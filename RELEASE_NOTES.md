@@ -2,3 +2,9 @@
 - Invested since (year): see a rough average return a year
 - Add past balances: fill in old statements (e.g. each 5 April) in one go for a truer chart
 - Logging a balance twice on the same day now updates it instead of adding a duplicate
+- All accounts view in Accounts: combined value, paid in, growth, chart and every account's figures
+- Undo after deleting an entry, account or goal
+- Update all: "same as last time" for paid in, and shows regular payments already logged
+- Reorder accounts in Settings
+- Provider initials badge next to each account
+- Set a goal straight from an account
