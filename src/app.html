@@ -166,7 +166,32 @@ h2{font-size:15px;font-weight:600;letter-spacing:-.01em;margin:0}
 /* ---------- charts ---------- */
 .chart{position:relative;min-height:200px}
 .chart svg{display:block;overflow:visible;touch-action:pan-y}
-.chart .grid{stroke:var(--line);stroke-width:1;stroke-dasharray:2 4}
+.chart .grid{stroke:var(--line);stroke-width:1;opacity:.7}
+.chart .draw{stroke-dasharray:1;stroke-dashoffset:1;animation:draw .9s cubic-bezier(.3,.7,.2,1) forwards}
+.chart .fade{animation:fadein .7s ease both}
+@keyframes draw{to{stroke-dashoffset:0}}
+@keyframes fadein{from{opacity:0}}
+@media (prefers-reduced-motion:reduce){.chart .draw{animation:none;stroke-dasharray:none;stroke-dashoffset:0}.chart .fade{animation:none}}
+.readout{display:flex;align-items:baseline;gap:6px 12px;flex-wrap:wrap;margin:-4px 0 10px;min-height:34px}
+.readout .rv{font-size:24px;font-weight:600;letter-spacing:-.025em;font-variant-numeric:tabular-nums}
+.readout .rd{font-size:12.5px;color:var(--ink-3)}
+.alloc-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:14px}
+.alloc-list summary{list-style:none;cursor:pointer;display:flex;flex-direction:column;gap:7px;color:var(--ink);font-size:13.5px;font-weight:500}
+.alloc-list summary::-webkit-details-marker{display:none}
+.al-top{display:flex;align-items:baseline;gap:8px}
+.al-top .nm{flex:1;min-width:0}
+.al-top .pc{font-family:var(--mono);font-size:12.5px;color:var(--ink-2);min-width:48px;text-align:right}
+.al-top b{font-family:var(--mono);font-weight:500;font-size:13px}
+.al-bar{display:block;height:8px;border-radius:99px;background:var(--surface-2);overflow:hidden}
+.al-bar i{display:block;height:100%;border-radius:99px}
+.al-sub{list-style:none;margin:10px 0 0;padding:0 0 0 16px;border-left:1px solid var(--line);display:flex;flex-direction:column;gap:8px;font-size:12.5px;color:var(--ink-2)}
+.al-sub li{display:flex;gap:8px}.al-sub li span:first-child{flex:1}
+.al-sub .mono{color:var(--ink)}
+.goal-row{display:grid;grid-template-columns:44px 1fr;gap:12px;align-items:center}
+.ring{width:44px;height:44px;position:relative}
+.ring svg{width:44px;height:44px;transform:rotate(-90deg)}
+.ring span{position:absolute;inset:0;display:grid;place-items:center;font-size:11px;font-weight:600;font-family:var(--mono)}
+.bar-legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:12.5px;color:var(--ink-2);margin-top:10px}
 .chart .base{stroke:var(--line-strong);stroke-width:1}
 .chart .axis{fill:var(--ink-3);font-size:11px;font-family:var(--mono)}
 .chart .hover-line{stroke:var(--ink-3);stroke-width:1}
@@ -728,7 +753,7 @@ function loadState() {
 
 let state = loadState();
 const DEFAULT_UI = {
-  tab: 'overview', range: '1Y', custom: { n: 6, unit: 'm' }, hist: { scope: 'this', kind: 'all', year: 'all', q: '' }, paidLine: true, lastYear: false, pence: false, compactNums: false, showClosed: false, account: null, person: 'me', hidden: false, stackBy: 'group', insight: '1M',
+  tab: 'overview', range: '1Y', custom: { n: 6, unit: 'm' }, hist: { scope: 'this', kind: 'all', year: 'all', q: '' }, fit: true, barMonths: 12, paidLine: true, lastYear: false, pence: false, compactNums: false, showClosed: false, account: null, person: 'me', hidden: false, stackBy: 'total', insight: '1M',
   calc: { monthly: 500, years: 20, rate: 6, draw: 20 },
   plan: { include: {}, monthly: {}, target: 0, years: 25, real: false }
 };
@@ -823,7 +848,7 @@ function money(n) {
 const gbp = n => ui.hidden ? MASK : ((n || 0) < 0 && Math.abs(n) >= 0.5 ? '−' : '') + money(n);
 const signed = n => ui.hidden ? MASK : (n > 0 ? '+' : n < 0 ? '−' : '') + money(n);
 const pct = n => (n > 0 ? '+' : n < 0 ? '−' : '') + Math.abs(n).toFixed(1) + '%';
-const compact = n => ui.hidden ? '£•••' : n >= 1e6 ? '£' + (n / 1e6).toFixed(n % 1e6 ? 1 : 0) + 'm' : n >= 1e3 ? '£' + Math.round(n / 1e3) + 'k' : '£' + Math.round(n);
+const compact = n => ui.hidden ? '£•••' : n < 0 ? '−' + compact(-n) : n >= 1e6 ? '£' + (n / 1e6).toFixed(n % 1e6 ? 1 : 0) + 'm' : n >= 1e3 ? '£' + Math.round(n / 1e3) + 'k' : '£' + Math.round(n);
 const fmtDate = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
 const fmtLong = new Intl.DateTimeFormat('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' });
 const fmtMonth = new Intl.DateTimeFormat('en-GB', { month: 'short', timeZone: 'UTC' });
@@ -896,15 +921,31 @@ function periodStats(a, startMs, endMs = TODAY_MS) {
   const change = cur - v0;
   const growth = change - paid;
   const base = v0 + opening + flowSum / 2;
-  return { v0, cur, change, paid, growth, base, ret: base > 0 ? growth / base * 100 : null };
+  return { v0, cur, change, paid, opening, growth, base, ret: base > 0 ? growth / base * 100 : null };
 }
 function periodTotals(accts, startMs, endMs) {
   const rows = accts.map(a => ({ a, p: periodStats(a, startMs, endMs) })).filter(r => r.p);
-  const t = rows.reduce((o, r) => { o.v0 += r.p.v0; o.cur += r.p.cur; o.paid += r.p.paid; o.growth += r.p.growth; o.base += r.p.base; return o; }, { v0: 0, cur: 0, paid: 0, growth: 0, base: 0 });
+  const t = rows.reduce((o, r) => { o.v0 += r.p.v0; o.cur += r.p.cur; o.paid += r.p.paid; o.opening += r.p.opening; o.growth += r.p.growth; o.base += r.p.base; return o; }, { v0: 0, cur: 0, paid: 0, opening: 0, growth: 0, base: 0 });
   t.change = t.cur - t.v0;
   t.ret = t.base > 0 ? t.growth / t.base * 100 : null;
   t.rows = rows;
   return t;
+}
+// Money paid in (excluding opening balances) and growth for each calendar month, oldest first.
+function monthlySplit(accts, count) {
+  const [y, m] = TODAY.split('-').map(Number);
+  const firstLog = Math.min(...accts.map(a => { const s = logsOf(a.id); return s.length ? toMs(s[0].date) : Infinity; }));
+  const out = [];
+  for (let k = count - 1; k >= 0; k--) {
+    const start = Date.UTC(y, m - 1 - k, 0), end = Math.min(TODAY_MS, Date.UTC(y, m - k, 0));
+    if (end < firstLog) continue;
+    const t = periodTotals(accts, start, end);
+    const mid = Date.UTC(y, m - 1 - k, 1);
+    out.push({ paid: t.paid - t.opening, growth: t.growth, short: fmtMonth.format(new Date(mid)).slice(0, 3), title: monthYear(mid) });
+  }
+  // Drop a leading month whose only activity was accounts being added.
+  while (out.length && !out[0].paid && !out[0].growth) out.shift();
+  return out;
 }
 function timeline(accts) {
   const ids = new Set(accts.map(a => a.id));
@@ -1052,13 +1093,45 @@ function niceMax(v) {
   const step = [1, 1.2, 1.5, 2, 2.5, 3, 4, 5, 6, 8, 10].find(s => s >= n * 1.04) || 10;
   return step * p;
 }
+// Clean axis ticks from lo to hi (lo may be above zero when a chart is fitted to its data).
+function niceScale(lo, hi, count) {
+  if (hi <= lo) hi = lo + 1;
+  const raw = (hi - lo) / count, p = 10 ** Math.floor(Math.log10(raw)), n = raw / p;
+  const step = ([1, 2, 2.5, 5, 10].find(s => s >= n) || 10) * p;
+  const min = Math.floor(lo / step) * step, max = Math.ceil(hi / step) * step;
+  const ticks = [];
+  for (let v = min; v <= max + step / 2; v += step) ticks.push(Math.round(v * 100) / 100);
+  return { min, max, ticks };
+}
+// Smooth line through points without overshooting (monotone cubic, Fritsch–Carlson).
+function smoothPath(p, join) {
+  const n = p.length, f = v => v.toFixed(1);
+  if (n < 3) return (join ? 'L' : 'M') + p.map(q => f(q[0]) + ',' + f(q[1])).join('L');
+  const d = [], t = [];
+  for (let i = 0; i < n - 1; i++) { const dx = p[i + 1][0] - p[i][0]; d[i] = dx ? (p[i + 1][1] - p[i][1]) / dx : 0; }
+  t[0] = d[0]; t[n - 1] = d[n - 2];
+  for (let i = 1; i < n - 1; i++) t[i] = d[i - 1] * d[i] <= 0 ? 0 : (d[i - 1] + d[i]) / 2;
+  for (let i = 0; i < n - 1; i++) {
+    if (d[i] === 0) { t[i] = 0; t[i + 1] = 0; continue; }
+    const a = t[i] / d[i], b = t[i + 1] / d[i], h = a * a + b * b;
+    if (h > 9) { const s = 3 / Math.sqrt(h); t[i] = s * a * d[i]; t[i + 1] = s * b * d[i]; }
+  }
+  let s = (join ? 'L' : 'M') + f(p[0][0]) + ',' + f(p[0][1]);
+  for (let i = 0; i < n - 1; i++) {
+    const dx = (p[i + 1][0] - p[i][0]) / 3;
+    s += `C${f(p[i][0] + dx)},${f(p[i][1] + t[i] * dx)} ${f(p[i + 1][0] - dx)},${f(p[i + 1][1] - t[i + 1] * dx)} ${f(p[i + 1][0])},${f(p[i + 1][1])}`;
+  }
+  return s;
+}
+let gradId = 0;
 const chartConfigs = new Map();
+const chartHeight = W => W < 520 ? 210 : W < 760 ? 260 : 300;
 function chart(host, cfg) {
   if (!host) return;
   chartConfigs.set(host, cfg);
   const W = Math.max(280, Math.round(host.clientWidth || 600));
-  const H = cfg.height || (W < 520 ? 200 : 250);
-  const m = { t: 10, r: 8, b: 26, l: W < 520 ? 46 : 56 };
+  const H = cfg.height || chartHeight(W);
+  const m = { t: 12, r: 10, b: 26, l: W < 520 ? 46 : 56 };
   const n = cfg.xs.length;
   if (n < 2) { host.innerHTML = `<div class="chart-empty">${esc(cfg.empty || 'Log at least two values to see a trend.')}</div>`; return; }
   const x0 = cfg.xs[0], x1 = cfg.xs[n - 1], span = (x1 - x0) || 1;
@@ -1072,15 +1145,21 @@ function chart(host, cfg) {
     return { ...s, lo, hi, stack };
   });
   const stackTop = layers.filter(l => l.stack).pop();
-  const top = niceMax(Math.max(1, ...layers.flatMap(l => l.hi)));
+  const all = [...layers.flatMap(l => l.hi), ...(cfg.band ? [...cfg.band.lo, ...cfg.band.hi] : [])];
+  // "Fit to data" starts the axis near the lowest value so changes are visible; stacked charts always start at zero.
+  const fit = cfg.fit && !cfg.stacked;
+  const lo = fit ? Math.min(...all) : 0, hi = Math.max(1, ...all);
+  const sc = fit && hi > lo ? niceScale(lo - (hi - lo) * 0.08, hi + (hi - lo) * 0.04, 4) : { min: 0, max: niceMax(hi), ticks: null };
+  if (!sc.ticks) sc.ticks = [0, 1, 2, 3, 4].map(k => sc.max * k / 4);
+  if (fit && sc.min < 0 && lo >= 0) { sc.min = 0; sc.ticks = sc.ticks.filter(v => v >= 0); }
   const X = x => m.l + (x - x0) / span * (W - m.l - m.r);
-  const Y = v => m.t + (1 - v / top) * (H - m.t - m.b);
+  const Y = v => m.t + (1 - (v - sc.min) / ((sc.max - sc.min) || 1)) * (H - m.t - m.b);
   const tick = cfg.tick || (span < 120 * 864e5 ? dayLabel : tickLabel);
   let g = '';
-  for (let k = 0; k <= 4; k++) {
-    const y = Y(top * k / 4).toFixed(1);
-    g += `<line class="${k ? 'grid' : 'base'}" x1="${m.l}" x2="${W - m.r}" y1="${y}" y2="${y}"/><text class="axis" x="${m.l - 10}" y="${y}" text-anchor="end" dominant-baseline="middle">${compact(top * k / 4)}</text>`;
-  }
+  sc.ticks.forEach((v, k) => {
+    const y = Y(v).toFixed(1);
+    g += `<line class="${k ? 'grid' : 'base'}" x1="${m.l}" x2="${W - m.r}" y1="${y}" y2="${y}"/><text class="axis" x="${m.l - 10}" y="${y}" text-anchor="end" dominant-baseline="middle">${compact(v)}</text>`;
+  });
   const ticks = Math.min(n, W < 520 ? 3 : 5);
   const used = new Set(), gap = W < 520 ? 70 : 80;
   const endX = X(cfg.xs[n - 1]);
@@ -1093,37 +1172,122 @@ function chart(host, cfg) {
     if (k < ticks - 1 && (x - lastX < gap || endX - x < gap)) continue;
     lastX = x;
     const anchor = k === 0 ? 'start' : k === ticks - 1 ? 'end' : 'middle';
-    g += `<text class="axis" x="${X(cfg.xs[i]).toFixed(1)}" y="${H - 6}" text-anchor="${anchor}">${esc(tick(cfg.xs[i]))}</text>`;
+    g += `<text class="axis" x="${x.toFixed(1)}" y="${H - 6}" text-anchor="${anchor}">${esc(tick(cfg.xs[i]))}</text>`;
   }
-  let shapes = '';
+  const anim = !cfg._drawn;
+  const pts = arr => arr.map((v, i) => [X(cfg.xs[i]), Y(v)]);
+  let defs = '', shapes = '';
+  if (cfg.band) {
+    const up = pts(cfg.band.hi), dn = pts(cfg.band.lo).reverse();
+    shapes += `<path class="${anim ? 'fade' : ''}" d="${smoothPath(up)}${smoothPath(dn, true)}Z" style="fill:${cfg.band.color}" fill-opacity=".13"/>`;
+  }
   layers.forEach(l => {
-    const pts = l.hi.map((v, i) => `${X(cfg.xs[i]).toFixed(1)},${Y(v).toFixed(1)}`);
-    const lower = l.stack
-      ? l.lo.map((v, i) => `${X(cfg.xs[i]).toFixed(1)},${Y(v).toFixed(1)}`).reverse()
-      : [`${X(x1).toFixed(1)},${Y(0).toFixed(1)}`, `${X(x0).toFixed(1)},${Y(0).toFixed(1)}`];
-    if (l.fill !== false) shapes += `<path d="M${pts.join('L')}L${lower.join('L')}Z" style="fill:${l.color}" fill-opacity="${l.stack ? 0.16 : 0.08}"/>`;
-    shapes += `<path d="M${pts.join('L')}" fill="none" style="stroke:${l.color}" stroke-width="${l.dash ? 1.4 : 1.8}" stroke-linejoin="round" stroke-linecap="round"${l.dash ? ' stroke-dasharray="4 4"' : ''}/>`;
-    if (!l.dash) shapes += `<circle cx="${X(x1).toFixed(1)}" cy="${Y(l.hi[n - 1]).toFixed(1)}" r="3.5" style="fill:${l.color};stroke:var(--surface)" stroke-width="2"/>`;
+    const up = pts(l.hi);
+    const line = smoothPath(up);
+    if (l.fill !== false) {
+      if (l.stack) shapes += `<path class="${anim ? 'fade' : ''}" d="${line}${smoothPath(pts(l.lo).reverse(), true)}Z" style="fill:${l.color}" fill-opacity=".16"/>`;
+      else {
+        const id = 'cg' + (++gradId), y0 = Y(sc.min).toFixed(1);
+        defs += `<linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:${l.color}" stop-opacity=".24"/><stop offset="1" style="stop-color:${l.color}" stop-opacity="0"/></linearGradient>`;
+        shapes += `<path class="${anim ? 'fade' : ''}" d="${line}L${up[n - 1][0].toFixed(1)},${y0}L${up[0][0].toFixed(1)},${y0}Z" fill="url(#${id})"/>`;
+      }
+    }
+    shapes += l.dash
+      ? `<path d="${line}" fill="none" style="stroke:${l.color}" stroke-width="1.5" stroke-dasharray="4 4" stroke-linecap="round"/>`
+      : `<path class="${anim ? 'draw' : ''}" pathLength="1" d="${line}" fill="none" style="stroke:${l.color}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>`;
+    if (!l.dash) shapes += `<circle cx="${up[n - 1][0].toFixed(1)}" cy="${up[n - 1][1].toFixed(1)}" r="4" style="fill:${l.color};stroke:var(--surface)" stroke-width="2"/>`;
   });
-  host.innerHTML = `<svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}" role="img" aria-label="${esc(cfg.label || 'Chart')}">${g}${shapes}<line class="hover-line" x1="0" x2="0" y1="${m.t}" y2="${H - m.b}" visibility="hidden"/><rect x="${m.l}" y="0" width="${W - m.l - m.r}" height="${H}" fill="transparent"/></svg><div class="tip" hidden></div>`;
-  const svg = host.querySelector('svg'), hl = svg.querySelector('.hover-line'), tip = host.querySelector('.tip');
+  cfg._drawn = true;
+  const dots = layers.map(l => `<circle class="hover-dot" r="4.5" style="fill:${l.color};stroke:var(--surface)" stroke-width="2" visibility="hidden"/>`).join('');
+  host.innerHTML = `<svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}" role="img" aria-label="${esc(cfg.label || 'Chart')}"><defs>${defs}</defs>${g}${shapes}<line class="hover-line" x1="0" x2="0" y1="${m.t}" y2="${H - m.b}" visibility="hidden"/>${dots}<rect x="${m.l}" y="0" width="${W - m.l - m.r}" height="${H}" fill="transparent"/></svg><div class="tip" hidden></div>`;
+  const svg = host.querySelector('svg'), hl = svg.querySelector('.hover-line'), tip = host.querySelector('.tip'), dotEls = svg.querySelectorAll('.hover-dot');
+  const readout = cfg.readout ? document.getElementById(cfg.readout.id) : null;
+  if (readout) readout.innerHTML = cfg.readout.html(n - 1);
   const move = e => {
     const r = svg.getBoundingClientRect(), px = (e.clientX - r.left) * (W / r.width);
     let best = 0, bd = Infinity;
     cfg.xs.forEach((x, i) => { const d = Math.abs(X(x) - px); if (d < bd) { bd = d; best = i; } });
     const cx = X(cfg.xs[best]);
     hl.setAttribute('x1', cx); hl.setAttribute('x2', cx); hl.setAttribute('visibility', 'visible');
+    layers.forEach((l, i) => { dotEls[i].setAttribute('cx', cx); dotEls[i].setAttribute('cy', Y(l.hi[best])); dotEls[i].setAttribute('visibility', l.dash ? 'hidden' : 'visible'); });
+    // Single-series charts with a readout update the big figure instead of showing a tooltip.
+    if (readout) readout.innerHTML = cfg.readout.html(best);
+    if (readout && !cfg.stacked && !cfg.tipAlways) return;
     const rows = cfg.series.map(s => `<div class="tip-row"><i style="background:${s.color}"></i><span>${esc(s.label)}</span>${gbp(s.values[best])}</div>`).join('');
+    const band = cfg.band ? `<div class="tip-row"><i style="background:${cfg.band.color};opacity:.4"></i><span>${esc(cfg.band.label)}</span>${compact(cfg.band.lo[best])}–${compact(cfg.band.hi[best])}</div>` : '';
     const stacked = layers.filter(l => l.stack);
     const total = stacked.length > 1 ? `<div class="tip-row total"><span>Total</span><b>${gbp(stackTop.hi[best])}</b></div>` : '';
-    tip.innerHTML = `<div class="tip-date">${esc(cfg.label2 ? cfg.label2(cfg.xs[best]) : dateLabel(cfg.xs[best]))}</div>${rows}${total}`;
+    tip.innerHTML = `<div class="tip-date">${esc(cfg.label2 ? cfg.label2(cfg.xs[best]) : dateLabel(cfg.xs[best]))}</div>${rows}${band}${total}`;
     tip.hidden = false;
     const scale = r.width / W, left = cx * scale, tw = tip.offsetWidth;
     tip.style.left = (left > r.width / 2 ? Math.max(0, left - tw - 12) : Math.min(r.width - tw, left + 12)) + 'px';
   };
   svg.addEventListener('pointermove', move);
   svg.addEventListener('pointerdown', move);
-  svg.addEventListener('pointerleave', () => { hl.setAttribute('visibility', 'hidden'); tip.hidden = true; });
+  svg.addEventListener('pointerleave', () => {
+    hl.setAttribute('visibility', 'hidden'); tip.hidden = true;
+    dotEls.forEach(d => d.setAttribute('visibility', 'hidden'));
+    if (readout) readout.innerHTML = cfg.readout.html(n - 1);
+  });
+}
+// Monthly columns: money paid in (ivory) with growth stacked on top, or a loss below the line.
+function barChart(host, cfg) {
+  if (!host) return;
+  chartConfigs.set(host, { ...cfg, bars: true });
+  const W = Math.max(280, Math.round(host.clientWidth || 600));
+  const H = cfg.height || (W < 520 ? 200 : 240);
+  const m = { t: 12, r: 10, b: 26, l: W < 520 ? 46 : 56 };
+  const n = cfg.labels.length;
+  if (!n) { host.innerHTML = `<div class="chart-empty">${esc(cfg.empty)}</div>`; return; }
+  const segs = cfg.paid.map((p, i) => {
+    const g = cfg.growth[i], up = Math.max(p, 0), down = Math.min(p, 0);
+    return { p, g, top: up + Math.max(g, 0), bottom: down + Math.min(g, 0), up, down };
+  });
+  const sc = niceScale(Math.min(0, ...segs.map(s => s.bottom)), Math.max(1, ...segs.map(s => s.top)), 4);
+  const Y = v => m.t + (1 - (v - sc.min) / ((sc.max - sc.min) || 1)) * (H - m.t - m.b);
+  const slot = (W - m.l - m.r) / n, bw = Math.min(24, slot * 0.62);
+  const cxOf = i => m.l + slot * (i + 0.5);
+  let g = '';
+  sc.ticks.forEach(v => {
+    const y = Y(v).toFixed(1);
+    g += `<line class="${v === 0 ? 'base' : 'grid'}" x1="${m.l}" x2="${W - m.r}" y1="${y}" y2="${y}"/><text class="axis" x="${m.l - 10}" y="${y}" text-anchor="end" dominant-baseline="middle">${compact(v)}</text>`;
+  });
+  const every = Math.ceil(n / Math.max(1, Math.floor((W - m.l - m.r) / 44)));
+  cfg.labels.forEach((l, i) => { if ((n - 1 - i) % every === 0) g += `<text class="axis" x="${cxOf(i).toFixed(1)}" y="${H - 6}" text-anchor="middle">${esc(l)}</text>`; });
+  // A bar segment from value a to b; the end away from zero is rounded (4px), the baseline end is square.
+  const seg = (i, a, b, color, round) => {
+    if (Math.abs(b - a) < 1e-9) return '';
+    const x = cxOf(i) - bw / 2, ya = Y(a), yb = Y(b), up = yb < ya, h = Math.abs(yb - ya);
+    const r = round ? Math.min(4, h, bw / 2) : 0, y1 = Math.min(ya, yb), y2 = Math.max(ya, yb);
+    const d = up
+      ? `M${x},${y2}V${y1 + r}Q${x},${y1} ${x + r},${y1}H${x + bw - r}Q${x + bw},${y1} ${x + bw},${y1 + r}V${y2}Z`
+      : `M${x},${y1}V${y2 - r}Q${x},${y2} ${x + r},${y2}H${x + bw - r}Q${x + bw},${y2} ${x + bw},${y2 - r}V${y1}Z`;
+    return `<path d="${d}" style="fill:${color}"/>`;
+  };
+  const gapV = (sc.max - sc.min) / (H - m.t - m.b) * 2; // a 2px surface gap between paid-in and growth
+  let bars = '';
+  segs.forEach((s, i) => {
+    bars += seg(i, 0, s.p, 'var(--c2)', (s.p >= 0 ? s.g <= 0 : s.g >= 0) || !s.g);
+    if (s.g > 0) bars += seg(i, s.up + (s.up ? gapV : 0), s.up + s.g + (s.up ? gapV : 0), 'var(--pos)', true);
+    if (s.g < 0) bars += seg(i, s.down - (s.down ? gapV : 0), s.down + s.g - (s.down ? gapV : 0), 'var(--neg)', true);
+  });
+  const hits = cfg.labels.map((_, i) => `<rect class="bar-hit" data-i="${i}" x="${(m.l + slot * i).toFixed(1)}" y="0" width="${slot.toFixed(1)}" height="${H}" fill="transparent"/>`).join('');
+  host.innerHTML = `<svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}" role="img" aria-label="${esc(cfg.label)}">${g}<rect class="bar-hl" x="0" y="${m.t}" width="${slot.toFixed(1)}" height="${H - m.t - m.b}" rx="4" style="fill:var(--surface-2)" visibility="hidden"/>${bars}${hits}</svg><div class="tip" hidden></div>`;
+  const svg = host.querySelector('svg'), tip = host.querySelector('.tip'), hl = svg.querySelector('.bar-hl');
+  const show = i => {
+    const s = segs[i];
+    hl.setAttribute('x', (m.l + slot * i).toFixed(1)); hl.setAttribute('visibility', 'visible');
+    tip.innerHTML = `<div class="tip-date">${esc(cfg.titles[i])}</div>
+      <div class="tip-row"><i style="background:var(--c2)"></i><span>Paid in</span>${gbp(s.p)}</div>
+      <div class="tip-row"><i style="background:var(${s.g >= 0 ? '--pos' : '--neg'})"></i><span>${s.g >= 0 ? 'Growth' : 'Loss'}</span>${signed(s.g)}</div>
+      <div class="tip-row total"><span>Change</span><b>${signed(s.p + s.g)}</b></div>`;
+    tip.hidden = false;
+    const r = svg.getBoundingClientRect(), left = cxOf(i) * r.width / W, tw = tip.offsetWidth;
+    tip.style.left = (left > r.width / 2 ? Math.max(0, left - tw - 16) : Math.min(r.width - tw, left + 16)) + 'px';
+  };
+  svg.addEventListener('pointermove', e => { const t = e.target.closest('.bar-hit'); if (t) show(+t.dataset.i); });
+  svg.addEventListener('pointerdown', e => { const t = e.target.closest('.bar-hit'); if (t) show(+t.dataset.i); });
+  svg.addEventListener('pointerleave', () => { tip.hidden = true; hl.setAttribute('visibility', 'hidden'); });
 }
 let resizeTimer, lastWidth = window.innerWidth;
 window.addEventListener('resize', () => {
@@ -1131,7 +1295,7 @@ window.addEventListener('resize', () => {
   resizeTimer = setTimeout(() => {
     if (window.innerWidth === lastWidth) return;
     lastWidth = window.innerWidth;
-    chartConfigs.forEach((cfg, host) => { if (host.isConnected) chart(host, cfg); else chartConfigs.delete(host); });
+    chartConfigs.forEach((cfg, host) => { if (!host.isConnected) chartConfigs.delete(host); else if (cfg.bars) barChart(host, cfg); else chart(host, cfg); });
   }, 120);
 });
 
@@ -1238,8 +1402,19 @@ function goalStatus(g) {
   const onTrack = projected >= g.target;
   return { cur, progress, onTrack, projected, need, monthly, text: onTrack ? `On track · about ${gbp(projected)} by then` : `Pay in ${gbp(need)}/month to get there (now ${gbp(monthly)})` };
 }
+function goalRing(p, ok) {
+  const C = 2 * Math.PI * 18, len = clamp(p, 0, 1) * C;
+  return `<span class="ring" aria-hidden="true"><svg viewBox="0 0 44 44"><circle cx="22" cy="22" r="18" fill="none" style="stroke:var(--surface-2)" stroke-width="5"/><circle cx="22" cy="22" r="18" fill="none" style="stroke:${ok ? 'var(--gold)' : 'var(--c3)'}" stroke-width="5" stroke-linecap="round" stroke-dasharray="${Math.max(0.01, len).toFixed(2)} ${C.toFixed(2)}"/></svg><span>${Math.round(clamp(p, 0, 1) * 100)}%</span></span>`;
+}
 function goalList(goals, withDelete) {
   if (!goals.length) return '';
+  if (!withDelete) return `<ul class="goal-list">${goals.map(g => {
+    const st = goalStatus(g);
+    return `<li class="goal-row">${goalRing(st.progress, st.done || st.onTrack || (!g.date && !st.late))}<div>
+      <div class="goal-top"><b>${esc(g.name)}</b><span class="mono">${gbp(st.cur)} <span class="faint">of ${gbp(g.target)}</span></span></div>
+      <div class="goal-meta"><span>${g.date ? 'By ' + dateLabel(toMs(g.date)) : esc(scopeName(g.scope))}</span><span class="${st.done || st.onTrack ? 'pos' : st.late ? 'neg' : ''}">${st.text}</span></div>
+    </div></li>`;
+  }).join('')}</ul>`;
   return `<ul class="goal-list">${goals.map(g => {
     const st = goalStatus(g);
     if (withDelete && pendingGoal === g.id) return `<li style="background:var(--neg-soft);padding:10px;border-radius:8px"><span>Delete the goal <b>${esc(g.name)}</b>?</span><span class="row-actions"><button class="btn sm ghost" data-action="goal-del-no">Keep</button><button class="btn sm danger solid" data-action="goal-del-yes" data-id="${esc(g.id)}">Delete</button></span></li>`;
@@ -1324,7 +1499,7 @@ function renderOverview() {
             <td class="r hide-sm">${x.m30 != null ? deltaChip(x.m30, signed(x.m30)) : '<span class="faint">—</span>'}</td>
             <td class="r hide-sm">${x.s.length > 1 ? deltaChip(x.change, pct(x.pct)) : '<span class="faint">—</span>'}</td>
             <td class="r hide-sm"><div class="weight"><span class="mono">${total ? (x.cur / total * 100).toFixed(1) : '0.0'}%</span><span class="bar"><i style="width:${total ? x.cur / total * 100 : 0}%;background:${colorOf(x.a)}"></i></span></div></td>
-            <td class="r hide-sm">${sparkline(x.s.slice(-12).map(l => l.value), colorOf(x.a))}</td>
+            <td class="r hide-sm">${sparkline(x.s.slice(-12).map(l => l.value), x.m30 > 0 ? 'var(--pos)' : x.m30 < 0 ? 'var(--neg)' : 'var(--ink-3)')}</td>
           </tr>`).join('');
         }).join('')}
         ${closedStats.length ? `<tr class="grp"><td>${closedStats.length} closed account${closedStats.length === 1 ? '' : 's'}</td><td class="r val">${gbp(closedStats.reduce((t, x) => t + x.cur, 0))}</td><td class="hide-sm" colspan="4"></td></tr>` : ''}
@@ -1338,13 +1513,15 @@ function renderOverview() {
     <section class="panel">
       <div class="panel-head">
         <h2>Performance</h2>
-        <div class="seg" role="group" aria-label="Chart breakdown">${[['group', 'By type'], ['account', 'By account']].map(([k, l]) => `<button data-action="stack-by" data-id="${k}" aria-pressed="${ui.stackBy === k}">${l}</button>`).join('')}</div>
+        <div class="seg" role="group" aria-label="Chart breakdown">${[['total', 'Total'], ['group', 'By type'], ['account', 'By account']].map(([k, l]) => `<button data-action="stack-by" data-id="${k}" aria-pressed="${ui.stackBy === k}">${l}</button>`).join('')}</div>
       </div>
       <div style="margin-bottom:12px">${rangeBar('range')}</div>
       ${pt.rows.length ? `<div class="period-sum"><span><b class="${cls(pt.change)}">${signed(pt.change)}</b>change over ${esc(rangeName(ui.range))}</span><span><b>${gbp(pt.paid)}</b>paid in</span><span><b class="${cls(pt.growth)}">${signed(pt.growth)}</b>growth${pt.ret != null ? ` (${pct(pt.ret)})` : ''}</span></div>` : ''}
+      ${ui.stackBy === 'total' ? '<div class="readout" id="growth-readout" aria-live="polite"></div>' : ''}
       <div class="chart" id="growth-chart"></div>
       <div class="legend-inline" id="growth-legend"></div>
       <div class="row-actions" style="margin-top:12px;gap:16px">
+        ${ui.stackBy === 'total' ? `<label class="check"><input type="checkbox" id="opt-fit" ${ui.fit ? 'checked' : ''}>Zoom to fit</label>` : ''}
         <label class="check"><input type="checkbox" id="opt-paid" ${ui.paidLine ? 'checked' : ''}>Show money paid in</label>
         <label class="check"><input type="checkbox" id="opt-lastyear" ${ui.lastYear ? 'checked' : ''}>Compare with a year earlier</label>
       </div>
@@ -1352,16 +1529,27 @@ function renderOverview() {
 
   const allocation = `
     <section class="panel">
-      <div class="panel-head"><h2>Allocation</h2><span class="aside">${stats.filter(x => x.cur > 0).length} accounts</span></div>
-      ${total > 0 ? `
-      <div class="donut-wrap">
-        <div class="donut-box">${donut(groups.map(g => ({ value: g.value, color: g.color })), total)}
-          <div class="donut-center"><b class="mono">${compact(total)}</b><span>Total</span></div>
-        </div>
-        <ul class="legend">
-          ${groups.map(g => `<li><i class="sw" style="background:${g.color}"></i><span>${esc(g.label)}</span><span class="pct">${(g.value / total * 100).toFixed(1)}%</span><small class="num">${gbp(g.value)}</small></li>`).join('')}
-        </ul>
-      </div>` : '<div class="chart-empty">Your split between account types shows here.</div>'}
+      <div class="panel-head"><h2>Allocation</h2><span class="aside">Tap a type for its accounts</span></div>
+      ${total > 0 ? `<ul class="alloc-list">${groups.map(g => {
+        const rows = stats.filter(x => groupOf(x.a) === g.g && x.cur > 0).sort((p, q) => q.cur - p.cur);
+        return `<li><details><summary>
+          <span class="al-top"><i class="sw" style="background:${g.color}"></i><span class="nm">${esc(g.label)}</span><b>${gbp(g.value)}</b><span class="pc">${(g.value / total * 100).toFixed(1)}%</span></span>
+          <span class="al-bar"><i style="width:${(g.value / total * 100).toFixed(2)}%;background:${g.color}"></i></span>
+        </summary><ul class="al-sub">${rows.map(x => `<li><span>${esc(x.a.name)}${ownerChip(x.a)}</span><span class="mono">${gbp(x.cur)}</span><span class="mono faint">${(x.cur / total * 100).toFixed(1)}%</span></li>`).join('')}</ul></details></li>`;
+      }).join('')}</ul>` : '<div class="chart-empty">Your split between account types shows here.</div>'}
+    </section>`;
+
+  const barMonths = [6, 12, 24].includes(ui.barMonths) ? ui.barMonths : 12;
+  const months = monthlySplit(accts, barMonths);
+  const mPaid = months.reduce((t, x) => t + x.paid, 0), mGrowth = months.reduce((t, x) => t + x.growth, 0);
+  const monthly = `
+    <section class="panel">
+      <div class="panel-head"><h2>Paid in vs growth, by month</h2>
+        <div class="seg" role="group" aria-label="Months">${[6, 12, 24].map(k => `<button data-action="bar-months" data-id="${k}" aria-pressed="${barMonths === k}">${k}M</button>`).join('')}</div>
+      </div>
+      ${months.length ? `<div class="period-sum"><span><b>${gbp(mPaid)}</b>paid in</span><span><b class="${cls(mGrowth)}">${signed(mGrowth)}</b>growth</span><span>growth beat what you paid in for <b>${months.filter(x => x.growth > x.paid && x.growth > 0).length}</b> of ${months.length} months</span></div>` : ''}
+      <div class="chart" id="monthly-chart"></div>
+      <div class="bar-legend"><span><i class="sw" style="background:var(--c2)"></i>Paid in</span><span><i class="sw" style="background:var(--pos)"></i>Growth</span><span><i class="sw" style="background:var(--neg)"></i>Loss</span></div>
     </section>`;
 
   const goals = state.goals.length && ui.person === 'me' ? `
@@ -1385,17 +1573,30 @@ function renderOverview() {
       }).join('')}</ul>` : '<div class="chart-empty">No activity yet.</div>'}
     </section>`;
 
-  view.innerHTML = `<div class="stack view">${updateBanner()}${exampleNotice()}${notices.join('')}${personFilter()}<div class="summary">${statement}${kpis}</div>${holdings}<div class="grid-2">${growth}${allocation}</div>${goals ? `<div class="grid-2">${activity}${goals}</div>` : activity}</div>`;
+  view.innerHTML = `<div class="stack view">${updateBanner()}${exampleNotice()}${notices.join('')}${personFilter()}<div class="summary">${statement}${kpis}</div>${holdings}<div class="grid-2">${growth}${allocation}</div>${monthly}${goals ? `<div class="grid-2">${activity}${goals}</div>` : activity}</div>`;
+  barChart(document.getElementById('monthly-chart'), {
+    labels: months.map(x => x.short), titles: months.map(x => x.title), paid: months.map(x => x.paid), growth: months.map(x => x.growth),
+    label: 'Money paid in and growth each month', empty: 'Log values over a few months to see this.'
+  });
 
   const pts = rangePoints(tl, start);
-  const series = ui.stackBy === 'account'
+  const totalMode = ui.stackBy === 'total';
+  const series = totalMode
+    ? [{ label: 'Net worth', color: 'var(--c1)', values: pts.map(p => p.total) }]
+    : ui.stackBy === 'account'
     ? accts.map(a => ({ label: a.name, color: colorOf(a), values: pts.map(p => p.vals[a.id]) }))
     : groupSummary(accts).map(g => ({ label: g.label, color: g.color, values: pts.map(p => accts.filter(a => groupOf(a) === g.g).reduce((t, a) => t + (p.vals[a.id] || 0), 0)) }));
   if (ui.paidLine) series.push({ label: 'Paid in', color: 'var(--ink-2)', values: pts.map(p => paidAt(accts, p.t)), overlay: true, dash: true, fill: false });
   if (ui.lastYear) series.push({ label: 'A year earlier', color: 'var(--c3)', values: pts.map(p => valueAt(tl, p.t - 365 * 864e5) || 0), overlay: true, dash: true, fill: false });
   document.getElementById('growth-legend').innerHTML = series.map(s => `<span><i class="sw" style="background:${s.color}"></i>${esc(s.label)}</span>`).join('');
+  const v0 = pts.length ? pts[0].total : 0;
   chart(document.getElementById('growth-chart'), {
-    xs: pts.map(p => p.t), stacked: true, label: 'Net worth over time', empty: 'Not enough values in this period yet.', series
+    xs: pts.map(p => p.t), stacked: !totalMode, fit: totalMode && ui.fit, label: 'Net worth over time', empty: 'Not enough values in this period yet.', series,
+    tipAlways: ui.paidLine || ui.lastYear,
+    readout: totalMode ? { id: 'growth-readout', html: i => {
+      const v = pts[i].total, d = v - v0;
+      return `<span class="rv">${gbp(v)}</span><span class="delta ${cls(d)}">${signed(d)}${v0 > 0 ? ' · ' + pct(d / v0 * 100) : ''}</span><span class="rd">${i === pts.length - 1 ? 'Today' : dateLabel(pts[i].t)} · since ${dateLabel(pts[0].t)}</span>`;
+    } } : null
   });
 }
 
@@ -1451,7 +1652,9 @@ function renderAccounts() {
         ${rate ? `<p class="explain" style="margin-top:12px">${rate}</p>` : ''}
         ${reg ? `<p class="hint" style="margin-top:12px">Regular payment: ${reg}.</p>` : ''}
         ${a.notes ? `<p class="hint" style="margin-top:8px;white-space:pre-wrap"><b>Notes:</b> ${esc(a.notes)}</p>` : ''}
-        <div class="chart" id="acct-chart" style="margin-top:20px"></div>
+        <div class="readout" id="acct-readout" style="margin-top:18px" aria-live="polite"></div>
+        <div class="chart" id="acct-chart"></div>
+        <label class="check" style="margin-top:10px"><input type="checkbox" id="opt-fit" ${ui.fit ? 'checked' : ''}>Zoom to fit</label>
       </section>
       <section class="panel">
         <div class="panel-head"><h2>History</h2><span class="aside">${st.s.length ? 'Since ' + dateLabel(toMs(st.s[0].date)) : ''}</span></div>
@@ -1468,7 +1671,8 @@ function renderAccounts() {
   const pts = st.s.map(l => ({ t: toMs(l.date), v: l.value }));
   if (pts.length && pts[pts.length - 1].t < TODAY_MS) pts.push({ t: TODAY_MS, v: pts[pts.length - 1].v });
   chart(document.getElementById('acct-chart'), {
-    xs: pts.map(p => p.t), label: a.name + ' value over time',
+    xs: pts.map(p => p.t), label: a.name + ' value over time', fit: ui.fit, tipAlways: ui.paidLine,
+    readout: pts.length ? { id: 'acct-readout', html: i => { const d = pts[i].v - pts[0].v; return `<span class="rv">${gbp(pts[i].v)}</span>${i ? `<span class="delta ${cls(d)}">${signed(d)}</span>` : ''}<span class="rd">${i === pts.length - 1 ? 'Now' : dateLabel(pts[i].t)}</span>`; } } : null,
     series: [{ label: a.name, color: colorOf(a), values: pts.map(p => p.v) }, ...(ui.paidLine ? [{ label: 'Paid in', color: 'var(--ink-3)', values: pts.map(p => paidAt([a], p.t)), overlay: true, dash: true, fill: false }] : [])]
   });
 }
@@ -1668,17 +1872,17 @@ function updatePlan() {
     ${rd && pensionIncluded && p.retireAge < earliest ? `<p class="warn">Pensions can normally be accessed from age ${earliest}. Retiring at ${p.retireAge} means relying on ISAs and savings until then.</p>` : ''}
     ${target ? (mid.final >= target ? `<p class="explain">You are on course to reach your <b>${gbp(target)}</b> target.</p>` : `<p class="explain">To reach <b>${gbp(target)}</b>, pay in about <b>${gbp(needMonthly)}</b> a month more across these accounts.</p>`) : ''}
     <div class="chart" id="plan-chart"></div>
-    <div class="legend-inline"><span><i class="sw" style="background:var(--c1)"></i>Expected ${p.growth}%</span><span><i class="sw" style="background:var(--c2)"></i>Range ±2%</span><span><i class="sw" style="background:var(--ink-3)"></i>Paid in</span></div>
+    <div class="legend-inline"><span><i class="sw" style="background:var(--c1)"></i>Expected ${p.growth}%</span><span><i class="sw" style="background:var(--c1);opacity:.35"></i>Likely range ±2%</span><span><i class="sw" style="background:var(--ink-3)"></i>Paid in</span></div>
     <p class="explain">Working two years longer would add about <b>${gbp(show(later.final, yrs + 2) - show(mid.final, yrs))}</b>.${feeCost > 1 ? ` Fees cost about <b>${gbp(show(feeCost, yrs))}</b> by then.` : ''}</p>
     <p class="hint">Illustration only, not financial advice. Assumes steady growth after each account's fees, monthly payments that stay the same, and 25% tax-free pension cash capped at the ${gbp(LSA)} Lump Sum Allowance. Pension income is taxable. The State Pension is not included.</p>`;
   const lbl = y => p.dob ? 'Age ' + (ageOn(p.dob, TODAY) + Math.round(y)) : 'Yr ' + Math.round(y);
   chart(document.getElementById('plan-chart'), {
     xs: mid.xs, tick: lbl, label2: y => (p.dob ? 'Age ' + (ageOn(p.dob, TODAY) + Math.round(y)) : 'Year ' + Math.round(y)), label: 'Projected pot',
     empty: 'You are at or past your retirement age.',
+    tipAlways: true,
+    band: { label: `Range ${Math.max(0, p.growth - 2)}–${p.growth + 2}%`, color: 'var(--c1)', lo: low.tot.map((v, i) => show(v, low.xs[i])), hi: high.tot.map((v, i) => show(v, high.xs[i])) },
     series: [
-      { label: `Expected ${p.growth}%`, color: 'var(--c1)', values: mid.tot.map((v, i) => show(v, mid.xs[i])) },
-      { label: `Cautious ${Math.max(0, p.growth - 2)}%`, color: 'var(--c2)', values: low.tot.map((v, i) => show(v, low.xs[i])), fill: false, dash: true },
-      { label: `Strong ${p.growth + 2}%`, color: 'var(--c2)', values: high.tot.map((v, i) => show(v, high.xs[i])), fill: false, dash: true },
+      { label: `Expected ${p.growth}%`, color: 'var(--c1)', values: mid.tot.map((v, i) => show(v, mid.xs[i])), fill: false },
       { label: 'Paid in', color: 'var(--ink-3)', values: mid.paidV.map((v, i) => show(v, mid.xs[i])), fill: false, dash: true }
     ]
   });
@@ -2583,6 +2787,7 @@ document.addEventListener('click', async e => {
     case 'toggle-hide': ui.hidden = !ui.hidden; saveUi(); render(); break;
     case 'range': ui.range = t.dataset.range; saveUi(); render(); break;
     case 'insight-range': ui.insight = t.dataset.range; saveUi(); render(); break;
+    case 'bar-months': ui.barMonths = +id; saveUi(); render(); break;
     case 'stack-by': ui.stackBy = id; saveUi(); render(); break;
     case 'person': ui.person = id; saveUi(); render(); break;
     case 'goto-account': ui.account = id; goTab('accounts'); break;
@@ -2732,6 +2937,7 @@ document.addEventListener('change', e => {
     if (t.value === 'light') store.set(THEME_KEY, 'light'); else store.del(THEME_KEY);
     applyTheme(t.value);
   }
+  if (t.id === 'opt-fit') { ui.fit = t.checked; saveUi(); render(); }
   if (t.id === 'opt-paid') { ui.paidLine = t.checked; saveUi(); render(); }
   if (t.id === 'opt-lastyear') { ui.lastYear = t.checked; saveUi(); render(); }
   if (t.id === 'set-pence') { ui.pence = t.checked; if (t.checked) ui.compactNums = false; saveUi(); render(); }

@@ -1,9 +1,7 @@
-- Edit any balance, payment or income entry (tap the pencil)
-- Search and filter history: by account, type and tax year
-- Charts: money paid in line and compare with a year earlier
-- Returns after inflation for each account
-- Year in review for each tax year, ready to share
-- Premium Bonds and savings: effective rate from your prizes and interest
-- Account notes, and close accounts while keeping their history
-- Automatic weekly backup to Documents/Aurum
-- Display options: show pence or short figures
+- New look for charts: smooth lines, gold gradients and a gentle draw-in
+- Drag along the net worth chart: the big figure shows the value on that date
+- Zoom to fit, so changes are easy to see
+- New monthly chart: money paid in vs growth (or loss) for each month
+- Planner shows a shaded likely range instead of dashed lines
+- Allocation as clear bars; tap a type to see its accounts
+- Goal progress rings, and trend lines coloured by the last 30 days
