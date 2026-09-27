@@ -26,12 +26,6 @@ jobs:
           java-version: 21
           cache: gradle
 
-      - name: Build web app and copy it into Android
-        run: |
-          npm ci --ignore-scripts
-          npm run build
-          npx cap sync android
-
       - name: Version
         run: |
           if [[ "$GITHUB_REF" == refs/tags/v* ]]; then
@@ -41,6 +35,12 @@ jobs:
           fi
           echo "AURUM_VERSION_NAME=$VERSION" >> "$GITHUB_ENV"
           echo "AURUM_VERSION_CODE=$GITHUB_RUN_NUMBER" >> "$GITHUB_ENV"
+
+      - name: Build web app and copy it into Android
+        run: |
+          npm ci --ignore-scripts
+          npm run build
+          npx cap sync android
 
       - name: Signing key
         env:

@@ -93,6 +93,7 @@ h1{font-size:22px;font-weight:650;letter-spacing:-.025em;margin:0;line-height:1.
 
 /* ---------- controls ---------- */
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;border:1px solid var(--line-strong);background:var(--surface);color:var(--ink);padding:8px 13px;border-radius:8px;font-weight:550;font-size:13.5px;line-height:1.25;white-space:nowrap;transition:background .15s,border-color .15s}
+a.btn{text-decoration:none}
 .btn:hover{background:var(--surface-2)}
 .btn.primary{background:var(--primary);border-color:var(--primary);color:var(--primary-ink)}
 .btn.primary:hover{filter:brightness(1.12)}
@@ -589,6 +590,11 @@ const toMs = iso => { const [y, m, d] = iso.split('-').map(Number); return Date.
 const msIso = ms => new Date(ms).toISOString().slice(0, 10);
 const isIso = s => typeof s === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(s);
 const TODAY = isoLocal(new Date());
+// Filled in by scripts/build.mjs. Anything with a suffix (1.1.0-dev, 1.1.0-build.42) is a development build.
+const APP_VERSION = '__APP_VERSION__';
+const IS_DEV = !/^\d+\.\d+\.\d+$/.test(APP_VERSION);
+const SITE_URL = 'https://lucky-lky3.github.io/Aura-Wealth/';
+const APK_URL = 'https://github.com/LUCKY-LKY3/Aura-Wealth/releases/latest';
 const TODAY_MS = toMs(TODAY);
 const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
 const num = (v, d) => { const n = parseFloat(v); return isFinite(n) ? n : d; };
@@ -1751,8 +1757,20 @@ function renderSettings() {
         </div>
         <div class="about" style="margin-top:8px">
           <svg class="mark" width="44" height="44" aria-hidden="true"><use href="#aurum-mark"/></svg>
-          <div><p><b>Aurum</b></p><p class="faint" style="font-size:13px">Personal wealth ledger. No sign-in, no servers: your data never leaves this device.</p></div>
+          <div><p><b>Aurum</b> <span class="mono faint" style="font-size:12.5px">v${esc(APP_VERSION)}</span>${IS_DEV ? ' <span class="owner">Development build</span>' : ''}</p><p class="faint" style="font-size:13px">Personal wealth ledger. No sign-in, no servers: your data never leaves this device.</p></div>
         </div>
+        ${IS_DEV ? '<p class="hint">This is a development version: features may change and there may be rough edges. Export a backup regularly.</p>' : ''}
+      </section>
+
+      <section class="panel stack">
+        <h2>Get Aurum</h2>
+        <p class="explain">Use it in any browser, or install the Android app. Each person's data stays on their own device.</p>
+        <div class="row-actions">
+          <button class="btn primary" data-action="share-site">Share website</button>
+          <a class="btn" href="${APK_URL}" target="_blank" rel="noopener">Download Android app (APK)</a>
+        </div>
+        <p class="hint">Website: <span class="mono">${esc(SITE_URL.replace('https://', ''))}</span>. To install the APK, open the downloaded file and allow installs from your browser if Android asks.</p>
+        <p class="status" id="share-status" role="status"></p>
       </section>
 
       <section class="panel stack">
@@ -2204,6 +2222,18 @@ document.addEventListener('click', async e => {
       const json = backupJson();
       if (await copyText(json)) { markBackedUp(); setStatus('Backup copied to your clipboard.'); }
       else { const ta = document.getElementById('import-text'); ta.value = json; ta.select(); setStatus('Backup text is selected in the box. Copy it from there.'); }
+      break;
+    }
+    case 'share-site': {
+      const data = { title: 'Aurum', text: 'Aurum: a private wealth ledger for UK pensions, ISAs and savings.', url: SITE_URL };
+      try {
+        if (Native) await Native.Share.share({ ...data, dialogTitle: 'Share Aurum' });
+        else if (navigator.share) await navigator.share(data);
+        else if (await copyText(SITE_URL)) setStatus('Link copied to your clipboard.', false, 'share-status');
+        else setStatus(SITE_URL, false, 'share-status');
+      } catch (err) {
+        if (!/cancel|abort/i.test(String(err && (err.name + err.message)))) setStatus(await copyText(SITE_URL) ? 'Link copied to your clipboard.' : SITE_URL, false, 'share-status');
+      }
       break;
     }
     case 'import-paste': importText(document.getElementById('import-text').value); break;

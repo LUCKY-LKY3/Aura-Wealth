@@ -30,7 +30,12 @@ const fontFaces = `<style>
 @font-face{font-family:'Geist Mono';font-style:normal;font-weight:100 900;font-display:swap;src:url(fonts/geist-mono.woff2) format('woff2')}
 </style>`;
 
+// App version shown in Settings. CI passes AURUM_VERSION_NAME (e.g. 1.1.0 for a release, 1.1.0-build.42 otherwise).
+const pkg = JSON.parse(fs.readFileSync(r('package.json'), 'utf8'));
+const appVersion = process.env.AURUM_VERSION_NAME || `${pkg.version}-dev`;
+
 let app = fs.readFileSync(r('src/app.html'), 'utf8')
+  .replace('__APP_VERSION__', appVersion)
   .replace(/<link rel="preconnect"[^>]*>\r?\n/g, '')
   .replace(/<link rel="stylesheet" href="https:\/\/fonts\.googleapis\.com[^>]*>/, fontFaces)
   .replace(/<link rel="icon" href="data:[^"]*">/, '<link rel="icon" href="icons/favicon.svg" type="image/svg+xml">');
