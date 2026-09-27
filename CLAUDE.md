@@ -63,8 +63,11 @@ There is no local Java/Android SDK on the owner's PC — **APKs are only built b
 - "Paid in this tax year" is a flow with `ytd: true` dated on the account's first balance: it counts for allowances
   (dated this tax year) but not as money in for growth (flows on/before the first balance are ignored). SIPP stores gross
   (`own` = amount/1.25), LISA stores own + 25% bonus. Only offered for accounts first logged this tax year.
+- `account.yearly` = reference amounts paid in per tax year (`{'2024': 20000}`), used by allowances, the yearly chart and
+  carry-forward via `yearPaid()`; never by balances/growth. `profile.p60[year] = {pay, tax, pay2, tax2, other, giftAid, marriage:'none'|'receive'|'give', code}` drives `incomeTax()` (E/W/NI rates
+  in `taxRules(y)`) for the tax helper's band and refund estimate.
 - `income` is for the tax helper only (doesn't affect growth). Employer pension payments are flows with `employer: true, own: 0`.
-- Device-only keys (not in backups): `aurum_lock` (PIN hash), `aurum_bio`, `aurum_reminder` (day), `aurum_update` (cached release), `aurum_autobackup`/`_last` (weekly copy to Documents/Aurum).
+- Device-only keys (not in backups): `aurum_lock` (PIN hash), `aurum_bio`, `aurum_reminder` (day), `aurum_update` (cached release), `aurum_taxrem` (June P60 / January SA reminders), `aurum_autobackup`/`_last` (weekly copy to Documents/Aurum).
 - `archived` accounts stay in totals/charts but are hidden from pickers, Update all, reminders and the planner.
 - Native plugins: Preferences, Filesystem, Share, LocalNotifications (monthly reminder), NativeBiometric (@capgo, fingerprint).
   saved to `localStorage['aurum_v1']` (key name kept). UI prefs in `aurum_ui`, theme in `aurum_theme`, PIN hash in `aurum_lock`.
