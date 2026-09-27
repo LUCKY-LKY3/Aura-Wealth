@@ -1,6 +1,9 @@
-- Update from inside the app: Aurum tells you when a new version is out
-- Monthly reminder notification to update your balances
-- Unlock with fingerprint (alongside your PIN)
-- Tax return helper: pension relief at source, annual allowance, savings interest and dividends for each tax year
-- Record employer pension payments, dividends and interest
-- Emergency fund check against your monthly spending
+- Edit any balance, payment or income entry (tap the pencil)
+- Search and filter history: by account, type and tax year
+- Charts: money paid in line and compare with a year earlier
+- Returns after inflation for each account
+- Year in review for each tax year, ready to share
+- Premium Bonds and savings: effective rate from your prizes and interest
+- Account notes, and close accounts while keeping their history
+- Automatic weekly backup to Documents/Aurum
+- Display options: show pence or short figures

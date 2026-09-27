@@ -422,12 +422,12 @@ body.setup .tabbar,body.setup .fab,body.setup .side-nav,body.setup .top-actions{
       <label for="log-date">Date</label>
       <input id="log-date" class="input" type="date" required>
     </div>
-    <div class="field">
+    <div class="field" id="log-value-field">
       <label for="log-value">Current balance</label>
       <div class="money"><span>£</span><input id="log-value" class="input" type="number" inputmode="decimal" step="0.01" min="0" placeholder="0.00"></div>
       <p class="hint" id="log-prev"></p>
     </div>
-    <fieldset class="field">
+    <fieldset class="field" id="log-flow-field">
       <legend class="label">Money in, out or income <span class="faint">Optional</span></legend>
       <div class="two">
         <select id="log-kind" class="input" aria-label="What kind of money"></select>
@@ -496,6 +496,16 @@ body.setup .tabbar,body.setup .fab,body.setup .side-nav,body.setup .top-actions{
       <label class="check" id="acct-reg-relief-wrap" hidden><input type="checkbox" id="acct-reg-relief"><span id="acct-reg-relief-label"></span></label>
       <p class="hint">Logged for you automatically each month from today, so you only need to update the balance.</p>
     </fieldset>
+    <div class="field" id="acct-rate-field">
+      <label for="acct-rate">Advertised rate <span class="faint">Optional, % a year</span></label>
+      <input id="acct-rate" class="input" type="number" inputmode="decimal" step="0.01" min="0" max="20" placeholder="e.g. 4.4 (Premium Bonds prize fund rate)">
+    </div>
+    <div class="field">
+      <label for="acct-notes">Notes <span class="faint">Optional</span></label>
+      <textarea id="acct-notes" class="input" rows="2" maxlength="500" placeholder="e.g. account ending 1234, Vanguard LifeStrategy 80%"></textarea>
+      <p class="hint">Never store passwords or full account numbers here.</p>
+    </div>
+    <label class="check" id="acct-archived-wrap"><input type="checkbox" id="acct-archived"><span><b style="color:var(--ink);font-weight:550">Closed account</b><br>Hides it from lists and reminders. Its history stays in your totals and charts.</span></label>
     <div class="sheet-actions">
       <button type="button" class="btn" data-action="close-sheet">Cancel</button>
       <button type="submit" class="btn primary" id="acct-submit">Add account</button>
@@ -662,7 +672,8 @@ function normalize(o) {
       const acct = {
         id: String(a.id), name: String(a.name), provider: String(a.provider || ''), type: TYPES[a.type] ? a.type : String(a.type || 'Other'),
         color: COLORS.includes(a.color) ? a.color : COLORS[i % COLORS.length],
-        owner: String(a.owner || 'me'), fee: clamp(num(a.fee, 0), 0, 5), regular: reg
+        owner: String(a.owner || 'me'), fee: clamp(num(a.fee, 0), 0, 5), regular: reg,
+        notes: String(a.notes || '').slice(0, 500), archived: !!a.archived, rate: clamp(num(a.rate, 0), 0, 20)
       };
       if (a.demo) acct.demo = true;
       return acct;
@@ -676,7 +687,7 @@ function normalize(o) {
       own: isFinite(+f.own) && f.own !== null && f.own !== '' ? +f.own : +f.amount, note: String(f.note || ''), auto: !!f.auto, employer: !!f.employer
     }));
     const income = (Array.isArray(o.income) ? o.income : []).filter(x => x && isIso(x.date) && isFinite(+x.amount) && +x.amount > 0 && ids.has(String(x.accountId))).map(x => ({
-      id: String(x.id || uid()), accountId: String(x.accountId), date: x.date, amount: +x.amount, kind: x.kind === 'dividend' ? 'dividend' : 'interest'
+      id: String(x.id || uid()), accountId: String(x.accountId), date: x.date, amount: +x.amount, kind: ['dividend', 'prize'].includes(x.kind) ? x.kind : 'interest'
     }));
     const goals = (Array.isArray(o.goals) ? o.goals : []).filter(g => g && g.name && isFinite(+g.target) && +g.target > 0).map(g => {
       const goal = { id: String(g.id || uid()), name: String(g.name).slice(0, 40), target: +g.target, date: isIso(g.date) ? g.date : '', scope: String(g.scope || 'all') };
@@ -717,14 +728,14 @@ function loadState() {
 
 let state = loadState();
 const DEFAULT_UI = {
-  tab: 'overview', range: '1Y', custom: { n: 6, unit: 'm' }, account: null, person: 'me', hidden: false, stackBy: 'group', insight: '1M',
+  tab: 'overview', range: '1Y', custom: { n: 6, unit: 'm' }, hist: { scope: 'this', kind: 'all', year: 'all', q: '' }, paidLine: true, lastYear: false, pence: false, compactNums: false, showClosed: false, account: null, person: 'me', hidden: false, stackBy: 'group', insight: '1M',
   calc: { monthly: 500, years: 20, rate: 6, draw: 20 },
   plan: { include: {}, monthly: {}, target: 0, years: 25, real: false }
 };
 let ui = (() => {
   try {
     const saved = JSON.parse(store.get(UI_KEY) || '{}');
-    return { ...DEFAULT_UI, ...saved, custom: { ...DEFAULT_UI.custom, ...(saved.custom || {}) }, calc: { ...DEFAULT_UI.calc, ...(saved.calc || {}) }, plan: { ...DEFAULT_UI.plan, ...(saved.plan || {}) } };
+    return { ...DEFAULT_UI, ...saved, hist: { ...DEFAULT_UI.hist, ...(saved.hist || {}) }, custom: { ...DEFAULT_UI.custom, ...(saved.custom || {}) }, calc: { ...DEFAULT_UI.calc, ...(saved.calc || {}) }, plan: { ...DEFAULT_UI.plan, ...(saved.plan || {}) } };
   } catch { return JSON.parse(JSON.stringify(DEFAULT_UI)); }
 })();
 let pendingDelete = null, pendingReset = false, pendingRemoveAcct = null, pendingGoal = null, pendingPerson = null, pendingForgot = false;
@@ -802,8 +813,15 @@ applyTheme(store.get(THEME_KEY));
 /* ---------- format ---------- */
 const fmtGBP = new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP', maximumFractionDigits: 0 });
 const MASK = '£••••';
-const gbp = n => ui.hidden ? MASK : fmtGBP.format(Math.round(n || 0));
-const signed = n => ui.hidden ? MASK : (n > 0 ? '+' : n < 0 ? '−' : '') + fmtGBP.format(Math.abs(Math.round(n || 0)));
+const fmtGBP2 = new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP', minimumFractionDigits: 2, maximumFractionDigits: 2 });
+// Display options (Settings): pence, and compact figures such as £104.1k for large amounts.
+function money(n) {
+  const v = Math.abs(n || 0);
+  if (ui.compactNums && v >= 10000) return v >= 1e6 ? '£' + (v / 1e6).toFixed(2).replace(/\.?0+$/, '') + 'm' : '£' + (v / 1e3).toFixed(1).replace(/\.0$/, '') + 'k';
+  return ui.pence ? fmtGBP2.format(v) : fmtGBP.format(Math.round(v));
+}
+const gbp = n => ui.hidden ? MASK : ((n || 0) < 0 && Math.abs(n) >= 0.5 ? '−' : '') + money(n);
+const signed = n => ui.hidden ? MASK : (n > 0 ? '+' : n < 0 ? '−' : '') + money(n);
 const pct = n => (n > 0 ? '+' : n < 0 ? '−' : '') + Math.abs(n).toFixed(1) + '%';
 const compact = n => ui.hidden ? '£•••' : n >= 1e6 ? '£' + (n / 1e6).toFixed(n % 1e6 ? 1 : 0) + 'm' : n >= 1e3 ? '£' + Math.round(n / 1e3) + 'k' : '£' + Math.round(n);
 const fmtDate = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
@@ -843,6 +861,7 @@ function visibleAccounts() {
   return state.accounts.filter(a => (a.owner || 'me') === ui.person);
 }
 const mine = () => state.accounts.filter(a => (a.owner || 'me') === 'me');
+const active = accts => accts.filter(a => !a.archived);
 const viewName = () => ui.person === 'all' ? 'Everyone' : ui.person === 'me' ? '' : personName(ui.person);
 
 /* ---------- derived data ---------- */
@@ -983,7 +1002,7 @@ function taxReport(y) {
   const dividends = taxable.map(a => ({ a, amount: incomeOf(a, 'dividend') })).filter(x => x.amount > 0);
   const isaIds = new Set(m.filter(a => typeOf(a).allow === 'isa').map(a => a.id));
   const isaSubs = sum(state.flows.filter(f => isaIds.has(f.accountId) && inTY(f.date) && f.own > 0), f => f.own);
-  const bonds = sum(m.filter(a => a.type === 'Premium Bonds'), a => { const p = periodStats(a, startMs, endMs); return p && p.growth > 0 ? p.growth : 0; });
+  const bonds = sum(m.filter(a => a.type === 'Premium Bonds'), a => { const p = periodStats(a, startMs, endMs); return Math.max(incomeOf(a, 'prize'), p && p.growth > 0 ? p.growth : 0); });
   const gia = m.filter(a => a.type === 'GIA');
   const giaOut = sum(state.flows.filter(f => gia.some(a => a.id === f.accountId) && inTY(f.date) && f.amount < 0), f => -f.amount);
   const interestTotal = sum(interest, x => x.amount), divTotal = sum(dividends, x => x.amount);
@@ -1012,7 +1031,7 @@ function emergencyFund() {
   return { cash, spend, months: cash / spend };
 }
 const lisaUsed = () => allowanceUsed(mine().filter(a => a.type === 'LISA'), 'isa');
-const staleAccounts = accts => accts.filter(a => { const s = logsOf(a.id); return !s.length || daysSince(s[s.length - 1].date) > 30; });
+const staleAccounts = accts => active(accts).filter(a => { const s = logsOf(a.id); return !s.length || daysSince(s[s.length - 1].date) > 30; });
 function ageOn(dob, iso) {
   const [y1, m1, d1] = dob.split('-').map(Number), [y2, m2, d2] = iso.split('-').map(Number);
   return y2 - y1 - (m2 < m1 || (m2 === m1 && d2 < d1) ? 1 : 0);
@@ -1044,12 +1063,15 @@ function chart(host, cfg) {
   if (n < 2) { host.innerHTML = `<div class="chart-empty">${esc(cfg.empty || 'Log at least two values to see a trend.')}</div>`; return; }
   const x0 = cfg.xs[0], x1 = cfg.xs[n - 1], span = (x1 - x0) || 1;
   let base = new Array(n).fill(0);
+  // Overlay series (e.g. a "Paid in" line) are drawn on their own, never stacked.
   const layers = cfg.series.map(s => {
-    const lo = base.slice();
-    const hi = s.values.map((v, i) => (cfg.stacked ? lo[i] : 0) + (v || 0));
-    if (cfg.stacked) base = hi;
-    return { ...s, lo, hi };
+    const stack = cfg.stacked && !s.overlay;
+    const lo = stack ? base.slice() : new Array(n).fill(0);
+    const hi = s.values.map((v, i) => (stack ? lo[i] : 0) + (v || 0));
+    if (stack) base = hi;
+    return { ...s, lo, hi, stack };
   });
+  const stackTop = layers.filter(l => l.stack).pop();
   const top = niceMax(Math.max(1, ...layers.flatMap(l => l.hi)));
   const X = x => m.l + (x - x0) / span * (W - m.l - m.r);
   const Y = v => m.t + (1 - v / top) * (H - m.t - m.b);
@@ -1060,20 +1082,26 @@ function chart(host, cfg) {
     g += `<line class="${k ? 'grid' : 'base'}" x1="${m.l}" x2="${W - m.r}" y1="${y}" y2="${y}"/><text class="axis" x="${m.l - 10}" y="${y}" text-anchor="end" dominant-baseline="middle">${compact(top * k / 4)}</text>`;
   }
   const ticks = Math.min(n, W < 520 ? 3 : 5);
-  const used = new Set();
+  const used = new Set(), gap = W < 520 ? 70 : 80;
+  const endX = X(cfg.xs[n - 1]);
+  let lastX = -Infinity;
   for (let k = 0; k < ticks; k++) {
     const i = Math.round(k * (n - 1) / (ticks - 1));
     if (used.has(i)) continue; used.add(i);
+    // Skip labels that would collide with the previous one or the last one.
+    const x = X(cfg.xs[i]);
+    if (k < ticks - 1 && (x - lastX < gap || endX - x < gap)) continue;
+    lastX = x;
     const anchor = k === 0 ? 'start' : k === ticks - 1 ? 'end' : 'middle';
     g += `<text class="axis" x="${X(cfg.xs[i]).toFixed(1)}" y="${H - 6}" text-anchor="${anchor}">${esc(tick(cfg.xs[i]))}</text>`;
   }
   let shapes = '';
   layers.forEach(l => {
     const pts = l.hi.map((v, i) => `${X(cfg.xs[i]).toFixed(1)},${Y(v).toFixed(1)}`);
-    const lower = cfg.stacked
+    const lower = l.stack
       ? l.lo.map((v, i) => `${X(cfg.xs[i]).toFixed(1)},${Y(v).toFixed(1)}`).reverse()
       : [`${X(x1).toFixed(1)},${Y(0).toFixed(1)}`, `${X(x0).toFixed(1)},${Y(0).toFixed(1)}`];
-    if (l.fill !== false) shapes += `<path d="M${pts.join('L')}L${lower.join('L')}Z" style="fill:${l.color}" fill-opacity="${cfg.stacked ? 0.16 : 0.08}"/>`;
+    if (l.fill !== false) shapes += `<path d="M${pts.join('L')}L${lower.join('L')}Z" style="fill:${l.color}" fill-opacity="${l.stack ? 0.16 : 0.08}"/>`;
     shapes += `<path d="M${pts.join('L')}" fill="none" style="stroke:${l.color}" stroke-width="${l.dash ? 1.4 : 1.8}" stroke-linejoin="round" stroke-linecap="round"${l.dash ? ' stroke-dasharray="4 4"' : ''}/>`;
     if (!l.dash) shapes += `<circle cx="${X(x1).toFixed(1)}" cy="${Y(l.hi[n - 1]).toFixed(1)}" r="3.5" style="fill:${l.color};stroke:var(--surface)" stroke-width="2"/>`;
   });
@@ -1086,7 +1114,8 @@ function chart(host, cfg) {
     const cx = X(cfg.xs[best]);
     hl.setAttribute('x1', cx); hl.setAttribute('x2', cx); hl.setAttribute('visibility', 'visible');
     const rows = cfg.series.map(s => `<div class="tip-row"><i style="background:${s.color}"></i><span>${esc(s.label)}</span>${gbp(s.values[best])}</div>`).join('');
-    const total = cfg.stacked && cfg.series.length > 1 ? `<div class="tip-row total"><span>Total</span><b>${gbp(layers[layers.length - 1].hi[best])}</b></div>` : '';
+    const stacked = layers.filter(l => l.stack);
+    const total = stacked.length > 1 ? `<div class="tip-row total"><span>Total</span><b>${gbp(stackTop.hi[best])}</b></div>` : '';
     tip.innerHTML = `<div class="tip-date">${esc(cfg.label2 ? cfg.label2(cfg.xs[best]) : dateLabel(cfg.xs[best]))}</div>${rows}${total}`;
     tip.hidden = false;
     const scale = r.width / W, left = cx * scale, tw = tip.offsetWidth;
@@ -1279,7 +1308,8 @@ function renderOverview() {
     </div>`;
 
   // Holdings, grouped with subtotals.
-  const byGroup = Object.keys(GROUPS).map(g => ({ g, rows: stats.filter(x => groupOf(x.a) === g) })).filter(x => x.rows.length);
+  const closedStats = stats.filter(x => x.a.archived);
+  const byGroup = Object.keys(GROUPS).map(g => ({ g, rows: stats.filter(x => groupOf(x.a) === g && !x.a.archived) })).filter(x => x.rows.length);
   const holdings = `
     <section class="panel">
       <div class="panel-head"><h2>Holdings</h2><div class="acct-actions"><button class="btn sm" data-action="open-bulk">Update all</button><button class="btn sm" data-action="add-acct">${icons.plus}Add account</button></div></div>
@@ -1297,6 +1327,7 @@ function renderOverview() {
             <td class="r hide-sm">${sparkline(x.s.slice(-12).map(l => l.value), colorOf(x.a))}</td>
           </tr>`).join('');
         }).join('')}
+        ${closedStats.length ? `<tr class="grp"><td>${closedStats.length} closed account${closedStats.length === 1 ? '' : 's'}</td><td class="r val">${gbp(closedStats.reduce((t, x) => t + x.cur, 0))}</td><td class="hide-sm" colspan="4"></td></tr>` : ''}
         </tbody>
       </table></div>` : `<div class="chart-empty"><div><p style="margin:0 0 12px">No accounts yet.</p><button class="btn primary" data-action="add-acct">${icons.plus}Add your first account</button></div></div>`}
     </section>`;
@@ -1313,6 +1344,10 @@ function renderOverview() {
       ${pt.rows.length ? `<div class="period-sum"><span><b class="${cls(pt.change)}">${signed(pt.change)}</b>change over ${esc(rangeName(ui.range))}</span><span><b>${gbp(pt.paid)}</b>paid in</span><span><b class="${cls(pt.growth)}">${signed(pt.growth)}</b>growth${pt.ret != null ? ` (${pct(pt.ret)})` : ''}</span></div>` : ''}
       <div class="chart" id="growth-chart"></div>
       <div class="legend-inline" id="growth-legend"></div>
+      <div class="row-actions" style="margin-top:12px;gap:16px">
+        <label class="check"><input type="checkbox" id="opt-paid" ${ui.paidLine ? 'checked' : ''}>Show money paid in</label>
+        <label class="check"><input type="checkbox" id="opt-lastyear" ${ui.lastYear ? 'checked' : ''}>Compare with a year earlier</label>
+      </div>
     </section>`;
 
   const allocation = `
@@ -1356,6 +1391,8 @@ function renderOverview() {
   const series = ui.stackBy === 'account'
     ? accts.map(a => ({ label: a.name, color: colorOf(a), values: pts.map(p => p.vals[a.id]) }))
     : groupSummary(accts).map(g => ({ label: g.label, color: g.color, values: pts.map(p => accts.filter(a => groupOf(a) === g.g).reduce((t, a) => t + (p.vals[a.id] || 0), 0)) }));
+  if (ui.paidLine) series.push({ label: 'Paid in', color: 'var(--ink-2)', values: pts.map(p => paidAt(accts, p.t)), overlay: true, dash: true, fill: false });
+  if (ui.lastYear) series.push({ label: 'A year earlier', color: 'var(--c3)', values: pts.map(p => valueAt(tl, p.t - 365 * 864e5) || 0), overlay: true, dash: true, fill: false });
   document.getElementById('growth-legend').innerHTML = series.map(s => `<span><i class="sw" style="background:${s.color}"></i>${esc(s.label)}</span>`).join('');
   chart(document.getElementById('growth-chart'), {
     xs: pts.map(p => p.t), stacked: true, label: 'Net worth over time', empty: 'Not enough values in this period yet.', series
@@ -1369,28 +1406,35 @@ function renderAccounts() {
     view.innerHTML = `<div class="stack view">${personFilter()}<div class="panel"><div class="chart-empty"><div><p style="margin:0 0 12px">No accounts yet. Add pensions, ISAs, savings, Premium Bonds or anything else you want to track.</p><button class="btn primary" data-action="add-acct">${icons.plus}Add account</button></div></div></div></div>`;
     return;
   }
-  if (!accts.some(a => a.id === ui.account)) ui.account = accts[0].id;
+  if (!accts.some(a => a.id === ui.account)) ui.account = (active(accts)[0] || accts[0]).id;
   const a = accts.find(x => x.id === ui.account);
   const st = accountStats(a.id);
   const all = periodStats(a, -Infinity);
-  const flows = flowsOf(a.id);
-  const inc = state.income.filter(x => x.accountId === a.id).map(x => ({ ...x, kind: 'income', incKind: x.kind }));
-  const rows = [...st.s.map(l => ({ ...l, kind: 'log' })), ...flows.map(f => ({ ...f, kind: 'flow' })), ...inc].sort((x, y) => byDate(y, x) || (x.kind === 'log' ? -1 : 1));
-  const logRows = [...st.s].reverse();
   const reg = a.regular ? `${gbp(a.regular.amount)} on day ${a.regular.day} each month${a.regular.relief ? (typeOf(a).topup === 'bonus' ? ' + 25% bonus' : ' + tax relief') : ''}` : '';
   const ordered = Object.keys(GROUPS).flatMap(g => accts.filter(x => groupOf(x) === g));
+  const open = ordered.filter(x => !x.archived), closed = ordered.filter(x => x.archived);
+  // Return after inflation, over the time the account has been tracked.
+  let realRet = null;
+  if (all && st.s.length > 1 && all.ret != null) {
+    const yrs = (TODAY_MS - toMs(st.s[0].date)) / (365.25 * 864e5);
+    if (yrs >= 0.25) realRet = ((1 + all.ret / 100) / Math.pow(1 + state.profile.inflation / 100, yrs) - 1) * 100;
+  }
+  const rate = rateInfo(a);
+  const hist = ui.hist;
+  const years = [...new Set([...state.logs, ...state.flows, ...state.income].map(x => taxYear(x.date)))].sort().reverse();
   view.innerHTML = `
     <div class="stack view">
       ${exampleNotice()}
       ${personFilter()}
       <div class="row-actions"><button class="btn" data-action="add-acct">${icons.plus}Add account</button><button class="btn" data-action="open-bulk">Update all</button></div>
       <div class="acct-picker" role="group" aria-label="Choose account">
-        ${ordered.map(x => `<button data-action="pick-account" data-id="${esc(x.id)}" aria-pressed="${x.id === a.id}"><i class="sw" style="background:${colorOf(x)}"></i>${esc(x.name)}</button>`).join('')}
+        ${open.map(x => `<button data-action="pick-account" data-id="${esc(x.id)}" aria-pressed="${x.id === a.id}"><i class="sw" style="background:${colorOf(x)}"></i>${esc(x.name)}</button>`).join('')}
+        ${closed.length ? (ui.showClosed || a.archived ? closed.map(x => `<button data-action="pick-account" data-id="${esc(x.id)}" aria-pressed="${x.id === a.id}" class="faint"><i class="sw" style="background:${colorOf(x)};opacity:.5"></i>${esc(x.name)} (closed)</button>`).join('') : `<button data-action="show-closed">${closed.length} closed</button>`) : ''}
       </div>
       <section class="panel">
         <div class="panel-head" style="align-items:flex-end">
           <div>
-            <div class="eyebrow">${esc(a.provider || 'Account')} · ${esc(typeOf(a).label)}${a.owner !== 'me' ? ' · ' + esc(personName(a.owner)) : ''}</div>
+            <div class="eyebrow">${esc(a.provider || 'Account')} · ${esc(typeOf(a).label)}${a.owner !== 'me' ? ' · ' + esc(personName(a.owner)) : ''}${a.archived ? ' · Closed' : ''}</div>
             <div class="acct-figure num">${gbp(st.cur)}</div>
           </div>
           <div class="acct-actions">
@@ -1401,37 +1445,99 @@ function renderAccounts() {
         <div class="stats">
           <div class="stat"><div class="k">Paid in</div><div class="v">${all ? gbp(all.paid) : '—'}</div></div>
           <div class="stat"><div class="k">Growth</div><div class="v ${cls(all ? all.growth : 0)}">${all && st.s.length > 1 ? signed(all.growth) : '—'}</div></div>
-          <div class="stat"><div class="k">Return</div><div class="v ${cls(all && all.ret || 0)}">${all && st.s.length > 1 && all.ret != null ? pct(all.ret) : '—'}</div></div>
+          <div class="stat"><div class="k">Return</div><div class="v ${cls(all && all.ret || 0)}">${all && st.s.length > 1 && all.ret != null ? pct(all.ret) : '—'}</div>${realRet != null ? `<div class="k">${pct(realRet)} after inflation</div>` : ''}</div>
           <div class="stat"><div class="k">Fees a year</div><div class="v">${a.fee ? gbp(st.cur * a.fee / 100) : '—'}</div></div>
         </div>
+        ${rate ? `<p class="explain" style="margin-top:12px">${rate}</p>` : ''}
         ${reg ? `<p class="hint" style="margin-top:12px">Regular payment: ${reg}.</p>` : ''}
+        ${a.notes ? `<p class="hint" style="margin-top:8px;white-space:pre-wrap"><b>Notes:</b> ${esc(a.notes)}</p>` : ''}
         <div class="chart" id="acct-chart" style="margin-top:20px"></div>
       </section>
       <section class="panel">
         <div class="panel-head"><h2>History</h2><span class="aside">${st.s.length ? 'Since ' + dateLabel(toMs(st.s[0].date)) : ''}</span></div>
-        ${rows.length ? `<div class="table-wrap"><table>
-          <thead><tr><th>Date</th><th class="r">Balance</th><th class="r">Change</th><th class="hide-sm">Note</th><th class="r"><span class="sr">Actions</span></th></tr></thead>
-          <tbody>${rows.map(l => {
-            const when = dateLabel(toMs(l.date));
-            if (pendingDelete === l.id) return `<tr class="confirm"><td colspan="3">Delete this ${l.kind === 'flow' ? 'payment' : l.kind === 'income' ? 'income entry' : 'valuation'} from ${when}?</td><td class="hide-sm"></td><td class="r" style="white-space:nowrap"><button class="btn sm ghost" data-action="del-no">Keep</button> <button class="btn sm danger solid" data-action="del-yes" data-id="${esc(l.id)}">Delete</button></td></tr>`;
-            if (l.kind === 'income') return `<tr><td style="white-space:nowrap">${when}</td><td class="r faint">${l.incKind === 'dividend' ? 'Dividend' : 'Interest'}</td><td class="r"><span class="delta muted">${gbp(l.amount)}</span></td><td class="note hide-sm faint">Income, for tax</td><td class="r"><button class="icon-btn" data-action="del" data-id="${esc(l.id)}" aria-label="Delete income from ${when}">${icons.trash}</button></td></tr>`;
-            if (l.kind === 'flow') return `<tr><td style="white-space:nowrap">${when}</td><td class="r faint">${l.employer ? 'Employer paid in' : l.amount >= 0 ? 'Paid in' : 'Taken out'}</td><td class="r">${deltaChip(l.amount, signed(l.amount))}</td><td class="note hide-sm">${esc(l.note)}${!l.employer && l.own !== l.amount ? ` <span class="faint">(you paid ${gbp(l.own)})</span>` : ''}</td><td class="r"><button class="icon-btn" data-action="del" data-id="${esc(l.id)}" aria-label="Delete payment from ${when}">${icons.trash}</button></td></tr>`;
-            const i = logRows.findIndex(x => x.id === l.id), prev = logRows[i + 1], d = prev ? l.value - prev.value : null;
-            return `<tr><td style="white-space:nowrap">${when}</td><td class="r val">${gbp(l.value)}</td><td class="r">${d == null ? '<span class="faint">—</span>' : deltaChip(d, signed(d))}</td><td class="note hide-sm">${esc(l.note)}</td><td class="r"><button class="icon-btn" data-action="del" data-id="${esc(l.id)}" aria-label="Delete valuation from ${when}">${icons.trash}</button></td></tr>`;
-          }).join('')}</tbody></table></div>` : '<div class="chart-empty">Nothing logged for this account yet.</div>'}
+        <div class="inline-form" style="margin-bottom:14px">
+          <input id="hist-q" class="input" type="search" placeholder="Search notes or amounts" value="${esc(hist.q || '')}" aria-label="Search history">
+          <select id="hist-scope" class="input" aria-label="Accounts"><option value="this" ${hist.scope !== 'all' ? 'selected' : ''}>This account</option><option value="all" ${hist.scope === 'all' ? 'selected' : ''}>All accounts</option></select>
+          <select id="hist-kind" class="input" aria-label="Entry type">${[['all', 'Everything'], ['log', 'Balances'], ['flow', 'Payments'], ['income', 'Income and prizes']].map(([v, l]) => `<option value="${v}" ${hist.kind === v ? 'selected' : ''}>${l}</option>`).join('')}</select>
+          <select id="hist-year" class="input" aria-label="Tax year"><option value="all">All tax years</option>${years.map(y => `<option value="${y}" ${hist.year === y ? 'selected' : ''}>Tax year ${y}</option>`).join('')}</select>
+        </div>
+        <div id="hist-body"></div>
       </section>
     </div>`;
+  renderHistory();
   const pts = st.s.map(l => ({ t: toMs(l.date), v: l.value }));
   if (pts.length && pts[pts.length - 1].t < TODAY_MS) pts.push({ t: TODAY_MS, v: pts[pts.length - 1].v });
   chart(document.getElementById('acct-chart'), {
     xs: pts.map(p => p.t), label: a.name + ' value over time',
-    series: [{ label: a.name, color: colorOf(a), values: pts.map(p => p.v) }]
+    series: [{ label: a.name, color: colorOf(a), values: pts.map(p => p.v) }, ...(ui.paidLine ? [{ label: 'Paid in', color: 'var(--ink-3)', values: pts.map(p => paidAt([a], p.t)), overlay: true, dash: true, fill: false }] : [])]
   });
+}
+// "Effective rate" for Premium Bonds and savings over the last 12 months, against the advertised rate.
+function rateInfo(a) {
+  if (groupOf(a) !== 'cash' && a.type !== 'Cash ISA') return '';
+  const start = TODAY_MS - 365 * 864e5, p = periodStats(a, start);
+  if (!p || p.v0 <= 0) return '';
+  const recorded = state.income.filter(x => x.accountId === a.id && toMs(x.date) > start && (x.kind === 'prize' || x.kind === 'interest')).reduce((t, x) => t + x.amount, 0);
+  const earned = Math.max(recorded, p.growth);
+  const avg = (p.v0 + p.cur) / 2;
+  if (earned <= 0 || avg <= 0) return a.rate ? `Advertised rate ${a.rate}%. Log ${a.type === 'Premium Bonds' ? 'prizes' : 'interest'} to compare what you actually earn.` : '';
+  const eff = earned / avg * 100;
+  const what = a.type === 'Premium Bonds' ? 'Prizes' : 'Interest';
+  return `${what} in the last 12 months: <b>${gbp(earned)}</b>, an effective rate of <b>${eff.toFixed(2)}%</b>${a.rate ? ` against ${a.type === 'Premium Bonds' ? 'the prize fund rate of' : 'an advertised'} ${a.rate}%` : ''}.`;
+}
+// Money paid into accounts up to a date (opening balances count as money in), for the "Paid in" chart line.
+function paidAt(accts, ms) {
+  let t = 0;
+  for (const a of accts) {
+    const s = logsOf(a.id);
+    if (!s.length || toMs(s[0].date) > ms) continue;
+    t += s[0].value;
+    for (const f of state.flows) if (f.accountId === a.id && f.date > s[0].date && toMs(f.date) <= ms) t += f.amount;
+  }
+  return t;
+}
+function renderHistory() {
+  const host = document.getElementById('hist-body');
+  if (!host) return;
+  const h = ui.hist, scopeAll = h.scope === 'all';
+  const ids = new Set(scopeAll ? visibleAccounts().map(a => a.id) : [ui.account]);
+  const accById = Object.fromEntries(state.accounts.map(a => [a.id, a]));
+  const prevLog = {};
+  for (const a of state.accounts) { const s = logsOf(a.id); s.forEach((l, i) => { prevLog[l.id] = i > 0 ? s[i - 1] : null; }); }
+  let rows = [
+    ...state.logs.filter(l => ids.has(l.accountId)).map(l => ({ ...l, kind: 'log' })),
+    ...state.flows.filter(f => ids.has(f.accountId)).map(f => ({ ...f, kind: 'flow' })),
+    ...state.income.filter(x => ids.has(x.accountId)).map(x => ({ ...x, kind: 'income', incKind: x.kind }))
+  ];
+  if (h.kind && h.kind !== 'all') rows = rows.filter(r => r.kind === h.kind);
+  if (h.year && h.year !== 'all') rows = rows.filter(r => taxYear(r.date) === h.year);
+  const q = String(h.q || '').trim().toLowerCase();
+  if (q) rows = rows.filter(r => [r.note, accById[r.accountId].name, String(Math.round(r.value ?? r.amount)), r.incKind, r.kind === 'flow' ? (r.employer ? 'employer' : r.amount >= 0 ? 'paid in' : 'taken out') : ''].join(' ').toLowerCase().includes(q));
+  rows.sort((x, y) => byDate(y, x) || (x.kind === 'log' ? -1 : 1));
+  const shown = rows.slice(0, 300);
+  const totalIn = rows.filter(r => r.kind === 'flow').reduce((t, r) => t + r.amount, 0);
+  const incLabel = k => k === 'dividend' ? 'Dividend' : k === 'prize' ? 'Prize' : 'Interest';
+  const actions = (l, label) => `<td class="r" style="white-space:nowrap"><button class="icon-btn edit" data-action="edit-entry" data-id="${esc(l.id)}" aria-label="Edit ${label}">${icons.edit}</button><button class="icon-btn" data-action="del" data-id="${esc(l.id)}" aria-label="Delete ${label}">${icons.trash}</button></td>`;
+  const who = l => scopeAll ? `<div class="hint">${esc(accById[l.accountId].name)}</div>` : '';
+  host.innerHTML = rows.length ? `
+    ${h.kind === 'flow' || q || (h.year && h.year !== 'all') ? `<p class="hint" style="margin:0 0 8px">${rows.length} entr${rows.length === 1 ? 'y' : 'ies'}${rows.some(r => r.kind === 'flow') ? ` · net paid in ${signed(totalIn)}` : ''}</p>` : ''}
+    <div class="table-wrap"><table>
+    <thead><tr><th>Date</th><th class="r">Balance</th><th class="r">Change</th><th class="hide-sm">Note</th><th class="r"><span class="sr">Actions</span></th></tr></thead>
+    <tbody>${shown.map(l => {
+      const when = dateLabel(toMs(l.date));
+      if (pendingDelete === l.id) return `<tr class="confirm"><td colspan="3">Delete this ${l.kind === 'flow' ? 'payment' : l.kind === 'income' ? 'income entry' : 'valuation'} from ${when}?</td><td class="hide-sm"></td><td class="r" style="white-space:nowrap"><button class="btn sm ghost" data-action="del-no">Keep</button> <button class="btn sm danger solid" data-action="del-yes" data-id="${esc(l.id)}">Delete</button></td></tr>`;
+      if (l.kind === 'income') return `<tr><td style="white-space:nowrap">${when}${who(l)}</td><td class="r faint">${incLabel(l.incKind)}</td><td class="r"><span class="delta muted">${gbp(l.amount)}</span></td><td class="note hide-sm faint">${l.incKind === 'prize' ? 'Tax-free prize' : 'Income, for tax'}</td>${actions(l, 'income from ' + when)}</tr>`;
+      if (l.kind === 'flow') return `<tr><td style="white-space:nowrap">${when}${who(l)}</td><td class="r faint">${l.employer ? 'Employer paid in' : l.amount >= 0 ? 'Paid in' : 'Taken out'}</td><td class="r">${deltaChip(l.amount, signed(l.amount))}</td><td class="note hide-sm">${esc(l.note)}${!l.employer && l.own !== l.amount ? ` <span class="faint">(you paid ${gbp(l.own)})</span>` : ''}</td>${actions(l, 'payment from ' + when)}</tr>`;
+      const prev = prevLog[l.id], d = prev ? l.value - prev.value : null;
+      return `<tr><td style="white-space:nowrap">${when}${who(l)}</td><td class="r val">${gbp(l.value)}</td><td class="r">${d == null ? '<span class="faint">—</span>' : deltaChip(d, signed(d))}</td><td class="note hide-sm">${esc(l.note)}</td>${actions(l, 'valuation from ' + when)}</tr>`;
+    }).join('')}</tbody></table></div>
+    ${rows.length > shown.length ? `<p class="hint">Showing the latest ${shown.length}. Narrow the search to see more.</p>` : ''}`
+    : `<div class="chart-empty">${q || h.kind !== 'all' || h.year !== 'all' ? 'Nothing matches these filters.' : 'Nothing logged for this account yet.'}</div>`;
 }
 
 /* ---------- planner ---------- */
 const LSA = 268275; // Lump Sum Allowance: the most you can take tax-free from pensions
-const planIncluded = a => { const v = ui.plan.include[a.id]; return v != null ? !!v : groupOf(a) === 'pension' || (groupOf(a) === 'isa' && a.type !== 'JISA'); };
+const planIncluded = a => { const v = ui.plan.include[a.id]; return v != null ? !!v : !a.archived && ( groupOf(a) === 'pension' || (groupOf(a) === 'isa' && a.type !== 'JISA')); };
 const planMonthly = a => { const v = ui.plan.monthly[a.id]; return v != null && v !== '' ? Math.max(0, num(v, 0)) : Math.round(monthlyIn(a)); };
 function retireDate() {
   const p = state.profile;
@@ -1500,7 +1606,7 @@ function renderPlanner() {
           </div>
           <div>
             <div class="eyebrow" style="margin-bottom:8px">Accounts and monthly payments</div>
-            ${accts.length ? `<ul class="plan-accts">${accts.map(a => `<li>
+            ${accts.length ? `<ul class="plan-accts">${accts.filter(a => !a.archived || planIncluded(a)).map(a => `<li>
               <input type="checkbox" data-plan-inc="${esc(a.id)}" ${planIncluded(a) ? 'checked' : ''} aria-label="Include ${esc(a.name)}" style="accent-color:var(--primary);width:16px;height:16px">
               <div><div style="font-weight:550">${esc(a.name)}</div><div class="hint">${gbp(accountStats(a.id).cur)}${a.fee ? ` · ${a.fee}% fees` : ''}</div></div>
               <div class="money"><span>£</span><input class="input" type="number" inputmode="decimal" min="0" step="10" data-plan-mon="${esc(a.id)}" value="${planMonthly(a)}" aria-label="Monthly into ${esc(a.name)}"></div>
@@ -1519,7 +1625,7 @@ function renderPlanner() {
           <select id="goal-scope" class="input" aria-label="Which accounts count">
             <option value="all">All my accounts</option>
             ${Object.entries(GROUPS).map(([k, v]) => `<option value="${k}">My ${v.toLowerCase()}</option>`).join('')}
-            ${state.accounts.map(a => `<option value="${esc(a.id)}">${esc(a.name)}${a.owner !== 'me' ? ' (' + esc(personName(a.owner)) + ')' : ''}</option>`).join('')}
+            ${active(state.accounts).map(a => `<option value="${esc(a.id)}">${esc(a.name)}${a.owner !== 'me' ? ' (' + esc(personName(a.owner)) + ')' : ''}</option>`).join('')}
           </select>
           <button class="btn" type="submit">${icons.plus}Add goal</button>
         </form>
@@ -1657,13 +1763,58 @@ function updateCalc() {
   });
 }
 
+/* ---------- year in review ---------- */
+function yearReview(y) {
+  const start = toMs(`${y}-04-06`) - 864e5, endIso = `${y + 1}-04-05`, end = Math.min(TODAY_MS, toMs(endIso));
+  const accts = mine();
+  const pt = periodTotals(accts, start, end);
+  const best = [...pt.rows].filter(r => r.p.growth > 0).sort((a, b) => b.p.growth - a.p.growth)[0];
+  const crossed = milestones(timeline(accts)).filter(m => m.t > start && m.t <= end);
+  const tr = taxReport(y);
+  return { y, pt, best, crossed, isa: tr.isaSubs, partial: end < toMs(endIso) };
+}
+const tyLabel = y => `${y}/${String(y + 1).slice(2)}`;
+function reviewText(r) {
+  const g = n => fmtGBP.format(Math.round(n));
+  const L = [`My ${tyLabel(r.y)} tax year with Aurum${r.partial ? ' (so far)' : ''}`,
+    `Net worth ${r.pt.change >= 0 ? 'up' : 'down'} ${g(Math.abs(r.pt.change))} to ${g(r.pt.cur)}`,
+    `Paid in ${g(r.pt.paid)}, growth ${g(r.pt.growth)}${r.pt.ret != null ? ` (${pct(r.pt.ret)})` : ''}`];
+  if (r.best) L.push(`Best performer: ${r.best.a.name}, ${g(r.best.p.growth)} growth`);
+  if (r.isa) L.push(`ISA: ${g(r.isa)} of ${g(ISA_ALLOWANCE)} used`);
+  if (r.crossed.length) L.push(`Milestones: ${r.crossed.map(m => compact(m.v)).join(', ')}`);
+  return L.join('\n');
+}
+function yearOptions() {
+  const cur = +taxYear(TODAY).split('/')[0];
+  const years = [cur, cur - 1, cur - 2, cur - 3];
+  return { years, y: years.includes(+ui.taxYear) ? +ui.taxYear : cur - 1 };
+}
+function reviewPanel() {
+  if (ui.person !== 'me') return '';
+  const { years, y } = yearOptions();
+  const r = yearReview(y);
+  if (!r.pt.rows.length) return '';
+  const stat = (k, v, c) => `<div class="stat"><div class="k">${k}</div><div class="v ${c || ''}">${v}</div></div>`;
+  return `<section class="panel stack">
+    <div class="panel-head" style="margin-bottom:0"><h2>Year in review</h2>
+      <div class="seg scroll" role="group" aria-label="Tax year">${years.map(v => `<button data-action="tax-year" data-id="${v}" aria-pressed="${v === y}">${tyLabel(v)}</button>`).join('')}</div>
+    </div>
+    <div class="compare">
+      ${stat('Net worth', gbp(r.pt.cur))}
+      ${stat('Change', signed(r.pt.change), cls(r.pt.change))}
+      ${stat('Paid in', gbp(r.pt.paid))}
+      ${stat('Growth', signed(r.pt.growth) + (r.pt.ret != null ? ` <span class="faint" style="font-size:12px">${pct(r.pt.ret)}</span>` : ''), cls(r.pt.growth))}
+    </div>
+    <p class="explain">${r.best ? `<b>${esc(r.best.a.name)}</b> grew the most (${signed(r.best.p.growth)}). ` : ''}${r.isa ? `You used <b>${gbp(r.isa)}</b> of your ISA allowance. ` : ''}${r.crossed.length ? `You passed <b>${r.crossed.map(m => compact(m.v)).join(', ')}</b>.` : ''}${r.partial ? ' The tax year is still running.' : ''}</p>
+    <div class="row-actions"><button class="btn" data-action="review-share" data-id="${y}">Share</button><span class="status" id="review-status" role="status"></span></div>
+  </section>`;
+}
+
 /* ---------- tax return helper ---------- */
 function taxPanel() {
   if (ui.person !== 'me') return '';
-  const cur = +taxYear(TODAY).split('/')[0];
-  const years = [cur, cur - 1, cur - 2, cur - 3];
-  // Default to the last complete tax year: the one a return is usually being filed for.
-  const y = years.includes(+ui.taxYear) ? +ui.taxYear : cur - 1;
+  // Defaults to the last complete tax year: the one a return is usually being filed for.
+  const { years, y } = yearOptions();
   const r = taxReport(y);
   const row = (label, value, note) => `<tr><td>${label}${note ? `<div class="hint">${note}</div>` : ''}</td><td class="r val">${value}</td></tr>`;
   const over = (v, lim) => v > lim ? ` <span class="delta neg">over by ${gbp(v - lim)}</span>` : '';
@@ -1760,6 +1911,7 @@ function renderInsights() {
         ${items.length ? `<ul class="insights">${items.join('')}</ul>` : ''}
       </section>
       ${table ? `<section class="panel"><div class="panel-head"><h2>By account</h2><span class="aside">${esc(rangeName(key))}</span></div>${table}</section>` : ''}
+      ${reviewPanel()}
       ${taxPanel()}
       ${ms.length ? `<section class="panel"><div class="panel-head"><h2>Milestones</h2></div><ul class="activity">${ms.map(m => `<li><span class="sw" style="background:var(--gold)"></span><div>${compact(m.v)} reached</div><div class="when">${dateLabel(m.t)}</div></li>`).join('')}</ul></section>` : ''}
       <p class="hint">Worked out on this device from your own entries. Nothing is sent anywhere.</p>
@@ -1851,11 +2003,14 @@ function renderSettings() {
             <div class="row-actions"><label class="btn" for="csv-file">Choose CSV file</label><input id="csv-file" type="file" accept=".csv,text/csv,text/plain" class="sr"></div>
           </div>
         </details>
+        ${Native ? `<label class="check"><input type="checkbox" id="set-autobackup" ${store.get(AUTO_KEY) === '1' ? 'checked' : ''}><span><b style="color:var(--ink);font-weight:550">Automatic weekly backup</b><br>Saves a copy to Documents/Aurum on this phone${store.get(AUTO_LAST) ? `, last on ${dateLabel(toMs(store.get(AUTO_LAST)))}` : ''}. Keeps the 8 newest. Copy them to Google Drive or a computer now and then, as they are lost if the phone is.</span></label><p class="status" id="auto-status" role="status"></p>` : ''}
         <p class="status" id="backup-status" role="status"></p>
       </section>
 
       <section class="panel stack">
         <h2>Appearance</h2>
+        <label class="check"><input type="checkbox" id="set-pence" ${ui.pence ? 'checked' : ''}>Show pence (£1,234.56)</label>
+        <label class="check"><input type="checkbox" id="set-compact" ${ui.compactNums ? 'checked' : ''}>Short figures for large amounts (£104.1k)</label>
         <div class="seg" role="radiogroup" aria-label="Theme" style="width:max-content">
           ${['dark', 'light'].map(t => `<input type="radio" name="theme" id="theme-${t}" value="${t}" ${theme === t ? 'checked' : ''}><label for="theme-${t}">${t[0].toUpperCase() + t.slice(1)}</label>`).join('')}
         </div>
@@ -1975,6 +2130,7 @@ function updateLogHints() {
   const g = a ? groupOf(a) : 'other';
   const opts = [['in', 'Paid in by me']];
   if (g === 'pension') opts.push(['employer', 'Paid in by employer']);
+  if (a && a.type === 'Premium Bonds') opts.push(['prize', 'Prize won']);
   opts.push(['out', 'Taken out']);
   if (g === 'invest' || g === 'other') opts.push(['dividend', 'Dividend received']);
   if (g !== 'pension' && g !== 'isa' && a && a.type !== 'Premium Bonds') opts.push(['interest', 'Interest received']);
@@ -1993,26 +2149,51 @@ function updateKindHint() {
     employer: 'Employer payments count towards your pension annual allowance.',
     out: 'Withdrawals are not counted as losses.',
     dividend: 'For your tax return. Record dividends even if they were reinvested.',
-    interest: 'For your tax return. Record interest even if it stayed in the account.'
+    interest: 'For your tax return. Record interest even if it stayed in the account.',
+    prize: 'Tax-free. Used to work out your effective Premium Bonds rate.'
   }[k] || '';
 }
 document.getElementById('log-kind').addEventListener('change', updateKindHint);
-function openLog(accountId) {
+let editingEntry = null;
+// Opens the sheet to log something new, or (with entryId) to edit an existing balance, payment or income entry.
+function openLog(accountId, entryId) {
   if (!state.accounts.length) { openAcctSheet(null); return; }
-  const accts = visibleAccounts().length ? visibleAccounts() : state.accounts;
+  const found = entryId ? (state.logs.find(x => x.id === entryId) && { kind: 'log', e: state.logs.find(x => x.id === entryId) })
+    || (state.flows.find(x => x.id === entryId) && { kind: 'flow', e: state.flows.find(x => x.id === entryId) })
+    || (state.income.find(x => x.id === entryId) && { kind: 'income', e: state.income.find(x => x.id === entryId) }) : null;
+  editingEntry = found ? { kind: found.kind, id: entryId } : null;
+  const base = visibleAccounts().length ? visibleAccounts() : state.accounts;
+  const accts = found ? state.accounts.filter(a => a.id === found.e.accountId) : active(base).length ? active(base) : base;
   logAccount.innerHTML = accts.map(a => `<option value="${esc(a.id)}">${esc(a.name)}${a.provider ? ' · ' + esc(a.provider) : ''}${a.owner !== 'me' ? ' (' + esc(personName(a.owner)) + ')' : ''}</option>`).join('');
-  logAccount.value = accountId || (ui.tab === 'accounts' && ui.account) || accts[0].id;
+  logAccount.value = found ? found.e.accountId : accountId || (ui.tab === 'accounts' && ui.account) || accts[0].id;
   if (!logAccount.value) logAccount.value = accts[0].id;
+  logAccount.disabled = !!found;
   const dateEl = document.getElementById('log-date');
-  dateEl.value = TODAY; dateEl.max = TODAY;
+  dateEl.value = found ? found.e.date : TODAY; dateEl.max = TODAY;
   ['log-value', 'log-flow', 'log-note'].forEach(id => { document.getElementById(id).value = ''; });
   document.getElementById('log-kind').innerHTML = '';
   document.getElementById('log-relief').checked = false;
   document.getElementById('log-err').textContent = '';
-  document.getElementById('log-example-note').hidden = !state.example;
+  document.getElementById('log-example-note').hidden = !state.example || !!found;
+  document.getElementById('sheet-title').textContent = found ? 'Edit entry' : 'Log a value';
+  document.getElementById('log-value-field').hidden = !!found && found.kind !== 'log';
+  document.getElementById('log-flow-field').hidden = !!found && found.kind === 'log';
   updateLogHints();
+  if (found) {
+    const e = found.e;
+    document.getElementById('log-note').value = e.note || '';
+    if (found.kind === 'log') document.getElementById('log-value').value = e.value;
+    else {
+      const kind = found.kind === 'income' ? e.kind : e.employer ? 'employer' : e.amount < 0 ? 'out' : 'in';
+      document.getElementById('log-kind').value = kind;
+      updateKindHint();
+      const relief = found.kind === 'flow' && !e.employer && e.amount > 0 && Math.abs(e.amount - e.own) > 0.005;
+      document.getElementById('log-relief').checked = relief;
+      document.getElementById('log-flow').value = found.kind === 'income' ? e.amount : e.employer ? e.amount : Math.abs(relief ? e.own : e.amount);
+    }
+  }
   openSheet(sheet);
-  setTimeout(() => document.getElementById('log-value').focus(), 50);
+  setTimeout(() => document.getElementById(found && found.kind !== 'log' ? 'log-flow' : 'log-value').focus(), 50);
 }
 logAccount.addEventListener('change', updateLogHints);
 document.getElementById('log-form').addEventListener('submit', e => {
@@ -2021,25 +2202,37 @@ document.getElementById('log-form').addEventListener('submit', e => {
   const value = parseFloat(rawV), flow = parseFloat(rawF);
   const date = document.getElementById('log-date').value;
   const hasV = rawV !== '' && isFinite(value) && value >= 0, hasF = rawF !== '' && isFinite(flow) && flow > 0;
-  if (!date || (!hasV && !hasF)) { document.getElementById('log-err').textContent = 'Enter a balance, an amount paid in or out, or both.'; return; }
+  if (!date || (!hasV && !hasF)) { document.getElementById('log-err').textContent = editingEntry ? 'Enter an amount.' : 'Enter a balance, an amount paid in or out, or both.'; return; }
   const accountId = logAccount.value, note = document.getElementById('log-note').value.trim();
-  clearExample([accountId]);
-  if (hasV) state.logs.push({ id: uid(), accountId, date, value, note });
+  // Editing replaces the entry, keeping its id.
+  let id = uid();
+  if (editingEntry) {
+    id = editingEntry.id;
+    const old = [...state.flows, ...state.logs].find(x => x.id === id);
+    state.logs = state.logs.filter(x => x.id !== id);
+    state.flows = state.flows.filter(x => x.id !== id);
+    state.income = state.income.filter(x => x.id !== id);
+    if (old && old.auto) editingEntry.auto = true;
+  } else clearExample([accountId]);
+  if (hasV) state.logs.push({ id, accountId, date, value, note });
   if (hasF) {
+    const fid = hasV ? uid() : id, auto = !!(editingEntry && editingEntry.auto);
     const kind = document.getElementById('log-kind').value;
-    if (kind === 'dividend' || kind === 'interest') state.income.push({ id: uid(), accountId, date, amount: flow, kind });
-    else if (kind === 'employer') state.flows.push({ id: uid(), accountId, date, amount: flow, own: 0, note: hasV ? '' : note, auto: false, employer: true });
+    if (kind === 'dividend' || kind === 'interest' || kind === 'prize') state.income.push({ id: fid, accountId, date, amount: flow, kind });
+    else if (kind === 'employer') state.flows.push({ id: fid, accountId, date, amount: flow, own: 0, note: hasV ? '' : note, auto, employer: true });
     else {
       const out = kind === 'out';
       const relief = !out && !document.getElementById('log-relief-wrap').hidden && document.getElementById('log-relief').checked;
       const own = out ? -flow : flow;
-      state.flows.push({ id: uid(), accountId, date, amount: relief ? own * 1.25 : own, own, note: hasV ? '' : note, auto: false });
+      state.flows.push({ id: fid, accountId, date, amount: relief ? own * 1.25 : own, own, note: hasV ? '' : note, auto });
     }
   }
+  editingEntry = null;
   save();
   sheet.close();
   render();
 });
+sheet.addEventListener('close', () => { editingEntry = null; logAccount.disabled = false; });
 
 // Add or edit an account
 const acctSheet = document.getElementById('acct-sheet');
@@ -2048,6 +2241,7 @@ function updateAcctRelief() {
   const lbl = topupLabel({ type: document.getElementById('acct-type').value });
   document.getElementById('acct-reg-relief-wrap').hidden = !lbl;
   document.getElementById('acct-reg-relief-label').textContent = lbl;
+  document.getElementById('acct-rate-field').hidden = TYPES[document.getElementById('acct-type').value]?.group !== 'cash' && document.getElementById('acct-type').value !== 'Cash ISA';
 }
 function openAcctSheet(id) {
   const a = id ? state.accounts.find(x => x.id === id) : null;
@@ -2069,6 +2263,10 @@ function openAcctSheet(id) {
   document.getElementById('acct-reg-amount').value = a && a.regular ? a.regular.amount : '';
   document.getElementById('acct-reg-day').value = String(a && a.regular ? a.regular.day : 1);
   document.getElementById('acct-reg-relief').checked = !!(a && a.regular && a.regular.relief);
+  document.getElementById('acct-rate').value = a && a.rate ? a.rate : '';
+  document.getElementById('acct-notes').value = a ? a.notes || '' : '';
+  document.getElementById('acct-archived').checked = !!(a && a.archived);
+  document.getElementById('acct-archived-wrap').hidden = !a;
   updateAcctRelief();
   openSheet(acctSheet);
   setTimeout(() => document.getElementById(a ? 'acct-name' : 'acct-type').focus(), 50);
@@ -2091,7 +2289,10 @@ document.getElementById('acct-form').addEventListener('submit', e => {
   const fields = {
     name, type, provider: document.getElementById('acct-provider').value.trim(),
     owner: document.getElementById('acct-owner').value || 'me',
-    fee: clamp(num(document.getElementById('acct-fee').value, 0), 0, 5)
+    fee: clamp(num(document.getElementById('acct-fee').value, 0), 0, 5),
+    rate: clamp(num(document.getElementById('acct-rate').value, 0), 0, 20),
+    notes: document.getElementById('acct-notes').value.trim().slice(0, 500),
+    archived: !!editingAcct && document.getElementById('acct-archived').checked
   };
   if (editingAcct) {
     const a = state.accounts.find(x => x.id === editingAcct);
@@ -2121,7 +2322,7 @@ document.getElementById('acct-form').addEventListener('submit', e => {
 // Update all
 const bulkSheet = document.getElementById('bulk-sheet');
 function openBulk() {
-  const accts = visibleAccounts();
+  const accts = active(visibleAccounts());
   if (!accts.length) { openAcctSheet(null); return; }
   document.getElementById('bulk-date').value = TODAY;
   document.getElementById('bulk-date').max = TODAY;
@@ -2230,6 +2431,34 @@ function importCsv(text) {
   }
   save(); render();
   setStatus(`Imported ${logs} balances and ${flows} payments${created ? `, created ${created} account${created === 1 ? '' : 's'} (set their type in Accounts)` : ''}${skipped ? `. Skipped ${skipped} rows that could not be read` : ''}.`, !logs && !flows);
+}
+
+/* ---------- automatic backup (Android app) ---------- */
+// Weekly copy to Documents/Aurum on the phone, keeping the 8 newest files.
+const AUTO_KEY = 'aurum_autobackup', AUTO_LAST = 'aurum_autobackup_last';
+async function autoBackup(force) {
+  if (!Native || store.get(AUTO_KEY) !== '1' || state.example || !state.profile.setupDone) return null;
+  const last = store.get(AUTO_LAST);
+  if (!force && last && daysSince(last) < 7) return null;
+  const FS = Native.Filesystem;
+  try {
+    await FS.writeFile({ path: `Aurum/aurum-backup-${TODAY}.json`, data: backupJson(), directory: 'DOCUMENTS', encoding: 'utf8', recursive: true });
+    store.set(AUTO_LAST, TODAY);
+    markBackedUp();
+    try {
+      const { files } = await FS.readdir({ path: 'Aurum', directory: 'DOCUMENTS' });
+      const names = files.map(f => typeof f === 'string' ? f : f.name).filter(n => /^aurum-backup-\d{4}-\d{2}-\d{2}\.json$/.test(n)).sort();
+      for (const n of names.slice(0, -8)) await FS.deleteFile({ path: 'Aurum/' + n, directory: 'DOCUMENTS' }).catch(() => {});
+    } catch {}
+    return true;
+  } catch { return false; }
+}
+async function setAutoBackup(on) {
+  if (!on) { store.del(AUTO_KEY); setStatus('Automatic backup off.', false, 'auto-status'); return; }
+  store.set(AUTO_KEY, '1');
+  const ok = await autoBackup(true);
+  if (ok) { render(); setStatus('Backed up to Documents/Aurum. A new copy is saved every week.', false, 'auto-status'); }
+  else { store.del(AUTO_KEY); const el = document.getElementById('set-autobackup'); if (el) el.checked = false; setStatus('Could not save to Documents on this phone. Use Export backup instead.', true, 'auto-status'); }
 }
 
 /* ---------- PIN lock ---------- */
@@ -2471,6 +2700,17 @@ document.addEventListener('click', async e => {
       break;
     }
     case 'bio-unlock': tryBio(); break;
+    case 'show-closed': ui.showClosed = true; saveUi(); render(); break;
+    case 'edit-entry': openLog(null, id); break;
+    case 'review-share': {
+      const text = reviewText(yearReview(+id));
+      try {
+        if (Native) await Native.Share.share({ title: 'My year with Aurum', text, dialogTitle: 'Share' });
+        else if (navigator.share) await navigator.share({ title: 'My year with Aurum', text });
+        else setStatus(await copyText(text) ? 'Copied.' : 'Could not share.', false, 'review-status');
+      } catch {}
+      break;
+    }
     case 'import-paste': importText(document.getElementById('import-text').value); break;
   }
 });
@@ -2492,6 +2732,12 @@ document.addEventListener('change', e => {
     if (t.value === 'light') store.set(THEME_KEY, 'light'); else store.del(THEME_KEY);
     applyTheme(t.value);
   }
+  if (t.id === 'opt-paid') { ui.paidLine = t.checked; saveUi(); render(); }
+  if (t.id === 'opt-lastyear') { ui.lastYear = t.checked; saveUi(); render(); }
+  if (t.id === 'set-pence') { ui.pence = t.checked; if (t.checked) ui.compactNums = false; saveUi(); render(); }
+  if (t.id === 'set-compact') { ui.compactNums = t.checked; if (t.checked) ui.pence = false; saveUi(); render(); }
+  if (t.id === 'hist-scope' || t.id === 'hist-kind' || t.id === 'hist-year') { ui.hist[t.id.slice(5)] = t.value; saveUi(); renderHistory(); }
+  if (t.id === 'set-autobackup') setAutoBackup(t.checked);
   if (t.id === 'set-hidden') { ui.hidden = t.checked; saveUi(); render(); }
   if (t.id === 'set-bio') {
     if (!t.checked) { store.del(BIO_KEY); return; }
@@ -2516,6 +2762,7 @@ document.addEventListener('change', e => {
 document.addEventListener('input', e => {
   const t = e.target, c = ui.calc, p = state.profile;
   const out = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+  if (t.id === 'hist-q') { ui.hist.q = t.value; saveUi(); renderHistory(); return; }
   if (t.id === 'plan-age') { p.retireAge = +t.value; out('out-age', t.value); save(); updatePlan(); return; }
   if (t.id === 'plan-years') { ui.plan.years = +t.value; out('out-pyears', t.value); saveUi(); updatePlan(); return; }
   if (t.id === 'plan-rate') { p.growth = +t.value; out('out-prate', t.value + '%'); save(); updatePlan(); return; }
@@ -2585,6 +2832,7 @@ document.addEventListener('submit', async e => {
   if (Native) {
     const day = +store.get(REMINDER_KEY);
     if (day) scheduleReminder(day).catch(() => {});
+    autoBackup(false);
     checkUpdate(false).then(() => { if (update && ui.tab === 'overview' && state.profile.setupDone) render(); });
   }
 })();

@@ -57,11 +57,12 @@ There is no local Java/Android SDK on the owner's PC — **APKs are only built b
 ## App architecture (src/app.html)
 
 - State (v2): `{ version: 2, example, profile: {name,dob,retireAge,band,growth,inflation,drawRate,people:[{id,name}],lastBackup,setupDone},
-  accounts: [{id,name,provider,type,color,owner,fee,regular:{amount,day,relief,since,last}|null}],
+  accounts: [{id,name,provider,type,color,owner,fee,rate,notes,archived,regular:{amount,day,relief,since,last}|null}],
   logs: [{id,accountId,date:'YYYY-MM-DD',value,note}], flows: [{id,accountId,date,amount,own,note,auto,employer}],
-  income: [{id,accountId,date,amount,kind:'dividend'|'interest'}], goals: [{id,name,target,date,scope}] }`
+  income: [{id,accountId,date,amount,kind:'dividend'|'interest'|'prize'}], goals: [{id,name,target,date,scope}] }`
 - `income` is for the tax helper only (doesn't affect growth). Employer pension payments are flows with `employer: true, own: 0`.
-- Device-only keys (not in backups): `aurum_lock` (PIN hash), `aurum_bio`, `aurum_reminder` (day), `aurum_update` (cached release).
+- Device-only keys (not in backups): `aurum_lock` (PIN hash), `aurum_bio`, `aurum_reminder` (day), `aurum_update` (cached release), `aurum_autobackup`/`_last` (weekly copy to Documents/Aurum).
+- `archived` accounts stay in totals/charts but are hidden from pickers, Update all, reminders and the planner.
 - Native plugins: Preferences, Filesystem, Share, LocalNotifications (monthly reminder), NativeBiometric (@capgo, fingerprint).
   saved to `localStorage['aurum_v1']` (key name kept). UI prefs in `aurum_ui`, theme in `aurum_theme`, PIN hash in `aurum_lock`.
 - `logs` are balances; `flows` are money in (+) / out (−). `amount` is what reached the account (incl. 25% pension relief /
