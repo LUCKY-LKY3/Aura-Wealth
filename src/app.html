@@ -538,6 +538,11 @@ body.setup .tabbar,body.setup .fab,body.setup .side-nav,body.setup .top-actions{
       </div>
     </div>
     <p class="hint" style="margin-top:-8px">Your own money in before you started tracking here (including tax relief). The rest of the first balance counts as growth. Leave blank if the first balance was all money in.</p>
+    <div class="field" id="acct-ytd-field">
+      <label for="acct-ytd" id="acct-ytd-label">Paid in this tax year so far</label>
+      <div class="money"><span>£</span><input id="acct-ytd" class="input" type="number" inputmode="decimal" step="0.01" min="0" placeholder="Since 6 April"></div>
+      <p class="hint" id="acct-ytd-hint"></p>
+    </div>
     <div class="field" id="acct-rate-field">
       <label for="acct-rate">Advertised rate <span class="faint">Optional, % a year</span></label>
       <input id="acct-rate" class="input" type="number" inputmode="decimal" step="0.01" min="0" max="20" placeholder="e.g. 4.4 (Premium Bonds prize fund rate)">
@@ -750,7 +755,7 @@ function normalize(o) {
     }));
     const flows = (Array.isArray(o.flows) ? o.flows : []).filter(f => f && isIso(f.date) && isFinite(+f.amount) && ids.has(String(f.accountId))).map(f => ({
       id: String(f.id || uid()), accountId: String(f.accountId), date: f.date, amount: +f.amount,
-      own: isFinite(+f.own) && f.own !== null && f.own !== '' ? +f.own : +f.amount, note: String(f.note || ''), auto: !!f.auto, employer: !!f.employer
+      own: isFinite(+f.own) && f.own !== null && f.own !== '' ? +f.own : +f.amount, note: String(f.note || ''), auto: !!f.auto, employer: !!f.employer, ytd: !!f.ytd
     }));
     const income = (Array.isArray(o.income) ? o.income : []).filter(x => x && isIso(x.date) && isFinite(+x.amount) && +x.amount > 0 && ids.has(String(x.accountId))).map(x => ({
       id: String(x.id || uid()), accountId: String(x.accountId), date: x.date, amount: +x.amount, kind: ['dividend', 'prize'].includes(x.kind) ? x.kind : 'interest'
@@ -1699,6 +1704,7 @@ function renderAccounts() {
         ${rate ? `<p class="explain" style="margin-top:12px">${rate}</p>` : ''}
         ${reg ? `<p class="hint" style="margin-top:12px">Regular payment: ${reg}.</p>` : ''}
         ${a.notes ? `<p class="hint" style="margin-top:8px;white-space:pre-wrap"><b>Notes:</b> ${esc(a.notes)}</p>` : ''}
+        ${ytdForm(a.type) && st.s.length && st.s[0].date >= taxYearStart(TODAY) && !ytdFlow(a) ? `<p class="hint" style="margin-top:8px">Paid into this account since 6 April? <button class="btn sm ghost" data-action="edit-acct" data-id="${esc(a.id)}">Add it for your ${taxYear(TODAY)} allowance</button></p>` : ''}
         ${a.priorPaid == null && st.s.length ? `<p class="hint" style="margin-top:8px">Had gains before you started tracking? <button class="btn sm ghost" data-action="edit-acct" data-id="${esc(a.id)}">Add total paid in so far</button> or <button class="btn sm ghost" data-action="open-past" data-id="${esc(a.id)}">add past balances</button></p>` : `<div class="row-actions" style="margin-top:8px"><button class="btn sm ghost" data-action="open-past" data-id="${esc(a.id)}">Add past balances</button></div>`}
         <div class="readout" id="acct-readout" style="margin-top:18px" aria-live="polite"></div>
         <div class="chart" id="acct-chart"></div>
@@ -2092,6 +2098,42 @@ function updateCalc() {
   });
 }
 
+/* ---------- allowances this tax year ---------- */
+function allowancesPanel() {
+  if (ui.person !== 'me' && ui.person !== 'all') return '';
+  const start = taxYearStart(TODAY), y = +start.slice(0, 4);
+  const end = Date.UTC(y + 1, 3, 5), daysLeft = Math.round((end - TODAY_MS) / 864e5);
+  const inTY = f => f.date >= start && f.date <= TODAY;
+  const m = mine();
+  const byAcct = (accts, val) => accts.map(a => ({ a, v: state.flows.filter(f => f.accountId === a.id && inTY(f)).reduce((t, f) => t + val(f), 0) }));
+  const isas = m.filter(a => typeOf(a).allow === 'isa' && !a.archived);
+  const pens = m.filter(a => groupOf(a) === 'pension' && !a.archived);
+  const isaRows = byAcct(isas, f => f.own > 0 ? f.own : 0), isaUsed = isaRows.reduce((t, r) => t + r.v, 0);
+  const penRows = byAcct(pens, f => f.amount > 0 ? f.amount : 0), penUsed = penRows.reduce((t, r) => t + r.v, 0);
+  const lisa = isaRows.filter(r => r.a.type === 'LISA').reduce((t, r) => t + r.v, 0);
+  const block = (title, used, limit, rows, note) => `<div class="stack" style="gap:8px">
+    <div class="goal-top"><b>${title}</b><span class="mono">${gbp(used)} <span class="faint">of ${gbp(limit)}</span></span></div>
+    <div class="progress"><i style="width:${clamp(used / limit * 100, 0, 100).toFixed(1)}%;${used > limit ? 'background:var(--neg)' : ''}"></i></div>
+    <div class="goal-meta"><span>${used > limit ? `<span class="neg">Over by ${gbp(used - limit)}</span>` : `${gbp(limit - used)} left`}</span><span>${note || ''}</span></div>
+    ${rows.length > 1 || rows.some(r => r.v) ? `<ul class="al-sub" style="margin-top:2px">${rows.map(r => `<li><span>${esc(r.a.name)}</span><span class="mono">${gbp(r.v)}</span></li>`).join('')}</ul>` : ''}
+  </div>`;
+  const parts = [];
+  if (isas.length) parts.push(block('ISA allowance', isaUsed, ISA_ALLOWANCE, isaRows, lisa ? `Lifetime ISA ${gbp(lisa)} of ${gbp(LISA_ALLOWANCE)}` : ''));
+  if (pens.length) parts.push(block('Pension annual allowance', penUsed, PENSION_ANNUAL_ALLOWANCE, penRows, 'You, employer and tax relief'));
+  for (const person of state.profile.people) {
+    const j = state.accounts.filter(a => a.owner === person.id && a.type === 'JISA' && !a.archived);
+    if (j.length) { const r = byAcct(j, f => f.own > 0 ? f.own : 0); parts.push(block(`${esc(person.name)}'s Junior ISA`, r.reduce((t, x) => t + x.v, 0), JISA_ALLOWANCE, r)); }
+  }
+  if (!parts.length) return '';
+  const missing = [...isas, ...pens].filter(a => { const s = logsOf(a.id); return s.length && s[0].date >= start && !ytdFlow(a) && !state.flows.some(f => f.accountId === a.id && inTY(f)); });
+  return `<section class="panel stack">
+    <div class="panel-head" style="margin-bottom:0"><h2>Allowances ${taxYear(TODAY)}</h2><span class="aside">${daysLeft} days until 5 April</span></div>
+    ${missing.length ? `<p class="warn">${missing.map(a => `<b>${esc(a.name)}</b>`).join(', ')}: add what you paid in since 6 April (Edit account → "Paid in this tax year") so these totals are complete.</p>` : ''}
+    ${parts.join('<hr style="border:0;border-top:1px solid var(--line);margin:4px 0">')}
+    <p class="hint">Counts payments dated since 6 April ${y}. Withdrawals don't give allowance back (unless your ISA is flexible). Pension allowance can be lower if your income is very high.</p>
+  </section>`;
+}
+
 /* ---------- year in review ---------- */
 function yearReview(y) {
   const start = toMs(`${y}-04-06`) - 864e5, endIso = `${y + 1}-04-05`, end = Math.min(TODAY_MS, toMs(endIso));
@@ -2195,20 +2237,13 @@ function renderInsights() {
   }
   const stale = staleAccounts(accts);
   if (stale.length) add('!', `${stale.map(a => `<b>${esc(a.name)}</b>`).join(', ')} ${stale.length === 1 ? 'needs' : 'need'} an up-to-date balance (over 30 days old). <button class="btn sm" data-action="open-bulk">Update all</button>`);
-  const tyEnd = Date.UTC(+taxYear(TODAY).split('/')[0] + 1, 3, 5), daysLeft = Math.round((tyEnd - TODAY_MS) / 864e5);
-  const myIsas = mine().filter(a => typeOf(a).allow === 'isa');
-  if (myIsas.length && (ui.person === 'me' || ui.person === 'all')) {
-    const used = allowanceUsed(myIsas, 'isa');
-    add('£', `ISA allowance: <b>${gbp(used)}</b> of ${gbp(ISA_ALLOWANCE)} used this tax year, <b>${gbp(Math.max(0, ISA_ALLOWANCE - used))}</b> left with ${daysLeft} days to go.${myIsas.some(a => a.type === 'LISA') ? ` Lifetime ISA: ${gbp(lisaUsed())} of ${gbp(LISA_ALLOWANCE)}.` : ''}`);
-  }
+  // Your own allowances are in the panel above; a child's Junior ISA shows here when viewing them.
   for (const person of state.profile.people) {
-    if (ui.person !== 'all' && ui.person !== person.id) continue;
+    if (ui.person !== person.id) continue;
     const j = state.accounts.filter(a => a.owner === person.id && a.type === 'JISA');
     if (j.length) { const used = allowanceUsed(j, 'jisa'); add('£', `${esc(person.name)}'s Junior ISA: <b>${gbp(used)}</b> of ${gbp(JISA_ALLOWANCE)} used this tax year.`); }
   }
   if (ui.person !== 'all' && ui.person !== 'me') { /* allowances below are the user's own */ } else {
-    const tr = taxReport(+taxYear(TODAY).split('/')[0]);
-    if (tr.aaUsed > 0) add('P', `Pension annual allowance: <b>${gbp(tr.aaUsed)}</b> of ${gbp(PENSION_ANNUAL_ALLOWANCE)} paid in this tax year, including your employer.`);
     const ef = emergencyFund();
     if (ef) add('☂', `Your easy-access cash of <b>${gbp(ef.cash)}</b> covers about <b>${ef.months.toFixed(1)} months</b> of spending. A common guide is 3 to 6 months.`);
   }
@@ -2232,6 +2267,7 @@ function renderInsights() {
     <div class="stack view">
       ${exampleNotice()}
       ${personFilter()}
+      ${allowancesPanel()}
       <section class="panel stack">
         <div class="panel-head" style="margin-bottom:0"><h2>Summary</h2>
           <div class="seg scroll" role="group" aria-label="Period">${INSIGHT_RANGES.map(k => `<button data-action="insight-range" data-range="${k}" aria-pressed="${key === k}">${RANGE_BTN[k] || k}</button>`).join('')}</div>
@@ -2571,6 +2607,34 @@ function updateAcctRelief() {
   document.getElementById('acct-reg-relief-wrap').hidden = !lbl;
   document.getElementById('acct-reg-relief-label').textContent = lbl;
   document.getElementById('acct-rate-field').hidden = TYPES[document.getElementById('acct-type').value]?.group !== 'cash' && document.getElementById('acct-type').value !== 'Cash ISA';
+  const type = document.getElementById('acct-type').value;
+  const f = ytdForm(type);
+  document.getElementById('acct-ytd-field').hidden = !f || !ytdEligible;
+  if (f) { document.getElementById('acct-ytd-label').textContent = f.label; document.getElementById('acct-ytd-hint').textContent = f.hint; }
+}
+// "Paid in this tax year so far": how each account type phrases it, and how it's stored.
+function ytdForm(type) {
+  const ty = taxYear(TODAY);
+  if (type === 'SIPP') return { label: `Paid in this tax year (${ty}), including tax relief`, hint: 'The gross amount, e.g. £4,000 paid + £1,000 relief = £5,000. Counts towards your £60,000 pension annual allowance.', store: v => ({ amount: v, own: v / 1.25 }) };
+  if (type === 'Pension') return { label: `Paid in this tax year (${ty}), you and employer`, hint: 'Everything paid in since 6 April, including tax relief. Counts towards your £60,000 pension annual allowance.', store: v => ({ amount: v, own: v }) };
+  if (type === 'LISA') return { label: `You paid in this tax year (${ty})`, hint: 'Your own money, not the 25% bonus. Counts towards the £4,000 Lifetime ISA limit and your £20,000 ISA allowance.', store: v => ({ amount: v * 1.25, own: v }) };
+  if (type === 'JISA') return { label: `Paid in this tax year (${ty})`, hint: 'Counts towards the £9,000 Junior ISA allowance.', store: v => ({ amount: v, own: v }) };
+  if (TYPES[type] && TYPES[type].allow === 'isa') return { label: `Paid in this tax year (${ty})`, hint: 'Money you put in since 6 April. Counts towards your £20,000 ISA allowance.', store: v => ({ amount: v, own: v }) };
+  return null;
+}
+let ytdEligible = true;
+const ytdFlow = a => state.flows.find(f => f.accountId === a.id && f.ytd && f.date >= taxYearStart(TODAY));
+// Stored as a payment dated on the first balance, so it counts towards allowances but not twice as money in.
+function setYtd(a, raw) {
+  const f = ytdForm(a.type), old = ytdFlow(a);
+  if (!f) { if (old) state.flows = state.flows.filter(x => x !== old); return; }
+  const s = logsOf(a.id), start = taxYearStart(TODAY), first = s.length ? s[0].date : TODAY;
+  if (first < start) return;
+  if (old) state.flows = state.flows.filter(x => x !== old);
+  const v = num(raw, 0);
+  if (raw === '' || v <= 0) return;
+  const st = f.store(v);
+  state.flows.push({ id: old ? old.id : uid(), accountId: a.id, date: first, amount: st.amount, own: st.own, note: 'Paid in earlier this tax year', auto: false, ytd: true });
 }
 function openAcctSheet(id) {
   const a = id ? state.accounts.find(x => x.id === id) : null;
@@ -2594,6 +2658,10 @@ function openAcctSheet(id) {
   document.getElementById('acct-reg-relief').checked = !!(a && a.regular && a.regular.relief);
   document.getElementById('acct-rate').value = a && a.rate ? a.rate : '';
   document.getElementById('acct-prior').value = a && a.priorPaid != null ? a.priorPaid : '';
+  // Only for accounts first logged this tax year; older ones log each payment with its date.
+  ytdEligible = !a || !logsOf(a.id).length || logsOf(a.id)[0].date >= taxYearStart(TODAY);
+  const yf = a && ytdFlow(a), yform = a && ytdForm(a.type);
+  document.getElementById('acct-ytd').value = yf ? Math.round((yform && a.type === 'LISA' ? yf.own : yf.amount) * 100) / 100 : '';
   document.getElementById('acct-since').value = a && a.since ? a.since : '';
   document.getElementById('acct-since').max = TODAY.slice(0, 4);
   document.getElementById('acct-notes').value = a ? a.notes || '' : '';
@@ -2635,6 +2703,7 @@ document.getElementById('acct-form').addEventListener('submit', e => {
       const same = a.regular && a.regular.day === regDay;
       a.regular = { amount: regAmount, day: regDay, relief, since: same ? a.regular.since : TODAY, last: same ? a.regular.last : '' };
     } else a.regular = null;
+    if (ytdEligible) setYtd(a, document.getElementById('acct-ytd').value);
   } else {
     clearExample([]);
     const used = new Set(state.accounts.map(a => a.color));
@@ -2642,6 +2711,7 @@ document.getElementById('acct-form').addEventListener('submit', e => {
     state.accounts.push(a);
     const open = parseFloat(document.getElementById('acct-open-value').value);
     if (isFinite(open) && open >= 0) state.logs.push({ id: uid(), accountId: a.id, date: document.getElementById('acct-open-date').value || TODAY, value: open, note: 'Opening balance' });
+    setYtd(a, document.getElementById('acct-ytd').value);
     ui.account = a.id;
     if (a.owner !== ui.person && ui.person !== 'all') ui.person = a.owner;
     if (ui.tab !== 'settings') ui.tab = 'accounts';
