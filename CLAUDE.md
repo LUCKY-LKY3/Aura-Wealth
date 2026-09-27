@@ -57,7 +57,7 @@ There is no local Java/Android SDK on the owner's PC — **APKs are only built b
 ## App architecture (src/app.html)
 
 - State (v2): `{ version: 2, example, profile: {name,dob,retireAge,band,growth,inflation,drawRate,people:[{id,name}],lastBackup,setupDone},
-  accounts: [{id,name,provider,type,color,owner,fee,rate,notes,archived,regular:{amount,day,relief,since,last}|null}],
+  accounts: [{id,name,provider,type,color,owner,fee,rate,notes,archived,priorPaid,since,regular:{amount,day,relief,since,last}|null}],
   logs: [{id,accountId,date:'YYYY-MM-DD',value,note}], flows: [{id,accountId,date,amount,own,note,auto,employer}],
   income: [{id,accountId,date,amount,kind:'dividend'|'interest'|'prize'}], goals: [{id,name,target,date,scope}] }`
 - `income` is for the tax helper only (doesn't affect growth). Employer pension payments are flows with `employer: true, own: 0`.
@@ -67,7 +67,8 @@ There is no local Java/Android SDK on the owner's PC — **APKs are only built b
   saved to `localStorage['aurum_v1']` (key name kept). UI prefs in `aurum_ui`, theme in `aurum_theme`, PIN hash in `aurum_lock`.
 - `logs` are balances; `flows` are money in (+) / out (−). `amount` is what reached the account (incl. 25% pension relief /
   LISA bonus), `own` is what the user paid (used for ISA allowances). An account's first balance counts as money in.
-  Growth = change − money in (`periodStats`). Account types live in `TYPES` (group, allowance, top-up).
+  Growth = change − money in (`periodStats`). `priorPaid` ("Total paid in so far") replaces the opening balance as money in
+  for all-time figures only (start = -Infinity), so ranged views and monthly bars don't show a fake jump. Account types live in `TYPES` (group, allowance, top-up).
 - `owner` is `'me'` or a `profile.people` id (e.g. a child's JISA); others are excluded from "my" net worth by default.
 - **Backwards compatibility matters** — `normalize()` must keep importing:
   v1 and v2 of the current format, older key `aura_wealth_v2`, and the original Gemini app's v1 backups
