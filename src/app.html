@@ -275,6 +275,59 @@ details summary{cursor:pointer;color:var(--ink-2);font-size:13px;font-weight:550
 .view{animation:fade .2s ease}
 @keyframes fade{from{opacity:.5}to{opacity:1}}
 @media (prefers-reduced-motion:reduce){.view,.saved.flash i{animation:none}}
+
+/* ---------- v2 additions ---------- */
+.seg.scroll{max-width:100%;overflow-x:auto;scrollbar-width:none}
+.seg.scroll button{flex:none}
+.range-bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.custom-range{display:flex;gap:6px;align-items:center;font-size:12.5px;color:var(--ink-2)}
+.custom-range .input{width:auto;padding:5px 8px;font-size:13px}
+.custom-range input.input{width:64px}
+.period-sum{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:13px;color:var(--ink-2);margin:-4px 0 14px}
+.period-sum b{font-family:var(--mono);font-weight:600;margin-right:4px}
+tr.grp td{background:var(--surface-2);font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-2);font-weight:600;padding-block:8px}
+tr.grp td.val{font-size:12.5px;letter-spacing:0;text-transform:none;color:var(--ink)}
+.owner{font-size:11px;font-weight:600;padding:1px 6px;border-radius:5px;background:var(--gold-soft);color:var(--gold);margin-left:6px;white-space:nowrap}
+.progress{height:6px;border-radius:99px;background:var(--surface-2);overflow:hidden}
+.progress i{display:block;height:100%;background:var(--gold);border-radius:99px}
+.goal-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:16px}
+.goal-list li{display:flex;flex-direction:column;gap:6px}
+.goal-top{display:flex;justify-content:space-between;gap:10px;align-items:baseline;flex-wrap:wrap}
+.goal-top b{font-weight:600}
+.goal-meta{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font-size:12.5px;color:var(--ink-3)}
+.check{display:flex;gap:9px;align-items:flex-start;font-size:13.5px;color:var(--ink-2);cursor:pointer}
+.check input{margin-top:3px;accent-color:var(--primary);width:16px;height:16px;flex:none}
+fieldset.field{border:0;padding:0;margin:0;min-width:0}
+fieldset.field legend{padding:0;margin-bottom:6px}
+.two{display:grid;gap:12px;grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+dialog.sheet{max-height:calc(100vh - 24px);overflow:auto}
+dialog.sheet.wide{width:min(620px,calc(100% - 32px))}
+.bulk-row{display:grid;gap:8px;grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:center;padding:10px 0;border-top:1px solid var(--line)}
+.bulk-row .who{grid-column:1/-1}
+@media (min-width:560px){.bulk-row{grid-template-columns:minmax(0,1.3fr) minmax(0,1fr) minmax(0,1fr)}.bulk-row .who{grid-column:auto}}
+.bulk-row .who b{font-weight:600}
+.insights{list-style:none;margin:0;padding:0}
+.insights li{display:grid;grid-template-columns:22px 1fr;gap:10px;padding:12px 0;border-top:1px solid var(--line);font-size:14px;color:var(--ink-2)}
+.insights li:first-child{border-top:0;padding-top:0}
+.insights li b{color:var(--ink);font-weight:600}
+.insights .ic{width:22px;height:22px;border-radius:6px;display:grid;place-items:center;background:var(--surface-2);color:var(--gold);font-size:12px}
+.headline{font-size:17px;line-height:1.45;margin:0;max-width:62ch}
+.headline b{font-weight:650}
+.plan-accts{list-style:none;margin:0;padding:0;border:1px solid var(--line);border-radius:10px}
+.plan-accts li{display:grid;grid-template-columns:auto minmax(0,1fr) 110px;gap:10px;align-items:center;padding:10px 12px;border-top:1px solid var(--line)}
+.plan-accts li:first-child{border-top:0}
+.plan-accts .money .input{padding-block:6px;font-size:13.5px}
+.big-figure{font-size:clamp(30px,6vw,40px);font-weight:600;letter-spacing:-.035em;line-height:1.1}
+.lock{position:fixed;inset:0;z-index:100;background:var(--bg);display:grid;place-items:center;padding:24px}
+.lock-box{display:flex;flex-direction:column;align-items:center;gap:14px;width:min(320px,100%);text-align:center}
+.lock-box .input{text-align:center;font-family:var(--mono);font-size:22px;letter-spacing:.4em}
+.lock-box .btn{width:100%}
+body.setup .tabbar,body.setup .fab,body.setup .side-nav,body.setup .top-actions{display:none}
+.setup-card{max-width:520px;margin:4vh auto 0}
+.icon-btn.edit:hover{color:var(--gold)}
+.eye{padding:8px}
+.eye svg{width:18px;height:18px}
+.acct-actions{display:flex;gap:8px;flex-wrap:wrap}
 </style>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -285,6 +338,11 @@ details summary{cursor:pointer;color:var(--ink-2);font-size:13px;font-weight:550
     <path d="M17.2 30.2L24 16.6l6.8 13.6" fill="none" stroke="#D4AF5A" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
     <path d="M19.9 25.4h8.2" stroke="#D4AF5A" stroke-width="2.4" stroke-linecap="round"/>
   </symbol>
+  <symbol id="i-overview" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></g></symbol>
+  <symbol id="i-accounts" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10l9-6 9 6"/><path d="M5 10v8M9.5 10v8M14.5 10v8M19 10v8M3 20h18"/></g></symbol>
+  <symbol id="i-planner" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19l5-6 4 3 7-9"/><path d="M4 4v16h16"/></g></symbol>
+  <symbol id="i-insights" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M19 16l.8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8z"/></g></symbol>
+  <symbol id="i-settings" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></g></symbol>
 </svg>
 
 <div class="shell">
@@ -295,11 +353,12 @@ details summary{cursor:pointer;color:var(--ink-2);font-size:13px;font-weight:550
     </div>
     <nav class="side-nav" aria-label="Sections">
       <div class="label">Portfolio</div>
-      <button class="nav-btn" data-action="tab" data-tab="overview"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>Overview</button>
-      <button class="nav-btn" data-action="tab" data-tab="accounts"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10l9-6 9 6"/><path d="M5 10v8M9.5 10v8M14.5 10v8M19 10v8M3 20h18"/></svg>Accounts</button>
-      <button class="nav-btn" data-action="tab" data-tab="calculator"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19l5-6 4 3 7-9"/><path d="M4 4v16h16"/></svg>SIPP vs ISA</button>
+      <button class="nav-btn" data-action="tab" data-tab="overview"><svg><use href="#i-overview"/></svg>Overview</button>
+      <button class="nav-btn" data-action="tab" data-tab="accounts"><svg><use href="#i-accounts"/></svg>Accounts</button>
+      <button class="nav-btn" data-action="tab" data-tab="planner"><svg><use href="#i-planner"/></svg>Planner &amp; goals</button>
+      <button class="nav-btn" data-action="tab" data-tab="insights"><svg><use href="#i-insights"/></svg>What's changed</button>
       <div class="label" style="margin-top:18px">Data</div>
-      <button class="nav-btn" data-action="tab" data-tab="settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 00.3 1.8l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-1.8-.3 1.7 1.7 0 00-1 1.5V21a2 2 0 11-4 0v-.1a1.7 1.7 0 00-1.1-1.5 1.7 1.7 0 00-1.8.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.7 1.7 0 00.3-1.8 1.7 1.7 0 00-1.5-1H3a2 2 0 110-4h.1a1.7 1.7 0 001.5-1.1 1.7 1.7 0 00-.3-1.8l-.1-.1a2 2 0 112.8-2.8l.1.1a1.7 1.7 0 001.8.3H9a1.7 1.7 0 001-1.5V3a2 2 0 114 0v.1a1.7 1.7 0 001 1.5 1.7 1.7 0 001.8-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.7 1.7 0 00-.3 1.8V9a1.7 1.7 0 001.5 1H21a2 2 0 110 4h-.1a1.7 1.7 0 00-1.5 1z"/></svg>Settings &amp; backup</button>
+      <button class="nav-btn" data-action="tab" data-tab="settings"><svg><use href="#i-settings"/></svg>Settings &amp; backup</button>
     </nav>
     <div class="side-foot">
       <div class="saved" data-saved role="status"><i></i><span>Saved on this device</span></div>
@@ -316,6 +375,7 @@ details summary{cursor:pointer;color:var(--ink-2);font-size:13px;font-weight:550
         </div>
         <div class="top-actions">
           <div class="saved" data-saved role="status"><i></i><span class="sr">Saved on this device</span></div>
+          <button class="btn ghost eye" data-action="toggle-hide" id="eye-btn" aria-pressed="false" aria-label="Hide balances"></button>
           <button class="btn primary only-wide" data-action="open-log">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Log a value</button>
         </div>
@@ -326,20 +386,29 @@ details summary{cursor:pointer;color:var(--ink-2);font-size:13px;font-weight:550
 </div>
 
 <nav class="tabbar" aria-label="Sections">
-  <button data-action="tab" data-tab="overview"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>Overview</button>
-  <button data-action="tab" data-tab="accounts"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10l9-6 9 6"/><path d="M5 10v8M9.5 10v8M14.5 10v8M19 10v8M3 20h18"/></svg>Accounts</button>
-  <button data-action="tab" data-tab="calculator"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19l5-6 4 3 7-9"/><path d="M4 4v16h16"/></svg>SIPP vs ISA</button>
-  <button data-action="tab" data-tab="settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg>Settings</button>
+  <button data-action="tab" data-tab="overview"><svg><use href="#i-overview"/></svg>Overview</button>
+  <button data-action="tab" data-tab="accounts"><svg><use href="#i-accounts"/></svg>Accounts</button>
+  <button data-action="tab" data-tab="planner"><svg><use href="#i-planner"/></svg>Planner</button>
+  <button data-action="tab" data-tab="insights"><svg><use href="#i-insights"/></svg>Changes</button>
+  <button data-action="tab" data-tab="settings"><svg><use href="#i-settings"/></svg>Settings</button>
 </nav>
 
 <button class="btn primary fab" data-action="open-log">
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Log value</button>
 
+<datalist id="providers">
+  <option value="Hargreaves Lansdown"><option value="Vanguard"><option value="AJ Bell"><option value="Interactive Investor"><option value="Fidelity">
+  <option value="Trading 212"><option value="Freetrade"><option value="InvestEngine"><option value="Nutmeg"><option value="Moneybox"><option value="Chip"><option value="Plum">
+  <option value="NatWest"><option value="Barclays"><option value="Lloyds"><option value="HSBC"><option value="Santander"><option value="Nationwide"><option value="Halifax">
+  <option value="Monzo"><option value="Starling"><option value="Chase"><option value="Marcus"><option value="Zopa"><option value="NS&amp;I">
+  <option value="Aegon"><option value="Aviva"><option value="Legal &amp; General"><option value="Scottish Widows"><option value="Royal London"><option value="Standard Life"><option value="Nest"><option value="PensionBee">
+</datalist>
+
 <dialog class="sheet" id="sheet" aria-labelledby="sheet-title">
   <form id="log-form" method="dialog">
     <div class="sheet-head">
       <h2 id="sheet-title">Log a value</h2>
-      <button type="button" class="icon-btn" data-action="close-log" aria-label="Close">
+      <button type="button" class="icon-btn" data-action="close-sheet" aria-label="Close">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
       </button>
     </div>
@@ -349,24 +418,122 @@ details summary{cursor:pointer;color:var(--ink-2);font-size:13px;font-weight:550
       <select id="log-account" class="input"></select>
     </div>
     <div class="field">
-      <label for="log-value">Current value</label>
-      <div class="money"><span>£</span><input id="log-value" class="input" type="number" inputmode="decimal" step="0.01" min="0" placeholder="0.00" required></div>
-      <p class="hint" id="log-prev"></p>
-    </div>
-    <div class="field">
-      <label for="log-date">Valuation date</label>
+      <label for="log-date">Date</label>
       <input id="log-date" class="input" type="date" required>
     </div>
     <div class="field">
-      <label for="log-note">Note <span class="faint">Optional</span></label>
-      <input id="log-note" class="input" type="text" maxlength="80" placeholder="e.g. Monthly check-in, added £500">
+      <label for="log-value">Current balance</label>
+      <div class="money"><span>£</span><input id="log-value" class="input" type="number" inputmode="decimal" step="0.01" min="0" placeholder="0.00"></div>
+      <p class="hint" id="log-prev"></p>
     </div>
+    <fieldset class="field">
+      <legend class="label">Money paid in or taken out <span class="faint">Optional</span></legend>
+      <div class="seg" role="radiogroup" aria-label="Direction" style="width:max-content">
+        <input type="radio" name="flowdir" id="flow-in" value="in" checked><label for="flow-in">Paid in</label>
+        <input type="radio" name="flowdir" id="flow-out" value="out"><label for="flow-out">Taken out</label>
+      </div>
+      <div class="money"><span>£</span><input id="log-flow" class="input" type="number" inputmode="decimal" step="0.01" min="0" placeholder="0.00" aria-label="Amount paid in or taken out"></div>
+      <label class="check" id="log-relief-wrap" hidden><input type="checkbox" id="log-relief"><span id="log-relief-label"></span></label>
+      <p class="hint">Recording deposits means they are not counted as growth.</p>
+    </fieldset>
+    <div class="field">
+      <label for="log-note">Note <span class="faint">Optional</span></label>
+      <input id="log-note" class="input" type="text" maxlength="80" placeholder="e.g. Monthly check-in">
+    </div>
+    <p class="status err" id="log-err" role="alert"></p>
     <div class="sheet-actions">
-      <button type="button" class="btn" data-action="close-log">Cancel</button>
-      <button type="submit" class="btn primary">Save value</button>
+      <button type="button" class="btn" data-action="close-sheet">Cancel</button>
+      <button type="submit" class="btn primary">Save</button>
     </div>
   </form>
 </dialog>
+
+<dialog class="sheet" id="acct-sheet" aria-labelledby="acct-title">
+  <form id="acct-form" method="dialog">
+    <div class="sheet-head">
+      <h2 id="acct-title">Add account</h2>
+      <button type="button" class="icon-btn" data-action="close-sheet" aria-label="Close">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+    <div class="field">
+      <label for="acct-type">Type</label>
+      <select id="acct-type" class="input"></select>
+    </div>
+    <div class="field">
+      <label for="acct-name">Name</label>
+      <input id="acct-name" class="input" maxlength="40" required placeholder="e.g. Stocks & Shares ISA">
+    </div>
+    <div class="field">
+      <label for="acct-provider">Provider</label>
+      <input id="acct-provider" class="input" maxlength="40" list="providers" placeholder="e.g. NatWest">
+    </div>
+    <div class="field">
+      <label for="acct-owner">Belongs to</label>
+      <select id="acct-owner" class="input"></select>
+      <p class="hint">Add family members, such as a child with a Junior ISA, in Settings. Their accounts show separately from your net worth.</p>
+    </div>
+    <div class="two" id="acct-opening">
+      <div class="field">
+        <label for="acct-open-value">Current balance</label>
+        <div class="money"><span>£</span><input id="acct-open-value" class="input" type="number" inputmode="decimal" step="0.01" min="0" placeholder="Optional"></div>
+      </div>
+      <div class="field">
+        <label for="acct-open-date">As of</label>
+        <input id="acct-open-date" class="input" type="date">
+      </div>
+    </div>
+    <div class="field">
+      <label for="acct-fee">Yearly fees <span class="faint">Optional, %</span></label>
+      <input id="acct-fee" class="input" type="number" inputmode="decimal" step="0.01" min="0" max="5" placeholder="e.g. 0.45">
+    </div>
+    <fieldset class="field">
+      <legend class="label">Regular payment <span class="faint">Optional</span></legend>
+      <div class="two">
+        <div class="money"><span>£</span><input id="acct-reg-amount" class="input" type="number" inputmode="decimal" step="0.01" min="0" placeholder="Per month" aria-label="Monthly amount"></div>
+        <select id="acct-reg-day" class="input" aria-label="Day of the month"></select>
+      </div>
+      <label class="check" id="acct-reg-relief-wrap" hidden><input type="checkbox" id="acct-reg-relief"><span id="acct-reg-relief-label"></span></label>
+      <p class="hint">Logged for you automatically each month from today, so you only need to update the balance.</p>
+    </fieldset>
+    <div class="sheet-actions">
+      <button type="button" class="btn" data-action="close-sheet">Cancel</button>
+      <button type="submit" class="btn primary" id="acct-submit">Add account</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog class="sheet wide" id="bulk-sheet" aria-labelledby="bulk-title">
+  <form id="bulk-form" method="dialog">
+    <div class="sheet-head">
+      <h2 id="bulk-title">Update all accounts</h2>
+      <button type="button" class="icon-btn" data-action="close-sheet" aria-label="Close">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+    <div class="field" style="max-width:220px">
+      <label for="bulk-date">Date</label>
+      <input id="bulk-date" class="input" type="date" required>
+    </div>
+    <p class="hint">Fill in the balances you have. Leave any blank to skip. "Paid in" is money you added since the last update.</p>
+    <div id="bulk-rows"></div>
+    <div class="sheet-actions">
+      <button type="button" class="btn" data-action="close-sheet">Cancel</button>
+      <button type="submit" class="btn primary">Save all</button>
+    </div>
+  </form>
+</dialog>
+
+<div class="lock" id="lock" hidden>
+  <form class="lock-box" id="lock-form">
+    <svg class="mark" width="52" height="52" aria-hidden="true"><use href="#aurum-mark"/></svg>
+    <h2>Aurum is locked</h2>
+    <input id="lock-pin" class="input" type="password" inputmode="numeric" autocomplete="off" maxlength="8" aria-label="PIN" placeholder="PIN">
+    <p class="status err" id="lock-err" role="alert"></p>
+    <button class="btn primary" type="submit">Unlock</button>
+    <div id="lock-forgot"></div>
+  </form>
+</div>
 
 <script>
 (() => {
@@ -377,14 +544,37 @@ const STORE_KEY = 'aurum_v1';
 const OLD_KEYS = ['aura_wealth_v2'];
 const UI_KEY = 'aurum_ui';
 const THEME_KEY = 'aurum_theme';
+const LOCK_KEY = 'aurum_lock';
 const LEGACY_KEYS = { hl_sipp: 'aura_v1_hl_sipp', hl_isa: 'aura_v1_hl_isa', aegon: 'aura_v1_aegon' };
 const COLORS = ['c1', 'c2', 'c3', 'c4', 'c5', 'c6'];
-const PENSION_TYPES = ['SIPP', 'Pension'];
+// Accounts created by the original app's v1 backups.
 const DEFAULT_ACCOUNTS = [
   { id: 'hl_sipp', name: 'SIPP', provider: 'Hargreaves Lansdown', type: 'SIPP', color: 'c1' },
   { id: 'hl_isa', name: 'Stocks & Shares ISA', provider: 'Hargreaves Lansdown', type: 'ISA', color: 'c2' },
   { id: 'aegon', name: 'Workplace Pension', provider: 'Aegon', type: 'Pension', color: 'c3' }
 ];
+
+// Account types. `group` drives subtotals; `allow` which allowance deposits count against;
+// `topup` means the pot receives 25% on top of what you pay (pension tax relief or the LISA bonus).
+const TYPES = {
+  'SIPP': { label: 'SIPP', group: 'pension', topup: 'relief' },
+  'Pension': { label: 'Workplace pension', group: 'pension', topup: 'relief' },
+  'ISA': { label: 'Stocks & Shares ISA', group: 'isa', allow: 'isa' },
+  'Cash ISA': { label: 'Cash ISA', group: 'isa', allow: 'isa' },
+  'LISA': { label: 'Lifetime ISA', group: 'isa', allow: 'isa', topup: 'bonus' },
+  'JISA': { label: 'Junior ISA', group: 'isa', allow: 'jisa' },
+  'GIA': { label: 'General investment account', group: 'invest' },
+  'Savings': { label: 'Savings account', group: 'cash' },
+  'Fixed': { label: 'Fixed-term savings', group: 'cash' },
+  'Premium Bonds': { label: 'Premium Bonds', group: 'cash' },
+  'Cash': { label: 'Current account or cash', group: 'cash' },
+  'Other': { label: 'Other', group: 'other' }
+};
+const GROUPS = { pension: 'Pensions', isa: 'ISAs', invest: 'Investments', cash: 'Cash and savings', other: 'Other' };
+const GROUP_COLOR = { pension: 'c1', isa: 'c2', invest: 'c3', cash: 'c4', other: 'c6' };
+const ISA_ALLOWANCE = 20000, JISA_ALLOWANCE = 9000, LISA_ALLOWANCE = 4000;
+const typeOf = a => TYPES[a.type] || TYPES.Other;
+const groupOf = a => typeOf(a).group;
 
 const store = {
   get(k) { try { return localStorage.getItem(k); } catch { return null; } },
@@ -396,44 +586,94 @@ const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 
 const pad = n => String(n).padStart(2, '0');
 const isoLocal = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 const toMs = iso => { const [y, m, d] = iso.split('-').map(Number); return Date.UTC(y, m - 1, d); };
+const msIso = ms => new Date(ms).toISOString().slice(0, 10);
+const isIso = s => typeof s === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(s);
 const TODAY = isoLocal(new Date());
+const TODAY_MS = toMs(TODAY);
+const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
+const num = (v, d) => { const n = parseFloat(v); return isFinite(n) ? n : d; };
 
-function seedExample() {
+/* ---------- data model ---------- */
+const BANDS = { basic: { label: 'Basic 20%', word: 'basic', extra: 0 }, higher: { label: 'Higher 40%', word: 'higher', extra: 0.20 }, additional: { label: 'Additional 45%', word: 'additional', extra: 0.25 } };
+function normProfile(p, done) {
+  p = p && typeof p === 'object' ? p : {};
+  return {
+    name: String(p.name || '').slice(0, 40),
+    dob: isIso(p.dob) ? p.dob : '',
+    retireAge: clamp(Math.round(num(p.retireAge, 60)), 40, 80),
+    band: BANDS[p.band] ? p.band : 'basic',
+    growth: clamp(num(p.growth, 5), 0, 15),
+    inflation: clamp(num(p.inflation, 2.5), 0, 10),
+    drawRate: clamp(num(p.drawRate, 4), 1, 10),
+    people: Array.isArray(p.people) ? p.people.filter(x => x && x.id && x.name).map(x => ({ id: String(x.id), name: String(x.name).slice(0, 30) })) : [],
+    lastBackup: isIso(p.lastBackup) ? p.lastBackup : '',
+    setupDone: p.setupDone != null ? !!p.setupDone : done
+  };
+}
+const emptyState = () => ({ version: 2, example: false, profile: normProfile(null, false), accounts: [], logs: [], flows: [], goals: [] });
+
+function seedExample(profile) {
   const today = new Date();
-  const spec = { hl_sipp: [18400, 24950], hl_isa: [9200, 15640], aegon: [31050, 35820] };
+  const accounts = [
+    { id: 'demo_sipp', name: 'SIPP', provider: 'Hargreaves Lansdown', type: 'SIPP', color: 'c1' },
+    { id: 'demo_isa', name: 'Stocks & Shares ISA', provider: 'Vanguard', type: 'ISA', color: 'c2' },
+    { id: 'demo_work', name: 'Workplace Pension', provider: 'Aegon', type: 'Pension', color: 'c3' },
+    { id: 'demo_bonds', name: 'Premium Bonds', provider: 'NS&I', type: 'Premium Bonds', color: 'c4' },
+    { id: 'demo_save', name: 'Easy Access Saver', provider: 'NatWest', type: 'Savings', color: 'c5' }
+  ].map(a => ({ ...a, owner: 'me', fee: a.type === 'SIPP' ? 0.45 : a.type === 'ISA' ? 0.15 : 0, regular: null, demo: true }));
+  const spec = { demo_sipp: [18400, 24950, 0], demo_isa: [9200, 15640, 500], demo_work: [31050, 35820, 300], demo_bonds: [20000, 20250, 0], demo_save: [6000, 7400, 100] };
   let r = 11;
   const rnd = () => (r = (r * 16807) % 2147483647) / 2147483647;
-  const logs = [];
+  const logs = [], flows = [];
   for (let i = 11; i >= 0; i--) {
     const d = i === 0 ? today : new Date(today.getFullYear(), today.getMonth() - i, Math.min(today.getDate(), 28));
     const t = (11 - i) / 11;
     for (const id of Object.keys(spec)) {
-      const [a, b] = spec[id];
-      const wobble = i === 0 ? 0 : (rnd() - 0.45) * (b - a) * 0.16;
-      logs.push({
-        id: uid(), accountId: id, date: isoLocal(d),
-        value: Math.round(a + (b - a) * t + wobble),
-        note: i === 11 ? 'Opening balance' : (id === 'hl_isa' && i % 3 === 0 ? 'Added £500' : '')
-      });
+      const [a, b, monthly] = spec[id];
+      const wobble = i === 0 || id === 'demo_bonds' ? 0 : (rnd() - 0.45) * (b - a) * 0.16;
+      logs.push({ id: uid(), accountId: id, date: isoLocal(d), value: Math.round(a + (b - a) * t + wobble), note: i === 11 ? 'Opening balance' : '' });
+      if (monthly && i < 11) flows.push({ id: uid(), accountId: id, date: isoLocal(d), amount: monthly, own: monthly, note: 'Monthly payment', auto: false });
     }
   }
-  return { version: 1, example: true, accounts: DEFAULT_ACCOUNTS.map(a => ({ ...a })), logs };
+  const goals = [{ id: uid(), name: 'ISA to £50,000', target: 50000, date: `${today.getFullYear() + 5}-04-05`, scope: 'isa', demo: true }];
+  return { version: 2, example: true, profile: normProfile({ ...profile, setupDone: true }, true), accounts, logs, flows, goals };
 }
 
-const validLog = l => l && typeof l.date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(l.date) && isFinite(+l.value);
+const validLog = l => l && isIso(l.date) && isFinite(+l.value);
 
-// Accepts Aurum backups and both older Aura Wealth formats.
+// Accepts Aurum backups (v1 and v2) and both older Aura Wealth formats.
 function normalize(o) {
   if (o && Array.isArray(o.accounts) && Array.isArray(o.logs)) {
-    const accounts = o.accounts.filter(a => a && a.id && a.name).map((a, i) => ({
-      id: String(a.id), name: String(a.name), provider: String(a.provider || ''), type: String(a.type || 'Other'),
-      color: COLORS.includes(a.color) ? a.color : COLORS[i % COLORS.length]
-    }));
+    const accounts = o.accounts.filter(a => a && a.id && a.name).map((a, i) => {
+      const reg = a.regular && isFinite(+a.regular.amount) && +a.regular.amount > 0 ? {
+        amount: +a.regular.amount, day: clamp(Math.round(num(a.regular.day, 1)), 1, 28), relief: !!a.regular.relief,
+        since: isIso(a.regular.since) ? a.regular.since : TODAY, last: isIso(a.regular.last) ? a.regular.last : ''
+      } : null;
+      const acct = {
+        id: String(a.id), name: String(a.name), provider: String(a.provider || ''), type: TYPES[a.type] ? a.type : String(a.type || 'Other'),
+        color: COLORS.includes(a.color) ? a.color : COLORS[i % COLORS.length],
+        owner: String(a.owner || 'me'), fee: clamp(num(a.fee, 0), 0, 5), regular: reg
+      };
+      if (a.demo) acct.demo = true;
+      return acct;
+    });
     const ids = new Set(accounts.map(a => a.id));
     const logs = o.logs.filter(l => validLog(l) && ids.has(String(l.accountId))).map(l => ({
       id: String(l.id || uid()), accountId: String(l.accountId), date: l.date, value: +l.value, note: String(l.note || '')
     }));
-    return { version: 1, example: !!o.example, accounts, logs };
+    const flows = (Array.isArray(o.flows) ? o.flows : []).filter(f => f && isIso(f.date) && isFinite(+f.amount) && ids.has(String(f.accountId))).map(f => ({
+      id: String(f.id || uid()), accountId: String(f.accountId), date: f.date, amount: +f.amount,
+      own: isFinite(+f.own) && f.own !== null && f.own !== '' ? +f.own : +f.amount, note: String(f.note || ''), auto: !!f.auto
+    }));
+    const goals = (Array.isArray(o.goals) ? o.goals : []).filter(g => g && g.name && isFinite(+g.target) && +g.target > 0).map(g => {
+      const goal = { id: String(g.id || uid()), name: String(g.name).slice(0, 40), target: +g.target, date: isIso(g.date) ? g.date : '', scope: String(g.scope || 'all') };
+      if (g.demo) goal.demo = true;
+      return goal;
+    });
+    const profile = normProfile(o.profile, !o.example);
+    const known = new Set(['me', ...profile.people.map(p => p.id)]);
+    accounts.forEach(a => { if (!known.has(a.owner)) a.owner = 'me'; });
+    return { version: 2, example: !!o.example, profile, accounts, logs, flows, goals };
   }
   if (o && (Array.isArray(o.hl_sipp) || Array.isArray(o.hl_isa) || Array.isArray(o.aegon))) {
     const logs = [];
@@ -443,7 +683,7 @@ function normalize(o) {
         note: l.note && l.note !== 'Valuation Log' ? String(l.note) : ''
       }));
     }
-    return { version: 1, example: false, accounts: DEFAULT_ACCOUNTS.map(a => ({ ...a })), logs };
+    return normalize({ version: 1, example: false, accounts: DEFAULT_ACCOUNTS.map(a => ({ ...a })), logs });
   }
   throw new Error('This file is not an Aurum or Aura Wealth backup.');
 }
@@ -459,18 +699,22 @@ function loadState() {
     if (v) { try { legacy[k] = JSON.parse(v); found = true; } catch {} }
   }
   if (found) { try { return normalize(legacy); } catch {} }
-  return seedExample();
+  return emptyState();
 }
 
 let state = loadState();
-const DEFAULT_UI = { tab: 'overview', range: '1Y', account: null, calc: { monthly: 500, band: 'basic', years: 20, rate: 6, draw: 20 } };
+const DEFAULT_UI = {
+  tab: 'overview', range: '1Y', custom: { n: 6, unit: 'm' }, account: null, person: 'me', hidden: false, stackBy: 'group', insight: '1M',
+  calc: { monthly: 500, years: 20, rate: 6, draw: 20 },
+  plan: { include: {}, monthly: {}, target: 0, years: 25, real: false }
+};
 let ui = (() => {
   try {
     const saved = JSON.parse(store.get(UI_KEY) || '{}');
-    return { ...DEFAULT_UI, ...saved, calc: { ...DEFAULT_UI.calc, ...(saved.calc || {}) } };
-  } catch { return { ...DEFAULT_UI, calc: { ...DEFAULT_UI.calc } }; }
+    return { ...DEFAULT_UI, ...saved, custom: { ...DEFAULT_UI.custom, ...(saved.custom || {}) }, calc: { ...DEFAULT_UI.calc, ...(saved.calc || {}) }, plan: { ...DEFAULT_UI.plan, ...(saved.plan || {}) } };
+  } catch { return JSON.parse(JSON.stringify(DEFAULT_UI)); }
 })();
-let pendingDelete = null, pendingReset = false, pendingRemoveAcct = null;
+let pendingDelete = null, pendingReset = false, pendingRemoveAcct = null, pendingGoal = null, pendingPerson = null, pendingForgot = false;
 
 const savedEls = document.querySelectorAll('[data-saved]');
 function setSaved(ok, text) {
@@ -499,6 +743,39 @@ function save() {
 const saveUi = () => store.set(UI_KEY, JSON.stringify(ui));
 (() => { const ok = store.set('aurum_probe', '1'); store.del('aurum_probe'); if (!ok) setSaved(false, 'Storage is blocked here'); })();
 
+// Drops the example data. `keep` lists demo accounts the user has started using for real.
+function clearExample(keep) {
+  if (!state.example) return;
+  const kept = new Set(keep || []);
+  state.logs = [];
+  state.flows = [];
+  state.accounts = state.accounts.filter(a => !a.demo || kept.has(a.id));
+  state.accounts.forEach(a => { delete a.demo; });
+  state.goals = state.goals.filter(g => !g.demo);
+  state.example = false;
+}
+
+// Regular payments are added as money-in entries on their day each month.
+function runRegular() {
+  if (state.example) return false;
+  let added = false;
+  for (const a of state.accounts) {
+    const r = a.regular;
+    if (!r) continue;
+    let [y, m] = (r.last || r.since).split('-').map(Number);
+    for (let guard = 0; guard < 600; guard++) {
+      const date = `${y}-${pad(m)}-${pad(r.day)}`;
+      if (date > TODAY) break;
+      if (date >= r.since && (!r.last || date > r.last)) {
+        state.flows.push({ id: uid(), accountId: a.id, date, amount: r.relief ? r.amount * 1.25 : r.amount, own: r.amount, note: 'Regular payment', auto: true });
+        r.last = date; added = true;
+      }
+      m++; if (m > 12) { m = 1; y++; }
+    }
+  }
+  return added;
+}
+
 /* ---------- theme ---------- */
 function applyTheme(t) {
   if (t === 'light') document.documentElement.setAttribute('data-aurum', 'light');
@@ -508,20 +785,25 @@ applyTheme(store.get(THEME_KEY));
 
 /* ---------- format ---------- */
 const fmtGBP = new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP', maximumFractionDigits: 0 });
-const gbp = n => fmtGBP.format(Math.round(n || 0));
-const signed = n => (n > 0 ? '+' : n < 0 ? '−' : '') + gbp(Math.abs(n));
+const MASK = '£••••';
+const gbp = n => ui.hidden ? MASK : fmtGBP.format(Math.round(n || 0));
+const signed = n => ui.hidden ? MASK : (n > 0 ? '+' : n < 0 ? '−' : '') + fmtGBP.format(Math.abs(Math.round(n || 0)));
 const pct = n => (n > 0 ? '+' : n < 0 ? '−' : '') + Math.abs(n).toFixed(1) + '%';
-const compact = n => n >= 1e6 ? '£' + (n / 1e6).toFixed(n % 1e6 ? 1 : 0) + 'm' : n >= 1e3 ? '£' + Math.round(n / 1e3) + 'k' : '£' + Math.round(n);
+const compact = n => ui.hidden ? '£•••' : n >= 1e6 ? '£' + (n / 1e6).toFixed(n % 1e6 ? 1 : 0) + 'm' : n >= 1e3 ? '£' + Math.round(n / 1e3) + 'k' : '£' + Math.round(n);
 const fmtDate = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
 const fmtLong = new Intl.DateTimeFormat('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' });
 const fmtMonth = new Intl.DateTimeFormat('en-GB', { month: 'short', timeZone: 'UTC' });
+const fmtDay = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' });
 const dateLabel = ms => fmtDate.format(new Date(ms));
 const tickLabel = ms => { const d = new Date(ms); return fmtMonth.format(d).slice(0, 3) + ' ' + String(d.getUTCFullYear()).slice(2); };
+const dayLabel = ms => fmtDay.format(new Date(ms));
+const monthYear = ms => `${fmtMonth.format(new Date(ms))} ${new Date(ms).getUTCFullYear()}`;
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const cls = n => n > 0 ? 'pos' : n < 0 ? 'neg' : 'muted';
 const colorOf = a => `var(--${a.color})`;
+const daysSince = iso => Math.round((TODAY_MS - toMs(iso)) / 864e5);
 function ago(iso) {
-  const days = Math.round((toMs(TODAY) - toMs(iso)) / 864e5);
+  const days = daysSince(iso);
   if (days <= 0) return 'Today';
   if (days === 1) return 'Yesterday';
   if (days < 45) return `${days} days ago`;
@@ -532,28 +814,70 @@ function taxYear(iso) {
   const start = m > 4 || (m === 4 && d >= 6) ? y : y - 1;
   return `${start}/${String(start + 1).slice(2)}`;
 }
+const taxYearStart = iso => `${taxYear(iso).split('/')[0]}-04-06`;
 const deltaChip = (n, text) => `<span class="delta ${cls(n)}">${text}</span>`;
+
+/* ---------- people ---------- */
+const people = () => [{ id: 'me', name: state.profile.name || 'Me' }, ...state.profile.people];
+const personName = id => (people().find(p => p.id === id) || { name: 'Me' }).name;
+const ownerChip = a => a.owner && a.owner !== 'me' ? `<span class="owner">${esc(personName(a.owner))}</span>` : '';
+function visibleAccounts() {
+  if (ui.person === 'all') return state.accounts;
+  if (!people().some(p => p.id === ui.person)) ui.person = 'me';
+  return state.accounts.filter(a => (a.owner || 'me') === ui.person);
+}
+const mine = () => state.accounts.filter(a => (a.owner || 'me') === 'me');
+const viewName = () => ui.person === 'all' ? 'Everyone' : ui.person === 'me' ? '' : personName(ui.person);
 
 /* ---------- derived data ---------- */
 const byDate = (a, b) => a.date < b.date ? -1 : a.date > b.date ? 1 : 0;
+const logsOf = id => state.logs.filter(l => l.accountId === id).sort(byDate);
+const flowsOf = id => state.flows.filter(f => f.accountId === id).sort(byDate);
 function accountStats(id) {
-  const s = state.logs.filter(l => l.accountId === id).sort(byDate);
+  const s = logsOf(id);
   const cur = s.length ? s[s.length - 1].value : 0;
   const first = s.length ? s[0].value : 0;
   const prev = s.length > 1 ? s[s.length - 2].value : null;
-  const cutoff = toMs(TODAY) - 30 * 864e5;
+  const cutoff = TODAY_MS - 30 * 864e5;
   let m30 = null;
   for (const l of s) { if (toMs(l.date) <= cutoff) m30 = l.value; else break; }
   return { s, cur, first, change: s.length > 1 ? cur - first : 0, pct: s.length > 1 && first ? (cur - first) / first * 100 : 0,
     lastChange: prev == null ? 0 : cur - prev, last: s[s.length - 1], m30: m30 == null ? null : cur - m30 };
 }
-function timeline() {
-  const dates = [...new Set(state.logs.map(l => l.date))].sort();
-  const sorted = Object.fromEntries(state.accounts.map(a => [a.id, accountStats(a.id).s]));
-  const ptr = Object.fromEntries(state.accounts.map(a => [a.id, -1]));
+// Change in one account since `startMs`, split into money paid in and growth.
+// An account's first valuation counts as money in (its opening balance).
+function periodStats(a, startMs) {
+  const s = logsOf(a.id);
+  if (!s.length) return null;
+  const cur = s[s.length - 1].value;
+  let v0 = null;
+  for (const l of s) { if (toMs(l.date) <= startMs) v0 = l.value; else break; }
+  let opening = 0, from;
+  if (v0 == null) { opening = s[0].value; v0 = 0; from = s[0].date; } else from = msIso(startMs);
+  const fl = flowsOf(a.id).filter(f => f.date > from && f.date <= TODAY);
+  const flowSum = fl.reduce((t, f) => t + f.amount, 0);
+  const paid = opening + flowSum;
+  const change = cur - v0;
+  const growth = change - paid;
+  const base = v0 + opening + flowSum / 2;
+  return { v0, cur, change, paid, growth, base, ret: base > 0 ? growth / base * 100 : null };
+}
+function periodTotals(accts, startMs) {
+  const rows = accts.map(a => ({ a, p: periodStats(a, startMs) })).filter(r => r.p);
+  const t = rows.reduce((o, r) => { o.v0 += r.p.v0; o.cur += r.p.cur; o.paid += r.p.paid; o.growth += r.p.growth; o.base += r.p.base; return o; }, { v0: 0, cur: 0, paid: 0, growth: 0, base: 0 });
+  t.change = t.cur - t.v0;
+  t.ret = t.base > 0 ? t.growth / t.base * 100 : null;
+  t.rows = rows;
+  return t;
+}
+function timeline(accts) {
+  const ids = new Set(accts.map(a => a.id));
+  const dates = [...new Set(state.logs.filter(l => ids.has(l.accountId)).map(l => l.date))].sort();
+  const sorted = Object.fromEntries(accts.map(a => [a.id, logsOf(a.id)]));
+  const ptr = Object.fromEntries(accts.map(a => [a.id, -1]));
   return dates.map(date => {
     const vals = {}; let total = 0;
-    for (const a of state.accounts) {
+    for (const a of accts) {
       const s = sorted[a.id];
       while (ptr[a.id] + 1 < s.length && s[ptr[a.id] + 1].date <= date) ptr[a.id]++;
       vals[a.id] = ptr[a.id] >= 0 ? s[ptr[a.id]].value : 0;
@@ -567,6 +891,70 @@ function valueAt(tl, ms) {
   for (const p of tl) { if (p.t <= ms) v = p.total; else break; }
   return v;
 }
+// Timeline points inside a range, starting exactly at the range start and running to today.
+function rangePoints(tl, startMs) {
+  if (!tl.length) return [];
+  let pts;
+  if (isFinite(startMs)) {
+    let prior = null;
+    for (const p of tl) { if (p.t <= startMs) prior = p; else break; }
+    pts = tl.filter(p => p.t > startMs);
+    if (prior) pts.unshift({ ...prior, t: startMs });
+  } else pts = tl.slice();
+  const last = pts[pts.length - 1];
+  if (last && last.t < TODAY_MS) pts.push({ ...last, t: TODAY_MS });
+  return pts;
+}
+
+const RANGES = ['1W', '1M', '3M', '6M', 'YTD', 'TY', '1Y', '5Y', 'All', 'Custom'];
+const RANGE_NAMES = { '1W': 'the past week', '1M': 'the past month', '3M': 'the past 3 months', '6M': 'the past 6 months', 'YTD': 'this calendar year', 'TY': 'this tax year', '1Y': 'the past year', '5Y': 'the past 5 years', 'All': 'all time' };
+const RANGE_BTN = { TY: 'Tax yr' };
+const UNITS = { d: ['day', 'days'], w: ['week', 'weeks'], m: ['month', 'months'], y: ['year', 'years'] };
+function rangeStart(key) {
+  const [y, m, d] = TODAY.split('-').map(Number);
+  const months = { '1M': 1, '3M': 3, '6M': 6, '1Y': 12, '5Y': 60 };
+  if (key === '1W') return Date.UTC(y, m - 1, d - 7);
+  if (months[key]) return Date.UTC(y, m - 1 - months[key], d);
+  if (key === 'YTD') return Date.UTC(y, 0, 0);
+  if (key === 'TY') return toMs(taxYearStart(TODAY)) - 864e5;
+  if (key === 'Custom') {
+    const n = clamp(Math.round(num(ui.custom.n, 1)), 1, 999), u = ui.custom.unit;
+    return u === 'd' ? Date.UTC(y, m - 1, d - n) : u === 'w' ? Date.UTC(y, m - 1, d - 7 * n) : u === 'y' ? Date.UTC(y - n, m - 1, d) : Date.UTC(y, m - 1 - n, d);
+  }
+  return -Infinity;
+}
+function rangeName(key) {
+  if (key !== 'Custom') return RANGE_NAMES[key] || 'all time';
+  const n = clamp(Math.round(num(ui.custom.n, 1)), 1, 999), u = UNITS[ui.custom.unit] || UNITS.m;
+  return `the past ${n} ${n === 1 ? u[0] : u[1]}`;
+}
+
+// Average monthly amount going into an account: its regular payment, else the last 12 months of deposits.
+function monthlyIn(a) {
+  if (a.regular) return a.regular.relief ? a.regular.amount * 1.25 : a.regular.amount;
+  const since = msIso(TODAY_MS - 365 * 864e5);
+  const sum = flowsOf(a.id).filter(f => f.date > since && f.date <= TODAY).reduce((t, f) => t + f.amount, 0);
+  return Math.max(0, sum / 12);
+}
+function allowanceUsed(accts, kind) {
+  const start = taxYearStart(TODAY);
+  const ids = new Set(accts.filter(a => typeOf(a).allow === kind).map(a => a.id));
+  return state.flows.filter(f => ids.has(f.accountId) && f.date >= start && f.date <= TODAY && f.own > 0).reduce((t, f) => t + f.own, 0);
+}
+const lisaUsed = () => allowanceUsed(mine().filter(a => a.type === 'LISA'), 'isa');
+const staleAccounts = accts => accts.filter(a => { const s = logsOf(a.id); return !s.length || daysSince(s[s.length - 1].date) > 30; });
+function ageOn(dob, iso) {
+  const [y1, m1, d1] = dob.split('-').map(Number), [y2, m2, d2] = iso.split('-').map(Number);
+  return y2 - y1 - (m2 < m1 || (m2 === m1 && d2 < d1) ? 1 : 0);
+}
+// Normal minimum pension age: 57 for anyone who turns 55 on or after 6 April 2028.
+const accessAge = dob => !dob || dob >= '1973-04-06' ? 57 : 55;
+const MILESTONES = [10000, 25000, 50000, 100000, 250000, 500000, 750000, 1000000, 2000000];
+function milestones(tl) {
+  // Ignore thresholds already passed on the first entry: those were not reached while tracking.
+  const start = tl.length ? tl[0].total : 0;
+  return MILESTONES.filter(v => v > start).map(v => { const p = tl.find(x => x.total >= v); return p ? { v, t: p.t } : null; }).filter(Boolean);
+}
 
 /* ---------- charts (plain SVG) ---------- */
 function niceMax(v) {
@@ -577,6 +965,7 @@ function niceMax(v) {
 }
 const chartConfigs = new Map();
 function chart(host, cfg) {
+  if (!host) return;
   chartConfigs.set(host, cfg);
   const W = Math.max(280, Math.round(host.clientWidth || 600));
   const H = cfg.height || (W < 520 ? 200 : 250);
@@ -594,6 +983,7 @@ function chart(host, cfg) {
   const top = niceMax(Math.max(1, ...layers.flatMap(l => l.hi)));
   const X = x => m.l + (x - x0) / span * (W - m.l - m.r);
   const Y = v => m.t + (1 - v / top) * (H - m.t - m.b);
+  const tick = cfg.tick || (span < 120 * 864e5 ? dayLabel : tickLabel);
   let g = '';
   for (let k = 0; k <= 4; k++) {
     const y = Y(top * k / 4).toFixed(1);
@@ -605,7 +995,7 @@ function chart(host, cfg) {
     const i = Math.round(k * (n - 1) / (ticks - 1));
     if (used.has(i)) continue; used.add(i);
     const anchor = k === 0 ? 'start' : k === ticks - 1 ? 'end' : 'middle';
-    g += `<text class="axis" x="${X(cfg.xs[i]).toFixed(1)}" y="${H - 6}" text-anchor="${anchor}">${esc(cfg.tick(cfg.xs[i]))}</text>`;
+    g += `<text class="axis" x="${X(cfg.xs[i]).toFixed(1)}" y="${H - 6}" text-anchor="${anchor}">${esc(tick(cfg.xs[i]))}</text>`;
   }
   let shapes = '';
   layers.forEach(l => {
@@ -664,124 +1054,6 @@ function donut(parts, total) {
   }).join('');
   return `<svg viewBox="0 0 132 132" aria-hidden="true"><circle r="${R}" cx="66" cy="66" fill="none" style="stroke:var(--surface-2)" stroke-width="12"/>${segs}</svg>`;
 }
-
-/* ---------- views ---------- */
-const view = document.getElementById('view');
-const icons = {
-  trash: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 002 2h6a2 2 0 002-2l1-12M9 7V4h6v3"/></svg>',
-  plus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
-  info: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg>'
-};
-const exampleNotice = () => state.example ? `
-  <div class="notice" role="note">${icons.info}
-    <p><b>Example figures.</b> These are sample numbers so you can see how Aurum works. Your first logged value replaces them.</p>
-    <button class="btn sm" data-action="clear-example">Clear examples</button>
-  </div>` : '';
-
-function renderOverview() {
-  const tl = timeline();
-  const stats = state.accounts.map(a => ({ a, ...accountStats(a.id) }));
-  const total = stats.reduce((s, x) => s + x.cur, 0);
-  const lastT = tl.length ? tl[tl.length - 1].t : toMs(TODAY);
-  const monthAgo = valueAt(tl, toMs(TODAY) - 30 * 864e5);
-  const first = tl.length ? tl[0].total : 0;
-  const mChange = monthAgo != null ? total - monthAgo : null;
-  const allChange = tl.length > 1 ? total - first : null;
-  const pension = stats.filter(x => PENSION_TYPES.includes(x.a.type)).reduce((s, x) => s + x.cur, 0);
-  const access = total - pension;
-  const alloc = stats.filter(x => x.cur > 0);
-  const startLabel = tl.length ? `${fmtMonth.format(new Date(tl[0].t))} ${new Date(tl[0].t).getUTCFullYear()}` : '';
-
-  const statement = `
-    <section class="statement" aria-label="Net worth">
-      <div class="eyebrow">Total net worth</div>
-      <div class="figure num">${gbp(total)}</div>
-      <div class="changes">
-        ${mChange != null ? `<span><b class="${mChange >= 0 ? 'up' : 'down'}">${signed(mChange)}${monthAgo ? ` (${pct(mChange / monthAgo * 100)})` : ''}</b>last 30 days</span>` : ''}
-        ${allChange != null ? `<span><b class="${allChange >= 0 ? 'up' : 'down'}">${signed(allChange)}${first ? ` (${pct(allChange / first * 100)})` : ''}</b>since ${esc(startLabel)}</span>` : ''}
-        ${!tl.length ? '<span>Log your first value to start tracking.</span>' : ''}
-      </div>
-      ${totalTrend(tl)}
-      ${total > 0 ? `
-        <div class="alloc-bar" aria-hidden="true">${alloc.map(x => `<i style="flex:${x.cur};background:var(--${x.a.color}-hi)"></i>`).join('')}</div>
-        <div class="alloc-legend">${alloc.map(x => `<span><i class="sw" style="background:var(--${x.a.color}-hi)"></i>${esc(x.a.name)} <b class="num">${(x.cur / total * 100).toFixed(0)}%</b></span>`).join('')}</div>` : ''}
-    </section>`;
-
-  const kpis = `
-    <div class="kpis">
-      <div class="kpi"><div class="k">Pensions</div><div class="v num">${gbp(pension)}</div><div class="s">SIPP and workplace. Usually locked until 57</div></div>
-      <div class="kpi"><div class="k">Accessible</div><div class="v num">${gbp(access)}</div><div class="s">ISAs and other accounts you can withdraw now</div></div>
-      <div class="kpi"><div class="k">Tax year ${taxYear(TODAY)}</div><div class="v num ${cls(sumSinceTaxYear(tl))}">${signed(sumSinceTaxYear(tl))}</div><div class="s">Change since 6 April</div></div>
-    </div>`;
-
-  const ranges = { '3M': 91, '6M': 182, '1Y': 365, 'All': Infinity };
-  const growth = `
-    <section class="panel">
-      <div class="panel-head">
-        <h2>Performance</h2>
-        <div class="seg" role="group" aria-label="Time range">
-          ${Object.keys(ranges).map(k => `<button data-action="range" data-range="${k}" aria-pressed="${ui.range === k}">${k}</button>`).join('')}
-        </div>
-      </div>
-      <div class="chart" id="growth-chart"></div>
-      <div class="legend-inline">${state.accounts.map(a => `<span><i class="sw" style="background:${colorOf(a)}"></i>${esc(a.name)}</span>`).join('')}</div>
-    </section>`;
-
-  const allocation = `
-    <section class="panel">
-      <div class="panel-head"><h2>Allocation</h2><span class="aside">${stats.filter(x => x.cur > 0).length} accounts</span></div>
-      ${total > 0 ? `
-      <div class="donut-wrap">
-        <div class="donut-box">${donut(stats.map(x => ({ value: x.cur, color: colorOf(x.a) })), total)}
-          <div class="donut-center"><b class="mono">${compact(total)}</b><span>Total</span></div>
-        </div>
-        <ul class="legend">
-          ${stats.map(x => `<li><i class="sw" style="background:${colorOf(x.a)}"></i><span>${esc(x.a.name)}</span><span class="pct">${total ? (x.cur / total * 100).toFixed(1) : 0}%</span><small class="num">${gbp(x.cur)}</small></li>`).join('')}
-        </ul>
-      </div>` : '<div class="chart-empty">Your split between accounts shows here.</div>'}
-    </section>`;
-
-  const holdings = `
-    <section class="panel">
-      <div class="panel-head"><h2>Holdings</h2><span class="aside">Select an account for its full history</span></div>
-      <div class="table-wrap"><table>
-        <thead><tr><th>Account</th><th class="hide-sm">Type</th><th class="r">Value</th><th class="r hide-sm">30 days</th><th class="r hide-sm">Since start</th><th class="r hide-sm">Weight</th><th class="r hide-sm">Trend</th></tr></thead>
-        <tbody>${stats.map(x => `
-          <tr class="clickable" data-action="goto-account" data-id="${esc(x.a.id)}" tabindex="0">
-            <td><div class="acct-cell"><i class="sw" style="background:${colorOf(x.a)}"></i><div><div class="n">${esc(x.a.name)}</div><div class="p">${esc(x.a.provider || '—')} · ${x.last ? 'Updated ' + ago(x.last.date).toLowerCase() : 'No values yet'}</div></div></div></td>
-            <td class="hide-sm"><span class="type">${esc(x.a.type.toUpperCase())}</span></td>
-            <td class="r val">${gbp(x.cur)}</td>
-            <td class="r hide-sm">${x.m30 != null ? deltaChip(x.m30, signed(x.m30)) : '<span class="faint">—</span>'}</td>
-            <td class="r hide-sm">${x.s.length > 1 ? deltaChip(x.change, pct(x.pct)) : '<span class="faint">—</span>'}</td>
-            <td class="r hide-sm"><div class="weight"><span class="mono">${total ? (x.cur / total * 100).toFixed(1) : '0.0'}%</span><span class="bar"><i style="width:${total ? x.cur / total * 100 : 0}%;background:${colorOf(x.a)}"></i></span></div></td>
-            <td class="r hide-sm">${sparkline(x.s.slice(-12).map(l => l.value), colorOf(x.a))}</td>
-          </tr>`).join('')}
-        </tbody>
-      </table></div>
-    </section>`;
-
-  const recent = [...state.logs].sort((a, b) => byDate(b, a) || (b.id > a.id ? 1 : -1)).slice(0, 5);
-  const accById = Object.fromEntries(state.accounts.map(a => [a.id, a]));
-  const activity = `
-    <section class="panel">
-      <div class="panel-head"><h2>Recent valuations</h2><button class="btn ghost sm" data-action="tab" data-tab="accounts">View all</button></div>
-      ${recent.length ? `<ul class="activity">${recent.map(l => {
-        const s = accountStats(l.accountId).s, i = s.findIndex(x => x.id === l.id), d = i > 0 ? l.value - s[i - 1].value : null;
-        const a = accById[l.accountId];
-        return `<li><i class="sw" style="background:${colorOf(a)}"></i><div><div>${esc(a.name)}</div><div class="when">${dateLabel(toMs(l.date))}${l.note ? ' · ' + esc(l.note) : ''}</div></div><div><div class="amt">${gbp(l.value)}</div>${d != null ? `<div class="d ${cls(d)}">${signed(d)}</div>` : ''}</div></li>`;
-      }).join('')}</ul>` : '<div class="chart-empty">No valuations yet.</div>'}
-    </section>`;
-
-  view.innerHTML = `<div class="stack view">${exampleNotice()}<div class="summary">${statement}${kpis}</div>${holdings}<div class="grid-2">${growth}${allocation}</div>${activity}</div>`;
-
-  const days = ranges[ui.range] || Infinity;
-  let pts = tl.filter(p => p.t >= lastT - days * 864e5);
-  if (pts.length < 2) pts = tl;
-  chart(document.getElementById('growth-chart'), {
-    xs: pts.map(p => p.t), tick: tickLabel, stacked: true, label: 'Net worth over time, stacked by account',
-    series: state.accounts.map(a => ({ label: a.name, color: colorOf(a), values: pts.map(p => p.vals[a.id]) }))
-  });
-}
 // Gold trend of the total inside the net-worth card; stretches to fill the card.
 function totalTrend(tl) {
   const pts = tl.slice(-24);
@@ -796,72 +1068,450 @@ function totalTrend(tl) {
     <path d="M${line}" fill="none" stroke="#D9B666" stroke-width="1.8" vector-effect="non-scaling-stroke" stroke-linejoin="round" stroke-linecap="round"/>
   </svg></div>`;
 }
-function sumSinceTaxYear(tl) {
-  if (!tl.length) return 0;
-  const [y] = taxYear(TODAY).split('/');
-  const start = Date.UTC(+y, 3, 6);
-  const before = valueAt(tl, start - 1);
-  const base = before != null ? before : (tl.find(p => p.t >= start) || tl[0]).total;
-  return tl[tl.length - 1].total - base;
+
+/* ---------- shared view bits ---------- */
+const view = document.getElementById('view');
+const icons = {
+  trash: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 002 2h6a2 2 0 002-2l1-12M9 7V4h6v3"/></svg>',
+  edit: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></svg>',
+  plus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
+  info: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg>',
+  clock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
+  eye: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>',
+  eyeOff: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3l18 18M10.6 5.1A10.4 10.4 0 0112 5c6.4 0 10 7 10 7a17 17 0 01-3.2 4.2M6.6 6.6C3.8 8.4 2 12 2 12s3.6 7 10 7a9.8 9.8 0 005.4-1.6M9.9 9.9a3 3 0 004.2 4.2"/></svg>'
+};
+const exampleNotice = () => state.example ? `
+  <div class="notice" role="note">${icons.info}
+    <p><b>Example figures.</b> These are sample accounts so you can see how Aurum works. Your first logged value or new account replaces them.</p>
+    <button class="btn sm" data-action="clear-example">Clear examples</button>
+  </div>` : '';
+function personFilter() {
+  if (!state.profile.people.length) return '';
+  const opts = [...people(), { id: 'all', name: 'Everyone' }];
+  return `<div class="seg scroll" role="group" aria-label="Whose accounts" style="width:max-content">${opts.map(p => `<button data-action="person" data-id="${esc(p.id)}" aria-pressed="${ui.person === p.id}">${esc(p.id === 'me' ? (state.profile.name || 'Me') : p.name)}</button>`).join('')}</div>`;
+}
+function rangeBar(action) {
+  const custom = ui.range === 'Custom' ? `<span class="custom-range">Last <input class="input" id="custom-n" type="number" min="1" max="999" inputmode="numeric" value="${esc(ui.custom.n)}" aria-label="Number"><select class="input" id="custom-unit" aria-label="Unit">${Object.entries(UNITS).map(([k, v]) => `<option value="${k}" ${ui.custom.unit === k ? 'selected' : ''}>${v[1]}</option>`).join('')}</select></span>` : '';
+  return `<div class="range-bar"><div class="seg scroll" role="group" aria-label="Time range">${RANGES.map(k => `<button data-action="${action}" data-range="${k}" aria-pressed="${ui.range === k}">${RANGE_BTN[k] || k}</button>`).join('')}</div>${custom}</div>`;
+}
+function groupSummary(accts) {
+  const out = {};
+  for (const a of accts) { const g = groupOf(a); out[g] = (out[g] || 0) + accountStats(a.id).cur; }
+  return Object.keys(GROUPS).filter(g => out[g] != null).map(g => ({ g, label: GROUPS[g], value: out[g], color: `var(--${GROUP_COLOR[g]})`, hi: `var(--${GROUP_COLOR[g]}-hi)` }));
 }
 
+/* ---------- goals ---------- */
+function goalAccounts(g) {
+  const m = mine();
+  if (g.scope === 'all') return m;
+  if (GROUPS[g.scope]) return m.filter(a => groupOf(a) === g.scope);
+  return state.accounts.filter(a => a.id === g.scope);
+}
+const scopeName = s => s === 'all' ? 'All my accounts' : GROUPS[s] ? 'My ' + GROUPS[s].toLowerCase() : ((state.accounts.find(a => a.id === s) || {}).name || 'Removed account');
+// Future value of a pot growing at `annual`% with `monthly` added each month.
+function grow(pv, monthly, annual, months) {
+  const r = Math.pow(1 + annual / 100, 1 / 12) - 1;
+  let v = pv;
+  for (let i = 0; i < months; i++) v = (v + monthly) * (1 + r);
+  return v;
+}
+function neededMonthly(pv, target, annual, months) {
+  if (months <= 0) return Math.max(0, target - pv);
+  const r = Math.pow(1 + annual / 100, 1 / 12) - 1;
+  const fvPv = pv * Math.pow(1 + r, months);
+  if (fvPv >= target) return 0;
+  const factor = r === 0 ? months : (Math.pow(1 + r, months) - 1) / r * (1 + r);
+  return (target - fvPv) / factor;
+}
+const monthsUntil = iso => { const [y, m, d] = iso.split('-').map(Number), [ty, tm, td] = TODAY.split('-').map(Number); return (y - ty) * 12 + (m - tm) - (d < td ? 1 : 0); };
+function goalStatus(g) {
+  const accts = goalAccounts(g);
+  const cur = accts.reduce((t, a) => t + accountStats(a.id).cur, 0);
+  const monthly = accts.reduce((t, a) => t + monthlyIn(a), 0);
+  const progress = clamp(cur / g.target, 0, 1);
+  if (cur >= g.target) return { cur, progress, done: true, text: 'Reached' };
+  if (!g.date) return { cur, progress, text: `${gbp(g.target - cur)} to go` };
+  const months = monthsUntil(g.date);
+  if (months <= 0) return { cur, progress, late: true, text: 'Target date passed' };
+  const rate = state.profile.growth;
+  const projected = grow(cur, monthly, rate, months);
+  const need = neededMonthly(cur, g.target, rate, months);
+  const onTrack = projected >= g.target;
+  return { cur, progress, onTrack, projected, need, monthly, text: onTrack ? `On track · about ${gbp(projected)} by then` : `Pay in ${gbp(need)}/month to get there (now ${gbp(monthly)})` };
+}
+function goalList(goals, withDelete) {
+  if (!goals.length) return '';
+  return `<ul class="goal-list">${goals.map(g => {
+    const st = goalStatus(g);
+    if (withDelete && pendingGoal === g.id) return `<li style="background:var(--neg-soft);padding:10px;border-radius:8px"><span>Delete the goal <b>${esc(g.name)}</b>?</span><span class="row-actions"><button class="btn sm ghost" data-action="goal-del-no">Keep</button><button class="btn sm danger solid" data-action="goal-del-yes" data-id="${esc(g.id)}">Delete</button></span></li>`;
+    return `<li>
+      <div class="goal-top"><b>${esc(g.name)}</b><span class="mono">${gbp(st.cur)} <span class="faint">of ${gbp(g.target)}</span>${withDelete ? ` <button class="icon-btn" data-action="goal-del" data-id="${esc(g.id)}" aria-label="Delete goal ${esc(g.name)}">${icons.trash}</button>` : ''}</span></div>
+      <div class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(st.progress * 100)}"><i style="width:${(st.progress * 100).toFixed(1)}%"></i></div>
+      <div class="goal-meta"><span>${esc(scopeName(g.scope))}${g.date ? ' · by ' + dateLabel(toMs(g.date)) : ''}</span><span class="${st.done || st.onTrack ? 'pos' : st.late ? 'neg' : ''}">${st.text}</span></div>
+    </li>`;
+  }).join('')}</ul>`;
+}
+
+/* ---------- overview ---------- */
+function renderOverview() {
+  const accts = visibleAccounts();
+  const tl = timeline(accts);
+  const stats = accts.map(a => ({ a, ...accountStats(a.id) }));
+  const total = stats.reduce((s, x) => s + x.cur, 0);
+  const monthAgo = valueAt(tl, TODAY_MS - 30 * 864e5);
+  const first = tl.length ? tl[0].total : 0;
+  const mChange = monthAgo != null ? total - monthAgo : null;
+  const allChange = tl.length > 1 ? total - first : null;
+  const groups = groupSummary(accts).filter(g => g.value > 0);
+  const pension = stats.filter(x => groupOf(x.a) === 'pension').reduce((s, x) => s + x.cur, 0);
+  const access = total - pension;
+  const who = viewName();
+
+  const notices = [];
+  const stale = staleAccounts(accts);
+  if (!state.example && stale.length && accts.length) {
+    const names = stale.slice(0, 3).map(a => esc(a.name)).join(', ') + (stale.length > 3 ? ` and ${stale.length - 3} more` : '');
+    notices.push(`<div class="notice" role="note">${icons.clock}<p><b>Time for an update.</b> ${names} ${stale.length === 1 ? 'has' : 'have'} not been updated for over 30 days.</p><button class="btn sm" data-action="open-bulk">Update all</button></div>`);
+  }
+  const lb = state.profile.lastBackup;
+  if (!state.example && state.logs.length >= 3 && (!lb || daysSince(lb) > 60)) {
+    notices.push(`<div class="notice" role="note">${icons.info}<p><b>Back up your data.</b> ${lb ? `Your last backup was ${ago(lb).toLowerCase()}.` : 'You have not exported a backup yet.'} Your data only lives on this device, so keep a copy somewhere safe.</p><button class="btn sm" data-action="export">Export backup</button></div>`);
+  }
+
+  const statement = `
+    <section class="statement" aria-label="Net worth">
+      <div class="eyebrow">${who ? esc(who) + ' · ' : ''}Total net worth</div>
+      <div class="figure num">${gbp(total)}</div>
+      <div class="changes">
+        ${mChange != null ? `<span><b class="${mChange >= 0 ? 'up' : 'down'}">${signed(mChange)}${monthAgo ? ` (${pct(mChange / monthAgo * 100)})` : ''}</b>last 30 days</span>` : ''}
+        ${allChange != null ? `<span><b class="${allChange >= 0 ? 'up' : 'down'}">${signed(allChange)}${first ? ` (${pct(allChange / first * 100)})` : ''}</b>since ${esc(monthYear(tl[0].t))}</span>` : ''}
+        ${!tl.length ? '<span>Log your first value to start tracking.</span>' : ''}
+      </div>
+      ${totalTrend(tl)}
+      ${total > 0 ? `
+        <div class="alloc-bar" aria-hidden="true">${groups.map(g => `<i style="flex:${g.value};background:${g.hi}"></i>`).join('')}</div>
+        <div class="alloc-legend">${groups.map(g => `<span><i class="sw" style="background:${g.hi}"></i>${esc(g.label)} <b class="num">${(g.value / total * 100).toFixed(0)}%</b></span>`).join('')}</div>` : ''}
+    </section>`;
+
+  const isaAccts = accts.filter(a => typeOf(a).allow === 'isa');
+  const jisaAccts = accts.filter(a => typeOf(a).allow === 'jisa');
+  const isaUsed = allowanceUsed(isaAccts.filter(a => a.owner === 'me'), 'isa');
+  const allowKpi = isaAccts.some(a => a.owner === 'me')
+    ? `<div class="kpi"><div class="k">ISA allowance ${taxYear(TODAY)}</div><div class="v num">${gbp(isaUsed)} <span class="faint" style="font-size:14px">of ${gbp(ISA_ALLOWANCE)}</span></div><div class="s"><span class="progress" style="display:block;margin:6px 0"><i style="width:${clamp(isaUsed / ISA_ALLOWANCE * 100, 0, 100).toFixed(1)}%"></i></span>${gbp(Math.max(0, ISA_ALLOWANCE - isaUsed))} left until 5 April</div></div>`
+    : jisaAccts.length
+      ? `<div class="kpi"><div class="k">Junior ISA allowance ${taxYear(TODAY)}</div><div class="v num">${gbp(allowanceUsed(jisaAccts, 'jisa'))} <span class="faint" style="font-size:14px">of ${gbp(JISA_ALLOWANCE)}</span></div><div class="s">Per child, separate from your own ISA allowance</div></div>`
+      : `<div class="kpi"><div class="k">Tax year ${taxYear(TODAY)}</div><div class="v num ${cls(periodTotals(accts, rangeStart('TY')).change)}">${signed(periodTotals(accts, rangeStart('TY')).change)}</div><div class="s">Change since 6 April</div></div>`;
+  const kpis = `
+    <div class="kpis">
+      <div class="kpi"><div class="k">Pensions</div><div class="v num">${gbp(pension)}</div><div class="s">Usually locked until ${accessAge(state.profile.dob)}</div></div>
+      <div class="kpi"><div class="k">Accessible now</div><div class="v num">${gbp(access)}</div><div class="s">ISAs, savings and investments</div></div>
+      ${allowKpi}
+    </div>`;
+
+  // Holdings, grouped with subtotals.
+  const byGroup = Object.keys(GROUPS).map(g => ({ g, rows: stats.filter(x => groupOf(x.a) === g) })).filter(x => x.rows.length);
+  const holdings = `
+    <section class="panel">
+      <div class="panel-head"><h2>Holdings</h2><div class="acct-actions"><button class="btn sm" data-action="open-bulk">Update all</button><button class="btn sm" data-action="add-acct">${icons.plus}Add account</button></div></div>
+      ${stats.length ? `<div class="table-wrap"><table>
+        <thead><tr><th>Account</th><th class="r">Value</th><th class="r hide-sm">30 days</th><th class="r hide-sm">Since start</th><th class="r hide-sm">Weight</th><th class="r hide-sm">Trend</th></tr></thead>
+        <tbody>${byGroup.map(({ g, rows }) => {
+          const sub = rows.reduce((t, x) => t + x.cur, 0);
+          return `<tr class="grp"><td>${esc(GROUPS[g])}</td><td class="r val">${gbp(sub)}</td><td class="hide-sm"></td><td class="hide-sm"></td><td class="r hide-sm mono">${total ? (sub / total * 100).toFixed(1) : '0.0'}%</td><td class="hide-sm"></td></tr>` + rows.map(x => `
+          <tr class="clickable" data-action="goto-account" data-id="${esc(x.a.id)}" tabindex="0">
+            <td><div class="acct-cell"><i class="sw" style="background:${colorOf(x.a)}"></i><div><div class="n">${esc(x.a.name)}${ownerChip(x.a)}</div><div class="p">${esc(x.a.provider || typeOf(x.a).label)} · ${x.last ? 'Updated ' + ago(x.last.date).toLowerCase() : 'No values yet'}</div></div></div></td>
+            <td class="r val">${gbp(x.cur)}</td>
+            <td class="r hide-sm">${x.m30 != null ? deltaChip(x.m30, signed(x.m30)) : '<span class="faint">—</span>'}</td>
+            <td class="r hide-sm">${x.s.length > 1 ? deltaChip(x.change, pct(x.pct)) : '<span class="faint">—</span>'}</td>
+            <td class="r hide-sm"><div class="weight"><span class="mono">${total ? (x.cur / total * 100).toFixed(1) : '0.0'}%</span><span class="bar"><i style="width:${total ? x.cur / total * 100 : 0}%;background:${colorOf(x.a)}"></i></span></div></td>
+            <td class="r hide-sm">${sparkline(x.s.slice(-12).map(l => l.value), colorOf(x.a))}</td>
+          </tr>`).join('');
+        }).join('')}
+        </tbody>
+      </table></div>` : `<div class="chart-empty"><div><p style="margin:0 0 12px">No accounts yet.</p><button class="btn primary" data-action="add-acct">${icons.plus}Add your first account</button></div></div>`}
+    </section>`;
+
+  const start = rangeStart(ui.range);
+  const pt = periodTotals(accts, start);
+  const growth = `
+    <section class="panel">
+      <div class="panel-head">
+        <h2>Performance</h2>
+        <div class="seg" role="group" aria-label="Chart breakdown">${[['group', 'By type'], ['account', 'By account']].map(([k, l]) => `<button data-action="stack-by" data-id="${k}" aria-pressed="${ui.stackBy === k}">${l}</button>`).join('')}</div>
+      </div>
+      <div style="margin-bottom:12px">${rangeBar('range')}</div>
+      ${pt.rows.length ? `<div class="period-sum"><span><b class="${cls(pt.change)}">${signed(pt.change)}</b>change over ${esc(rangeName(ui.range))}</span><span><b>${gbp(pt.paid)}</b>paid in</span><span><b class="${cls(pt.growth)}">${signed(pt.growth)}</b>growth${pt.ret != null ? ` (${pct(pt.ret)})` : ''}</span></div>` : ''}
+      <div class="chart" id="growth-chart"></div>
+      <div class="legend-inline" id="growth-legend"></div>
+    </section>`;
+
+  const allocation = `
+    <section class="panel">
+      <div class="panel-head"><h2>Allocation</h2><span class="aside">${stats.filter(x => x.cur > 0).length} accounts</span></div>
+      ${total > 0 ? `
+      <div class="donut-wrap">
+        <div class="donut-box">${donut(groups.map(g => ({ value: g.value, color: g.color })), total)}
+          <div class="donut-center"><b class="mono">${compact(total)}</b><span>Total</span></div>
+        </div>
+        <ul class="legend">
+          ${groups.map(g => `<li><i class="sw" style="background:${g.color}"></i><span>${esc(g.label)}</span><span class="pct">${(g.value / total * 100).toFixed(1)}%</span><small class="num">${gbp(g.value)}</small></li>`).join('')}
+        </ul>
+      </div>` : '<div class="chart-empty">Your split between account types shows here.</div>'}
+    </section>`;
+
+  const goals = state.goals.length && ui.person === 'me' ? `
+    <section class="panel">
+      <div class="panel-head"><h2>Goals</h2><button class="btn ghost sm" data-action="tab" data-tab="planner">Manage</button></div>
+      ${goalList(state.goals.slice(0, 3), false)}
+    </section>` : '';
+
+  const ids = new Set(accts.map(a => a.id));
+  const accById = Object.fromEntries(state.accounts.map(a => [a.id, a]));
+  const recent = [...state.logs.filter(l => ids.has(l.accountId)).map(l => ({ ...l, kind: 'log' })), ...state.flows.filter(f => ids.has(f.accountId) && f.date <= TODAY).map(f => ({ ...f, kind: 'flow' }))]
+    .sort((a, b) => byDate(b, a) || (b.id > a.id ? 1 : -1)).slice(0, 6);
+  const activity = `
+    <section class="panel">
+      <div class="panel-head"><h2>Recent activity</h2><button class="btn ghost sm" data-action="tab" data-tab="accounts">View all</button></div>
+      ${recent.length ? `<ul class="activity">${recent.map(l => {
+        const a = accById[l.accountId];
+        if (l.kind === 'flow') return `<li><i class="sw" style="background:${colorOf(a)}"></i><div><div>${esc(a.name)}</div><div class="when">${dateLabel(toMs(l.date))} · ${l.amount >= 0 ? 'Paid in' : 'Taken out'}${l.note ? ' · ' + esc(l.note) : ''}</div></div><div><div class="amt ${cls(l.amount)}">${signed(l.amount)}</div></div></li>`;
+        const s = logsOf(l.accountId), i = s.findIndex(x => x.id === l.id), d = i > 0 ? l.value - s[i - 1].value : null;
+        return `<li><i class="sw" style="background:${colorOf(a)}"></i><div><div>${esc(a.name)}</div><div class="when">${dateLabel(toMs(l.date))}${l.note ? ' · ' + esc(l.note) : ''}</div></div><div><div class="amt">${gbp(l.value)}</div>${d != null ? `<div class="d ${cls(d)}">${signed(d)}</div>` : ''}</div></li>`;
+      }).join('')}</ul>` : '<div class="chart-empty">No activity yet.</div>'}
+    </section>`;
+
+  view.innerHTML = `<div class="stack view">${exampleNotice()}${notices.join('')}${personFilter()}<div class="summary">${statement}${kpis}</div>${holdings}<div class="grid-2">${growth}${allocation}</div>${goals ? `<div class="grid-2">${activity}${goals}</div>` : activity}</div>`;
+
+  const pts = rangePoints(tl, start);
+  const series = ui.stackBy === 'account'
+    ? accts.map(a => ({ label: a.name, color: colorOf(a), values: pts.map(p => p.vals[a.id]) }))
+    : groupSummary(accts).map(g => ({ label: g.label, color: g.color, values: pts.map(p => accts.filter(a => groupOf(a) === g.g).reduce((t, a) => t + (p.vals[a.id] || 0), 0)) }));
+  document.getElementById('growth-legend').innerHTML = series.map(s => `<span><i class="sw" style="background:${s.color}"></i>${esc(s.label)}</span>`).join('');
+  chart(document.getElementById('growth-chart'), {
+    xs: pts.map(p => p.t), stacked: true, label: 'Net worth over time', empty: 'Not enough values in this period yet.', series
+  });
+}
+
+/* ---------- accounts ---------- */
 function renderAccounts() {
-  if (!state.accounts.length) {
-    view.innerHTML = `<div class="stack view"><div class="panel"><div class="chart-empty">No accounts yet. Add one in Settings.</div></div></div>`;
+  const accts = visibleAccounts();
+  if (!accts.length) {
+    view.innerHTML = `<div class="stack view">${personFilter()}<div class="panel"><div class="chart-empty"><div><p style="margin:0 0 12px">No accounts yet. Add pensions, ISAs, savings, Premium Bonds or anything else you want to track.</p><button class="btn primary" data-action="add-acct">${icons.plus}Add account</button></div></div></div></div>`;
     return;
   }
-  if (!state.accounts.some(a => a.id === ui.account)) ui.account = state.accounts[0].id;
-  const a = state.accounts.find(x => x.id === ui.account);
+  if (!accts.some(a => a.id === ui.account)) ui.account = accts[0].id;
+  const a = accts.find(x => x.id === ui.account);
   const st = accountStats(a.id);
-  const rows = [...st.s].reverse();
+  const all = periodStats(a, -Infinity);
+  const flows = flowsOf(a.id);
+  const rows = [...st.s.map(l => ({ ...l, kind: 'log' })), ...flows.map(f => ({ ...f, kind: 'flow' }))].sort((x, y) => byDate(y, x) || (x.kind === 'log' ? -1 : 1));
+  const logRows = [...st.s].reverse();
+  const reg = a.regular ? `${gbp(a.regular.amount)} on day ${a.regular.day} each month${a.regular.relief ? (typeOf(a).topup === 'bonus' ? ' + 25% bonus' : ' + tax relief') : ''}` : '';
+  const ordered = Object.keys(GROUPS).flatMap(g => accts.filter(x => groupOf(x) === g));
   view.innerHTML = `
     <div class="stack view">
       ${exampleNotice()}
+      ${personFilter()}
+      <div class="row-actions"><button class="btn" data-action="add-acct">${icons.plus}Add account</button><button class="btn" data-action="open-bulk">Update all</button></div>
       <div class="acct-picker" role="group" aria-label="Choose account">
-        ${state.accounts.map(x => `<button data-action="pick-account" data-id="${esc(x.id)}" aria-pressed="${x.id === a.id}"><i class="sw" style="background:${colorOf(x)}"></i>${esc(x.name)}</button>`).join('')}
+        ${ordered.map(x => `<button data-action="pick-account" data-id="${esc(x.id)}" aria-pressed="${x.id === a.id}"><i class="sw" style="background:${colorOf(x)}"></i>${esc(x.name)}</button>`).join('')}
       </div>
       <section class="panel">
         <div class="panel-head" style="align-items:flex-end">
           <div>
-            <div class="eyebrow">${esc(a.provider || 'Account')} · ${esc(a.type)}</div>
+            <div class="eyebrow">${esc(a.provider || 'Account')} · ${esc(typeOf(a).label)}${a.owner !== 'me' ? ' · ' + esc(personName(a.owner)) : ''}</div>
             <div class="acct-figure num">${gbp(st.cur)}</div>
           </div>
-          <button class="btn primary" data-action="open-log" data-id="${esc(a.id)}">${icons.plus}Log value</button>
+          <div class="acct-actions">
+            <button class="btn" data-action="edit-acct" data-id="${esc(a.id)}">${icons.edit}Edit</button>
+            <button class="btn primary" data-action="open-log" data-id="${esc(a.id)}">${icons.plus}Log value</button>
+          </div>
         </div>
         <div class="stats">
-          <div class="stat"><div class="k">Since first entry</div><div class="v ${cls(st.change)}">${st.s.length > 1 ? signed(st.change) : '—'}</div></div>
-          <div class="stat"><div class="k">Growth</div><div class="v ${cls(st.pct)}">${st.s.length > 1 ? pct(st.pct) : '—'}</div></div>
-          <div class="stat"><div class="k">Last change</div><div class="v ${cls(st.lastChange)}">${st.s.length > 1 ? signed(st.lastChange) : '—'}</div></div>
-          <div class="stat"><div class="k">Valuations</div><div class="v">${st.s.length}</div></div>
+          <div class="stat"><div class="k">Paid in</div><div class="v">${all ? gbp(all.paid) : '—'}</div></div>
+          <div class="stat"><div class="k">Growth</div><div class="v ${cls(all ? all.growth : 0)}">${all && st.s.length > 1 ? signed(all.growth) : '—'}</div></div>
+          <div class="stat"><div class="k">Return</div><div class="v ${cls(all && all.ret || 0)}">${all && st.s.length > 1 && all.ret != null ? pct(all.ret) : '—'}</div></div>
+          <div class="stat"><div class="k">Fees a year</div><div class="v">${a.fee ? gbp(st.cur * a.fee / 100) : '—'}</div></div>
         </div>
+        ${reg ? `<p class="hint" style="margin-top:12px">Regular payment: ${reg}.</p>` : ''}
         <div class="chart" id="acct-chart" style="margin-top:20px"></div>
       </section>
       <section class="panel">
-        <div class="panel-head"><h2>Valuation history</h2><span class="aside">${st.s.length ? 'Since ' + dateLabel(toMs(st.s[0].date)) : ''}</span></div>
+        <div class="panel-head"><h2>History</h2><span class="aside">${st.s.length ? 'Since ' + dateLabel(toMs(st.s[0].date)) : ''}</span></div>
         ${rows.length ? `<div class="table-wrap"><table>
-          <thead><tr><th>Date</th><th class="r">Value</th><th class="r">Change</th><th class="hide-sm">Note</th><th class="r"><span class="sr">Actions</span></th></tr></thead>
-          <tbody>${rows.map((l, i) => {
-            const prev = rows[i + 1], d = prev ? l.value - prev.value : null;
-            if (pendingDelete === l.id) return `<tr class="confirm"><td colspan="3">Delete the ${gbp(l.value)} valuation from ${dateLabel(toMs(l.date))}?</td><td class="hide-sm"></td><td class="r" style="white-space:nowrap"><button class="btn sm ghost" data-action="del-no">Keep</button> <button class="btn sm danger solid" data-action="del-yes" data-id="${esc(l.id)}">Delete</button></td></tr>`;
-            return `<tr><td style="white-space:nowrap">${dateLabel(toMs(l.date))}</td><td class="r val">${gbp(l.value)}</td><td class="r">${d == null ? '<span class="faint">—</span>' : deltaChip(d, signed(d))}</td><td class="note hide-sm">${esc(l.note)}</td><td class="r"><button class="icon-btn" data-action="del" data-id="${esc(l.id)}" aria-label="Delete valuation from ${dateLabel(toMs(l.date))}">${icons.trash}</button></td></tr>`;
-          }).join('')}</tbody></table></div>` : '<div class="chart-empty">No values logged for this account yet.</div>'}
+          <thead><tr><th>Date</th><th class="r">Balance</th><th class="r">Change</th><th class="hide-sm">Note</th><th class="r"><span class="sr">Actions</span></th></tr></thead>
+          <tbody>${rows.map(l => {
+            const when = dateLabel(toMs(l.date));
+            if (pendingDelete === l.id) return `<tr class="confirm"><td colspan="3">Delete this ${l.kind === 'flow' ? 'payment' : 'valuation'} from ${when}?</td><td class="hide-sm"></td><td class="r" style="white-space:nowrap"><button class="btn sm ghost" data-action="del-no">Keep</button> <button class="btn sm danger solid" data-action="del-yes" data-id="${esc(l.id)}">Delete</button></td></tr>`;
+            if (l.kind === 'flow') return `<tr><td style="white-space:nowrap">${when}</td><td class="r faint">${l.amount >= 0 ? 'Paid in' : 'Taken out'}</td><td class="r">${deltaChip(l.amount, signed(l.amount))}</td><td class="note hide-sm">${esc(l.note)}${l.own !== l.amount ? ` <span class="faint">(you paid ${gbp(l.own)})</span>` : ''}</td><td class="r"><button class="icon-btn" data-action="del" data-id="${esc(l.id)}" aria-label="Delete payment from ${when}">${icons.trash}</button></td></tr>`;
+            const i = logRows.findIndex(x => x.id === l.id), prev = logRows[i + 1], d = prev ? l.value - prev.value : null;
+            return `<tr><td style="white-space:nowrap">${when}</td><td class="r val">${gbp(l.value)}</td><td class="r">${d == null ? '<span class="faint">—</span>' : deltaChip(d, signed(d))}</td><td class="note hide-sm">${esc(l.note)}</td><td class="r"><button class="icon-btn" data-action="del" data-id="${esc(l.id)}" aria-label="Delete valuation from ${when}">${icons.trash}</button></td></tr>`;
+          }).join('')}</tbody></table></div>` : '<div class="chart-empty">Nothing logged for this account yet.</div>'}
       </section>
     </div>`;
+  const pts = st.s.map(l => ({ t: toMs(l.date), v: l.value }));
+  if (pts.length && pts[pts.length - 1].t < TODAY_MS) pts.push({ t: TODAY_MS, v: pts[pts.length - 1].v });
   chart(document.getElementById('acct-chart'), {
-    xs: st.s.map(l => toMs(l.date)), tick: tickLabel, label: a.name + ' value over time',
-    series: [{ label: a.name, color: colorOf(a), values: st.s.map(l => l.value) }]
+    xs: pts.map(p => p.t), label: a.name + ' value over time',
+    series: [{ label: a.name, color: colorOf(a), values: pts.map(p => p.v) }]
+  });
+}
+
+/* ---------- planner ---------- */
+const LSA = 268275; // Lump Sum Allowance: the most you can take tax-free from pensions
+const planIncluded = a => { const v = ui.plan.include[a.id]; return v != null ? !!v : groupOf(a) === 'pension' || (groupOf(a) === 'isa' && a.type !== 'JISA'); };
+const planMonthly = a => { const v = ui.plan.monthly[a.id]; return v != null && v !== '' ? Math.max(0, num(v, 0)) : Math.round(monthlyIn(a)); };
+function retireDate() {
+  const p = state.profile;
+  if (!p.dob) return '';
+  return `${+p.dob.slice(0, 4) + p.retireAge}${p.dob.slice(4)}`;
+}
+const planMonths = () => { const d = retireDate(); return d ? Math.max(0, monthsUntil(d)) : ui.plan.years * 12; };
+function project(accts, months, adj, noFees) {
+  const pots = accts.map(a => ({ a, v: accountStats(a.id).cur, c: planMonthly(a), r: Math.pow(1 + Math.max(0, state.profile.growth + adj - (noFees ? 0 : a.fee)) / 100, 1 / 12) - 1 }));
+  const sum = () => pots.reduce((t, p) => t + p.v, 0);
+  let paid = sum();
+  const xs = [0], tot = [paid], paidV = [paid];
+  for (let m = 1; m <= months; m++) {
+    for (const p of pots) { p.v = (p.v + p.c) * (1 + p.r); paid += p.c; }
+    if (m % 12 === 0 || m === months) { xs.push(m / 12); tot.push(sum()); paidV.push(paid); }
+  }
+  const final = sum();
+  return { xs, tot, paidV, final, paid, pension: pots.filter(p => groupOf(p.a) === 'pension').reduce((t, p) => t + p.v, 0) };
+}
+function historicRate(accts) {
+  const t = periodTotals(accts, -Infinity);
+  if (!t.rows.length || t.base <= 0) return null;
+  const first = Math.min(...t.rows.map(r => toMs(logsOf(r.a.id)[0].date)));
+  const yrs = (TODAY_MS - first) / (365.25 * 864e5);
+  if (yrs < 0.5) return null;
+  const r = (Math.pow(1 + t.growth / t.base, 1 / yrs) - 1) * 100;
+  return isFinite(r) ? Math.round(clamp(r, -20, 30) * 10) / 10 : null;
+}
+function renderPlanner() {
+  const p = state.profile, accts = mine();
+  const hist = historicRate(accts.filter(planIncluded));
+  const age = p.dob ? ageOn(p.dob, TODAY) : null;
+  view.innerHTML = `
+    <div class="stack view">
+      ${exampleNotice()}
+      <div class="calc-grid">
+        <section class="panel stack">
+          <div class="panel-head" style="margin-bottom:0"><h2>Retirement plan</h2>${age != null ? `<span class="aside">You are ${age}</span>` : ''}</div>
+          ${p.dob ? '' : `<p class="warn">Add your date of birth in <button class="btn sm ghost" data-action="tab" data-tab="settings">Settings</button> to plan to a retirement age. Until then, set the number of years below.</p>`}
+          <div class="form-grid">
+            ${p.dob ? `<div class="field">
+              <label for="plan-age">Retire at age <output id="out-age">${p.retireAge}</output></label>
+              <input id="plan-age" type="range" min="${Math.max(40, (age || 40) + 1)}" max="80" step="1" value="${p.retireAge}">
+            </div>` : `<div class="field">
+              <label for="plan-years">Years until retirement <output id="out-pyears">${ui.plan.years}</output></label>
+              <input id="plan-years" type="range" min="1" max="50" step="1" value="${ui.plan.years}">
+            </div>`}
+            <div class="field">
+              <label for="plan-rate">Growth a year, before fees <output id="out-prate">${p.growth}%</output></label>
+              <input id="plan-rate" type="range" min="0" max="12" step="0.5" value="${p.growth}">
+              ${hist != null ? `<p class="hint">Your accounts have grown about ${pct(hist)} a year so far. <button class="btn sm ghost" data-action="use-hist" data-id="${hist}">Use ${hist}%</button></p>` : ''}
+            </div>
+            <div class="field">
+              <label for="plan-infl">Inflation <output id="out-infl">${p.inflation}%</output></label>
+              <input id="plan-infl" type="range" min="0" max="6" step="0.5" value="${p.inflation}">
+            </div>
+            <div class="field">
+              <label for="plan-draw">Yearly withdrawal in retirement <output id="out-draw">${p.drawRate}%</output></label>
+              <input id="plan-draw" type="range" min="2" max="8" step="0.5" value="${p.drawRate}">
+            </div>
+            <div class="field">
+              <label for="plan-target">Target pot <span class="faint">Optional</span></label>
+              <div class="money"><span>£</span><input id="plan-target" class="input" type="number" inputmode="decimal" min="0" step="1000" value="${ui.plan.target || ''}" placeholder="e.g. 750000"></div>
+            </div>
+            <label class="check"><input type="checkbox" id="plan-real" ${ui.plan.real ? 'checked' : ''}>Show figures in today's money</label>
+          </div>
+          <div>
+            <div class="eyebrow" style="margin-bottom:8px">Accounts and monthly payments</div>
+            ${accts.length ? `<ul class="plan-accts">${accts.map(a => `<li>
+              <input type="checkbox" data-plan-inc="${esc(a.id)}" ${planIncluded(a) ? 'checked' : ''} aria-label="Include ${esc(a.name)}" style="accent-color:var(--primary);width:16px;height:16px">
+              <div><div style="font-weight:550">${esc(a.name)}</div><div class="hint">${gbp(accountStats(a.id).cur)}${a.fee ? ` · ${a.fee}% fees` : ''}</div></div>
+              <div class="money"><span>£</span><input class="input" type="number" inputmode="decimal" min="0" step="10" data-plan-mon="${esc(a.id)}" value="${planMonthly(a)}" aria-label="Monthly into ${esc(a.name)}"></div>
+            </li>`).join('')}</ul><p class="hint" style="margin-top:8px">Monthly amounts start from your regular payments or last year's deposits. Include pension tax relief.</p>` : '<p class="hint">Add accounts to build a plan.</p>'}
+          </div>
+        </section>
+        <section class="panel stack" id="plan-results" aria-live="polite"></section>
+      </div>
+      <section class="panel stack">
+        <div class="panel-head" style="margin-bottom:0"><h2>Goals</h2><span class="aside">Assumes ${p.growth}% growth a year</span></div>
+        ${goalList(state.goals, true) || '<p class="hint">Set a target, such as an emergency fund, a house deposit or an ISA milestone, and see if you are on track.</p>'}
+        <form id="goal-form" class="inline-form">
+          <input id="goal-name" class="input" placeholder="Goal, e.g. House deposit" maxlength="40" required aria-label="Goal name">
+          <div class="money"><span>£</span><input id="goal-target" class="input" type="number" inputmode="decimal" min="1" step="100" placeholder="Target" required aria-label="Target amount"></div>
+          <input id="goal-date" class="input" type="date" min="${TODAY}" aria-label="Target date (optional)">
+          <select id="goal-scope" class="input" aria-label="Which accounts count">
+            <option value="all">All my accounts</option>
+            ${Object.entries(GROUPS).map(([k, v]) => `<option value="${k}">My ${v.toLowerCase()}</option>`).join('')}
+            ${state.accounts.map(a => `<option value="${esc(a.id)}">${esc(a.name)}${a.owner !== 'me' ? ' (' + esc(personName(a.owner)) + ')' : ''}</option>`).join('')}
+          </select>
+          <button class="btn" type="submit">${icons.plus}Add goal</button>
+        </form>
+      </section>
+      <div class="calc-grid" id="calc-host"></div>
+    </div>`;
+  updatePlan();
+  renderCalculator(document.getElementById('calc-host'));
+}
+function updatePlan() {
+  const host = document.getElementById('plan-results');
+  if (!host) return;
+  const p = state.profile, accts = mine().filter(planIncluded);
+  const months = planMonths(), rd = retireDate();
+  if (!accts.length) { host.innerHTML = '<div class="chart-empty">Tick at least one account to see a projection.</div>'; return; }
+  const inf = p.inflation / 100;
+  const real = (v, yrs) => v / Math.pow(1 + inf, yrs);
+  const yrs = months / 12;
+  const mid = project(accts, months, 0), low = project(accts, months, -2), high = project(accts, months, 2);
+  const later = project(accts, months + 24, 0), noFees = project(accts, months, 0, true);
+  const show = (v, y) => ui.plan.real ? real(v, y) : v;
+  const taxFree = Math.min(mid.pension * 0.25, LSA);
+  const income = mid.final * p.drawRate / 100;
+  const feeCost = noFees.final - mid.final;
+  const target = +ui.plan.target || 0;
+  const needMonthly = target && mid.final < target ? neededMonthly(0, target - mid.final, p.growth, months) : 0;
+  const pensionIncluded = accts.some(a => groupOf(a) === 'pension');
+  const earliest = accessAge(p.dob);
+  const when = rd ? `at ${p.retireAge} (${monthYear(toMs(rd))})` : `in ${ui.plan.years} years`;
+  host.innerHTML = `
+    <div class="panel-head" style="margin-bottom:0"><h2>Projected pot ${esc(when)}</h2><span class="aside">${ui.plan.real ? "In today's money" : 'In future pounds'}</span></div>
+    <div class="big-figure num">${gbp(show(mid.final, yrs))}</div>
+    <p class="explain">${ui.plan.real ? `That is <b>${gbp(mid.final)}</b> in future pounds.` : `That is about <b>${gbp(real(mid.final, yrs))}</b> in today's money after ${p.inflation}% inflation.`} Range ${gbp(show(low.final, yrs))} to ${gbp(show(high.final, yrs))} at ${Math.max(0, p.growth - 2)}% to ${p.growth + 2}% growth.</p>
+    <div class="compare">
+      <div class="stat"><div class="k">Pensions</div><div class="v num">${gbp(show(mid.pension, yrs))}</div></div>
+      <div class="stat"><div class="k">ISAs and other</div><div class="v num">${gbp(show(mid.final - mid.pension, yrs))}</div></div>
+      <div class="stat"><div class="k">Tax-free cash</div><div class="v num">${gbp(show(taxFree, yrs))}</div></div>
+      <div class="stat"><div class="k">Income at ${p.drawRate}%</div><div class="v num">${gbp(show(income, yrs))}<span class="faint" style="font-size:12px">/yr</span></div></div>
+    </div>
+    ${rd && pensionIncluded && p.retireAge < earliest ? `<p class="warn">Pensions can normally be accessed from age ${earliest}. Retiring at ${p.retireAge} means relying on ISAs and savings until then.</p>` : ''}
+    ${target ? (mid.final >= target ? `<p class="explain">You are on course to reach your <b>${gbp(target)}</b> target.</p>` : `<p class="explain">To reach <b>${gbp(target)}</b>, pay in about <b>${gbp(needMonthly)}</b> a month more across these accounts.</p>`) : ''}
+    <div class="chart" id="plan-chart"></div>
+    <div class="legend-inline"><span><i class="sw" style="background:var(--c1)"></i>Expected ${p.growth}%</span><span><i class="sw" style="background:var(--c2)"></i>Range ±2%</span><span><i class="sw" style="background:var(--ink-3)"></i>Paid in</span></div>
+    <p class="explain">Working two years longer would add about <b>${gbp(show(later.final, yrs + 2) - show(mid.final, yrs))}</b>.${feeCost > 1 ? ` Fees cost about <b>${gbp(show(feeCost, yrs))}</b> by then.` : ''}</p>
+    <p class="hint">Illustration only, not financial advice. Assumes steady growth after each account's fees, monthly payments that stay the same, and 25% tax-free pension cash capped at the ${gbp(LSA)} Lump Sum Allowance. Pension income is taxable. The State Pension is not included.</p>`;
+  const lbl = y => p.dob ? 'Age ' + (ageOn(p.dob, TODAY) + Math.round(y)) : 'Yr ' + Math.round(y);
+  chart(document.getElementById('plan-chart'), {
+    xs: mid.xs, tick: lbl, label2: y => (p.dob ? 'Age ' + (ageOn(p.dob, TODAY) + Math.round(y)) : 'Year ' + Math.round(y)), label: 'Projected pot',
+    empty: 'You are at or past your retirement age.',
+    series: [
+      { label: `Expected ${p.growth}%`, color: 'var(--c1)', values: mid.tot.map((v, i) => show(v, mid.xs[i])) },
+      { label: `Cautious ${Math.max(0, p.growth - 2)}%`, color: 'var(--c2)', values: low.tot.map((v, i) => show(v, low.xs[i])), fill: false, dash: true },
+      { label: `Strong ${p.growth + 2}%`, color: 'var(--c2)', values: high.tot.map((v, i) => show(v, high.xs[i])), fill: false, dash: true },
+      { label: 'Paid in', color: 'var(--ink-3)', values: mid.paidV.map((v, i) => show(v, mid.xs[i])), fill: false, dash: true }
+    ]
   });
 }
 
 /* SIPP vs ISA */
-const BANDS = { basic: { label: 'Basic 20%', word: 'basic', extra: 0 }, higher: { label: 'Higher 40%', word: 'higher', extra: 0.20 }, additional: { label: 'Additional 45%', word: 'additional', extra: 0.25 } };
-const LSA = 268275; // Lump Sum Allowance: the most you can take tax-free from pensions
-function renderCalculator() {
-  const c = ui.calc;
-  view.innerHTML = `
-    <div class="calc-grid view">
+function renderCalculator(host) {
+  const c = ui.calc, band = state.profile.band;
+  host.innerHTML = `
       <section class="panel">
-        <div class="panel-head"><h2>Assumptions</h2></div>
+        <div class="panel-head"><h2>SIPP vs ISA</h2></div>
         <div class="form-grid">
           <div class="field">
             <label for="calc-monthly">You pay in each month</label>
@@ -871,7 +1521,7 @@ function renderCalculator() {
           <div class="field">
             <span class="label" id="band-label">Income tax band</span>
             <div class="seg" role="radiogroup" aria-labelledby="band-label">
-              ${Object.entries(BANDS).map(([k, b]) => `<input type="radio" name="band" id="band-${k}" value="${k}" ${c.band === k ? 'checked' : ''}><label for="band-${k}">${b.label}</label>`).join('')}
+              ${Object.entries(BANDS).map(([k, b]) => `<input type="radio" name="band" id="band-${k}" value="${k}" ${band === k ? 'checked' : ''}><label for="band-${k}">${b.label}</label>`).join('')}
             </div>
           </div>
           <div class="field">
@@ -892,13 +1542,12 @@ function renderCalculator() {
           </div>
         </div>
       </section>
-      <section class="panel stack" id="calc-results" aria-live="polite"></section>
-    </div>`;
+      <section class="panel stack" id="calc-results" aria-live="polite"></section>`;
   updateCalc();
 }
 function updateCalc() {
-  const c = ui.calc;
-  const net = Math.max(0, +c.monthly || 0), gross = net / 0.8, reclaim = gross * BANDS[c.band].extra, rate = (+c.rate || 0) / 100;
+  const c = ui.calc, band = state.profile.band;
+  const net = Math.max(0, +c.monthly || 0), gross = net / 0.8, reclaim = gross * BANDS[band].extra, rate = (+c.rate || 0) / 100;
   let isa = 0, sipp = 0, paid = 0;
   const years = [0], isaV = [0], sippV = [0], paidV = [0];
   for (let y = 1; y <= c.years; y++) {
@@ -913,14 +1562,14 @@ function updateCalc() {
   const sippAfterTax = taxFree + (sipp - taxFree) * (1 - c.draw / 100);
   const lead = sippAfterTax - isa;
   document.getElementById('calc-results').innerHTML = `
-    <div class="panel-head" style="margin-bottom:0"><h2>Projection after ${c.years} year${c.years == 1 ? '' : 's'}</h2><span class="aside">You pay in ${gbp(paid)}</span></div>
+    <div class="panel-head" style="margin-bottom:0"><h2>After ${c.years} year${c.years == 1 ? '' : 's'}</h2><span class="aside">You pay in ${gbp(paid)}</span></div>
     <div class="compare">
       <div class="stat"><div class="k"><i class="sw" style="background:var(--c2)"></i>ISA, tax-free</div><div class="v num">${gbp(isa)}</div></div>
       <div class="stat"><div class="k"><i class="sw" style="background:var(--c1)"></i>SIPP pot</div><div class="v num">${gbp(sipp)}</div></div>
       <div class="stat"><div class="k">SIPP after tax</div><div class="v num">${gbp(sippAfterTax)}</div></div>
     </div>
     <p class="explain">Each <b>${gbp(net)}</b> you pay into a SIPP becomes <b>${gbp(gross)}</b> with 20% basic-rate relief.
-      ${reclaim > 0 ? `As a ${BANDS[c.band].word}-rate taxpayer you can reclaim a further <b>${gbp(reclaim)}</b> a month through Self Assessment, so the real cost is <b>${gbp(net - reclaim)}</b>.` : ''}
+      ${reclaim > 0 ? `As a ${BANDS[band].word}-rate taxpayer you can reclaim a further <b>${gbp(reclaim)}</b> a month through Self Assessment, so the real cost is <b>${gbp(net - reclaim)}</b>.` : ''}
       Taking 25% tax-free and paying ${c.draw}% on the rest, the SIPP finishes <b class="${cls(lead)}">${signed(lead)}</b> ${lead >= 0 ? 'ahead of' : 'behind'} the ISA.</p>
     ${net * 12 > 20000 ? `<p class="warn">${gbp(net * 12)} a year is more than the £20,000 ISA allowance.</p>` : ''}
     <div class="chart" id="calc-chart"></div>
@@ -936,14 +1585,143 @@ function updateCalc() {
   });
 }
 
+/* ---------- what's changed ---------- */
+const INSIGHT_RANGES = ['1M', '3M', '6M', '1Y', 'TY', 'All'];
+function renderInsights() {
+  const accts = visibleAccounts();
+  const key = INSIGHT_RANGES.includes(ui.insight) ? ui.insight : '1M';
+  const start = rangeStart(key);
+  const pt = periodTotals(accts, start);
+  const who = viewName();
+  const items = [];
+  const add = (ic, html) => items.push(`<li><span class="ic">${ic}</span><span>${html}</span></li>`);
+
+  let headline = '<p class="headline faint">Log a few values to see what has changed.</p>';
+  if (pt.rows.length) {
+    const up = pt.change >= 0;
+    headline = `<p class="headline">Over ${esc(rangeName(key))}, ${who ? esc(who) + "'s" : 'your'} net worth ${up ? 'rose' : 'fell'} by <b class="${cls(pt.change)}">${gbp(Math.abs(pt.change))}</b>${pt.v0 > 0 ? ` (${pct(pt.change / pt.v0 * 100)})` : ''} to <b>${gbp(pt.cur)}</b>.
+      ${pt.paid ? `<b>${gbp(pt.paid)}</b> was money paid in and <b class="${cls(pt.growth)}">${signed(pt.growth)}</b> came from growth${pt.ret != null ? `, a return of <b>${pct(pt.ret)}</b>` : ''}.` : `No deposits were recorded, so this was all growth${pt.ret != null ? ` (<b>${pct(pt.ret)}</b>)` : ''}. Record deposits when you log values for a truer split.`}</p>`;
+    const ranked = pt.rows.filter(r => r.p.ret != null && r.p.base > 100).sort((a, b) => b.p.ret - a.p.ret);
+    if (ranked.length > 1) {
+      const best = ranked[0], worst = ranked[ranked.length - 1];
+      add('▲', `<b>${esc(best.a.name)}</b> did best, ${pct(best.p.ret)} (${signed(best.p.growth)} growth).`);
+      if (worst.p.ret < best.p.ret) add('▼', `<b>${esc(worst.a.name)}</b> did least well, ${pct(worst.p.ret)} (${signed(worst.p.growth)}).`);
+    }
+    const bonds = pt.rows.filter(r => r.a.type === 'Premium Bonds' && r.p.growth > 0);
+    if (bonds.length) add('★', `Premium Bonds prizes of about <b>${gbp(bonds.reduce((t, r) => t + r.p.growth, 0))}</b>.`);
+    const crossed = milestones(timeline(accts)).filter(m => m.t > start);
+    if (crossed.length) add('◆', `You passed <b>${crossed.map(m => compact(m.v)).join(', ')}</b> in this period. Well done.`);
+  }
+  const stale = staleAccounts(accts);
+  if (stale.length) add('!', `${stale.map(a => `<b>${esc(a.name)}</b>`).join(', ')} ${stale.length === 1 ? 'needs' : 'need'} an up-to-date balance (over 30 days old). <button class="btn sm" data-action="open-bulk">Update all</button>`);
+  const tyEnd = Date.UTC(+taxYear(TODAY).split('/')[0] + 1, 3, 5), daysLeft = Math.round((tyEnd - TODAY_MS) / 864e5);
+  const myIsas = mine().filter(a => typeOf(a).allow === 'isa');
+  if (myIsas.length && (ui.person === 'me' || ui.person === 'all')) {
+    const used = allowanceUsed(myIsas, 'isa');
+    add('£', `ISA allowance: <b>${gbp(used)}</b> of ${gbp(ISA_ALLOWANCE)} used this tax year, <b>${gbp(Math.max(0, ISA_ALLOWANCE - used))}</b> left with ${daysLeft} days to go.${myIsas.some(a => a.type === 'LISA') ? ` Lifetime ISA: ${gbp(lisaUsed())} of ${gbp(LISA_ALLOWANCE)}.` : ''}`);
+  }
+  for (const person of state.profile.people) {
+    if (ui.person !== 'all' && ui.person !== person.id) continue;
+    const j = state.accounts.filter(a => a.owner === person.id && a.type === 'JISA');
+    if (j.length) { const used = allowanceUsed(j, 'jisa'); add('£', `${esc(person.name)}'s Junior ISA: <b>${gbp(used)}</b> of ${gbp(JISA_ALLOWANCE)} used this tax year.`); }
+  }
+  const fees = accts.reduce((t, a) => t + accountStats(a.id).cur * (a.fee || 0) / 100, 0);
+  if (fees > 0) add('%', `Platform and fund fees cost about <b>${gbp(fees)}</b> a year at current balances.`);
+  if (ui.person === 'me' && state.goals.length) {
+    const st = state.goals.map(goalStatus), ok = st.filter(s => s.done || s.onTrack).length;
+    add('◎', `<b>${ok} of ${st.length}</b> goals are reached or on track. <button class="btn sm ghost" data-action="tab" data-tab="planner">See goals</button>`);
+  }
+
+  const table = pt.rows.length ? `<div class="table-wrap"><table>
+    <thead><tr><th>Account</th><th class="r hide-sm">Start</th><th class="r">Now</th><th class="r hide-sm">Paid in</th><th class="r">Growth</th><th class="r hide-sm">Return</th></tr></thead>
+    <tbody>${[...pt.rows].sort((a, b) => b.p.growth - a.p.growth).map(r => `<tr class="clickable" data-action="goto-account" data-id="${esc(r.a.id)}" tabindex="0">
+      <td><div class="acct-cell" style="min-width:120px"><i class="sw" style="background:${colorOf(r.a)}"></i><span class="n">${esc(r.a.name)}</span></div></td>
+      <td class="r val hide-sm">${gbp(r.p.v0)}</td><td class="r val">${gbp(r.p.cur)}</td><td class="r val hide-sm">${gbp(r.p.paid)}</td>
+      <td class="r">${deltaChip(r.p.growth, signed(r.p.growth))}</td><td class="r hide-sm mono">${r.p.ret != null ? pct(r.p.ret) : '—'}</td></tr>`).join('')}
+    </tbody></table></div>` : '';
+  const ms = milestones(timeline(accts));
+
+  view.innerHTML = `
+    <div class="stack view">
+      ${exampleNotice()}
+      ${personFilter()}
+      <section class="panel stack">
+        <div class="panel-head" style="margin-bottom:0"><h2>Summary</h2>
+          <div class="seg scroll" role="group" aria-label="Period">${INSIGHT_RANGES.map(k => `<button data-action="insight-range" data-range="${k}" aria-pressed="${key === k}">${RANGE_BTN[k] || k}</button>`).join('')}</div>
+        </div>
+        ${headline}
+        ${items.length ? `<ul class="insights">${items.join('')}</ul>` : ''}
+      </section>
+      ${table ? `<section class="panel"><div class="panel-head"><h2>By account</h2><span class="aside">${esc(rangeName(key))}</span></div>${table}</section>` : ''}
+      ${ms.length ? `<section class="panel"><div class="panel-head"><h2>Milestones</h2></div><ul class="activity">${ms.map(m => `<li><span class="sw" style="background:var(--gold)"></span><div>${compact(m.v)} reached</div><div class="when">${dateLabel(m.t)}</div></li>`).join('')}</ul></section>` : ''}
+      <p class="hint">Worked out on this device from your own entries. Nothing is sent anywhere.</p>
+    </div>`;
+}
+
+/* ---------- settings ---------- */
+const hasCrypto = !!(window.crypto && crypto.subtle && window.TextEncoder);
 function renderSettings() {
   const theme = store.get(THEME_KEY) === 'light' ? 'light' : 'dark';
+  const p = state.profile, locked = !!store.get(LOCK_KEY);
   const count = state.logs.length;
   view.innerHTML = `
     <div class="settings-grid view">
       <section class="panel stack">
+        <h2>About you</h2>
+        <form id="profile-form" class="form-grid">
+          <div class="two">
+            <div class="field"><label for="pf-name">First name</label><input id="pf-name" class="input" maxlength="40" value="${esc(p.name)}" autocomplete="given-name"></div>
+            <div class="field"><label for="pf-dob">Date of birth</label><input id="pf-dob" class="input" type="date" max="${TODAY}" value="${esc(p.dob)}"></div>
+          </div>
+          <div class="two">
+            <div class="field"><label for="pf-retire">Retirement age</label><input id="pf-retire" class="input" type="number" min="40" max="80" inputmode="numeric" value="${p.retireAge}"></div>
+            <div class="field"><label for="pf-band">Income tax band</label><select id="pf-band" class="input">${Object.entries(BANDS).map(([k, b]) => `<option value="${k}" ${p.band === k ? 'selected' : ''}>${b.label}</option>`).join('')}</select></div>
+          </div>
+          <p class="hint">Used by the planner and pension access age. Stored only on this device.</p>
+          <div class="row-actions"><button class="btn primary" type="submit">Save details</button><span class="status" id="profile-status" role="status"></span></div>
+        </form>
+      </section>
+
+      <section class="panel stack">
+        <h2>Family</h2>
+        <p class="explain">Track accounts you hold for others, such as a child's Junior ISA. Their accounts are kept out of your own net worth, and you can view each person or everyone together.</p>
+        ${p.people.length ? `<ul class="acct-list">${p.people.map(x => pendingPerson === x.id ? `
+          <li style="background:var(--neg-soft)"><span class="grow">Remove <b>${esc(x.name)}</b>? Their accounts will move to you.</span><button class="btn sm ghost" data-action="person-del-no">Keep</button><button class="btn sm danger solid" data-action="person-del-yes" data-id="${esc(x.id)}">Remove</button></li>` : `
+          <li><span class="grow"><b>${esc(x.name)}</b> <span class="faint">${state.accounts.filter(a => a.owner === x.id).length} accounts</span></span><button class="icon-btn" data-action="person-del" data-id="${esc(x.id)}" aria-label="Remove ${esc(x.name)}">${icons.trash}</button></li>`).join('')}</ul>` : ''}
+        <form id="person-form" class="inline-form">
+          <input id="person-name" class="input" placeholder="Name, e.g. Arjun" maxlength="30" required aria-label="Name">
+          <button class="btn" type="submit">${icons.plus}Add person</button>
+        </form>
+      </section>
+
+      <section class="panel stack">
+        <div class="panel-head" style="margin-bottom:0"><h2>Accounts</h2><button class="btn sm" data-action="add-acct">${icons.plus}Add account</button></div>
+        ${state.accounts.length ? `<ul class="acct-list">
+          ${state.accounts.map(a => pendingRemoveAcct === a.id ? `
+            <li style="background:var(--neg-soft)"><span class="grow">Remove <b>${esc(a.name)}</b> and its ${accountStats(a.id).s.length} valuations?</span><button class="btn sm ghost" data-action="remove-acct-no">Keep</button><button class="btn sm danger solid" data-action="remove-acct-yes" data-id="${esc(a.id)}">Remove</button></li>` : `
+            <li><i class="sw" style="background:${colorOf(a)}"></i><span class="grow"><b>${esc(a.name)}</b>${ownerChip(a)} <span class="faint">${esc(a.provider)}${a.provider ? ' · ' : ''}${esc(typeOf(a).label)}</span></span><button class="icon-btn edit" data-action="edit-acct" data-id="${esc(a.id)}" aria-label="Edit ${esc(a.name)}">${icons.edit}</button><button class="icon-btn" data-action="remove-acct" data-id="${esc(a.id)}" aria-label="Remove ${esc(a.name)}">${icons.trash}</button></li>`).join('')}
+        </ul>` : '<p class="hint">No accounts yet.</p>'}
+      </section>
+
+      <section class="panel stack">
+        <h2>Privacy</h2>
+        <label class="check"><input type="checkbox" id="set-hidden" ${ui.hidden ? 'checked' : ''}><span><b style="color:var(--ink);font-weight:550">Hide balances</b><br>Shows £•••• instead of amounts. Also on the eye button at the top.</span></label>
+        <div class="stack" style="gap:10px">
+          <div><b style="font-weight:550">PIN lock</b> <span class="faint">${locked ? 'On' : 'Off'}</span></div>
+          ${!hasCrypto ? '<p class="hint">PIN lock needs a secure (https) connection.</p>' : `
+          <form id="pin-form" class="inline-form">
+            <input id="pin-new" class="input" type="password" inputmode="numeric" pattern="[0-9]{4,8}" minlength="4" maxlength="8" placeholder="${locked ? 'New PIN' : '4 to 8 digits'}" autocomplete="off" aria-label="PIN">
+            <button class="btn" type="submit">${locked ? 'Change PIN' : 'Set PIN'}</button>
+            ${locked ? '<button class="btn danger" type="button" data-action="pin-off">Turn off</button>' : ''}
+          </form>
+          <p class="hint">Asks for the PIN when Aurum opens or after a minute in the background. It is a privacy screen: if you forget it, you can erase the data on this device and restore a backup.</p>`}
+          <p class="status" id="pin-status" role="status"></p>
+        </div>
+      </section>
+
+      <section class="panel stack">
         <h2>Backup and restore</h2>
-        <p class="explain">Your data is saved on this device. Export a backup before you change phone or clear your browser, then import it on the new device. Backups from the old Aura Wealth app import too.</p>
+        <p class="explain">Your data is saved on this device only. Export a backup regularly and before you change phone. ${p.lastBackup ? `Last backup: <b>${dateLabel(toMs(p.lastBackup))}</b>.` : '<b>No backup yet.</b>'}</p>
         <div class="row-actions">
           <button class="btn primary" data-action="export">Export backup</button>
           <label class="btn" for="import-file">Import backup file</label>
@@ -952,26 +1730,18 @@ function renderSettings() {
         <details>
           <summary>Paste backup text instead</summary>
           <div class="stack" style="margin-top:10px">
-            <textarea id="import-text" class="input mono" rows="4" placeholder='{"version":1,"accounts":[…]}' spellcheck="false" style="font-size:12.5px"></textarea>
+            <textarea id="import-text" class="input mono" rows="4" placeholder='{"version":2,"accounts":[…]}' spellcheck="false" style="font-size:12.5px"></textarea>
             <div class="row-actions"><button class="btn" data-action="import-paste">Import pasted text</button><button class="btn ghost" data-action="copy-backup">Copy current backup</button></div>
           </div>
         </details>
+        <details>
+          <summary>Import history from a spreadsheet (CSV)</summary>
+          <div class="stack" style="margin-top:10px">
+            <p class="hint">Columns: <span class="mono">date, account, balance, paid in, note</span>. Dates as 2025-04-30 or 30/04/2025. New account names are created for you. Added to what you have, nothing is replaced.</p>
+            <div class="row-actions"><label class="btn" for="csv-file">Choose CSV file</label><input id="csv-file" type="file" accept=".csv,text/csv,text/plain" class="sr"></div>
+          </div>
+        </details>
         <p class="status" id="backup-status" role="status"></p>
-      </section>
-
-      <section class="panel stack">
-        <h2>Accounts</h2>
-        <ul class="acct-list">
-          ${state.accounts.map(a => pendingRemoveAcct === a.id ? `
-            <li style="background:var(--neg-soft)"><span class="grow">Remove <b>${esc(a.name)}</b> and its ${accountStats(a.id).s.length} valuations?</span><button class="btn sm ghost" data-action="remove-acct-no">Keep</button><button class="btn sm danger solid" data-action="remove-acct-yes" data-id="${esc(a.id)}">Remove</button></li>` : `
-            <li><i class="sw" style="background:${colorOf(a)}"></i><span class="grow"><b>${esc(a.name)}</b> <span class="faint">${esc(a.provider)}${a.provider ? ' · ' : ''}${esc(a.type)}</span></span><button class="icon-btn" data-action="remove-acct" data-id="${esc(a.id)}" aria-label="Remove ${esc(a.name)}">${icons.trash}</button></li>`).join('')}
-        </ul>
-        <form id="add-acct" class="inline-form">
-          <input id="new-acct-name" class="input" placeholder="Account name" maxlength="40" required aria-label="Account name">
-          <input id="new-acct-provider" class="input" placeholder="Provider, e.g. Vanguard" maxlength="40" aria-label="Provider">
-          <select id="new-acct-type" class="input" aria-label="Account type"><option>ISA</option><option>SIPP</option><option>Pension</option><option>LISA</option><option>GIA</option><option>Cash</option><option>Other</option></select>
-          <button class="btn" type="submit">${icons.plus}Add account</button>
-        </form>
       </section>
 
       <section class="panel stack">
@@ -981,13 +1751,13 @@ function renderSettings() {
         </div>
         <div class="about" style="margin-top:8px">
           <svg class="mark" width="44" height="44" aria-hidden="true"><use href="#aurum-mark"/></svg>
-          <div><p><b>Aurum</b></p><p class="faint" style="font-size:13px">Personal wealth ledger. Your data never leaves this device.</p></div>
+          <div><p><b>Aurum</b></p><p class="faint" style="font-size:13px">Personal wealth ledger. No sign-in, no servers: your data never leaves this device.</p></div>
         </div>
       </section>
 
       <section class="panel stack">
         <h2>Reset</h2>
-        <p class="explain">Deletes all ${count} valuations on this device. Export a backup first if you may want them back.</p>
+        <p class="explain">Deletes all ${count} valuations, your accounts and goals on this device. Export a backup first if you may want them back.</p>
         <div class="row-actions">
           ${pendingReset
             ? `<span>Delete everything?</span><button class="btn ghost" data-action="reset-no">Cancel</button><button class="btn danger solid" data-action="reset-yes">Delete all data</button>`
@@ -997,16 +1767,55 @@ function renderSettings() {
     </div>`;
 }
 
+/* ---------- first run ---------- */
+function renderSetup() {
+  view.innerHTML = `
+    <div class="view setup-card">
+      <section class="panel stack">
+        <svg class="mark" width="52" height="52" aria-hidden="true"><use href="#aurum-mark"/></svg>
+        <div><h1>Welcome to Aurum</h1><p class="explain" style="margin-top:6px">Track your pensions, ISAs, savings and investments in one place, see what is growing, and plan for retirement.</p></div>
+        <form id="setup-form" class="form-grid">
+          <div class="field"><label for="su-name">First name</label><input id="su-name" class="input" maxlength="40" autocomplete="given-name" value="${esc(state.profile.name)}"></div>
+          <div class="field"><label for="su-dob">Date of birth <span class="faint">Optional, for retirement planning</span></label><input id="su-dob" class="input" type="date" max="${TODAY}" value="${esc(state.profile.dob)}"></div>
+          <div class="row-actions">
+            <button class="btn primary" type="submit">Start with my accounts</button>
+            <button class="btn" type="button" data-action="setup-demo">Explore with example data</button>
+          </div>
+        </form>
+        <p class="hint">No sign-in and no servers. Everything stays on this device, so export a backup from Settings now and then.</p>
+        <details>
+          <summary>Restore a backup instead</summary>
+          <div class="row-actions" style="margin-top:10px"><label class="btn" for="import-file">Import backup file</label><input id="import-file" type="file" accept="application/json,.json" class="sr"></div>
+          <p class="status" id="backup-status" role="status"></p>
+        </details>
+      </section>
+    </div>`;
+}
+
 const TITLES = {
-  overview: ['Overview', () => fmtLong.format(new Date(toMs(TODAY)))],
-  accounts: ['Accounts', () => `${state.accounts.length} accounts · ${state.logs.length} valuations`],
-  calculator: ['SIPP vs ISA', () => 'Compare tax relief and long-term growth'],
+  overview: ['Overview', () => fmtLong.format(new Date(TODAY_MS))],
+  accounts: ['Accounts', () => `${visibleAccounts().length} accounts · ${state.logs.length} valuations`],
+  planner: ['Planner & goals', () => 'Project your retirement and track goals'],
+  insights: ["What's changed", () => 'A plain-English summary of your money'],
   settings: ['Settings & backup', () => 'Your data is stored on this device only']
 };
-const renderers = { overview: renderOverview, accounts: renderAccounts, calculator: renderCalculator, settings: renderSettings };
+const renderers = { overview: renderOverview, accounts: renderAccounts, planner: renderPlanner, insights: renderInsights, settings: renderSettings };
 function render() {
-  if (!renderers[ui.tab]) ui.tab = 'overview';
   chartConfigs.clear();
+  const eye = document.getElementById('eye-btn');
+  eye.innerHTML = ui.hidden ? icons.eyeOff : icons.eye;
+  eye.setAttribute('aria-pressed', String(!!ui.hidden));
+  eye.setAttribute('aria-label', ui.hidden ? 'Show balances' : 'Hide balances');
+  if (!state.profile.setupDone) {
+    document.body.classList.add('setup');
+    document.getElementById('page-title').textContent = 'Aurum';
+    document.getElementById('page-sub').textContent = 'Personal wealth ledger';
+    renderSetup();
+    return;
+  }
+  document.body.classList.remove('setup');
+  if (ui.tab === 'calculator') ui.tab = 'planner';
+  if (!renderers[ui.tab]) ui.tab = 'overview';
   document.querySelectorAll('.side-nav [data-tab], .tabbar [data-tab]').forEach(b => {
     if (b.dataset.tab === ui.tab) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current');
   });
@@ -1015,64 +1824,291 @@ function render() {
   renderers[ui.tab]();
 }
 
-/* ---------- log sheet ---------- */
+/* ---------- sheets ---------- */
+const openSheet = el => { if (typeof el.showModal === 'function') el.showModal(); else el.setAttribute('open', ''); };
+const closeSheets = () => document.querySelectorAll('dialog.sheet').forEach(d => { if (d.open) d.close(); });
+function typeOptions(sel) {
+  return Object.entries(GROUPS).map(([g, gl]) => `<optgroup label="${esc(gl)}">${Object.entries(TYPES).filter(([, t]) => t.group === g).map(([k, t]) => `<option value="${esc(k)}" ${k === sel ? 'selected' : ''}>${esc(t.label)}</option>`).join('')}</optgroup>`).join('')
+    + (sel && !TYPES[sel] ? `<option value="${esc(sel)}" selected>${esc(sel)}</option>` : '');
+}
+const topupLabel = a => typeOf(a).topup === 'bonus' ? 'Government bonus added: the account gets 25% on top of what you paid' : typeOf(a).topup === 'relief' ? 'Tax relief added: the pension gets 25% on top of what you paid' : '';
+
+// Log a value
 const sheet = document.getElementById('sheet');
 const logAccount = document.getElementById('log-account');
-function updatePrevHint() {
+function updateLogHints() {
+  const a = state.accounts.find(x => x.id === logAccount.value);
   const st = accountStats(logAccount.value);
-  document.getElementById('log-prev').textContent = st.last ? `Last valued at ${gbp(st.last.value)} on ${dateLabel(toMs(st.last.date))}` : 'First valuation for this account';
+  document.getElementById('log-prev').textContent = st.last ? `Last balance ${gbp(st.last.value)} on ${dateLabel(toMs(st.last.date))}` : 'First balance for this account';
+  const lbl = a ? topupLabel(a) : '';
+  document.getElementById('log-relief-wrap').hidden = !lbl;
+  document.getElementById('log-relief-label').textContent = lbl;
 }
 function openLog(accountId) {
-  if (!state.accounts.length) { ui.tab = 'settings'; render(); return; }
-  logAccount.innerHTML = state.accounts.map(a => `<option value="${esc(a.id)}">${esc(a.name)}${a.provider ? ' · ' + esc(a.provider) : ''}</option>`).join('');
-  logAccount.value = accountId || (ui.tab === 'accounts' && ui.account) || state.accounts[0].id;
+  if (!state.accounts.length) { openAcctSheet(null); return; }
+  const accts = visibleAccounts().length ? visibleAccounts() : state.accounts;
+  logAccount.innerHTML = accts.map(a => `<option value="${esc(a.id)}">${esc(a.name)}${a.provider ? ' · ' + esc(a.provider) : ''}${a.owner !== 'me' ? ' (' + esc(personName(a.owner)) + ')' : ''}</option>`).join('');
+  logAccount.value = accountId || (ui.tab === 'accounts' && ui.account) || accts[0].id;
+  if (!logAccount.value) logAccount.value = accts[0].id;
   const dateEl = document.getElementById('log-date');
   dateEl.value = TODAY; dateEl.max = TODAY;
-  document.getElementById('log-value').value = '';
-  document.getElementById('log-note').value = '';
+  ['log-value', 'log-flow', 'log-note'].forEach(id => { document.getElementById(id).value = ''; });
+  document.getElementById('flow-in').checked = true;
+  document.getElementById('log-relief').checked = false;
+  document.getElementById('log-err').textContent = '';
   document.getElementById('log-example-note').hidden = !state.example;
-  updatePrevHint();
-  if (typeof sheet.showModal === 'function') sheet.showModal(); else sheet.setAttribute('open', '');
+  updateLogHints();
+  openSheet(sheet);
   setTimeout(() => document.getElementById('log-value').focus(), 50);
 }
-logAccount.addEventListener('change', updatePrevHint);
+logAccount.addEventListener('change', updateLogHints);
 document.getElementById('log-form').addEventListener('submit', e => {
   e.preventDefault();
-  const value = parseFloat(document.getElementById('log-value').value);
+  const rawV = document.getElementById('log-value').value, rawF = document.getElementById('log-flow').value;
+  const value = parseFloat(rawV), flow = parseFloat(rawF);
   const date = document.getElementById('log-date').value;
-  if (!isFinite(value) || value < 0 || !date) return;
-  if (state.example) { state.logs = []; state.example = false; }
-  state.logs.push({ id: uid(), accountId: logAccount.value, date, value, note: document.getElementById('log-note').value.trim() });
+  const hasV = rawV !== '' && isFinite(value) && value >= 0, hasF = rawF !== '' && isFinite(flow) && flow > 0;
+  if (!date || (!hasV && !hasF)) { document.getElementById('log-err').textContent = 'Enter a balance, an amount paid in or out, or both.'; return; }
+  const accountId = logAccount.value, note = document.getElementById('log-note').value.trim();
+  clearExample([accountId]);
+  if (hasV) state.logs.push({ id: uid(), accountId, date, value, note });
+  if (hasF) {
+    const out = document.getElementById('flow-out').checked;
+    const relief = !out && !document.getElementById('log-relief-wrap').hidden && document.getElementById('log-relief').checked;
+    const own = out ? -flow : flow;
+    state.flows.push({ id: uid(), accountId, date, amount: relief ? own * 1.25 : own, own, note: hasV ? '' : note, auto: false });
+  }
   save();
   sheet.close();
   render();
 });
-sheet.addEventListener('click', e => { if (e.target === sheet) sheet.close(); });
+
+// Add or edit an account
+const acctSheet = document.getElementById('acct-sheet');
+let editingAcct = null;
+function updateAcctRelief() {
+  const lbl = topupLabel({ type: document.getElementById('acct-type').value });
+  document.getElementById('acct-reg-relief-wrap').hidden = !lbl;
+  document.getElementById('acct-reg-relief-label').textContent = lbl;
+}
+function openAcctSheet(id) {
+  const a = id ? state.accounts.find(x => x.id === id) : null;
+  editingAcct = a ? a.id : null;
+  document.getElementById('acct-title').textContent = a ? 'Edit account' : 'Add account';
+  document.getElementById('acct-submit').textContent = a ? 'Save changes' : 'Add account';
+  document.getElementById('acct-type').innerHTML = typeOptions(a ? a.type : 'ISA');
+  document.getElementById('acct-name').value = a ? a.name : '';
+  document.getElementById('acct-provider').value = a ? a.provider : '';
+  const owner = document.getElementById('acct-owner');
+  owner.innerHTML = people().map(p => `<option value="${esc(p.id)}">${esc(p.id === 'me' ? (state.profile.name ? state.profile.name + ' (me)' : 'Me') : p.name)}</option>`).join('');
+  owner.value = a ? a.owner : (ui.person !== 'all' ? ui.person : 'me');
+  document.getElementById('acct-opening').hidden = !!a;
+  document.getElementById('acct-open-value').value = '';
+  document.getElementById('acct-open-date').value = TODAY;
+  document.getElementById('acct-open-date').max = TODAY;
+  document.getElementById('acct-fee').value = a && a.fee ? a.fee : '';
+  document.getElementById('acct-reg-day').innerHTML = Array.from({ length: 28 }, (_, i) => `<option value="${i + 1}">Day ${i + 1}</option>`).join('');
+  document.getElementById('acct-reg-amount').value = a && a.regular ? a.regular.amount : '';
+  document.getElementById('acct-reg-day').value = String(a && a.regular ? a.regular.day : 1);
+  document.getElementById('acct-reg-relief').checked = !!(a && a.regular && a.regular.relief);
+  updateAcctRelief();
+  openSheet(acctSheet);
+  setTimeout(() => document.getElementById(a ? 'acct-name' : 'acct-type').focus(), 50);
+}
+document.getElementById('acct-type').addEventListener('change', () => {
+  updateAcctRelief();
+  const name = document.getElementById('acct-name');
+  const t = TYPES[document.getElementById('acct-type').value];
+  if (!editingAcct && t && (!name.value || name.dataset.auto === '1')) { name.value = t.label; name.dataset.auto = '1'; }
+});
+document.getElementById('acct-name').addEventListener('input', e => { e.target.dataset.auto = ''; });
+document.getElementById('acct-form').addEventListener('submit', e => {
+  e.preventDefault();
+  const name = document.getElementById('acct-name').value.trim();
+  if (!name) return;
+  const type = document.getElementById('acct-type').value;
+  const regAmount = num(document.getElementById('acct-reg-amount').value, 0);
+  const regDay = clamp(+document.getElementById('acct-reg-day').value || 1, 1, 28);
+  const relief = !document.getElementById('acct-reg-relief-wrap').hidden && document.getElementById('acct-reg-relief').checked;
+  const fields = {
+    name, type, provider: document.getElementById('acct-provider').value.trim(),
+    owner: document.getElementById('acct-owner').value || 'me',
+    fee: clamp(num(document.getElementById('acct-fee').value, 0), 0, 5)
+  };
+  if (editingAcct) {
+    const a = state.accounts.find(x => x.id === editingAcct);
+    Object.assign(a, fields);
+    if (regAmount > 0) {
+      const same = a.regular && a.regular.day === regDay;
+      a.regular = { amount: regAmount, day: regDay, relief, since: same ? a.regular.since : TODAY, last: same ? a.regular.last : '' };
+    } else a.regular = null;
+  } else {
+    clearExample([]);
+    const used = new Set(state.accounts.map(a => a.color));
+    const a = { id: uid(), ...fields, color: COLORS.find(c => !used.has(c)) || COLORS[state.accounts.length % COLORS.length], regular: regAmount > 0 ? { amount: regAmount, day: regDay, relief, since: TODAY, last: '' } : null };
+    state.accounts.push(a);
+    const open = parseFloat(document.getElementById('acct-open-value').value);
+    if (isFinite(open) && open >= 0) state.logs.push({ id: uid(), accountId: a.id, date: document.getElementById('acct-open-date').value || TODAY, value: open, note: 'Opening balance' });
+    ui.account = a.id;
+    if (a.owner !== ui.person && ui.person !== 'all') ui.person = a.owner;
+    if (ui.tab !== 'settings') ui.tab = 'accounts';
+    saveUi();
+  }
+  runRegular();
+  save();
+  acctSheet.close();
+  render();
+});
+
+// Update all
+const bulkSheet = document.getElementById('bulk-sheet');
+function openBulk() {
+  const accts = visibleAccounts();
+  if (!accts.length) { openAcctSheet(null); return; }
+  document.getElementById('bulk-date').value = TODAY;
+  document.getElementById('bulk-date').max = TODAY;
+  document.getElementById('bulk-rows').innerHTML = Object.keys(GROUPS).flatMap(g => accts.filter(a => groupOf(a) === g)).map(a => {
+    const st = accountStats(a.id);
+    return `<div class="bulk-row">
+      <div class="who"><b>${esc(a.name)}</b>${ownerChip(a)}<div class="hint">${st.last ? `${gbp(st.last.value)} · ${ago(st.last.date).toLowerCase()}` : 'No balance yet'}</div></div>
+      <div class="money"><span>£</span><input class="input" type="number" inputmode="decimal" step="0.01" min="0" data-bulk="value" data-id="${esc(a.id)}" placeholder="Balance" aria-label="${esc(a.name)} balance"></div>
+      <div class="money"><span>£</span><input class="input" type="number" inputmode="decimal" step="0.01" min="0" data-bulk="paid" data-id="${esc(a.id)}" placeholder="Paid in" aria-label="${esc(a.name)} paid in"></div>
+    </div>`;
+  }).join('');
+  openSheet(bulkSheet);
+}
+document.getElementById('bulk-form').addEventListener('submit', e => {
+  e.preventDefault();
+  const date = document.getElementById('bulk-date').value || TODAY;
+  const entries = [];
+  bulkSheet.querySelectorAll('[data-bulk]').forEach(inp => {
+    const v = parseFloat(inp.value);
+    if (inp.value !== '' && isFinite(v) && v >= 0) entries.push({ id: inp.dataset.id, kind: inp.dataset.bulk, v });
+  });
+  if (!entries.length) { bulkSheet.close(); return; }
+  clearExample(entries.map(x => x.id));
+  for (const x of entries) {
+    if (x.kind === 'value') state.logs.push({ id: uid(), accountId: x.id, date, value: x.v, note: '' });
+    else if (x.v > 0) state.flows.push({ id: uid(), accountId: x.id, date, amount: x.v, own: x.v, note: '', auto: false });
+  }
+  save();
+  bulkSheet.close();
+  render();
+});
+document.querySelectorAll('dialog.sheet').forEach(d => d.addEventListener('click', e => { if (e.target === d) d.close(); }));
 
 /* ---------- backup ---------- */
 const backupJson = () => JSON.stringify({ app: 'Aurum', exportedAt: new Date().toISOString(), ...state }, null, 2);
-function setStatus(msg, err) {
-  const el = document.getElementById('backup-status');
+function setStatus(msg, err, id) {
+  const el = document.getElementById(id || 'backup-status');
   if (!el) return;
   el.textContent = msg; el.classList.toggle('err', !!err);
 }
 async function copyText(text) {
   try { await navigator.clipboard.writeText(text); return true; } catch { return false; }
 }
+function markBackedUp() { state.profile.lastBackup = TODAY; save(); }
 function importText(text) {
   try {
     const next = normalize(JSON.parse(text));
     next.example = false;
-    state = next; save();
+    next.profile.setupDone = true;
+    state = next; runRegular(); save();
     render();
     setStatus(`Imported ${state.logs.length} valuations across ${state.accounts.length} accounts.`);
   } catch (err) {
     setStatus(err instanceof SyntaxError ? 'That text is not valid JSON. Check you copied the whole backup.' : err.message, true);
   }
 }
+function csvRows(text) {
+  const rows = [];
+  for (const line of text.split(/\r?\n/)) {
+    if (!line.trim()) continue;
+    const cells = []; let cur = '', q = false;
+    for (let i = 0; i < line.length; i++) {
+      const c = line[i];
+      if (q) { if (c === '"' && line[i + 1] === '"') { cur += '"'; i++; } else if (c === '"') q = false; else cur += c; }
+      else if (c === '"') q = true; else if (c === ',') { cells.push(cur); cur = ''; } else cur += c;
+    }
+    cells.push(cur);
+    rows.push(cells.map(s => s.trim()));
+  }
+  return rows;
+}
+function csvDate(s) {
+  let m = /^(\d{4})-(\d{1,2})-(\d{1,2})$/.exec(s);
+  if (m) return `${m[1]}-${pad(+m[2])}-${pad(+m[3])}`;
+  m = /^(\d{1,2})[/.-](\d{1,2})[/.-](\d{2}|\d{4})$/.exec(s);
+  if (m) { const y = m[3].length === 2 ? 2000 + +m[3] : +m[3]; return `${y}-${pad(+m[2])}-${pad(+m[1])}`; }
+  return '';
+}
+const csvMoney = s => { const t = String(s || '').replace(/[£,\s]/g, ''); return t === '' ? NaN : parseFloat(t); };
+function importCsv(text) {
+  const rows = csvRows(text);
+  if (!rows.length) { setStatus('That file is empty.', true); return; }
+  let col = { date: 0, account: 1, value: 2, paid: 3, note: 4 };
+  if (rows[0].some(c => /date/i.test(c))) {
+    const h = rows.shift().map(c => c.toLowerCase());
+    const find = re => h.findIndex(c => re.test(c));
+    col = { date: find(/date/), account: find(/account|name/), value: find(/balance|value/), paid: find(/paid|deposit|contribution/), note: find(/note/) };
+  }
+  if (col.date < 0 || col.account < 0) { setStatus('Could not find the date and account columns.', true); return; }
+  clearExample([]);
+  let logs = 0, flows = 0, skipped = 0, created = 0;
+  const byName = new Map(state.accounts.map(a => [a.name.toLowerCase(), a]));
+  for (const r of rows) {
+    const date = csvDate(r[col.date] || ''), name = (r[col.account] || '').slice(0, 40);
+    const value = col.value >= 0 ? csvMoney(r[col.value]) : NaN, paid = col.paid >= 0 ? csvMoney(r[col.paid]) : NaN;
+    if (!date || !name || date > TODAY || (!isFinite(value) && !isFinite(paid))) { skipped++; continue; }
+    let a = byName.get(name.toLowerCase());
+    if (!a) {
+      const used = new Set(state.accounts.map(x => x.color));
+      a = { id: uid(), name, provider: '', type: 'Other', color: COLORS.find(c => !used.has(c)) || COLORS[state.accounts.length % COLORS.length], owner: 'me', fee: 0, regular: null };
+      state.accounts.push(a); byName.set(name.toLowerCase(), a); created++;
+    }
+    const note = col.note >= 0 ? String(r[col.note] || '').slice(0, 80) : '';
+    if (isFinite(value) && value >= 0) { state.logs.push({ id: uid(), accountId: a.id, date, value, note }); logs++; }
+    if (isFinite(paid) && paid !== 0) { state.flows.push({ id: uid(), accountId: a.id, date, amount: paid, own: paid, note: '', auto: false }); flows++; }
+  }
+  save(); render();
+  setStatus(`Imported ${logs} balances and ${flows} payments${created ? `, created ${created} account${created === 1 ? '' : 's'} (set their type in Accounts)` : ''}${skipped ? `. Skipped ${skipped} rows that could not be read` : ''}.`, !logs && !flows);
+}
+
+/* ---------- PIN lock ---------- */
+const lockEl = document.getElementById('lock');
+async function hashPin(pin) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode('aurum:' + pin));
+  return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, '0')).join('');
+}
+function showLock() {
+  if (!store.get(LOCK_KEY) || !hasCrypto) return;
+  closeSheets();
+  pendingForgot = false;
+  renderForgot();
+  document.getElementById('lock-pin').value = '';
+  document.getElementById('lock-err').textContent = '';
+  lockEl.hidden = false;
+  setTimeout(() => document.getElementById('lock-pin').focus(), 50);
+}
+function renderForgot() {
+  document.getElementById('lock-forgot').innerHTML = pendingForgot
+    ? `<p class="hint" style="margin-bottom:10px">This erases all Aurum data on this device. You can then restore a backup.</p><div class="row-actions" style="justify-content:center"><button class="btn sm ghost" type="button" data-action="forgot-no">Cancel</button><button class="btn sm danger solid" type="button" data-action="forgot-yes">Erase data</button></div>`
+    : '<button class="btn ghost sm" type="button" data-action="forgot">Forgot PIN?</button>';
+}
+document.getElementById('lock-form').addEventListener('submit', async e => {
+  e.preventDefault();
+  const pin = document.getElementById('lock-pin').value;
+  if (await hashPin(pin) === store.get(LOCK_KEY)) { lockEl.hidden = true; document.getElementById('lock-pin').value = ''; }
+  else { document.getElementById('lock-err').textContent = 'That PIN is not right.'; document.getElementById('lock-pin').select(); }
+});
+let hiddenAt = 0;
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) hiddenAt = Date.now();
+  else if (hiddenAt && Date.now() - hiddenAt > 60000) showLock();
+});
 
 /* ---------- events ---------- */
-function goTab(tab) { ui.tab = tab; pendingDelete = null; pendingReset = false; pendingRemoveAcct = null; saveUi(); render(); window.scrollTo({ top: 0 }); }
+function goTab(tab) { ui.tab = tab; pendingDelete = null; pendingReset = false; pendingRemoveAcct = null; pendingGoal = null; pendingPerson = null; saveUi(); render(); window.scrollTo({ top: 0 }); }
 document.addEventListener('click', async e => {
   const t = e.target.closest('[data-action]');
   if (!t) return;
@@ -1080,35 +2116,74 @@ document.addEventListener('click', async e => {
   switch (act) {
     case 'tab': goTab(t.dataset.tab); break;
     case 'open-log': openLog(id); break;
-    case 'close-log': sheet.close(); break;
+    case 'open-bulk': openBulk(); break;
+    case 'add-acct': openAcctSheet(null); break;
+    case 'edit-acct': openAcctSheet(id); break;
+    case 'close-sheet': closeSheets(); break;
+    case 'toggle-hide': ui.hidden = !ui.hidden; saveUi(); render(); break;
     case 'range': ui.range = t.dataset.range; saveUi(); render(); break;
+    case 'insight-range': ui.insight = t.dataset.range; saveUi(); render(); break;
+    case 'stack-by': ui.stackBy = id; saveUi(); render(); break;
+    case 'person': ui.person = id; saveUi(); render(); break;
     case 'goto-account': ui.account = id; goTab('accounts'); break;
     case 'pick-account': ui.account = id; pendingDelete = null; saveUi(); render(); break;
     case 'del': pendingDelete = id; render(); break;
     case 'del-no': pendingDelete = null; render(); break;
-    case 'del-yes': state.logs = state.logs.filter(l => l.id !== id); pendingDelete = null; save(); render(); break;
-    case 'clear-example': state.logs = []; state.example = false; save(); render(); break;
+    case 'del-yes':
+      state.logs = state.logs.filter(l => l.id !== id);
+      state.flows = state.flows.filter(f => f.id !== id);
+      pendingDelete = null; save(); render(); break;
+    case 'clear-example': clearExample([]); save(); render(); break;
     case 'reset': pendingReset = true; render(); break;
     case 'reset-no': pendingReset = false; render(); break;
-    case 'reset-yes':
-      state = { version: 1, example: false, accounts: DEFAULT_ACCOUNTS.map(a => ({ ...a })), logs: [] };
+    case 'reset-yes': {
+      const profile = { ...state.profile, people: [], setupDone: true };
+      state = { ...emptyState(), profile: normProfile(profile, true) };
       pendingReset = false; save(); render(); setStatus('All data deleted.'); break;
+    }
     case 'remove-acct': pendingRemoveAcct = id; render(); break;
     case 'remove-acct-no': pendingRemoveAcct = null; render(); break;
     case 'remove-acct-yes':
       state.accounts = state.accounts.filter(a => a.id !== id);
       state.logs = state.logs.filter(l => l.accountId !== id);
+      state.flows = state.flows.filter(f => f.accountId !== id);
+      state.goals = state.goals.filter(g => g.scope !== id);
       pendingRemoveAcct = null; save(); render(); break;
+    case 'goal-del': pendingGoal = id; render(); break;
+    case 'goal-del-no': pendingGoal = null; render(); break;
+    case 'goal-del-yes': state.goals = state.goals.filter(g => g.id !== id); pendingGoal = null; save(); render(); break;
+    case 'person-del': pendingPerson = id; render(); break;
+    case 'person-del-no': pendingPerson = null; render(); break;
+    case 'person-del-yes':
+      state.profile.people = state.profile.people.filter(p => p.id !== id);
+      state.accounts.forEach(a => { if (a.owner === id) a.owner = 'me'; });
+      if (ui.person === id) ui.person = 'me';
+      pendingPerson = null; save(); saveUi(); render(); break;
+    case 'use-hist': state.profile.growth = clamp(Math.round(+id * 2) / 2, 0, 12); save(); render(); break;
+    case 'setup-demo': {
+      const name = document.getElementById('su-name').value.trim(), dob = document.getElementById('su-dob').value;
+      state = seedExample({ ...state.profile, name, dob });
+      ui.tab = 'overview'; saveUi(); save(); render(); break;
+    }
+    case 'pin-off': store.del(LOCK_KEY); render(); setStatus('PIN lock turned off.', false, 'pin-status'); break;
+    case 'forgot': pendingForgot = true; renderForgot(); break;
+    case 'forgot-no': pendingForgot = false; renderForgot(); break;
+    case 'forgot-yes':
+      [STORE_KEY, ...OLD_KEYS, ...Object.values(LEGACY_KEYS), LOCK_KEY, UI_KEY].forEach(k => store.del(k));
+      if (Native) Native.Preferences.remove({ key: STORE_KEY }).catch(() => {});
+      state = emptyState(); ui = JSON.parse(JSON.stringify(DEFAULT_UI));
+      lockEl.hidden = true; save(); render(); break;
     case 'export': {
       const json = backupJson();
       if (Native) {
         try {
           const { uri } = await Native.Filesystem.writeFile({ path: `aurum-backup-${TODAY}.json`, data: json, directory: 'CACHE', encoding: 'utf8' });
           await Native.Share.share({ title: 'Aurum backup', dialogTitle: 'Save your Aurum backup', files: [uri] });
+          markBackedUp(); render();
           setStatus('Backup ready. Save it somewhere safe, such as Google Drive or Files.');
         } catch (err) {
           const cancelled = /cancel/i.test(String(err && err.message));
-          if (!cancelled && await copyText(json)) setStatus('Sharing is unavailable, so the backup was copied to your clipboard.');
+          if (!cancelled && await copyText(json)) { markBackedUp(); setStatus('Sharing is unavailable, so the backup was copied to your clipboard.'); }
           else setStatus(cancelled ? 'Export cancelled.' : 'Could not export. Use "Copy current backup" instead.', !cancelled);
         }
         break;
@@ -1121,12 +2196,13 @@ document.addEventListener('click', async e => {
         document.body.appendChild(a); a.click(); a.remove();
         setTimeout(() => URL.revokeObjectURL(url), 1000);
       } catch {}
+      markBackedUp(); render();
       setStatus(copied ? 'Backup exported. A copy is also on your clipboard.' : 'Backup exported to your downloads.');
       break;
     }
     case 'copy-backup': {
       const json = backupJson();
-      if (await copyText(json)) setStatus('Backup copied to your clipboard.');
+      if (await copyText(json)) { markBackedUp(); setStatus('Backup copied to your clipboard.'); }
       else { const ta = document.getElementById('import-text'); ta.value = json; ta.select(); setStatus('Backup text is selected in the box. Copy it from there.'); }
       break;
     }
@@ -1136,44 +2212,85 @@ document.addEventListener('click', async e => {
 document.addEventListener('keydown', e => {
   if ((e.key === 'Enter' || e.key === ' ') && e.target.matches('tr[data-action]')) { e.preventDefault(); e.target.click(); }
 });
+function readFile(input, fn) {
+  const reader = new FileReader();
+  reader.onload = () => fn(String(reader.result));
+  reader.onerror = () => setStatus('Could not read that file.', true);
+  reader.readAsText(input.files[0]);
+  input.value = '';
+}
 document.addEventListener('change', e => {
   const t = e.target;
-  if (t.id === 'import-file' && t.files && t.files[0]) {
-    const reader = new FileReader();
-    reader.onload = () => importText(String(reader.result));
-    reader.onerror = () => setStatus('Could not read that file.', true);
-    reader.readAsText(t.files[0]);
-    t.value = '';
-  }
+  if (t.id === 'import-file' && t.files && t.files[0]) readFile(t, importText);
+  if (t.id === 'csv-file' && t.files && t.files[0]) readFile(t, importCsv);
   if (t.name === 'theme') {
     if (t.value === 'light') store.set(THEME_KEY, 'light'); else store.del(THEME_KEY);
     applyTheme(t.value);
   }
-  if (t.name === 'band') { ui.calc.band = t.value; saveUi(); updateCalc(); }
+  if (t.id === 'set-hidden') { ui.hidden = t.checked; saveUi(); render(); }
+  if (t.name === 'band') { state.profile.band = t.value; save(); updateCalc(); }
   if (t.id === 'calc-draw') { ui.calc.draw = +t.value; saveUi(); updateCalc(); }
+  if (t.id === 'custom-unit') { ui.custom.unit = t.value; saveUi(); render(); }
+  if (t.id === 'custom-n') { ui.custom.n = clamp(Math.round(num(t.value, 1)), 1, 999); saveUi(); render(); }
+  if (t.dataset.planInc) { ui.plan.include[t.dataset.planInc] = t.checked; saveUi(); updatePlan(); }
+  if (t.id === 'plan-real') { ui.plan.real = t.checked; saveUi(); updatePlan(); }
+  if (t.id === 'plan-rate' || t.id === 'plan-age') render();
 });
 document.addEventListener('input', e => {
-  const t = e.target, c = ui.calc;
+  const t = e.target, c = ui.calc, p = state.profile;
+  const out = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+  if (t.id === 'plan-age') { p.retireAge = +t.value; out('out-age', t.value); save(); updatePlan(); return; }
+  if (t.id === 'plan-years') { ui.plan.years = +t.value; out('out-pyears', t.value); saveUi(); updatePlan(); return; }
+  if (t.id === 'plan-rate') { p.growth = +t.value; out('out-prate', t.value + '%'); save(); updatePlan(); return; }
+  if (t.id === 'plan-infl') { p.inflation = +t.value; out('out-infl', t.value + '%'); save(); updatePlan(); return; }
+  if (t.id === 'plan-draw') { p.drawRate = +t.value; out('out-draw', t.value + '%'); save(); updatePlan(); return; }
+  if (t.id === 'plan-target') { ui.plan.target = Math.max(0, num(t.value, 0)); saveUi(); updatePlan(); return; }
+  if (t.dataset.planMon) { ui.plan.monthly[t.dataset.planMon] = t.value === '' ? null : Math.max(0, num(t.value, 0)); saveUi(); updatePlan(); return; }
   if (t.id === 'calc-monthly') { c.monthly = Math.max(0, +t.value || 0); document.getElementById('calc-monthly-range').value = Math.min(2000, c.monthly); }
   else if (t.id === 'calc-monthly-range') { c.monthly = +t.value; document.getElementById('calc-monthly').value = c.monthly; }
-  else if (t.id === 'calc-years') { c.years = +t.value; document.getElementById('out-years').textContent = c.years; }
-  else if (t.id === 'calc-rate') { c.rate = +t.value; document.getElementById('out-rate').textContent = c.rate + '%'; }
+  else if (t.id === 'calc-years') { c.years = +t.value; out('out-years', c.years); }
+  else if (t.id === 'calc-rate') { c.rate = +t.value; out('out-rate', c.rate + '%'); }
   else return;
   saveUi(); updateCalc();
 });
-document.addEventListener('submit', e => {
-  if (e.target.id !== 'add-acct') return;
-  e.preventDefault();
-  const name = document.getElementById('new-acct-name').value.trim();
-  if (!name) return;
-  const used = new Set(state.accounts.map(a => a.color));
-  state.accounts.push({
-    id: uid(), name,
-    provider: document.getElementById('new-acct-provider').value.trim(),
-    type: document.getElementById('new-acct-type').value,
-    color: COLORS.find(c => !used.has(c)) || COLORS[state.accounts.length % COLORS.length]
-  });
-  save(); render();
+document.addEventListener('submit', async e => {
+  const f = e.target;
+  if (f.id === 'setup-form') {
+    e.preventDefault();
+    state.profile.name = document.getElementById('su-name').value.trim().slice(0, 40);
+    const dob = document.getElementById('su-dob').value;
+    state.profile.dob = isIso(dob) ? dob : '';
+    state.profile.setupDone = true;
+    ui.tab = 'accounts'; saveUi(); save(); render();
+    openAcctSheet(null);
+  } else if (f.id === 'profile-form') {
+    e.preventDefault();
+    const p = state.profile, dob = document.getElementById('pf-dob').value;
+    p.name = document.getElementById('pf-name').value.trim().slice(0, 40);
+    p.dob = isIso(dob) && dob <= TODAY ? dob : '';
+    p.retireAge = clamp(Math.round(num(document.getElementById('pf-retire').value, 60)), 40, 80);
+    p.band = BANDS[document.getElementById('pf-band').value] ? document.getElementById('pf-band').value : 'basic';
+    save(); render(); setStatus('Saved.', false, 'profile-status');
+  } else if (f.id === 'person-form') {
+    e.preventDefault();
+    const name = document.getElementById('person-name').value.trim().slice(0, 30);
+    if (!name) return;
+    state.profile.people.push({ id: uid(), name });
+    save(); render();
+  } else if (f.id === 'goal-form') {
+    e.preventDefault();
+    const name = document.getElementById('goal-name').value.trim(), target = num(document.getElementById('goal-target').value, 0);
+    if (!name || target <= 0) return;
+    const date = document.getElementById('goal-date').value;
+    state.goals.push({ id: uid(), name: name.slice(0, 40), target, date: isIso(date) ? date : '', scope: document.getElementById('goal-scope').value || 'all' });
+    save(); render();
+  } else if (f.id === 'pin-form') {
+    e.preventDefault();
+    const pin = document.getElementById('pin-new').value;
+    if (!/^\d{4,8}$/.test(pin)) { setStatus('Use 4 to 8 digits.', true, 'pin-status'); return; }
+    store.set(LOCK_KEY, await hashPin(pin));
+    render(); setStatus('PIN lock is on.', false, 'pin-status');
+  }
 });
 
 // Native storage is the source of truth in the app if the WebView's storage was cleared.
@@ -1184,7 +2301,9 @@ document.addEventListener('submit', e => {
       if (value) { state = normalize(JSON.parse(value)); store.set(STORE_KEY, value); }
     } catch {}
   }
+  if (runRegular()) save();
   render();
+  showLock();
 })();
 })();
 </script>
