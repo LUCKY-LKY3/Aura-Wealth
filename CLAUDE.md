@@ -60,6 +60,9 @@ There is no local Java/Android SDK on the owner's PC — **APKs are only built b
   accounts: [{id,name,provider,type,color,owner,fee,rate,notes,archived,priorPaid,since,regular:{amount,day,relief,since,last}|null}],
   logs: [{id,accountId,date:'YYYY-MM-DD',value,note}], flows: [{id,accountId,date,amount,own,note,auto,employer}],
   income: [{id,accountId,date,amount,kind:'dividend'|'interest'|'prize'}], goals: [{id,name,target,date,scope}] }`
+- "Paid in this tax year" is a flow with `ytd: true` dated on the account's first balance: it counts for allowances
+  (dated this tax year) but not as money in for growth (flows on/before the first balance are ignored). SIPP stores gross
+  (`own` = amount/1.25), LISA stores own + 25% bonus. Only offered for accounts first logged this tax year.
 - `income` is for the tax helper only (doesn't affect growth). Employer pension payments are flows with `employer: true, own: 0`.
 - Device-only keys (not in backups): `aurum_lock` (PIN hash), `aurum_bio`, `aurum_reminder` (day), `aurum_update` (cached release), `aurum_autobackup`/`_last` (weekly copy to Documents/Aurum).
 - `archived` accounts stay in totals/charts but are hidden from pickers, Update all, reminders and the planner.

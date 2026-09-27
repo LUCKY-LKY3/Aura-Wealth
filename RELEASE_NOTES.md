@@ -1,10 +1,3 @@
-- Total paid in so far: tell Aurum how much of an account's balance was your money, so earlier gains count as growth
-- Invested since (year): see a rough average return a year
-- Add past balances: fill in old statements (e.g. each 5 April) in one go for a truer chart
-- Logging a balance twice on the same day now updates it instead of adding a duplicate
-- All accounts view in Accounts: combined value, paid in, growth, chart and every account's figures
-- Undo after deleting an entry, account or goal
-- Update all: "same as last time" for paid in, and shows regular payments already logged
-- Reorder accounts in Settings
-- Provider initials badge next to each account
-- Set a goal straight from an account
+- Paid in this tax year: tell Aurum what you've already put into an ISA, SIPP or pension since 6 April
+- New Allowances panel: ISA, Lifetime ISA, pension annual allowance and Junior ISA used and left, per account
+- Reminder when an account added this tax year has no payments recorded yet
