@@ -355,6 +355,7 @@ body.setup .tabbar,body.setup .fab,body.setup .side-nav,body.setup .top-actions{
 .eye svg{width:18px;height:18px}
 .acct-actions{display:flex;gap:8px;flex-wrap:wrap}
 details.fold>summary{list-style:none;cursor:pointer}
+.yr-in{width:112px;margin-left:auto}@media (max-width:420px){.yr-in{width:92px}}.yr-in .input{padding-left:22px;font-size:13.5px}
 details.fold>summary::-webkit-details-marker{display:none}
 details.fold>summary h2::after{content:' ▾';color:var(--ink-3);font-size:12px}
 details.fold:not([open])>summary h2::after{content:' ▸'}
@@ -1887,11 +1888,12 @@ function yearlyPanel(a) {
     <summary><span class="panel-head" style="margin:0"><h2>Year by year</h2><span class="aside">Optional · tap to ${hasData ? 'hide' : 'add past years'}</span></span></summary>
     <p class="hint" style="margin:12px 0 10px">${pension ? 'Paid in: everything, including tax relief and employer payments.' : 'Paid in: your own money.'} Value at 5 April: from your annual statement. Values become balances on the chart; paid-in amounts are for reference (allowances and growth per year). Leave blanks where you don't know.</p>
     <div class="table-wrap"><table>
-      <thead><tr><th>Tax year</th><th class="r">Paid in</th><th class="r">Value at 5 April</th><th class="r">Growth</th></tr></thead>
-      <tbody>${[...rows].reverse().map(r => `<tr><td style="white-space:nowrap">${tyLabel(r.y)}${r.y === cur ? '<div class="hint">so far</div>' : ''}</td>
-        <td class="r"><div class="money" style="max-width:120px;margin-left:auto"><span>£</span><input class="input" type="number" inputmode="decimal" min="0" step="1" data-yearly="${r.y}" value="${a.yearly && a.yearly[r.y] != null ? a.yearly[r.y] : ''}" placeholder="${Math.round(loggedPaid(a, r.y)) || ''}" aria-label="Paid in ${tyLabel(r.y)}"></div></td>
-        <td class="r">${r.y === cur ? `<span class="val mono">${r.end != null ? gbp(r.end) : '—'}</span><div class="hint">now</div>` : `<div class="money" style="max-width:130px;margin-left:auto"><span>£</span><input class="input" type="number" inputmode="decimal" min="0" step="1" data-yearval="${r.y}" value="${r.exactEnd != null ? r.exactEnd : ''}" placeholder="${r.end != null ? Math.round(r.end) : ''}" aria-label="Value at 5 April ${r.y + 1}"></div>`}</td>
-        <td class="r">${r.growth != null ? deltaChip(r.growth, signed(r.growth)) + (r.ret != null ? `<div class="hint">${pct(r.ret)}</div>` : '') : '<span class="faint">—</span>'}</td></tr>`).join('')}</tbody>
+      <thead><tr><th>Tax year</th><th class="r">Paid in</th><th class="r">Value at 5 April</th></tr></thead>
+      <tbody>${[...rows].reverse().map(r => `<tr><td><span style="white-space:nowrap">${tyLabel(r.y)}</span>${r.y === cur ? '<div class="hint">so far</div>' : ''}
+          <div style="margin-top:4px">${r.growth != null ? deltaChip(r.growth, signed(r.growth)) + (r.ret != null ? `<div class="hint">${pct(r.ret)}</div>` : '') : '<span class="hint">growth —</span>'}</div></td>
+        <td class="r"><div class="money yr-in"><span>£</span><input class="input" type="number" inputmode="decimal" min="0" step="1" data-yearly="${r.y}" value="${a.yearly && a.yearly[r.y] != null ? a.yearly[r.y] : ''}" placeholder="${Math.round(loggedPaid(a, r.y)) || ''}" aria-label="Paid in ${tyLabel(r.y)}"></div></td>
+        <td class="r">${r.y === cur ? `<span class="val mono">${r.end != null ? gbp(r.end) : '—'}</span><div class="hint">now</div>` : `<div class="money yr-in"><span>£</span><input class="input" type="number" inputmode="decimal" min="0" step="1" data-yearval="${r.y}" value="${r.exactEnd != null ? r.exactEnd : ''}" placeholder="${r.end != null ? Math.round(r.end) : ''}" aria-label="Value at 5 April ${r.y + 1}"></div>`}</td>
+      </tr>`).join('')}</tbody>
     </table></div>
     <div class="row-actions" style="margin-top:10px">
       <button class="btn" data-action="save-yearly" data-id="${esc(a.id)}">Save</button>
