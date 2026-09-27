@@ -1,0 +1,10 @@
+node_modules/
+www/
+dist/
+
+# Signing keys must never be committed.
+*.p12
+*.jks
+*.keystore
+*.base64.txt
+keystore-password.txt

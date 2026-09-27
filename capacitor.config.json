@@ -1,0 +1,14 @@
+{
+  "appId": "io.github.luckylky3.aurum",
+  "appName": "Aurum",
+  "webDir": "www",
+  "android": {
+    "backgroundColor": "#080807"
+  },
+  "plugins": {
+    "SystemBars": {
+      "insetsHandling": "css",
+      "style": "DARK"
+    }
+  }
+}

@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 196 48" width="392" height="96">
+  <rect x=".5" y=".5" width="47" height="47" rx="11.5" fill="#0B0A08" stroke="#D4AF5A" stroke-opacity=".35"/>
+  <circle cx="24" cy="24" r="14.5" fill="none" stroke="#D4AF5A" stroke-width="2.2"/>
+  <circle cx="24" cy="24" r="11.6" fill="none" stroke="#D4AF5A" stroke-width=".8" opacity=".45"/>
+  <path d="M17.2 30.2L24 16.6l6.8 13.6" fill="none" stroke="#D4AF5A" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M19.9 25.4h8.2" stroke="#D4AF5A" stroke-width="2.4" stroke-linecap="round"/>
+  <text x="62" y="33" font-family="Geist, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="28" font-weight="650" letter-spacing="-0.7" fill="#0B0A08">Aurum</text>
+</svg>

@@ -1,0 +1,1190 @@
+<title>Aurum</title>
+<meta name="theme-color" content="#080807">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Crect width='48' height='48' rx='12' fill='%230B0A08'/%3E%3Ccircle cx='24' cy='24' r='14' fill='none' stroke='%23D4AF5A' stroke-width='2.4'/%3E%3Cpath d='M16.5 30.5L24 15.5l7.5 15' fill='none' stroke='%23D4AF5A' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M19.4 25h9.2' stroke='%23D4AF5A' stroke-width='2.6' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400..700&family=Geist+Mono:wght@400..600&display=swap">
+<style>
+/* Black and gold is the default look; Light is an opt-in setting (data-aurum="light"). */
+:root{
+  color-scheme:dark;
+  --bg:#080807; --surface:#121110; --surface-2:#1B1916; --line:#27241F; --line-strong:#3A352D;
+  --ink:#F3EFE6; --ink-2:#B5AE9F; --ink-3:#7C7568;
+  --primary:#D4AF5A; --primary-ink:#0A0906; --focus:#E8C877;
+  --gold:#D9B666; --gold-soft:#231D10;
+  --navy:#0E0D0B; --navy-2:#1A1712; --on-navy:#F6F1E4; --on-navy-2:#B2A993; --on-navy-line:rgba(217,182,102,.22); --gold-on-navy:#D9B666;
+  --pos:#4CC98E; --neg:#F07360; --pos-soft:#10241A; --neg-soft:#2B1512;
+  --c1:#D9B666; --c2:#EDE4D0; --c3:#C0784A; --c4:#9C8F6A; --c5:#D9967F; --c6:#8E8A82;
+  --c1-hi:#E3C47A; --c2-hi:#F2EBDB; --c3-hi:#D38D5E; --c4-hi:#B3A57E; --c5-hi:#E6A994; --c6-hi:#A7A39A;
+  --shadow:0 1px 2px rgba(0,0,0,.5),0 8px 24px -12px rgba(0,0,0,.8);
+  --font:'Geist',ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --mono:'Geist Mono',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  /* Safe areas: Capacitor sets --safe-area-inset-*; browsers use env(). */
+  --sa-top:var(--safe-area-inset-top,env(safe-area-inset-top,0px));
+  --sa-bottom:var(--safe-area-inset-bottom,env(safe-area-inset-bottom,0px));
+}
+:root[data-aurum="light"]{
+  color-scheme:light;
+  --bg:#F6F4EF; --surface:#FFFFFF; --surface-2:#F1EEE7; --line:#E5E0D5; --line-strong:#D2CBBC;
+  --ink:#15130F; --ink-2:#565044; --ink-3:#8D8676;
+  --primary:#15130F; --primary-ink:#F3E3B5; --focus:#A57A1E;
+  --gold:#A57A1E; --gold-soft:#F7EFDC;
+  --navy:#0E0D0B; --navy-2:#1C1914;
+  --pos:#0E7F4F; --neg:#C23A28; --pos-soft:#E4F4EC; --neg-soft:#FBE9E6;
+  --c1:#B38622; --c2:#3D382F; --c3:#B0602F; --c4:#7F7250; --c5:#B8705C; --c6:#8A857B;
+  --shadow:0 1px 2px rgba(21,19,15,.05),0 4px 16px -8px rgba(21,19,15,.12);
+}
+*{box-sizing:border-box}
+html,body{background:var(--bg)}
+body{font-family:var(--font);color:var(--ink);font-size:14.5px;line-height:1.5;-webkit-font-smoothing:antialiased;font-feature-settings:"ss01"}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px;border-radius:6px}
+.num{font-variant-numeric:tabular-nums}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* ---------- shell ---------- */
+.shell{display:grid;grid-template-columns:minmax(0,1fr);min-height:100%}
+@media (min-width:960px){.shell{grid-template-columns:232px minmax(0,1fr)}}
+.side{display:none}
+@media (min-width:960px){
+  .side{display:flex;flex-direction:column;gap:28px;position:sticky;top:var(--sa-top);height:100vh;padding:22px 16px;border-right:1px solid var(--line);background:var(--surface)}
+}
+.lockup{display:flex;align-items:center;gap:10px;padding:0 8px}
+.lockup .word{font-size:19px;font-weight:650;letter-spacing:-.025em}
+.lockup .tag{display:block;font-size:11px;font-weight:500;letter-spacing:.04em;color:var(--ink-3);margin-top:-2px}
+.mark{flex:none;display:block}
+.side-nav{display:flex;flex-direction:column;gap:2px}
+.side-nav .label{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);padding:0 10px 8px}
+.nav-btn{display:flex;align-items:center;gap:11px;border:0;background:transparent;color:var(--ink-2);padding:9px 10px;border-radius:8px;font-weight:500;font-size:14px;text-align:left;width:100%}
+.nav-btn svg{width:18px;height:18px;flex:none}
+.nav-btn:hover{background:var(--surface-2);color:var(--ink)}
+.nav-btn[aria-current="page"]{background:var(--surface-2);color:var(--ink);font-weight:600}
+.nav-btn[aria-current="page"] svg{color:var(--gold)}
+.side-foot{margin-top:auto;display:flex;flex-direction:column;gap:10px;padding:0 8px}
+.saved{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--ink-2)}
+.saved i{width:7px;height:7px;border-radius:50%;background:var(--pos);flex:none}
+.saved.bad i{background:var(--neg)}
+.saved.flash i{animation:pulse .9s ease}
+@keyframes pulse{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--pos) 55%,transparent)}100%{box-shadow:0 0 0 7px transparent}}
+
+.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:30;display:flex;justify-content:space-around;background:var(--surface);border-top:1px solid var(--line);padding:6px 6px calc(8px + var(--sa-bottom))}
+.tabbar button{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;border:0;background:transparent;color:var(--ink-3);font-size:11px;font-weight:500;padding:6px 2px;border-radius:8px}
+.tabbar svg{width:22px;height:22px}
+.tabbar button[aria-current="page"]{color:var(--ink);font-weight:600}
+.tabbar button[aria-current="page"] svg{color:var(--gold)}
+@media (min-width:960px){.tabbar{display:none}}
+
+.main{min-width:0;padding-inline:16px;padding-block:0 130px}
+@media (min-width:760px){.main{padding-inline:32px}}
+@media (min-width:960px){.main{padding-block:0 56px}}
+.page{max-width:1160px;margin:0 auto}
+.top{display:flex;align-items:center;gap:14px;padding-block:18px 20px;flex-wrap:wrap}
+@media (min-width:960px){.top{padding-block:28px 24px}}
+.top .m-brand{display:flex}
+@media (min-width:960px){.top .m-brand{display:none}}
+h1{font-size:22px;font-weight:650;letter-spacing:-.025em;margin:0;line-height:1.2}
+@media (min-width:760px){h1{font-size:26px}}
+.top .sub{font-size:13px;color:var(--ink-3)}
+.top-actions{margin-left:auto;display:flex;align-items:center;gap:10px}
+.top .saved{display:flex}
+@media (min-width:960px){.top .saved{display:none}}
+
+/* ---------- controls ---------- */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;border:1px solid var(--line-strong);background:var(--surface);color:var(--ink);padding:8px 13px;border-radius:8px;font-weight:550;font-size:13.5px;line-height:1.25;white-space:nowrap;transition:background .15s,border-color .15s}
+.btn:hover{background:var(--surface-2)}
+.btn.primary{background:var(--primary);border-color:var(--primary);color:var(--primary-ink)}
+.btn.primary:hover{filter:brightness(1.12)}
+.btn.danger{color:var(--neg)}
+.btn.danger.solid{background:var(--neg);border-color:var(--neg);color:#fff}
+.btn.ghost{border-color:transparent;background:transparent;color:var(--ink-2)}
+.btn.ghost:hover{background:var(--surface-2);color:var(--ink)}
+.btn.sm{padding:5px 10px;font-size:12.5px}
+.btn svg{width:16px;height:16px;flex:none}
+.only-wide{display:none}
+@media (min-width:760px){.only-wide{display:inline-flex}}
+.fab{position:fixed;right:16px;bottom:calc(76px + var(--sa-bottom));z-index:31;padding:13px 16px;border-radius:12px;box-shadow:0 12px 28px -10px rgba(14,22,38,.55)}
+@media (min-width:760px){.fab{display:none}}
+
+.seg{display:inline-flex;gap:2px;padding:3px;background:var(--surface-2);border:1px solid var(--line);border-radius:9px;position:relative}
+.seg button,.seg label{border:0;background:transparent;color:var(--ink-2);padding:4px 10px;border-radius:6px;font-size:12.5px;font-weight:550;cursor:pointer}
+.seg button[aria-pressed="true"],.seg input:checked+label{background:var(--surface);color:var(--ink);box-shadow:var(--shadow)}
+.seg input{position:absolute;opacity:0;pointer-events:none}
+.seg input:focus-visible+label{outline:2px solid var(--focus)}
+
+/* ---------- surfaces ---------- */
+.stack{display:flex;flex-direction:column;gap:16px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px;min-width:0}
+@media (min-width:760px){.panel{padding:20px 22px}}
+.panel-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+h2{font-size:15px;font-weight:600;letter-spacing:-.01em;margin:0}
+.panel-head .aside{font-size:12.5px;color:var(--ink-3)}
+.eyebrow{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+.muted{color:var(--ink-2)} .faint{color:var(--ink-3)}
+.pos{color:var(--pos)} .neg{color:var(--neg)}
+.delta{display:inline-flex;align-items:center;gap:3px;font-weight:600;font-size:12.5px;padding:2px 7px;border-radius:6px;white-space:nowrap}
+.delta.pos{background:var(--pos-soft)} .delta.neg{background:var(--neg-soft)} .delta.muted{background:var(--surface-2)}
+
+.notice{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:var(--gold-soft);border:1px solid color-mix(in srgb,var(--gold) 30%,transparent);border-radius:10px;padding:10px 14px;font-size:13.5px;color:var(--ink)}
+.notice svg{width:18px;height:18px;color:var(--gold);flex:none}
+.notice p{margin:0;flex:1;min-width:200px}
+
+/* statement card: the one bold element */
+.summary{display:grid;gap:16px;grid-template-columns:minmax(0,1fr)}
+@media (min-width:1000px){.summary{grid-template-columns:minmax(0,1.55fr) minmax(0,1fr)}}
+.statement{display:flex;flex-direction:column;position:relative;overflow:hidden;border-radius:14px;padding:22px;background:radial-gradient(90% 120% at 100% 0%,rgba(217,182,102,.13),transparent 55%),linear-gradient(160deg,var(--navy) 0%,var(--navy-2) 100%);box-shadow:0 20px 50px -30px rgba(217,182,102,.35);color:var(--on-navy);border:1px solid var(--on-navy-line)}
+@media (min-width:760px){.statement{padding:26px 28px}}
+.statement::after{content:"";position:absolute;right:-70px;top:-70px;width:240px;height:240px;border-radius:50%;border:1px solid color-mix(in srgb,var(--gold-on-navy) 28%,transparent);box-shadow:inset 0 0 0 22px color-mix(in srgb,var(--gold-on-navy) 4%,transparent);pointer-events:none}
+.statement>*{position:relative}
+.statement .eyebrow{color:var(--on-navy-2)}
+.statement .figure{font-size:clamp(38px,8vw,54px);font-weight:600;letter-spacing:-.04em;line-height:1.05;margin:10px 0 14px}
+.statement .figure .p{color:var(--on-navy-2);font-size:.55em;letter-spacing:-.02em}
+.stmt-trend{position:relative;flex:1 1 96px;min-height:80px;max-height:170px;margin:18px 0 20px}
+.stmt-trend svg{position:absolute;inset:0;width:100%;height:100%}
+.statement .changes{display:flex;flex-wrap:wrap;gap:8px 20px;font-size:13px;color:var(--on-navy-2)}
+.statement .changes b{font-weight:600;margin-right:4px}
+.statement .up{color:#6FE0A9} .statement .down{color:#FF9A88}
+.alloc-bar{display:flex;flex:none;height:6px;border-radius:99px;overflow:hidden;gap:2px;margin-top:auto;background:var(--on-navy-line)}
+.alloc-bar i{display:block;height:100%;min-width:3px}
+.alloc-legend{display:flex;flex-wrap:wrap;gap:6px 18px;margin-top:10px;font-size:12.5px;color:var(--on-navy-2)}
+.alloc-legend b{color:var(--on-navy);font-weight:600}
+.sw{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:6px;vertical-align:1px}
+
+.kpis{display:grid;gap:12px;grid-template-columns:minmax(0,1fr);align-content:start}
+@media (min-width:600px) and (max-width:999px){.kpis{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (min-width:1000px){.kpis{grid-template-columns:1fr}}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px;display:grid;grid-template-columns:1fr auto;gap:2px 10px;align-items:end}
+.kpi .k{font-size:12.5px;color:var(--ink-2);grid-column:1/-1}
+.kpi .v{font-size:22px;font-weight:600;letter-spacing:-.025em}
+.kpi .s{font-size:12px;color:var(--ink-3);grid-column:1/-1}
+
+.grid-2{display:grid;gap:16px;grid-template-columns:minmax(0,1fr)}
+@media (min-width:1000px){.grid-2{grid-template-columns:minmax(0,1.55fr) minmax(0,1fr)}}
+
+/* ---------- charts ---------- */
+.chart{position:relative;min-height:200px}
+.chart svg{display:block;overflow:visible;touch-action:pan-y}
+.chart .grid{stroke:var(--line);stroke-width:1;stroke-dasharray:2 4}
+.chart .base{stroke:var(--line-strong);stroke-width:1}
+.chart .axis{fill:var(--ink-3);font-size:11px;font-family:var(--mono)}
+.chart .hover-line{stroke:var(--ink-3);stroke-width:1}
+.chart-empty{display:grid;place-items:center;min-height:190px;color:var(--ink-3);font-size:13.5px;text-align:center;border:1px dashed var(--line-strong);border-radius:10px;padding:16px}
+.legend-inline{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:12.5px;color:var(--ink-2);margin-top:10px}
+.tip{position:absolute;top:4px;pointer-events:none;background:var(--surface);border:1px solid var(--line-strong);box-shadow:var(--shadow);border-radius:8px;padding:8px 10px;font-size:12px;min-width:180px;z-index:2}
+.tip-date{font-weight:600;margin-bottom:4px}
+.tip-row{display:flex;align-items:center;gap:7px;font-family:var(--mono);font-size:11.5px}
+.tip-row span{flex:1;color:var(--ink-2);font-family:var(--font);font-size:12px}
+.tip-row i{width:8px;height:8px;border-radius:2px;flex:none}
+.tip-row.total{border-top:1px solid var(--line);margin-top:5px;padding-top:5px}
+
+.donut-wrap{display:grid;grid-template-columns:132px 1fr;gap:20px;align-items:center}
+@media (max-width:400px){.donut-wrap{grid-template-columns:1fr;justify-items:center}}
+.donut-box{position:relative;width:132px;height:132px}
+.donut-box svg{width:132px;height:132px}
+.donut-center{position:absolute;inset:0;display:grid;place-content:center;text-align:center}
+.donut-center b{font-size:17px;font-weight:600;letter-spacing:-.02em}
+.donut-center span{font-size:11px;color:var(--ink-3)}
+.legend{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:12px;width:100%}
+.legend li{display:grid;grid-template-columns:auto 1fr auto;gap:0 8px;align-items:baseline;font-size:13.5px}
+.legend .pct{font-family:var(--mono);font-size:13px}
+.legend small{grid-column:2/4;color:var(--ink-3);font-size:12px}
+
+/* ---------- tables ---------- */
+.table-wrap{overflow-x:auto;margin:0 -4px}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th{text-align:left;font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3);font-weight:600;padding:0 12px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:12px;border-bottom:1px solid var(--line);vertical-align:middle}
+tbody tr:last-child td{border-bottom:0}
+td.r,th.r{text-align:right}
+td.val{font-family:var(--mono);font-weight:500;white-space:nowrap}
+tr.clickable{cursor:pointer}
+tr.clickable:hover td{background:var(--surface-2)}
+.acct-cell{display:flex;align-items:center;gap:10px;min-width:180px}
+.acct-cell .n{font-weight:600}
+.acct-cell .p{font-size:12px;color:var(--ink-3)}
+.type{font-size:11px;font-weight:600;letter-spacing:.05em;padding:2px 7px;border-radius:5px;background:var(--surface-2);color:var(--ink-2);border:1px solid var(--line)}
+.weight{display:flex;align-items:center;gap:8px;justify-content:flex-end;min-width:110px}
+.weight .bar{width:56px;height:4px;border-radius:99px;background:var(--surface-2);overflow:hidden}
+.weight .bar i{display:block;height:100%}
+.spark{width:96px;height:28px;display:block;margin-left:auto}
+td.note{color:var(--ink-2);max-width:280px;overflow-wrap:anywhere}
+tr.confirm td{background:var(--neg-soft)}
+@media (max-width:759px){.hide-sm{display:none}}
+.icon-btn{border:0;background:transparent;color:var(--ink-3);padding:6px;border-radius:6px;display:inline-grid;place-items:center}
+.icon-btn:hover{background:var(--surface-2);color:var(--neg)}
+.icon-btn svg{width:16px;height:16px}
+.activity{list-style:none;margin:0;padding:0}
+.activity li{display:grid;grid-template-columns:auto 1fr auto;gap:0 12px;align-items:center;padding:11px 0;border-top:1px solid var(--line)}
+.activity li:first-child{border-top:0;padding-top:0}
+.activity .when{font-size:12px;color:var(--ink-3)}
+.activity .amt{text-align:right;font-family:var(--mono);font-weight:500}
+.activity .d{font-size:12px;text-align:right;font-family:var(--mono)}
+
+.acct-picker{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;border-bottom:1px solid var(--line)}
+.acct-picker button{flex:none;display:flex;align-items:center;gap:8px;border:0;border-bottom:2px solid transparent;background:transparent;color:var(--ink-2);padding:10px 12px;font-weight:550;font-size:13.5px;margin-bottom:-1px}
+.acct-picker button[aria-pressed="true"]{border-bottom-color:var(--gold);color:var(--ink)}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:0;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.stat{padding:12px 14px;border-right:1px solid var(--line);margin-right:-1px}
+.stat .k{font-size:12px;color:var(--ink-3)}
+.stat .v{font-size:18px;font-weight:600;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.acct-figure{font-size:clamp(30px,6vw,40px);font-weight:600;letter-spacing:-.035em;line-height:1.1;margin-top:6px}
+
+/* ---------- forms ---------- */
+.field{display:flex;flex-direction:column;gap:6px}
+.field>label,.field>.label{font-size:13px;font-weight:550;color:var(--ink-2);display:flex;justify-content:space-between;gap:8px}
+.field output{color:var(--ink);font-family:var(--mono)}
+.input{width:100%;background:var(--surface);border:1px solid var(--line-strong);border-radius:8px;padding:9px 11px;font-size:14.5px}
+.input:focus{outline:none;border-color:var(--focus);box-shadow:0 0 0 3px color-mix(in srgb,var(--focus) 20%,transparent)}
+.money{position:relative}
+.money span{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--ink-3)}
+.money .input{padding-left:24px;font-family:var(--mono)}
+input[type=range]{width:100%;accent-color:var(--primary)}
+.form-grid{display:grid;gap:18px}
+.hint{font-size:12px;color:var(--ink-3);margin:0}
+.warn{font-size:13px;background:var(--gold-soft);border:1px solid color-mix(in srgb,var(--gold) 30%,transparent);border-radius:8px;padding:8px 11px;margin:0}
+.status{font-size:13px;color:var(--pos);min-height:1.5em;margin:0}
+.status.err{color:var(--neg)}
+
+dialog.sheet{border:1px solid var(--line);padding:0;background:var(--surface);color:var(--ink);border-radius:14px;width:min(440px,calc(100% - 32px));box-shadow:0 30px 80px -20px rgba(0,0,0,.45)}
+dialog.sheet::backdrop{background:rgba(8,12,22,.55)}
+@media (max-width:759px){dialog.sheet{width:100%;max-width:100%;margin:auto 0 0;border-radius:16px 16px 0 0;padding-bottom:var(--sa-bottom)}}
+.sheet form{padding:22px;display:flex;flex-direction:column;gap:16px}
+.sheet-head{display:flex;align-items:center;justify-content:space-between}
+.sheet-head h2{font-size:18px}
+.sheet-actions{display:flex;gap:10px;justify-content:flex-end;padding-top:4px}
+@media (max-width:759px){.sheet-actions .btn{flex:1;padding-block:11px}}
+
+.calc-grid{display:grid;gap:16px;grid-template-columns:minmax(0,1fr)}
+@media (min-width:1000px){.calc-grid{grid-template-columns:minmax(0,.85fr) minmax(0,1.5fr)}}
+.compare{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:0;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.compare .stat .v{font-size:20px}
+.explain{font-size:14px;color:var(--ink-2);margin:0;max-width:66ch}
+.explain b{color:var(--ink);font-weight:600}
+.settings-grid{display:grid;gap:16px;grid-template-columns:minmax(0,1fr)}
+@media (min-width:1000px){.settings-grid{grid-template-columns:1fr 1fr}}
+.row-actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+details summary{cursor:pointer;color:var(--ink-2);font-size:13px;font-weight:550}
+.acct-list{list-style:none;margin:0;padding:0;border:1px solid var(--line);border-radius:10px}
+.acct-list li{display:flex;align-items:center;gap:10px;padding:10px 12px;border-top:1px solid var(--line);flex-wrap:wrap}
+.acct-list li:first-child{border-top:0}
+.acct-list .grow{flex:1;min-width:150px}
+.inline-form{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(140px,1fr))}
+.about{display:flex;align-items:center;gap:16px}
+.about p{margin:0}
+.view{animation:fade .2s ease}
+@keyframes fade{from{opacity:.5}to{opacity:1}}
+@media (prefers-reduced-motion:reduce){.view,.saved.flash i{animation:none}}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="aurum-mark" viewBox="0 0 48 48">
+    <rect x=".5" y=".5" width="47" height="47" rx="11.5" fill="#0B0A08" stroke="#D4AF5A" stroke-opacity=".35"/>
+    <circle cx="24" cy="24" r="14.5" fill="none" stroke="#D4AF5A" stroke-width="2.2"/>
+    <circle cx="24" cy="24" r="11.6" fill="none" stroke="#D4AF5A" stroke-width=".8" opacity=".45"/>
+    <path d="M17.2 30.2L24 16.6l6.8 13.6" fill="none" stroke="#D4AF5A" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M19.9 25.4h8.2" stroke="#D4AF5A" stroke-width="2.4" stroke-linecap="round"/>
+  </symbol>
+</svg>
+
+<div class="shell">
+  <aside class="side" aria-label="Aurum">
+    <div class="lockup">
+      <svg class="mark" width="34" height="34"><use href="#aurum-mark"/></svg>
+      <div><span class="word">Aurum</span><span class="tag">Personal wealth ledger</span></div>
+    </div>
+    <nav class="side-nav" aria-label="Sections">
+      <div class="label">Portfolio</div>
+      <button class="nav-btn" data-action="tab" data-tab="overview"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>Overview</button>
+      <button class="nav-btn" data-action="tab" data-tab="accounts"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10l9-6 9 6"/><path d="M5 10v8M9.5 10v8M14.5 10v8M19 10v8M3 20h18"/></svg>Accounts</button>
+      <button class="nav-btn" data-action="tab" data-tab="calculator"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19l5-6 4 3 7-9"/><path d="M4 4v16h16"/></svg>SIPP vs ISA</button>
+      <div class="label" style="margin-top:18px">Data</div>
+      <button class="nav-btn" data-action="tab" data-tab="settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 00.3 1.8l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-1.8-.3 1.7 1.7 0 00-1 1.5V21a2 2 0 11-4 0v-.1a1.7 1.7 0 00-1.1-1.5 1.7 1.7 0 00-1.8.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.7 1.7 0 00.3-1.8 1.7 1.7 0 00-1.5-1H3a2 2 0 110-4h.1a1.7 1.7 0 001.5-1.1 1.7 1.7 0 00-.3-1.8l-.1-.1a2 2 0 112.8-2.8l.1.1a1.7 1.7 0 001.8.3H9a1.7 1.7 0 001-1.5V3a2 2 0 114 0v.1a1.7 1.7 0 001 1.5 1.7 1.7 0 001.8-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.7 1.7 0 00-.3 1.8V9a1.7 1.7 0 001.5 1H21a2 2 0 110 4h-.1a1.7 1.7 0 00-1.5 1z"/></svg>Settings &amp; backup</button>
+    </nav>
+    <div class="side-foot">
+      <div class="saved" data-saved role="status"><i></i><span>Saved on this device</span></div>
+    </div>
+  </aside>
+
+  <div class="main">
+    <div class="page">
+      <header class="top">
+        <svg class="mark m-brand" width="30" height="30" aria-hidden="true"><use href="#aurum-mark"/></svg>
+        <div>
+          <h1 id="page-title">Overview</h1>
+          <div class="sub" id="page-sub"></div>
+        </div>
+        <div class="top-actions">
+          <div class="saved" data-saved role="status"><i></i><span class="sr">Saved on this device</span></div>
+          <button class="btn primary only-wide" data-action="open-log">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Log a value</button>
+        </div>
+      </header>
+      <main id="view"></main>
+    </div>
+  </div>
+</div>
+
+<nav class="tabbar" aria-label="Sections">
+  <button data-action="tab" data-tab="overview"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>Overview</button>
+  <button data-action="tab" data-tab="accounts"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10l9-6 9 6"/><path d="M5 10v8M9.5 10v8M14.5 10v8M19 10v8M3 20h18"/></svg>Accounts</button>
+  <button data-action="tab" data-tab="calculator"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19l5-6 4 3 7-9"/><path d="M4 4v16h16"/></svg>SIPP vs ISA</button>
+  <button data-action="tab" data-tab="settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg>Settings</button>
+</nav>
+
+<button class="btn primary fab" data-action="open-log">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Log value</button>
+
+<dialog class="sheet" id="sheet" aria-labelledby="sheet-title">
+  <form id="log-form" method="dialog">
+    <div class="sheet-head">
+      <h2 id="sheet-title">Log a value</h2>
+      <button type="button" class="icon-btn" data-action="close-log" aria-label="Close">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+    <p class="warn" id="log-example-note" hidden>Saving your first value clears the example figures, so only your own numbers remain.</p>
+    <div class="field">
+      <label for="log-account">Account</label>
+      <select id="log-account" class="input"></select>
+    </div>
+    <div class="field">
+      <label for="log-value">Current value</label>
+      <div class="money"><span>£</span><input id="log-value" class="input" type="number" inputmode="decimal" step="0.01" min="0" placeholder="0.00" required></div>
+      <p class="hint" id="log-prev"></p>
+    </div>
+    <div class="field">
+      <label for="log-date">Valuation date</label>
+      <input id="log-date" class="input" type="date" required>
+    </div>
+    <div class="field">
+      <label for="log-note">Note <span class="faint">Optional</span></label>
+      <input id="log-note" class="input" type="text" maxlength="80" placeholder="e.g. Monthly check-in, added £500">
+    </div>
+    <div class="sheet-actions">
+      <button type="button" class="btn" data-action="close-log">Cancel</button>
+      <button type="submit" class="btn primary">Save value</button>
+    </div>
+  </form>
+</dialog>
+
+<script>
+(() => {
+'use strict';
+
+/* ---------- storage ---------- */
+const STORE_KEY = 'aurum_v1';
+const OLD_KEYS = ['aura_wealth_v2'];
+const UI_KEY = 'aurum_ui';
+const THEME_KEY = 'aurum_theme';
+const LEGACY_KEYS = { hl_sipp: 'aura_v1_hl_sipp', hl_isa: 'aura_v1_hl_isa', aegon: 'aura_v1_aegon' };
+const COLORS = ['c1', 'c2', 'c3', 'c4', 'c5', 'c6'];
+const PENSION_TYPES = ['SIPP', 'Pension'];
+const DEFAULT_ACCOUNTS = [
+  { id: 'hl_sipp', name: 'SIPP', provider: 'Hargreaves Lansdown', type: 'SIPP', color: 'c1' },
+  { id: 'hl_isa', name: 'Stocks & Shares ISA', provider: 'Hargreaves Lansdown', type: 'ISA', color: 'c2' },
+  { id: 'aegon', name: 'Workplace Pension', provider: 'Aegon', type: 'Pension', color: 'c3' }
+];
+
+const store = {
+  get(k) { try { return localStorage.getItem(k); } catch { return null; } },
+  set(k, v) { try { localStorage.setItem(k, v); return true; } catch { return false; } },
+  del(k) { try { localStorage.removeItem(k); } catch {} }
+};
+
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+const pad = n => String(n).padStart(2, '0');
+const isoLocal = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+const toMs = iso => { const [y, m, d] = iso.split('-').map(Number); return Date.UTC(y, m - 1, d); };
+const TODAY = isoLocal(new Date());
+
+function seedExample() {
+  const today = new Date();
+  const spec = { hl_sipp: [18400, 24950], hl_isa: [9200, 15640], aegon: [31050, 35820] };
+  let r = 11;
+  const rnd = () => (r = (r * 16807) % 2147483647) / 2147483647;
+  const logs = [];
+  for (let i = 11; i >= 0; i--) {
+    const d = i === 0 ? today : new Date(today.getFullYear(), today.getMonth() - i, Math.min(today.getDate(), 28));
+    const t = (11 - i) / 11;
+    for (const id of Object.keys(spec)) {
+      const [a, b] = spec[id];
+      const wobble = i === 0 ? 0 : (rnd() - 0.45) * (b - a) * 0.16;
+      logs.push({
+        id: uid(), accountId: id, date: isoLocal(d),
+        value: Math.round(a + (b - a) * t + wobble),
+        note: i === 11 ? 'Opening balance' : (id === 'hl_isa' && i % 3 === 0 ? 'Added £500' : '')
+      });
+    }
+  }
+  return { version: 1, example: true, accounts: DEFAULT_ACCOUNTS.map(a => ({ ...a })), logs };
+}
+
+const validLog = l => l && typeof l.date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(l.date) && isFinite(+l.value);
+
+// Accepts Aurum backups and both older Aura Wealth formats.
+function normalize(o) {
+  if (o && Array.isArray(o.accounts) && Array.isArray(o.logs)) {
+    const accounts = o.accounts.filter(a => a && a.id && a.name).map((a, i) => ({
+      id: String(a.id), name: String(a.name), provider: String(a.provider || ''), type: String(a.type || 'Other'),
+      color: COLORS.includes(a.color) ? a.color : COLORS[i % COLORS.length]
+    }));
+    const ids = new Set(accounts.map(a => a.id));
+    const logs = o.logs.filter(l => validLog(l) && ids.has(String(l.accountId))).map(l => ({
+      id: String(l.id || uid()), accountId: String(l.accountId), date: l.date, value: +l.value, note: String(l.note || '')
+    }));
+    return { version: 1, example: !!o.example, accounts, logs };
+  }
+  if (o && (Array.isArray(o.hl_sipp) || Array.isArray(o.hl_isa) || Array.isArray(o.aegon))) {
+    const logs = [];
+    for (const key of Object.keys(LEGACY_KEYS)) {
+      (o[key] || []).filter(validLog).forEach(l => logs.push({
+        id: String(l.id || uid()), accountId: key, date: l.date, value: +l.value,
+        note: l.note && l.note !== 'Valuation Log' ? String(l.note) : ''
+      }));
+    }
+    return { version: 1, example: false, accounts: DEFAULT_ACCOUNTS.map(a => ({ ...a })), logs };
+  }
+  throw new Error('This file is not an Aurum or Aura Wealth backup.');
+}
+
+function loadState() {
+  for (const key of [STORE_KEY, ...OLD_KEYS]) {
+    const raw = store.get(key);
+    if (raw) { try { return normalize(JSON.parse(raw)); } catch {} }
+  }
+  const legacy = {}; let found = false;
+  for (const [k, key] of Object.entries(LEGACY_KEYS)) {
+    const v = store.get(key);
+    if (v) { try { legacy[k] = JSON.parse(v); found = true; } catch {} }
+  }
+  if (found) { try { return normalize(legacy); } catch {} }
+  return seedExample();
+}
+
+let state = loadState();
+const DEFAULT_UI = { tab: 'overview', range: '1Y', account: null, calc: { monthly: 500, band: 'basic', years: 20, rate: 6, draw: 20 } };
+let ui = (() => {
+  try {
+    const saved = JSON.parse(store.get(UI_KEY) || '{}');
+    return { ...DEFAULT_UI, ...saved, calc: { ...DEFAULT_UI.calc, ...(saved.calc || {}) } };
+  } catch { return { ...DEFAULT_UI, calc: { ...DEFAULT_UI.calc } }; }
+})();
+let pendingDelete = null, pendingReset = false, pendingRemoveAcct = null;
+
+const savedEls = document.querySelectorAll('[data-saved]');
+function setSaved(ok, text) {
+  savedEls.forEach(el => {
+    el.classList.toggle('bad', !ok);
+    el.querySelector('span').textContent = text;
+    el.title = text;
+    el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash');
+  });
+}
+// In the Android app (Capacitor), data is mirrored to native storage too.
+const capx = window.capacitorExports;
+const isNative = !!(capx && capx.Capacitor && capx.Capacitor.isNativePlatform());
+const Native = isNative ? {
+  Preferences: capx.registerPlugin('Preferences'),
+  Filesystem: capx.registerPlugin('Filesystem'),
+  Share: capx.registerPlugin('Share')
+} : null;
+
+function save() {
+  const json = JSON.stringify(state);
+  let ok = store.set(STORE_KEY, json);
+  if (Native) { Native.Preferences.set({ key: STORE_KEY, value: json }).catch(() => {}); ok = true; }
+  setSaved(ok, ok ? 'Saved on this device' : 'Not saved. Export a backup');
+}
+const saveUi = () => store.set(UI_KEY, JSON.stringify(ui));
+(() => { const ok = store.set('aurum_probe', '1'); store.del('aurum_probe'); if (!ok) setSaved(false, 'Storage is blocked here'); })();
+
+/* ---------- theme ---------- */
+function applyTheme(t) {
+  if (t === 'light') document.documentElement.setAttribute('data-aurum', 'light');
+  else document.documentElement.removeAttribute('data-aurum');
+}
+applyTheme(store.get(THEME_KEY));
+
+/* ---------- format ---------- */
+const fmtGBP = new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP', maximumFractionDigits: 0 });
+const gbp = n => fmtGBP.format(Math.round(n || 0));
+const signed = n => (n > 0 ? '+' : n < 0 ? '−' : '') + gbp(Math.abs(n));
+const pct = n => (n > 0 ? '+' : n < 0 ? '−' : '') + Math.abs(n).toFixed(1) + '%';
+const compact = n => n >= 1e6 ? '£' + (n / 1e6).toFixed(n % 1e6 ? 1 : 0) + 'm' : n >= 1e3 ? '£' + Math.round(n / 1e3) + 'k' : '£' + Math.round(n);
+const fmtDate = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
+const fmtLong = new Intl.DateTimeFormat('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' });
+const fmtMonth = new Intl.DateTimeFormat('en-GB', { month: 'short', timeZone: 'UTC' });
+const dateLabel = ms => fmtDate.format(new Date(ms));
+const tickLabel = ms => { const d = new Date(ms); return fmtMonth.format(d).slice(0, 3) + ' ' + String(d.getUTCFullYear()).slice(2); };
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const cls = n => n > 0 ? 'pos' : n < 0 ? 'neg' : 'muted';
+const colorOf = a => `var(--${a.color})`;
+function ago(iso) {
+  const days = Math.round((toMs(TODAY) - toMs(iso)) / 864e5);
+  if (days <= 0) return 'Today';
+  if (days === 1) return 'Yesterday';
+  if (days < 45) return `${days} days ago`;
+  return `${Math.round(days / 30)} months ago`;
+}
+function taxYear(iso) {
+  const [y, m, d] = iso.split('-').map(Number);
+  const start = m > 4 || (m === 4 && d >= 6) ? y : y - 1;
+  return `${start}/${String(start + 1).slice(2)}`;
+}
+const deltaChip = (n, text) => `<span class="delta ${cls(n)}">${text}</span>`;
+
+/* ---------- derived data ---------- */
+const byDate = (a, b) => a.date < b.date ? -1 : a.date > b.date ? 1 : 0;
+function accountStats(id) {
+  const s = state.logs.filter(l => l.accountId === id).sort(byDate);
+  const cur = s.length ? s[s.length - 1].value : 0;
+  const first = s.length ? s[0].value : 0;
+  const prev = s.length > 1 ? s[s.length - 2].value : null;
+  const cutoff = toMs(TODAY) - 30 * 864e5;
+  let m30 = null;
+  for (const l of s) { if (toMs(l.date) <= cutoff) m30 = l.value; else break; }
+  return { s, cur, first, change: s.length > 1 ? cur - first : 0, pct: s.length > 1 && first ? (cur - first) / first * 100 : 0,
+    lastChange: prev == null ? 0 : cur - prev, last: s[s.length - 1], m30: m30 == null ? null : cur - m30 };
+}
+function timeline() {
+  const dates = [...new Set(state.logs.map(l => l.date))].sort();
+  const sorted = Object.fromEntries(state.accounts.map(a => [a.id, accountStats(a.id).s]));
+  const ptr = Object.fromEntries(state.accounts.map(a => [a.id, -1]));
+  return dates.map(date => {
+    const vals = {}; let total = 0;
+    for (const a of state.accounts) {
+      const s = sorted[a.id];
+      while (ptr[a.id] + 1 < s.length && s[ptr[a.id] + 1].date <= date) ptr[a.id]++;
+      vals[a.id] = ptr[a.id] >= 0 ? s[ptr[a.id]].value : 0;
+      total += vals[a.id];
+    }
+    return { date, t: toMs(date), vals, total };
+  });
+}
+function valueAt(tl, ms) {
+  let v = null;
+  for (const p of tl) { if (p.t <= ms) v = p.total; else break; }
+  return v;
+}
+
+/* ---------- charts (plain SVG) ---------- */
+function niceMax(v) {
+  if (v <= 0) return 1;
+  const p = 10 ** Math.floor(Math.log10(v)), n = v / p;
+  const step = [1, 1.2, 1.5, 2, 2.5, 3, 4, 5, 6, 8, 10].find(s => s >= n * 1.04) || 10;
+  return step * p;
+}
+const chartConfigs = new Map();
+function chart(host, cfg) {
+  chartConfigs.set(host, cfg);
+  const W = Math.max(280, Math.round(host.clientWidth || 600));
+  const H = cfg.height || (W < 520 ? 200 : 250);
+  const m = { t: 10, r: 8, b: 26, l: W < 520 ? 46 : 56 };
+  const n = cfg.xs.length;
+  if (n < 2) { host.innerHTML = `<div class="chart-empty">${esc(cfg.empty || 'Log at least two values to see a trend.')}</div>`; return; }
+  const x0 = cfg.xs[0], x1 = cfg.xs[n - 1], span = (x1 - x0) || 1;
+  let base = new Array(n).fill(0);
+  const layers = cfg.series.map(s => {
+    const lo = base.slice();
+    const hi = s.values.map((v, i) => (cfg.stacked ? lo[i] : 0) + (v || 0));
+    if (cfg.stacked) base = hi;
+    return { ...s, lo, hi };
+  });
+  const top = niceMax(Math.max(1, ...layers.flatMap(l => l.hi)));
+  const X = x => m.l + (x - x0) / span * (W - m.l - m.r);
+  const Y = v => m.t + (1 - v / top) * (H - m.t - m.b);
+  let g = '';
+  for (let k = 0; k <= 4; k++) {
+    const y = Y(top * k / 4).toFixed(1);
+    g += `<line class="${k ? 'grid' : 'base'}" x1="${m.l}" x2="${W - m.r}" y1="${y}" y2="${y}"/><text class="axis" x="${m.l - 10}" y="${y}" text-anchor="end" dominant-baseline="middle">${compact(top * k / 4)}</text>`;
+  }
+  const ticks = Math.min(n, W < 520 ? 3 : 5);
+  const used = new Set();
+  for (let k = 0; k < ticks; k++) {
+    const i = Math.round(k * (n - 1) / (ticks - 1));
+    if (used.has(i)) continue; used.add(i);
+    const anchor = k === 0 ? 'start' : k === ticks - 1 ? 'end' : 'middle';
+    g += `<text class="axis" x="${X(cfg.xs[i]).toFixed(1)}" y="${H - 6}" text-anchor="${anchor}">${esc(cfg.tick(cfg.xs[i]))}</text>`;
+  }
+  let shapes = '';
+  layers.forEach(l => {
+    const pts = l.hi.map((v, i) => `${X(cfg.xs[i]).toFixed(1)},${Y(v).toFixed(1)}`);
+    const lower = cfg.stacked
+      ? l.lo.map((v, i) => `${X(cfg.xs[i]).toFixed(1)},${Y(v).toFixed(1)}`).reverse()
+      : [`${X(x1).toFixed(1)},${Y(0).toFixed(1)}`, `${X(x0).toFixed(1)},${Y(0).toFixed(1)}`];
+    if (l.fill !== false) shapes += `<path d="M${pts.join('L')}L${lower.join('L')}Z" style="fill:${l.color}" fill-opacity="${cfg.stacked ? 0.16 : 0.08}"/>`;
+    shapes += `<path d="M${pts.join('L')}" fill="none" style="stroke:${l.color}" stroke-width="${l.dash ? 1.4 : 1.8}" stroke-linejoin="round" stroke-linecap="round"${l.dash ? ' stroke-dasharray="4 4"' : ''}/>`;
+    if (!l.dash) shapes += `<circle cx="${X(x1).toFixed(1)}" cy="${Y(l.hi[n - 1]).toFixed(1)}" r="3.5" style="fill:${l.color};stroke:var(--surface)" stroke-width="2"/>`;
+  });
+  host.innerHTML = `<svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}" role="img" aria-label="${esc(cfg.label || 'Chart')}">${g}${shapes}<line class="hover-line" x1="0" x2="0" y1="${m.t}" y2="${H - m.b}" visibility="hidden"/><rect x="${m.l}" y="0" width="${W - m.l - m.r}" height="${H}" fill="transparent"/></svg><div class="tip" hidden></div>`;
+  const svg = host.querySelector('svg'), hl = svg.querySelector('.hover-line'), tip = host.querySelector('.tip');
+  const move = e => {
+    const r = svg.getBoundingClientRect(), px = (e.clientX - r.left) * (W / r.width);
+    let best = 0, bd = Infinity;
+    cfg.xs.forEach((x, i) => { const d = Math.abs(X(x) - px); if (d < bd) { bd = d; best = i; } });
+    const cx = X(cfg.xs[best]);
+    hl.setAttribute('x1', cx); hl.setAttribute('x2', cx); hl.setAttribute('visibility', 'visible');
+    const rows = cfg.series.map(s => `<div class="tip-row"><i style="background:${s.color}"></i><span>${esc(s.label)}</span>${gbp(s.values[best])}</div>`).join('');
+    const total = cfg.stacked && cfg.series.length > 1 ? `<div class="tip-row total"><span>Total</span><b>${gbp(layers[layers.length - 1].hi[best])}</b></div>` : '';
+    tip.innerHTML = `<div class="tip-date">${esc(cfg.label2 ? cfg.label2(cfg.xs[best]) : dateLabel(cfg.xs[best]))}</div>${rows}${total}`;
+    tip.hidden = false;
+    const scale = r.width / W, left = cx * scale, tw = tip.offsetWidth;
+    tip.style.left = (left > r.width / 2 ? Math.max(0, left - tw - 12) : Math.min(r.width - tw, left + 12)) + 'px';
+  };
+  svg.addEventListener('pointermove', move);
+  svg.addEventListener('pointerdown', move);
+  svg.addEventListener('pointerleave', () => { hl.setAttribute('visibility', 'hidden'); tip.hidden = true; });
+}
+let resizeTimer, lastWidth = window.innerWidth;
+window.addEventListener('resize', () => {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(() => {
+    if (window.innerWidth === lastWidth) return;
+    lastWidth = window.innerWidth;
+    chartConfigs.forEach((cfg, host) => { if (host.isConnected) chart(host, cfg); else chartConfigs.delete(host); });
+  }, 120);
+});
+
+function sparkline(values, color) {
+  if (values.length < 2) return '<svg class="spark" viewBox="0 0 96 28" aria-hidden="true"></svg>';
+  const min = Math.min(...values), max = Math.max(...values), rng = (max - min) || 1;
+  const pts = values.map((v, i) => [i / (values.length - 1) * 92 + 2, 25 - (v - min) / rng * 22]);
+  const d = pts.map(p => p[0].toFixed(1) + ',' + p[1].toFixed(1)).join('L');
+  const last = pts[pts.length - 1];
+  return `<svg class="spark" viewBox="0 0 96 28" aria-hidden="true"><path d="M${d}" fill="none" style="stroke:${color}" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/><circle cx="${last[0]}" cy="${last[1]}" r="2.5" style="fill:${color}"/></svg>`;
+}
+function donut(parts, total) {
+  const R = 54, C = 2 * Math.PI * R;
+  let off = 0;
+  const segs = parts.filter(p => p.value > 0).map(p => {
+    const len = p.value / total * C;
+    const s = `<circle r="${R}" cx="66" cy="66" fill="none" style="stroke:${p.color}" stroke-width="12" stroke-dasharray="${Math.max(0.5, len - 2.5).toFixed(2)} ${C.toFixed(2)}" stroke-dashoffset="${(-off).toFixed(2)}" transform="rotate(-90 66 66)"/>`;
+    off += len; return s;
+  }).join('');
+  return `<svg viewBox="0 0 132 132" aria-hidden="true"><circle r="${R}" cx="66" cy="66" fill="none" style="stroke:var(--surface-2)" stroke-width="12"/>${segs}</svg>`;
+}
+
+/* ---------- views ---------- */
+const view = document.getElementById('view');
+const icons = {
+  trash: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 002 2h6a2 2 0 002-2l1-12M9 7V4h6v3"/></svg>',
+  plus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
+  info: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg>'
+};
+const exampleNotice = () => state.example ? `
+  <div class="notice" role="note">${icons.info}
+    <p><b>Example figures.</b> These are sample numbers so you can see how Aurum works. Your first logged value replaces them.</p>
+    <button class="btn sm" data-action="clear-example">Clear examples</button>
+  </div>` : '';
+
+function renderOverview() {
+  const tl = timeline();
+  const stats = state.accounts.map(a => ({ a, ...accountStats(a.id) }));
+  const total = stats.reduce((s, x) => s + x.cur, 0);
+  const lastT = tl.length ? tl[tl.length - 1].t : toMs(TODAY);
+  const monthAgo = valueAt(tl, toMs(TODAY) - 30 * 864e5);
+  const first = tl.length ? tl[0].total : 0;
+  const mChange = monthAgo != null ? total - monthAgo : null;
+  const allChange = tl.length > 1 ? total - first : null;
+  const pension = stats.filter(x => PENSION_TYPES.includes(x.a.type)).reduce((s, x) => s + x.cur, 0);
+  const access = total - pension;
+  const alloc = stats.filter(x => x.cur > 0);
+  const startLabel = tl.length ? `${fmtMonth.format(new Date(tl[0].t))} ${new Date(tl[0].t).getUTCFullYear()}` : '';
+
+  const statement = `
+    <section class="statement" aria-label="Net worth">
+      <div class="eyebrow">Total net worth</div>
+      <div class="figure num">${gbp(total)}</div>
+      <div class="changes">
+        ${mChange != null ? `<span><b class="${mChange >= 0 ? 'up' : 'down'}">${signed(mChange)}${monthAgo ? ` (${pct(mChange / monthAgo * 100)})` : ''}</b>last 30 days</span>` : ''}
+        ${allChange != null ? `<span><b class="${allChange >= 0 ? 'up' : 'down'}">${signed(allChange)}${first ? ` (${pct(allChange / first * 100)})` : ''}</b>since ${esc(startLabel)}</span>` : ''}
+        ${!tl.length ? '<span>Log your first value to start tracking.</span>' : ''}
+      </div>
+      ${totalTrend(tl)}
+      ${total > 0 ? `
+        <div class="alloc-bar" aria-hidden="true">${alloc.map(x => `<i style="flex:${x.cur};background:var(--${x.a.color}-hi)"></i>`).join('')}</div>
+        <div class="alloc-legend">${alloc.map(x => `<span><i class="sw" style="background:var(--${x.a.color}-hi)"></i>${esc(x.a.name)} <b class="num">${(x.cur / total * 100).toFixed(0)}%</b></span>`).join('')}</div>` : ''}
+    </section>`;
+
+  const kpis = `
+    <div class="kpis">
+      <div class="kpi"><div class="k">Pensions</div><div class="v num">${gbp(pension)}</div><div class="s">SIPP and workplace. Usually locked until 57</div></div>
+      <div class="kpi"><div class="k">Accessible</div><div class="v num">${gbp(access)}</div><div class="s">ISAs and other accounts you can withdraw now</div></div>
+      <div class="kpi"><div class="k">Tax year ${taxYear(TODAY)}</div><div class="v num ${cls(sumSinceTaxYear(tl))}">${signed(sumSinceTaxYear(tl))}</div><div class="s">Change since 6 April</div></div>
+    </div>`;
+
+  const ranges = { '3M': 91, '6M': 182, '1Y': 365, 'All': Infinity };
+  const growth = `
+    <section class="panel">
+      <div class="panel-head">
+        <h2>Performance</h2>
+        <div class="seg" role="group" aria-label="Time range">
+          ${Object.keys(ranges).map(k => `<button data-action="range" data-range="${k}" aria-pressed="${ui.range === k}">${k}</button>`).join('')}
+        </div>
+      </div>
+      <div class="chart" id="growth-chart"></div>
+      <div class="legend-inline">${state.accounts.map(a => `<span><i class="sw" style="background:${colorOf(a)}"></i>${esc(a.name)}</span>`).join('')}</div>
+    </section>`;
+
+  const allocation = `
+    <section class="panel">
+      <div class="panel-head"><h2>Allocation</h2><span class="aside">${stats.filter(x => x.cur > 0).length} accounts</span></div>
+      ${total > 0 ? `
+      <div class="donut-wrap">
+        <div class="donut-box">${donut(stats.map(x => ({ value: x.cur, color: colorOf(x.a) })), total)}
+          <div class="donut-center"><b class="mono">${compact(total)}</b><span>Total</span></div>
+        </div>
+        <ul class="legend">
+          ${stats.map(x => `<li><i class="sw" style="background:${colorOf(x.a)}"></i><span>${esc(x.a.name)}</span><span class="pct">${total ? (x.cur / total * 100).toFixed(1) : 0}%</span><small class="num">${gbp(x.cur)}</small></li>`).join('')}
+        </ul>
+      </div>` : '<div class="chart-empty">Your split between accounts shows here.</div>'}
+    </section>`;
+
+  const holdings = `
+    <section class="panel">
+      <div class="panel-head"><h2>Holdings</h2><span class="aside">Select an account for its full history</span></div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Account</th><th class="hide-sm">Type</th><th class="r">Value</th><th class="r hide-sm">30 days</th><th class="r hide-sm">Since start</th><th class="r hide-sm">Weight</th><th class="r hide-sm">Trend</th></tr></thead>
+        <tbody>${stats.map(x => `
+          <tr class="clickable" data-action="goto-account" data-id="${esc(x.a.id)}" tabindex="0">
+            <td><div class="acct-cell"><i class="sw" style="background:${colorOf(x.a)}"></i><div><div class="n">${esc(x.a.name)}</div><div class="p">${esc(x.a.provider || '—')} · ${x.last ? 'Updated ' + ago(x.last.date).toLowerCase() : 'No values yet'}</div></div></div></td>
+            <td class="hide-sm"><span class="type">${esc(x.a.type.toUpperCase())}</span></td>
+            <td class="r val">${gbp(x.cur)}</td>
+            <td class="r hide-sm">${x.m30 != null ? deltaChip(x.m30, signed(x.m30)) : '<span class="faint">—</span>'}</td>
+            <td class="r hide-sm">${x.s.length > 1 ? deltaChip(x.change, pct(x.pct)) : '<span class="faint">—</span>'}</td>
+            <td class="r hide-sm"><div class="weight"><span class="mono">${total ? (x.cur / total * 100).toFixed(1) : '0.0'}%</span><span class="bar"><i style="width:${total ? x.cur / total * 100 : 0}%;background:${colorOf(x.a)}"></i></span></div></td>
+            <td class="r hide-sm">${sparkline(x.s.slice(-12).map(l => l.value), colorOf(x.a))}</td>
+          </tr>`).join('')}
+        </tbody>
+      </table></div>
+    </section>`;
+
+  const recent = [...state.logs].sort((a, b) => byDate(b, a) || (b.id > a.id ? 1 : -1)).slice(0, 5);
+  const accById = Object.fromEntries(state.accounts.map(a => [a.id, a]));
+  const activity = `
+    <section class="panel">
+      <div class="panel-head"><h2>Recent valuations</h2><button class="btn ghost sm" data-action="tab" data-tab="accounts">View all</button></div>
+      ${recent.length ? `<ul class="activity">${recent.map(l => {
+        const s = accountStats(l.accountId).s, i = s.findIndex(x => x.id === l.id), d = i > 0 ? l.value - s[i - 1].value : null;
+        const a = accById[l.accountId];
+        return `<li><i class="sw" style="background:${colorOf(a)}"></i><div><div>${esc(a.name)}</div><div class="when">${dateLabel(toMs(l.date))}${l.note ? ' · ' + esc(l.note) : ''}</div></div><div><div class="amt">${gbp(l.value)}</div>${d != null ? `<div class="d ${cls(d)}">${signed(d)}</div>` : ''}</div></li>`;
+      }).join('')}</ul>` : '<div class="chart-empty">No valuations yet.</div>'}
+    </section>`;
+
+  view.innerHTML = `<div class="stack view">${exampleNotice()}<div class="summary">${statement}${kpis}</div>${holdings}<div class="grid-2">${growth}${allocation}</div>${activity}</div>`;
+
+  const days = ranges[ui.range] || Infinity;
+  let pts = tl.filter(p => p.t >= lastT - days * 864e5);
+  if (pts.length < 2) pts = tl;
+  chart(document.getElementById('growth-chart'), {
+    xs: pts.map(p => p.t), tick: tickLabel, stacked: true, label: 'Net worth over time, stacked by account',
+    series: state.accounts.map(a => ({ label: a.name, color: colorOf(a), values: pts.map(p => p.vals[a.id]) }))
+  });
+}
+// Gold trend of the total inside the net-worth card; stretches to fill the card.
+function totalTrend(tl) {
+  const pts = tl.slice(-24);
+  if (pts.length < 2) return '<div class="stmt-trend"></div>';
+  const vals = pts.map(p => p.total), min = Math.min(...vals), max = Math.max(...vals), rng = (max - min) || 1;
+  const t0 = pts[0].t, span = (pts[pts.length - 1].t - t0) || 1;
+  const xy = pts.map(p => [((p.t - t0) / span * 100).toFixed(2), (4 + (1 - (p.total - min) / rng) * 88).toFixed(2)]);
+  const line = xy.map(p => p.join(',')).join('L');
+  return `<div class="stmt-trend" aria-hidden="true"><svg viewBox="0 0 100 100" preserveAspectRatio="none">
+    <defs><linearGradient id="stmt-fill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#D9B666" stop-opacity=".28"/><stop offset="1" stop-color="#D9B666" stop-opacity="0"/></linearGradient></defs>
+    <path d="M${line}L100,100L0,100Z" fill="url(#stmt-fill)"/>
+    <path d="M${line}" fill="none" stroke="#D9B666" stroke-width="1.8" vector-effect="non-scaling-stroke" stroke-linejoin="round" stroke-linecap="round"/>
+  </svg></div>`;
+}
+function sumSinceTaxYear(tl) {
+  if (!tl.length) return 0;
+  const [y] = taxYear(TODAY).split('/');
+  const start = Date.UTC(+y, 3, 6);
+  const before = valueAt(tl, start - 1);
+  const base = before != null ? before : (tl.find(p => p.t >= start) || tl[0]).total;
+  return tl[tl.length - 1].total - base;
+}
+
+function renderAccounts() {
+  if (!state.accounts.length) {
+    view.innerHTML = `<div class="stack view"><div class="panel"><div class="chart-empty">No accounts yet. Add one in Settings.</div></div></div>`;
+    return;
+  }
+  if (!state.accounts.some(a => a.id === ui.account)) ui.account = state.accounts[0].id;
+  const a = state.accounts.find(x => x.id === ui.account);
+  const st = accountStats(a.id);
+  const rows = [...st.s].reverse();
+  view.innerHTML = `
+    <div class="stack view">
+      ${exampleNotice()}
+      <div class="acct-picker" role="group" aria-label="Choose account">
+        ${state.accounts.map(x => `<button data-action="pick-account" data-id="${esc(x.id)}" aria-pressed="${x.id === a.id}"><i class="sw" style="background:${colorOf(x)}"></i>${esc(x.name)}</button>`).join('')}
+      </div>
+      <section class="panel">
+        <div class="panel-head" style="align-items:flex-end">
+          <div>
+            <div class="eyebrow">${esc(a.provider || 'Account')} · ${esc(a.type)}</div>
+            <div class="acct-figure num">${gbp(st.cur)}</div>
+          </div>
+          <button class="btn primary" data-action="open-log" data-id="${esc(a.id)}">${icons.plus}Log value</button>
+        </div>
+        <div class="stats">
+          <div class="stat"><div class="k">Since first entry</div><div class="v ${cls(st.change)}">${st.s.length > 1 ? signed(st.change) : '—'}</div></div>
+          <div class="stat"><div class="k">Growth</div><div class="v ${cls(st.pct)}">${st.s.length > 1 ? pct(st.pct) : '—'}</div></div>
+          <div class="stat"><div class="k">Last change</div><div class="v ${cls(st.lastChange)}">${st.s.length > 1 ? signed(st.lastChange) : '—'}</div></div>
+          <div class="stat"><div class="k">Valuations</div><div class="v">${st.s.length}</div></div>
+        </div>
+        <div class="chart" id="acct-chart" style="margin-top:20px"></div>
+      </section>
+      <section class="panel">
+        <div class="panel-head"><h2>Valuation history</h2><span class="aside">${st.s.length ? 'Since ' + dateLabel(toMs(st.s[0].date)) : ''}</span></div>
+        ${rows.length ? `<div class="table-wrap"><table>
+          <thead><tr><th>Date</th><th class="r">Value</th><th class="r">Change</th><th class="hide-sm">Note</th><th class="r"><span class="sr">Actions</span></th></tr></thead>
+          <tbody>${rows.map((l, i) => {
+            const prev = rows[i + 1], d = prev ? l.value - prev.value : null;
+            if (pendingDelete === l.id) return `<tr class="confirm"><td colspan="3">Delete the ${gbp(l.value)} valuation from ${dateLabel(toMs(l.date))}?</td><td class="hide-sm"></td><td class="r" style="white-space:nowrap"><button class="btn sm ghost" data-action="del-no">Keep</button> <button class="btn sm danger solid" data-action="del-yes" data-id="${esc(l.id)}">Delete</button></td></tr>`;
+            return `<tr><td style="white-space:nowrap">${dateLabel(toMs(l.date))}</td><td class="r val">${gbp(l.value)}</td><td class="r">${d == null ? '<span class="faint">—</span>' : deltaChip(d, signed(d))}</td><td class="note hide-sm">${esc(l.note)}</td><td class="r"><button class="icon-btn" data-action="del" data-id="${esc(l.id)}" aria-label="Delete valuation from ${dateLabel(toMs(l.date))}">${icons.trash}</button></td></tr>`;
+          }).join('')}</tbody></table></div>` : '<div class="chart-empty">No values logged for this account yet.</div>'}
+      </section>
+    </div>`;
+  chart(document.getElementById('acct-chart'), {
+    xs: st.s.map(l => toMs(l.date)), tick: tickLabel, label: a.name + ' value over time',
+    series: [{ label: a.name, color: colorOf(a), values: st.s.map(l => l.value) }]
+  });
+}
+
+/* SIPP vs ISA */
+const BANDS = { basic: { label: 'Basic 20%', word: 'basic', extra: 0 }, higher: { label: 'Higher 40%', word: 'higher', extra: 0.20 }, additional: { label: 'Additional 45%', word: 'additional', extra: 0.25 } };
+const LSA = 268275; // Lump Sum Allowance: the most you can take tax-free from pensions
+function renderCalculator() {
+  const c = ui.calc;
+  view.innerHTML = `
+    <div class="calc-grid view">
+      <section class="panel">
+        <div class="panel-head"><h2>Assumptions</h2></div>
+        <div class="form-grid">
+          <div class="field">
+            <label for="calc-monthly">You pay in each month</label>
+            <div class="money"><span>£</span><input id="calc-monthly" class="input" type="number" inputmode="decimal" min="0" step="10" value="${c.monthly}"></div>
+            <input id="calc-monthly-range" type="range" min="0" max="2000" step="10" value="${Math.min(2000, c.monthly)}" aria-label="Monthly amount slider">
+          </div>
+          <div class="field">
+            <span class="label" id="band-label">Income tax band</span>
+            <div class="seg" role="radiogroup" aria-labelledby="band-label">
+              ${Object.entries(BANDS).map(([k, b]) => `<input type="radio" name="band" id="band-${k}" value="${k}" ${c.band === k ? 'checked' : ''}><label for="band-${k}">${b.label}</label>`).join('')}
+            </div>
+          </div>
+          <div class="field">
+            <label for="calc-years">Years invested <output id="out-years">${c.years}</output></label>
+            <input id="calc-years" type="range" min="1" max="45" step="1" value="${c.years}">
+          </div>
+          <div class="field">
+            <label for="calc-rate">Annual growth after fees <output id="out-rate">${c.rate}%</output></label>
+            <input id="calc-rate" type="range" min="0" max="12" step="0.5" value="${c.rate}">
+          </div>
+          <div class="field">
+            <label for="calc-draw">Tax rate when drawing the pension</label>
+            <select id="calc-draw" class="input">
+              <option value="0" ${c.draw == 0 ? 'selected' : ''}>0%, within personal allowance</option>
+              <option value="20" ${c.draw == 20 ? 'selected' : ''}>20% basic rate</option>
+              <option value="40" ${c.draw == 40 ? 'selected' : ''}>40% higher rate</option>
+            </select>
+          </div>
+        </div>
+      </section>
+      <section class="panel stack" id="calc-results" aria-live="polite"></section>
+    </div>`;
+  updateCalc();
+}
+function updateCalc() {
+  const c = ui.calc;
+  const net = Math.max(0, +c.monthly || 0), gross = net / 0.8, reclaim = gross * BANDS[c.band].extra, rate = (+c.rate || 0) / 100;
+  let isa = 0, sipp = 0, paid = 0;
+  const years = [0], isaV = [0], sippV = [0], paidV = [0];
+  for (let y = 1; y <= c.years; y++) {
+    for (let m = 0; m < 12; m++) {
+      isa = (isa + net) * (1 + rate / 12);
+      sipp = (sipp + gross) * (1 + rate / 12);
+      paid += net;
+    }
+    years.push(y); isaV.push(isa); sippV.push(sipp); paidV.push(paid);
+  }
+  const taxFree = Math.min(sipp * 0.25, LSA);
+  const sippAfterTax = taxFree + (sipp - taxFree) * (1 - c.draw / 100);
+  const lead = sippAfterTax - isa;
+  document.getElementById('calc-results').innerHTML = `
+    <div class="panel-head" style="margin-bottom:0"><h2>Projection after ${c.years} year${c.years == 1 ? '' : 's'}</h2><span class="aside">You pay in ${gbp(paid)}</span></div>
+    <div class="compare">
+      <div class="stat"><div class="k"><i class="sw" style="background:var(--c2)"></i>ISA, tax-free</div><div class="v num">${gbp(isa)}</div></div>
+      <div class="stat"><div class="k"><i class="sw" style="background:var(--c1)"></i>SIPP pot</div><div class="v num">${gbp(sipp)}</div></div>
+      <div class="stat"><div class="k">SIPP after tax</div><div class="v num">${gbp(sippAfterTax)}</div></div>
+    </div>
+    <p class="explain">Each <b>${gbp(net)}</b> you pay into a SIPP becomes <b>${gbp(gross)}</b> with 20% basic-rate relief.
+      ${reclaim > 0 ? `As a ${BANDS[c.band].word}-rate taxpayer you can reclaim a further <b>${gbp(reclaim)}</b> a month through Self Assessment, so the real cost is <b>${gbp(net - reclaim)}</b>.` : ''}
+      Taking 25% tax-free and paying ${c.draw}% on the rest, the SIPP finishes <b class="${cls(lead)}">${signed(lead)}</b> ${lead >= 0 ? 'ahead of' : 'behind'} the ISA.</p>
+    ${net * 12 > 20000 ? `<p class="warn">${gbp(net * 12)} a year is more than the £20,000 ISA allowance.</p>` : ''}
+    <div class="chart" id="calc-chart"></div>
+    <div class="legend-inline"><span><i class="sw" style="background:var(--c1)"></i>SIPP pot</span><span><i class="sw" style="background:var(--c2)"></i>ISA</span><span><i class="sw" style="background:var(--ink-3)"></i>Paid in</span></div>
+    <p class="hint">Illustration only, not financial advice. Assumes a steady return, relief at source, and 25% taken tax-free up to the ${gbp(LSA)} Lump Sum Allowance. A SIPP can normally be accessed from age 57 from April 2028; an ISA can be withdrawn at any time.</p>`;
+  chart(document.getElementById('calc-chart'), {
+    xs: years, tick: y => 'Yr ' + y, label2: y => 'Year ' + y, label: 'SIPP versus ISA growth',
+    series: [
+      { label: 'SIPP pot', color: 'var(--c1)', values: sippV },
+      { label: 'ISA', color: 'var(--c2)', values: isaV },
+      { label: 'Paid in', color: 'var(--ink-3)', values: paidV, fill: false, dash: true }
+    ]
+  });
+}
+
+function renderSettings() {
+  const theme = store.get(THEME_KEY) === 'light' ? 'light' : 'dark';
+  const count = state.logs.length;
+  view.innerHTML = `
+    <div class="settings-grid view">
+      <section class="panel stack">
+        <h2>Backup and restore</h2>
+        <p class="explain">Your data is saved on this device. Export a backup before you change phone or clear your browser, then import it on the new device. Backups from the old Aura Wealth app import too.</p>
+        <div class="row-actions">
+          <button class="btn primary" data-action="export">Export backup</button>
+          <label class="btn" for="import-file">Import backup file</label>
+          <input id="import-file" type="file" accept="application/json,.json" class="sr">
+        </div>
+        <details>
+          <summary>Paste backup text instead</summary>
+          <div class="stack" style="margin-top:10px">
+            <textarea id="import-text" class="input mono" rows="4" placeholder='{"version":1,"accounts":[…]}' spellcheck="false" style="font-size:12.5px"></textarea>
+            <div class="row-actions"><button class="btn" data-action="import-paste">Import pasted text</button><button class="btn ghost" data-action="copy-backup">Copy current backup</button></div>
+          </div>
+        </details>
+        <p class="status" id="backup-status" role="status"></p>
+      </section>
+
+      <section class="panel stack">
+        <h2>Accounts</h2>
+        <ul class="acct-list">
+          ${state.accounts.map(a => pendingRemoveAcct === a.id ? `
+            <li style="background:var(--neg-soft)"><span class="grow">Remove <b>${esc(a.name)}</b> and its ${accountStats(a.id).s.length} valuations?</span><button class="btn sm ghost" data-action="remove-acct-no">Keep</button><button class="btn sm danger solid" data-action="remove-acct-yes" data-id="${esc(a.id)}">Remove</button></li>` : `
+            <li><i class="sw" style="background:${colorOf(a)}"></i><span class="grow"><b>${esc(a.name)}</b> <span class="faint">${esc(a.provider)}${a.provider ? ' · ' : ''}${esc(a.type)}</span></span><button class="icon-btn" data-action="remove-acct" data-id="${esc(a.id)}" aria-label="Remove ${esc(a.name)}">${icons.trash}</button></li>`).join('')}
+        </ul>
+        <form id="add-acct" class="inline-form">
+          <input id="new-acct-name" class="input" placeholder="Account name" maxlength="40" required aria-label="Account name">
+          <input id="new-acct-provider" class="input" placeholder="Provider, e.g. Vanguard" maxlength="40" aria-label="Provider">
+          <select id="new-acct-type" class="input" aria-label="Account type"><option>ISA</option><option>SIPP</option><option>Pension</option><option>LISA</option><option>GIA</option><option>Cash</option><option>Other</option></select>
+          <button class="btn" type="submit">${icons.plus}Add account</button>
+        </form>
+      </section>
+
+      <section class="panel stack">
+        <h2>Appearance</h2>
+        <div class="seg" role="radiogroup" aria-label="Theme" style="width:max-content">
+          ${['dark', 'light'].map(t => `<input type="radio" name="theme" id="theme-${t}" value="${t}" ${theme === t ? 'checked' : ''}><label for="theme-${t}">${t[0].toUpperCase() + t.slice(1)}</label>`).join('')}
+        </div>
+        <div class="about" style="margin-top:8px">
+          <svg class="mark" width="44" height="44" aria-hidden="true"><use href="#aurum-mark"/></svg>
+          <div><p><b>Aurum</b></p><p class="faint" style="font-size:13px">Personal wealth ledger. Your data never leaves this device.</p></div>
+        </div>
+      </section>
+
+      <section class="panel stack">
+        <h2>Reset</h2>
+        <p class="explain">Deletes all ${count} valuations on this device. Export a backup first if you may want them back.</p>
+        <div class="row-actions">
+          ${pendingReset
+            ? `<span>Delete everything?</span><button class="btn ghost" data-action="reset-no">Cancel</button><button class="btn danger solid" data-action="reset-yes">Delete all data</button>`
+            : `<button class="btn danger" data-action="reset">Reset all data</button>`}
+        </div>
+      </section>
+    </div>`;
+}
+
+const TITLES = {
+  overview: ['Overview', () => fmtLong.format(new Date(toMs(TODAY)))],
+  accounts: ['Accounts', () => `${state.accounts.length} accounts · ${state.logs.length} valuations`],
+  calculator: ['SIPP vs ISA', () => 'Compare tax relief and long-term growth'],
+  settings: ['Settings & backup', () => 'Your data is stored on this device only']
+};
+const renderers = { overview: renderOverview, accounts: renderAccounts, calculator: renderCalculator, settings: renderSettings };
+function render() {
+  if (!renderers[ui.tab]) ui.tab = 'overview';
+  chartConfigs.clear();
+  document.querySelectorAll('.side-nav [data-tab], .tabbar [data-tab]').forEach(b => {
+    if (b.dataset.tab === ui.tab) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current');
+  });
+  document.getElementById('page-title').textContent = TITLES[ui.tab][0];
+  document.getElementById('page-sub').textContent = TITLES[ui.tab][1]();
+  renderers[ui.tab]();
+}
+
+/* ---------- log sheet ---------- */
+const sheet = document.getElementById('sheet');
+const logAccount = document.getElementById('log-account');
+function updatePrevHint() {
+  const st = accountStats(logAccount.value);
+  document.getElementById('log-prev').textContent = st.last ? `Last valued at ${gbp(st.last.value)} on ${dateLabel(toMs(st.last.date))}` : 'First valuation for this account';
+}
+function openLog(accountId) {
+  if (!state.accounts.length) { ui.tab = 'settings'; render(); return; }
+  logAccount.innerHTML = state.accounts.map(a => `<option value="${esc(a.id)}">${esc(a.name)}${a.provider ? ' · ' + esc(a.provider) : ''}</option>`).join('');
+  logAccount.value = accountId || (ui.tab === 'accounts' && ui.account) || state.accounts[0].id;
+  const dateEl = document.getElementById('log-date');
+  dateEl.value = TODAY; dateEl.max = TODAY;
+  document.getElementById('log-value').value = '';
+  document.getElementById('log-note').value = '';
+  document.getElementById('log-example-note').hidden = !state.example;
+  updatePrevHint();
+  if (typeof sheet.showModal === 'function') sheet.showModal(); else sheet.setAttribute('open', '');
+  setTimeout(() => document.getElementById('log-value').focus(), 50);
+}
+logAccount.addEventListener('change', updatePrevHint);
+document.getElementById('log-form').addEventListener('submit', e => {
+  e.preventDefault();
+  const value = parseFloat(document.getElementById('log-value').value);
+  const date = document.getElementById('log-date').value;
+  if (!isFinite(value) || value < 0 || !date) return;
+  if (state.example) { state.logs = []; state.example = false; }
+  state.logs.push({ id: uid(), accountId: logAccount.value, date, value, note: document.getElementById('log-note').value.trim() });
+  save();
+  sheet.close();
+  render();
+});
+sheet.addEventListener('click', e => { if (e.target === sheet) sheet.close(); });
+
+/* ---------- backup ---------- */
+const backupJson = () => JSON.stringify({ app: 'Aurum', exportedAt: new Date().toISOString(), ...state }, null, 2);
+function setStatus(msg, err) {
+  const el = document.getElementById('backup-status');
+  if (!el) return;
+  el.textContent = msg; el.classList.toggle('err', !!err);
+}
+async function copyText(text) {
+  try { await navigator.clipboard.writeText(text); return true; } catch { return false; }
+}
+function importText(text) {
+  try {
+    const next = normalize(JSON.parse(text));
+    next.example = false;
+    state = next; save();
+    render();
+    setStatus(`Imported ${state.logs.length} valuations across ${state.accounts.length} accounts.`);
+  } catch (err) {
+    setStatus(err instanceof SyntaxError ? 'That text is not valid JSON. Check you copied the whole backup.' : err.message, true);
+  }
+}
+
+/* ---------- events ---------- */
+function goTab(tab) { ui.tab = tab; pendingDelete = null; pendingReset = false; pendingRemoveAcct = null; saveUi(); render(); window.scrollTo({ top: 0 }); }
+document.addEventListener('click', async e => {
+  const t = e.target.closest('[data-action]');
+  if (!t) return;
+  const act = t.dataset.action, id = t.dataset.id;
+  switch (act) {
+    case 'tab': goTab(t.dataset.tab); break;
+    case 'open-log': openLog(id); break;
+    case 'close-log': sheet.close(); break;
+    case 'range': ui.range = t.dataset.range; saveUi(); render(); break;
+    case 'goto-account': ui.account = id; goTab('accounts'); break;
+    case 'pick-account': ui.account = id; pendingDelete = null; saveUi(); render(); break;
+    case 'del': pendingDelete = id; render(); break;
+    case 'del-no': pendingDelete = null; render(); break;
+    case 'del-yes': state.logs = state.logs.filter(l => l.id !== id); pendingDelete = null; save(); render(); break;
+    case 'clear-example': state.logs = []; state.example = false; save(); render(); break;
+    case 'reset': pendingReset = true; render(); break;
+    case 'reset-no': pendingReset = false; render(); break;
+    case 'reset-yes':
+      state = { version: 1, example: false, accounts: DEFAULT_ACCOUNTS.map(a => ({ ...a })), logs: [] };
+      pendingReset = false; save(); render(); setStatus('All data deleted.'); break;
+    case 'remove-acct': pendingRemoveAcct = id; render(); break;
+    case 'remove-acct-no': pendingRemoveAcct = null; render(); break;
+    case 'remove-acct-yes':
+      state.accounts = state.accounts.filter(a => a.id !== id);
+      state.logs = state.logs.filter(l => l.accountId !== id);
+      pendingRemoveAcct = null; save(); render(); break;
+    case 'export': {
+      const json = backupJson();
+      if (Native) {
+        try {
+          const { uri } = await Native.Filesystem.writeFile({ path: `aurum-backup-${TODAY}.json`, data: json, directory: 'CACHE', encoding: 'utf8' });
+          await Native.Share.share({ title: 'Aurum backup', dialogTitle: 'Save your Aurum backup', files: [uri] });
+          setStatus('Backup ready. Save it somewhere safe, such as Google Drive or Files.');
+        } catch (err) {
+          const cancelled = /cancel/i.test(String(err && err.message));
+          if (!cancelled && await copyText(json)) setStatus('Sharing is unavailable, so the backup was copied to your clipboard.');
+          else setStatus(cancelled ? 'Export cancelled.' : 'Could not export. Use "Copy current backup" instead.', !cancelled);
+        }
+        break;
+      }
+      const copied = await copyText(json);
+      try {
+        const url = URL.createObjectURL(new Blob([json], { type: 'application/json' }));
+        const a = document.createElement('a');
+        a.href = url; a.download = `aurum-backup-${TODAY}.json`;
+        document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+      } catch {}
+      setStatus(copied ? 'Backup exported. A copy is also on your clipboard.' : 'Backup exported to your downloads.');
+      break;
+    }
+    case 'copy-backup': {
+      const json = backupJson();
+      if (await copyText(json)) setStatus('Backup copied to your clipboard.');
+      else { const ta = document.getElementById('import-text'); ta.value = json; ta.select(); setStatus('Backup text is selected in the box. Copy it from there.'); }
+      break;
+    }
+    case 'import-paste': importText(document.getElementById('import-text').value); break;
+  }
+});
+document.addEventListener('keydown', e => {
+  if ((e.key === 'Enter' || e.key === ' ') && e.target.matches('tr[data-action]')) { e.preventDefault(); e.target.click(); }
+});
+document.addEventListener('change', e => {
+  const t = e.target;
+  if (t.id === 'import-file' && t.files && t.files[0]) {
+    const reader = new FileReader();
+    reader.onload = () => importText(String(reader.result));
+    reader.onerror = () => setStatus('Could not read that file.', true);
+    reader.readAsText(t.files[0]);
+    t.value = '';
+  }
+  if (t.name === 'theme') {
+    if (t.value === 'light') store.set(THEME_KEY, 'light'); else store.del(THEME_KEY);
+    applyTheme(t.value);
+  }
+  if (t.name === 'band') { ui.calc.band = t.value; saveUi(); updateCalc(); }
+  if (t.id === 'calc-draw') { ui.calc.draw = +t.value; saveUi(); updateCalc(); }
+});
+document.addEventListener('input', e => {
+  const t = e.target, c = ui.calc;
+  if (t.id === 'calc-monthly') { c.monthly = Math.max(0, +t.value || 0); document.getElementById('calc-monthly-range').value = Math.min(2000, c.monthly); }
+  else if (t.id === 'calc-monthly-range') { c.monthly = +t.value; document.getElementById('calc-monthly').value = c.monthly; }
+  else if (t.id === 'calc-years') { c.years = +t.value; document.getElementById('out-years').textContent = c.years; }
+  else if (t.id === 'calc-rate') { c.rate = +t.value; document.getElementById('out-rate').textContent = c.rate + '%'; }
+  else return;
+  saveUi(); updateCalc();
+});
+document.addEventListener('submit', e => {
+  if (e.target.id !== 'add-acct') return;
+  e.preventDefault();
+  const name = document.getElementById('new-acct-name').value.trim();
+  if (!name) return;
+  const used = new Set(state.accounts.map(a => a.color));
+  state.accounts.push({
+    id: uid(), name,
+    provider: document.getElementById('new-acct-provider').value.trim(),
+    type: document.getElementById('new-acct-type').value,
+    color: COLORS.find(c => !used.has(c)) || COLORS[state.accounts.length % COLORS.length]
+  });
+  save(); render();
+});
+
+// Native storage is the source of truth in the app if the WebView's storage was cleared.
+(async () => {
+  if (Native && !store.get(STORE_KEY)) {
+    try {
+      const { value } = await Native.Preferences.get({ key: STORE_KEY });
+      if (value) { state = normalize(JSON.parse(value)); store.set(STORE_KEY, value); }
+    } catch {}
+  }
+  render();
+})();
+})();
+</script>
