@@ -1,8 +1,10 @@
 # Aurum — project guide for Claude
 
-Aurum (formerly "Aura Wealth") is the owner's personal wealth ledger for UK pensions and ISAs.
-The user logs each account's value over time; the app shows net worth, performance, allocation,
-and a SIPP vs ISA tax-relief calculator. It ships as a **website** (GitHub Pages) and an
+Aurum (formerly "Aura Wealth") is a personal wealth ledger for UK pensions, ISAs, savings and investments.
+It started as the owner's app but is now for anyone: no personal data is built in, and a first-run setup
+asks for name and date of birth (optional example data). Users log balances and money paid in/out; the app
+shows net worth, paid-in vs growth, allocation, a retirement planner, goals, a "What's changed" summary,
+and a SIPP vs ISA calculator. It ships as a **website** (GitHub Pages) and an
 **Android APK** (Capacitor), built from the same source.
 
 - Website: https://lucky-lky3.github.io/Aura-Wealth/
@@ -51,10 +53,16 @@ There is no local Java/Android SDK on the owner's PC — **APKs are only built b
 
 ## App architecture (src/app.html)
 
-- State: `{ version: 1, example, accounts: [{id,name,provider,type,color}], logs: [{id,accountId,date:'YYYY-MM-DD',value,note}] }`
-  saved to `localStorage['aurum_v1']`. UI prefs in `aurum_ui`, theme in `aurum_theme`.
+- State (v2): `{ version: 2, example, profile: {name,dob,retireAge,band,growth,inflation,drawRate,people:[{id,name}],lastBackup,setupDone},
+  accounts: [{id,name,provider,type,color,owner,fee,regular:{amount,day,relief,since,last}|null}],
+  logs: [{id,accountId,date:'YYYY-MM-DD',value,note}], flows: [{id,accountId,date,amount,own,note,auto}], goals: [{id,name,target,date,scope}] }`
+  saved to `localStorage['aurum_v1']` (key name kept). UI prefs in `aurum_ui`, theme in `aurum_theme`, PIN hash in `aurum_lock`.
+- `logs` are balances; `flows` are money in (+) / out (−). `amount` is what reached the account (incl. 25% pension relief /
+  LISA bonus), `own` is what the user paid (used for ISA allowances). An account's first balance counts as money in.
+  Growth = change − money in (`periodStats`). Account types live in `TYPES` (group, allowance, top-up).
+- `owner` is `'me'` or a `profile.people` id (e.g. a child's JISA); others are excluded from "my" net worth by default.
 - **Backwards compatibility matters** — `normalize()` must keep importing:
-  the current format, older key `aura_wealth_v2`, and the original Gemini app's v1 backups
+  v1 and v2 of the current format, older key `aura_wealth_v2`, and the original Gemini app's v1 backups
   (`{ hl_sipp:[], hl_isa:[], aegon:[] }` / localStorage keys `aura_v1_*`). Don't break these.
 - First run shows seeded **example data** (`example: true`); the first real logged value clears it.
 - Native (Android) is detected via `window.capacitorExports.Capacitor.isNativePlatform()`; plugins via
