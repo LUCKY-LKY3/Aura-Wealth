@@ -79,12 +79,21 @@ jobs:
           name: Aurum-${{ env.AURUM_VERSION_NAME }}
           path: dist/*.apk
 
+      # RELEASE_NOTES.md is shown in the app's "What's new" when it offers the update.
+      - name: Release notes
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          {
+            cat RELEASE_NOTES.md
+            echo
+            echo "Download **Aurum-${AURUM_VERSION_NAME}.apk** below and open it on your Android phone to install."
+            echo "Your data stays on your phone. Export a backup from Settings before uninstalling or changing phone."
+          } > dist/notes.md
+
       - name: Publish GitHub release
         if: startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v2
         with:
           name: Aurum ${{ env.AURUM_VERSION_NAME }}
           files: dist/*.apk
-          body: |
-            Download **Aurum-${{ env.AURUM_VERSION_NAME }}.apk** below and open it on your Android phone to install.
-            Your data stays on your phone. Export a backup from Settings before uninstalling or changing phone.
+          body_path: dist/notes.md
