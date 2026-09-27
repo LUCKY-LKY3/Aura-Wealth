@@ -521,6 +521,17 @@ body.setup .tabbar,body.setup .fab,body.setup .side-nav,body.setup .top-actions{
       <label class="check" id="acct-reg-relief-wrap" hidden><input type="checkbox" id="acct-reg-relief"><span id="acct-reg-relief-label"></span></label>
       <p class="hint">Logged for you automatically each month from today, so you only need to update the balance.</p>
     </fieldset>
+    <div class="two">
+      <div class="field">
+        <label for="acct-prior">Total paid in so far <span class="faint">Optional</span></label>
+        <div class="money"><span>£</span><input id="acct-prior" class="input" type="number" inputmode="decimal" step="0.01" min="0" placeholder="e.g. 5000"></div>
+      </div>
+      <div class="field">
+        <label for="acct-since">Invested since <span class="faint">Year</span></label>
+        <input id="acct-since" class="input" type="number" inputmode="numeric" min="1950" placeholder="e.g. 2019">
+      </div>
+    </div>
+    <p class="hint" style="margin-top:-8px">Your own money in before you started tracking here (including tax relief). The rest of the first balance counts as growth. Leave blank if the first balance was all money in.</p>
     <div class="field" id="acct-rate-field">
       <label for="acct-rate">Advertised rate <span class="faint">Optional, % a year</span></label>
       <input id="acct-rate" class="input" type="number" inputmode="decimal" step="0.01" min="0" max="20" placeholder="e.g. 4.4 (Premium Bonds prize fund rate)">
@@ -555,6 +566,25 @@ body.setup .tabbar,body.setup .fab,body.setup .side-nav,body.setup .top-actions{
     <div class="sheet-actions">
       <button type="button" class="btn" data-action="close-sheet">Cancel</button>
       <button type="submit" class="btn primary">Save all</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog class="sheet wide" id="past-sheet" aria-labelledby="past-title">
+  <form id="past-form" method="dialog">
+    <div class="sheet-head">
+      <h2 id="past-title">Add past balances</h2>
+      <button type="button" class="icon-btn" data-action="close-sheet" aria-label="Close">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+    <p class="hint" id="past-hint"></p>
+    <div id="past-rows"></div>
+    <button type="button" class="btn sm ghost" data-action="past-row" style="align-self:flex-start">+ Add another row</button>
+    <p class="status err" id="past-err" role="alert"></p>
+    <div class="sheet-actions">
+      <button type="button" class="btn" data-action="close-sheet">Cancel</button>
+      <button type="submit" class="btn primary">Save</button>
     </div>
   </form>
 </dialog>
@@ -698,7 +728,9 @@ function normalize(o) {
         id: String(a.id), name: String(a.name), provider: String(a.provider || ''), type: TYPES[a.type] ? a.type : String(a.type || 'Other'),
         color: COLORS.includes(a.color) ? a.color : COLORS[i % COLORS.length],
         owner: String(a.owner || 'me'), fee: clamp(num(a.fee, 0), 0, 5), regular: reg,
-        notes: String(a.notes || '').slice(0, 500), archived: !!a.archived, rate: clamp(num(a.rate, 0), 0, 20)
+        notes: String(a.notes || '').slice(0, 500), archived: !!a.archived, rate: clamp(num(a.rate, 0), 0, 20),
+        priorPaid: a.priorPaid != null && a.priorPaid !== '' && isFinite(+a.priorPaid) && +a.priorPaid >= 0 ? +a.priorPaid : null,
+        since: /^(19|20)\d\d$/.test(String(a.since || '')) ? String(a.since) : ''
       };
       if (a.demo) acct.demo = true;
       return acct;
@@ -905,7 +937,8 @@ function accountStats(id) {
     lastChange: prev == null ? 0 : cur - prev, last: s[s.length - 1], m30: m30 == null ? null : cur - m30 };
 }
 // Change in one account since `startMs`, split into money paid in and growth.
-// An account's first valuation counts as money in (its opening balance).
+// An account's first valuation counts as money in (its opening balance). For all-time figures,
+// "Total paid in so far" (priorPaid) replaces it, so gains made before tracking count as growth.
 function periodStats(a, startMs, endMs = TODAY_MS) {
   const s = logsOf(a.id).filter(l => toMs(l.date) <= endMs);
   if (!s.length) return null;
@@ -917,10 +950,11 @@ function periodStats(a, startMs, endMs = TODAY_MS) {
   if (v0 == null) { opening = s[0].value; v0 = 0; from = s[0].date; } else from = msIso(startMs);
   const fl = flowsOf(a.id).filter(f => f.date > from && f.date <= end);
   const flowSum = fl.reduce((t, f) => t + f.amount, 0);
-  const paid = opening + flowSum;
+  const allTime = !isFinite(startMs) && a.priorPaid != null;
+  const paid = (allTime ? a.priorPaid : opening) + flowSum;
   const change = cur - v0;
   const growth = change - paid;
-  const base = v0 + opening + flowSum / 2;
+  const base = v0 + (allTime ? a.priorPaid : opening) + flowSum / 2;
   return { v0, cur, change, paid, opening, growth, base, ret: base > 0 ? growth / base * 100 : null };
 }
 function periodTotals(accts, startMs, endMs) {
@@ -1615,10 +1649,15 @@ function renderAccounts() {
   const ordered = Object.keys(GROUPS).flatMap(g => accts.filter(x => groupOf(x) === g));
   const open = ordered.filter(x => !x.archived), closed = ordered.filter(x => x.archived);
   // Return after inflation, over the time the account has been tracked.
-  let realRet = null;
-  if (all && st.s.length > 1 && all.ret != null) {
-    const yrs = (TODAY_MS - toMs(st.s[0].date)) / (365.25 * 864e5);
+  // With "paid in so far" set, growth and return are known from the first balance.
+  const hasRet = !!all && all.ret != null && (st.s.length > 1 || a.priorPaid != null);
+  let realRet = null, yearly = null;
+  if (hasRet) {
+    const from = a.since ? Date.UTC(+a.since, 0, 1) : toMs(st.s[0].date);
+    const yrs = (TODAY_MS - Math.min(from, toMs(st.s[0].date))) / (365.25 * 864e5);
     if (yrs >= 0.25) realRet = ((1 + all.ret / 100) / Math.pow(1 + state.profile.inflation / 100, yrs) - 1) * 100;
+    // Rough average a year: assumes deposits were spread evenly, so it is only a guide.
+    if (yrs >= 1 && all.ret > -100) yearly = (Math.pow(1 + all.ret / 100, 1 / yrs) - 1) * 100;
   }
   const rate = rateInfo(a);
   const hist = ui.hist;
@@ -1645,13 +1684,14 @@ function renderAccounts() {
         </div>
         <div class="stats">
           <div class="stat"><div class="k">Paid in</div><div class="v">${all ? gbp(all.paid) : '—'}</div></div>
-          <div class="stat"><div class="k">Growth</div><div class="v ${cls(all ? all.growth : 0)}">${all && st.s.length > 1 ? signed(all.growth) : '—'}</div></div>
-          <div class="stat"><div class="k">Return</div><div class="v ${cls(all && all.ret || 0)}">${all && st.s.length > 1 && all.ret != null ? pct(all.ret) : '—'}</div>${realRet != null ? `<div class="k">${pct(realRet)} after inflation</div>` : ''}</div>
+          <div class="stat"><div class="k">Growth</div><div class="v ${cls(all ? all.growth : 0)}">${hasRet ? signed(all.growth) : '—'}</div></div>
+          <div class="stat"><div class="k">Return</div><div class="v ${cls(all && all.ret || 0)}">${hasRet ? pct(all.ret) : '—'}</div>${yearly != null ? `<div class="k">about ${pct(yearly)} a year${a.since ? ' since ' + esc(a.since) : ''}</div>` : ''}${realRet != null ? `<div class="k">${pct(realRet)} after inflation</div>` : ''}</div>
           <div class="stat"><div class="k">Fees a year</div><div class="v">${a.fee ? gbp(st.cur * a.fee / 100) : '—'}</div></div>
         </div>
         ${rate ? `<p class="explain" style="margin-top:12px">${rate}</p>` : ''}
         ${reg ? `<p class="hint" style="margin-top:12px">Regular payment: ${reg}.</p>` : ''}
         ${a.notes ? `<p class="hint" style="margin-top:8px;white-space:pre-wrap"><b>Notes:</b> ${esc(a.notes)}</p>` : ''}
+        ${a.priorPaid == null && st.s.length ? `<p class="hint" style="margin-top:8px">Had gains before you started tracking? <button class="btn sm ghost" data-action="edit-acct" data-id="${esc(a.id)}">Add total paid in so far</button> or <button class="btn sm ghost" data-action="open-past" data-id="${esc(a.id)}">add past balances</button></p>` : `<div class="row-actions" style="margin-top:8px"><button class="btn sm ghost" data-action="open-past" data-id="${esc(a.id)}">Add past balances</button></div>`}
         <div class="readout" id="acct-readout" style="margin-top:18px" aria-live="polite"></div>
         <div class="chart" id="acct-chart"></div>
         <label class="check" style="margin-top:10px"><input type="checkbox" id="opt-fit" ${ui.fit ? 'checked' : ''}>Zoom to fit</label>
@@ -1695,7 +1735,7 @@ function paidAt(accts, ms) {
   for (const a of accts) {
     const s = logsOf(a.id);
     if (!s.length || toMs(s[0].date) > ms) continue;
-    t += s[0].value;
+    t += a.priorPaid != null ? a.priorPaid : s[0].value;
     for (const f of state.flows) if (f.accountId === a.id && f.date > s[0].date && toMs(f.date) <= ms) t += f.amount;
   }
   return t;
@@ -2418,7 +2458,7 @@ document.getElementById('log-form').addEventListener('submit', e => {
     state.income = state.income.filter(x => x.id !== id);
     if (old && old.auto) editingEntry.auto = true;
   } else clearExample([accountId]);
-  if (hasV) state.logs.push({ id, accountId, date, value, note });
+  if (hasV) { if (editingEntry) state.logs.push({ id, accountId, date, value, note }); else upsertLog(accountId, date, value, note); }
   if (hasF) {
     const fid = hasV ? uid() : id, auto = !!(editingEntry && editingEntry.auto);
     const kind = document.getElementById('log-kind').value;
@@ -2468,6 +2508,9 @@ function openAcctSheet(id) {
   document.getElementById('acct-reg-day').value = String(a && a.regular ? a.regular.day : 1);
   document.getElementById('acct-reg-relief').checked = !!(a && a.regular && a.regular.relief);
   document.getElementById('acct-rate').value = a && a.rate ? a.rate : '';
+  document.getElementById('acct-prior').value = a && a.priorPaid != null ? a.priorPaid : '';
+  document.getElementById('acct-since').value = a && a.since ? a.since : '';
+  document.getElementById('acct-since').max = TODAY.slice(0, 4);
   document.getElementById('acct-notes').value = a ? a.notes || '' : '';
   document.getElementById('acct-archived').checked = !!(a && a.archived);
   document.getElementById('acct-archived-wrap').hidden = !a;
@@ -2496,6 +2539,8 @@ document.getElementById('acct-form').addEventListener('submit', e => {
     fee: clamp(num(document.getElementById('acct-fee').value, 0), 0, 5),
     rate: clamp(num(document.getElementById('acct-rate').value, 0), 0, 20),
     notes: document.getElementById('acct-notes').value.trim().slice(0, 500),
+    priorPaid: document.getElementById('acct-prior').value === '' ? null : Math.max(0, num(document.getElementById('acct-prior').value, 0)),
+    since: (v => /^(19|20)\d\d$/.test(v) && v <= TODAY.slice(0, 4) ? v : '')(document.getElementById('acct-since').value.trim()),
     archived: !!editingAcct && document.getElementById('acct-archived').checked
   };
   if (editingAcct) {
@@ -2521,6 +2566,55 @@ document.getElementById('acct-form').addEventListener('submit', e => {
   save();
   acctSheet.close();
   render();
+});
+
+// Add past balances: one row per date (e.g. each 5 April), with money paid in since the row before.
+const pastSheet = document.getElementById('past-sheet');
+let pastAcct = null;
+const pastRow = (date = '') => `<div class="bulk-row">
+  <div class="who"><input class="input" type="date" data-past="date" max="${TODAY}" value="${esc(date)}" aria-label="Date"></div>
+  <div class="money"><span>£</span><input class="input" type="number" inputmode="decimal" step="0.01" min="0" data-past="value" placeholder="Balance" aria-label="Balance"></div>
+  <div class="money"><span>£</span><input class="input" type="number" inputmode="decimal" step="0.01" min="0" data-past="paid" placeholder="Paid in" aria-label="Paid in since the row before"></div>
+</div>`;
+function openPast(id) {
+  const a = state.accounts.find(x => x.id === id);
+  if (!a) return;
+  pastAcct = id;
+  const s = logsOf(id), first = s.length ? s[0].date : TODAY;
+  // Suggest the last four tax year ends before the first balance: annual statements use these dates.
+  let y = +first.slice(0, 4) - (first.slice(5) > '04-05' ? 0 : 1);
+  const dates = [];
+  for (let k = 0; k < 4; k++) dates.unshift(`${y - k}-04-05`);
+  document.getElementById('past-title').textContent = `Past balances: ${a.name}`;
+  document.getElementById('past-hint').textContent = `One row per date, oldest first is fine. "Paid in" is money you added since the row before. Dates are suggestions (5 April, when annual statements are dated); change them or leave rows blank.${a.priorPaid != null ? ' If you add balances older than your first one, update "Total paid in so far" in Edit account to what you had paid in by the earliest date.' : ''}`;
+  document.getElementById('past-rows').innerHTML = dates.map(d => pastRow(d)).join('');
+  document.getElementById('past-err').textContent = '';
+  openSheet(pastSheet);
+}
+// A balance for the same account and date replaces the old one rather than duplicating it.
+function upsertLog(accountId, date, value, note) {
+  const ex = state.logs.find(l => l.accountId === accountId && l.date === date);
+  if (ex) { ex.value = value; if (note) ex.note = note; return ex; }
+  const l = { id: uid(), accountId, date, value, note: note || '' };
+  state.logs.push(l);
+  return l;
+}
+document.getElementById('past-form').addEventListener('submit', e => {
+  e.preventDefault();
+  let n = 0;
+  const rows = [...pastSheet.querySelectorAll('#past-rows .bulk-row')].map(r => ({
+    date: r.querySelector('[data-past=date]').value, value: r.querySelector('[data-past=value]').value, paid: r.querySelector('[data-past=paid]').value
+  }));
+  const bad = rows.some(r => (r.value !== '' || r.paid !== '') && (!isIso(r.date) || r.date > TODAY));
+  if (bad) { document.getElementById('past-err').textContent = 'Each row with an amount needs a date that is not in the future.'; return; }
+  clearExample([pastAcct]);
+  for (const r of rows) {
+    const v = parseFloat(r.value), p = parseFloat(r.paid);
+    if (r.value !== '' && isFinite(v) && v >= 0) { upsertLog(pastAcct, r.date, v, ''); n++; }
+    if (r.paid !== '' && isFinite(p) && p > 0) { state.flows.push({ id: uid(), accountId: pastAcct, date: r.date, amount: p, own: p, note: 'Past payment', auto: false }); n++; }
+  }
+  if (!n) { document.getElementById('past-err').textContent = 'Enter at least one balance.'; return; }
+  save(); pastSheet.close(); render();
 });
 
 // Update all
@@ -2551,7 +2645,7 @@ document.getElementById('bulk-form').addEventListener('submit', e => {
   if (!entries.length) { bulkSheet.close(); return; }
   clearExample(entries.map(x => x.id));
   for (const x of entries) {
-    if (x.kind === 'value') state.logs.push({ id: uid(), accountId: x.id, date, value: x.v, note: '' });
+    if (x.kind === 'value') upsertLog(x.id, date, x.v, '');
     else if (x.v > 0) state.flows.push({ id: uid(), accountId: x.id, date, amount: x.v, own: x.v, note: '', auto: false });
   }
   save();
@@ -2906,6 +3000,8 @@ document.addEventListener('click', async e => {
     }
     case 'bio-unlock': tryBio(); break;
     case 'show-closed': ui.showClosed = true; saveUi(); render(); break;
+    case 'open-past': openPast(id); break;
+    case 'past-row': document.getElementById('past-rows').insertAdjacentHTML('beforeend', pastRow()); break;
     case 'edit-entry': openLog(null, id); break;
     case 'review-share': {
       const text = reviewText(yearReview(+id));

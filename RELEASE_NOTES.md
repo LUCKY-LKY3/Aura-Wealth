@@ -1,7 +1,4 @@
-- New look for charts: smooth lines, gold gradients and a gentle draw-in
-- Drag along the net worth chart: the big figure shows the value on that date
-- Zoom to fit, so changes are easy to see
-- New monthly chart: money paid in vs growth (or loss) for each month
-- Planner shows a shaded likely range instead of dashed lines
-- Allocation as clear bars; tap a type to see its accounts
-- Goal progress rings, and trend lines coloured by the last 30 days
+- Total paid in so far: tell Aurum how much of an account's balance was your money, so earlier gains count as growth
+- Invested since (year): see a rough average return a year
+- Add past balances: fill in old statements (e.g. each 5 April) in one go for a truer chart
+- Logging a balance twice on the same day now updates it instead of adding a duplicate
