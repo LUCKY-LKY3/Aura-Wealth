@@ -63,6 +63,8 @@ There is no local Java/Android SDK on the owner's PC — **APKs are only built b
 - "Paid in this tax year" is a flow with `ytd: true` dated on the account's first balance: it counts for allowances
   (dated this tax year) but not as money in for growth (flows on/before the first balance are ignored). SIPP stores gross
   (`own` = amount/1.25), LISA stores own + 25% bonus. Only offered for accounts first logged this tax year.
+- Year by year (`yearRows`): values at 5 April are saved as real balances (`upsertLog`). For all-time figures, `yearlyExtra`
+  adds yearly amounts for tax years after the first balance (less what was logged) to money in.
 - `account.yearly` = reference amounts paid in per tax year (`{'2024': 20000}`), used by allowances, the yearly chart and
   carry-forward via `yearPaid()`; never by balances/growth. `profile.p60[year] = {pay, tax, pay2, tax2, other, giftAid, marriage:'none'|'receive'|'give', code}` drives `incomeTax()` (E/W/NI rates
   in `taxRules(y)`) for the tax helper's band and refund estimate.

@@ -1,8 +1,6 @@
-- P60 for each tax year: Aurum uses your real tax band and estimates any refund, such as higher-rate pension relief
-- Paid in each tax year: add past years' amounts for reference on any account (balances don't change)
-- New "Paid in by tax year" chart and table for ISAs and pensions
-- Pension carry-forward: unused allowance from the last three tax years
-- Tax helper uses each year's allowances (dividends, capital gains, pension annual allowance)
-- Tax helper: second job, other income (rental, self-employed), Gift Aid, Marriage Allowance and tax code check
-- "How to claim" steps with links to the right gov.uk pages
-- Tax reminders: each June to add your P60, and in January if you have a refund to claim or income to declare
+- Year by year on each account: paid in and value at 5 April for past tax years, with growth for each year and a chart
+- Past yearly payments now count as money in for all-time growth, and can fill in "Total paid in so far" for you
+- High Income Child Benefit Charge, with how much more pension would remove it
+- Work expenses relief (uniform, professional fees, working from home)
+- Tip for the £100,000 personal allowance trap
+- The optional tax and yearly sections now fold away

@@ -354,6 +354,11 @@ body.setup .tabbar,body.setup .fab,body.setup .side-nav,body.setup .top-actions{
 .eye{padding:8px}
 .eye svg{width:18px;height:18px}
 .acct-actions{display:flex;gap:8px;flex-wrap:wrap}
+details.fold>summary{list-style:none;cursor:pointer}
+.yr-in{width:112px;margin-left:auto}@media (max-width:420px){.yr-in{width:92px}}.yr-in .input{padding-left:22px;font-size:13.5px}
+details.fold>summary::-webkit-details-marker{display:none}
+details.fold>summary h2::after{content:' ▾';color:var(--ink-3);font-size:12px}
+details.fold:not([open])>summary h2::after{content:' ▸'}
 .badge{flex:none;display:inline-grid;place-items:center;width:30px;height:30px;border-radius:8px;border:1.5px solid;background:var(--surface-2);color:var(--ink);font-size:10.5px;font-weight:650;letter-spacing:.02em}
 .badge.big{width:44px;height:44px;border-radius:11px;font-size:14px}
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(84px + var(--sa-bottom));z-index:60;display:flex;align-items:center;gap:14px;background:var(--surface-2);border:1px solid var(--line-strong);box-shadow:var(--shadow);border-radius:10px;padding:8px 8px 8px 14px;font-size:13.5px;max-width:calc(100% - 32px)}
@@ -703,7 +708,8 @@ function normProfile(p, done) {
     lastBackup: isIso(p.lastBackup) ? p.lastBackup : '',
     p60: Object.fromEntries(Object.entries(p.p60 && typeof p.p60 === 'object' ? p.p60 : {}).filter(([y, v]) => /^\d{4}$/.test(y) && v && typeof v === 'object').map(([y, v]) => [y, {
       pay: Math.max(0, num(v.pay, 0)), tax: Math.max(0, num(v.tax, 0)), pay2: Math.max(0, num(v.pay2, 0)), tax2: Math.max(0, num(v.tax2, 0)),
-      other: Math.max(0, num(v.other, 0)), giftAid: Math.max(0, num(v.giftAid, 0)),
+      other: Math.max(0, num(v.other, 0)), giftAid: Math.max(0, num(v.giftAid, 0)), expenses: Math.max(0, num(v.expenses, 0)),
+      cb: Math.max(0, num(v.cb, 0)), kids: clamp(Math.round(num(v.kids, 0)), 0, 12),
       marriage: ['receive', 'give'].includes(v.marriage) ? v.marriage : 'none', code: /^[A-Z0-9]{1,8}$/.test(String(v.code || '').toUpperCase()) ? String(v.code).toUpperCase() : ''
     }]).filter(([, v]) => v.pay + v.pay2 + v.other > 0)),
     setupDone: p.setupDone != null ? !!p.setupDone : done
@@ -976,11 +982,21 @@ function periodStats(a, startMs, endMs = TODAY_MS) {
   const fl = flowsOf(a.id).filter(f => f.date > from && f.date <= end);
   const flowSum = fl.reduce((t, f) => t + f.amount, 0);
   const allTime = !isFinite(startMs) && a.priorPaid != null;
-  const paid = (allTime ? a.priorPaid : opening) + flowSum;
+  // All-time figures also count yearly reference amounts for tax years after the first balance, less what was logged.
+  const extra = !isFinite(startMs) ? yearlyExtra(a, s[0].date, end) : 0;
+  const paid = (allTime ? a.priorPaid : opening) + flowSum + extra;
   const change = cur - v0;
   const growth = change - paid;
-  const base = v0 + (allTime ? a.priorPaid : opening) + flowSum / 2;
+  const base = v0 + (allTime ? a.priorPaid : opening) + (flowSum + extra) / 2;
   return { v0, cur, change, paid, opening, growth, base, ret: base > 0 ? growth / base * 100 : null };
+}
+function yearlyExtra(a, firstIso, toIso) {
+  let t = 0;
+  for (const [k, v] of Object.entries(a.yearly || {})) {
+    const y = +k, ys = `${y}-04-06`;
+    if (ys > firstIso && ys <= toIso) t += Math.max(0, v - loggedPaid(a, y));
+  }
+  return t;
 }
 function periodTotals(accts, startMs, endMs) {
   const rows = accts.map(a => ({ a, p: periodStats(a, startMs, endMs) })).filter(r => r.p);
@@ -1085,6 +1101,19 @@ function taxRules(y) {
 // Tax on employment income. `ext` is gross relief-at-source pension payments, which widen the basic and higher bands
 // and reduce income for the personal allowance taper.
 const MARRIAGE = 1260; // Marriage Allowance: personal allowance a partner can transfer
+// Child Benefit for a full tax year: weekly rates for the eldest and each other child.
+function childBenefit(y, kids) {
+  if (!kids) return 0;
+  const [first, other] = y >= 2025 ? [26.05, 17.25] : y === 2024 ? [25.60, 16.95] : y === 2023 ? [24.00, 15.90] : [21.80, 14.45];
+  return 52 * (first + (kids - 1) * other);
+}
+// High Income Child Benefit Charge: 1% of the benefit per £200 of adjusted net income over £60,000 (from 2024/25),
+// or per £100 over £50,000 before that.
+function hicbc(y, ani, cb) {
+  const [from, step] = y >= 2024 ? [60000, 200] : [50000, 100];
+  const pctOf = clamp(Math.floor((ani - from) / step), 0, 100);
+  return { charge: Math.floor(cb * pctOf / 100), pct: pctOf, from, to: from + step * 100 };
+}
 function incomeTax(pay, y, ext = 0, paAdj = 0) {
   const r = taxRules(y);
   const pa = Math.max(0, r.pa - Math.max(0, pay - ext - r.taper) / 2 + paAdj);
@@ -1138,17 +1167,27 @@ function taxReport(y) {
     // Gift Aid works like relief at source: the gross donation widens your basic-rate band.
     const giftGross = p60.giftAid / 0.8;
     const paAdj = p60.marriage === 'give' ? -MARRIAGE : 0;
-    const plain = incomeTax(income, y, 0, paAdj), withRelief = incomeTax(income, y, ras, paAdj), withAll = incomeTax(income, y, ras + giftGross, paAdj);
+    const exp = Math.min(p60.expenses, income), net0 = income - exp;
+    const plain = incomeTax(income, y, 0, paAdj), afterExp = incomeTax(net0, y, 0, paAdj), withRelief = incomeTax(net0, y, ras, paAdj), withAll = incomeTax(net0, y, ras + giftGross, paAdj);
+    const expRelief = plain.tax - afterExp.tax;
     // Receiving Marriage Allowance cuts the bill by 20% of the transfer, for basic-rate taxpayers only.
     const maCut = p60.marriage === 'receive' && plain.band === 'basic' ? Math.min(plain.tax, MARRIAGE * 0.2) : 0;
     const rate = { basic: 0.2, higher: 0.4, additional: 0.45 }[band], divRate = { basic: 0.0875, higher: 0.3375, additional: 0.3935 }[band];
     const taxPaid = p60.tax + p60.tax2, expected = plain.tax - maCut;
-    const relief = plain.tax - withRelief.tax, giftRelief = withRelief.tax - withAll.tax;
+    const relief = afterExp.tax - withRelief.tax, giftRelief = withRelief.tax - withAll.tax;
     const savingsTax = Math.max(0, interestTotal - psa) * rate, divTax = Math.max(0, divTotal - rules.div) * divRate;
     // PAYE can't collect tax on "other income"; it's paid through Self Assessment.
     const otherTax = p60.other ? plain.tax - incomeTax(income - p60.other, y, 0, paAdj).tax : 0;
     const payeDiff = taxPaid - (expected - otherTax);
-    const net = taxPaid - (withAll.tax - maCut) - savingsTax - divTax;
+    // Adjusted net income: income less work expenses and gross pension and Gift Aid payments.
+    const ani = net0 - ras - giftGross;
+    const cbAmount = p60.cb || childBenefit(y, p60.kids), cbc = cbAmount ? hicbc(y, ani, cbAmount) : null;
+    const hicbcCharge = cbc ? cbc.charge : 0;
+    const net = taxPaid - (withAll.tax - maCut) - savingsTax - divTax - hicbcCharge;
+    // Tips: gross pension needed to clear the Child Benefit charge, or to get back out of the £100k allowance taper.
+    const tips = [];
+    if (hicbcCharge > 0) tips.push({ kind: 'cb', gross: ani - cbc.from, saves: hicbcCharge + (ani - cbc.from) * ({ basic: 0.2, higher: 0.4, additional: 0.45 }[band] - 0.2) });
+    if (ani > 100000 && ani < 125140 + 20000) tips.push({ kind: 'taper', gross: ani - 100000 });
     // Tax code: the number is roughly the tax-free allowance ÷ 10; M/N mean Marriage Allowance received/given.
     const expPA = plain.pa + (p60.marriage === 'receive' ? MARRIAGE : 0);
     const expCode = `${Math.floor(expPA / 10)}${p60.marriage === 'receive' ? 'M' : p60.marriage === 'give' ? 'N' : 'L'}`;
@@ -1160,7 +1199,7 @@ function taxReport(y) {
     }
     const maHint = p60.marriage === 'none' && income < rules.pa ? 'You earn under the personal allowance: if your spouse or civil partner is a basic-rate taxpayer, you could transfer £1,260 of it to them (Marriage Allowance), worth up to £252 a year.'
       : p60.marriage === 'none' && plain.band === 'basic' ? 'If your spouse or civil partner earns under £12,570, they could transfer £1,260 of their allowance to you (Marriage Allowance), worth up to £252 a year.' : '';
-    est = { income, pay: p60.pay, taxPaid, expected, payeDiff, relief, giftRelief, giftGross, maCut, otherTax, savingsTax, divTax, net, expCode, codeNote, maHint, other: p60.other };
+    est = { income, pay: p60.pay, taxPaid, expected, payeDiff, relief, giftRelief, giftGross, maCut, otherTax, savingsTax, divTax, net, expCode, codeNote, maHint, other: p60.other, expRelief, exp, ani, cbAmount, cbc, hicbcCharge, tips };
   }
   return { y, start, end, partial: last < end, band, ras, extraRelief: est ? est.relief : ras * BANDS[band].extra, aaUsed, aa: rules.aa, employer: sum(employerFlows, f => f.amount),
     interest, interestTotal, psa, dividends, divTotal, divAllow: rules.div, cgt: rules.cgt, isaSubs, bonds, giaOut, est, fromP60: !!p60 };
@@ -1792,6 +1831,7 @@ function renderAccounts() {
       </section>
     </div>`;
   renderHistory();
+  drawAcctYears(a);
   const pts = st.s.map(l => ({ t: toMs(l.date), v: l.value }));
   if (pts.length && pts[pts.length - 1].t < TODAY_MS) pts.push({ t: TODAY_MS, v: pts[pts.length - 1].v });
   chart(document.getElementById('acct-chart'), {
@@ -1810,21 +1850,65 @@ function acctPicker(accts, a) {
     ${closed.length ? (ui.showClosed || (a && a.archived) ? closed.map(x => `<button data-action="pick-account" data-id="${esc(x.id)}" aria-pressed="${x.id === cur}" class="faint"><i class="sw" style="background:${colorOf(x)};opacity:.5"></i>${esc(x.name)} (closed)</button>`).join('') : `<button data-action="show-closed">${closed.length} closed</button>`) : ''}
   </div>`;
 }
-// Reference amounts paid in for each of the last six tax years; doesn't change balances or growth.
+// Year by year: reference "paid in" per tax year plus the value at each 5 April (saved as balances),
+// giving growth for each tax year and a real history for the chart.
+function yearRows(a) {
+  const cur = +taxYearStart(TODAY).slice(0, 4);
+  const s = logsOf(a.id);
+  const first = Math.min(a.since ? +a.since : cur, s.length ? +taxYearStart(s[0].date).slice(0, 4) : cur, ...Object.keys(a.yearly || {}).map(Number));
+  const from = Math.max(first, cur - 14);
+  const valueOn = iso => { let v = null; for (const l of s) { if (l.date <= iso) v = l.value; else break; } return v; };
+  const exact = iso => { const l = s.find(x => x.date === iso); return l ? l.value : null; };
+  const rows = [];
+  for (let y = from; y <= cur; y++) {
+    const endIso = y === cur ? TODAY : `${y + 1}-04-05`;
+    // A year's end value needs a balance inside that tax year; otherwise its growth is unknown.
+    const inYear = s.some(l => l.date >= `${y}-04-06` && l.date <= endIso);
+    const start = valueOn(`${y}-04-05`), end = inYear ? valueOn(endIso) : null, paid = yearPaid(a, y);
+    const startV = start != null ? start : a.since && +a.since === y ? 0 : null;
+    const growth = startV != null && end != null ? end - startV - paid : null;
+    const base = startV != null ? startV + paid / 2 : 0;
+    rows.push({ y, paid, end, exactEnd: y === cur ? null : exact(`${y + 1}-04-05`), growth, ret: growth != null && base > 0 ? growth / base * 100 : null });
+  }
+  return rows;
+}
 function yearlyPanel(a) {
   if (a.type === 'Premium Bonds' || a.type === 'Cash') return '';
-  const cur = +taxYearStart(TODAY).slice(0, 4), years = Array.from({ length: 6 }, (_, k) => cur - k);
+  const cur = +taxYearStart(TODAY).slice(0, 4);
   const pension = groupOf(a) === 'pension';
-  return `<section class="panel">
-    <div class="panel-head"><h2>Paid in each tax year</h2><span class="aside">For reference</span></div>
-    <p class="hint" style="margin:0 0 10px">${pension ? 'Everything paid in, including tax relief and employer payments.' : 'Your own money paid in.'} Used for allowances, carry-forward and the yearly chart. It doesn't change the balance or growth. Leave blank to use the payments you've logged.</p>
+  const rows = yearRows(a);
+  const hasData = Object.keys(a.yearly || {}).length > 0 || rows.some(r => r.exactEnd != null);
+  // Suggest "Total paid in so far" from the yearly amounts before the earliest balance.
+  const s = logsOf(a.id), firstIso = s.length ? s[0].date : null;
+  const before = firstIso ? rows.filter(r => r.y < cur && `${r.y + 1}-04-05` <= firstIso).reduce((t, r) => t + r.paid, 0) : 0;
+  const allBefore = firstIso && a.since ? rows.filter(r => r.y >= +a.since && `${r.y + 1}-04-05` <= firstIso).every(r => a.yearly && a.yearly[r.y] != null) : false;
+  const suggest = before > 0 && allBefore && Math.abs((a.priorPaid || 0) - before) > 0.5;
+  const minY = rows.length ? rows[0].y : cur;
+  return `<section class="panel"><details class="fold" ${hasData ? 'open' : ''}>
+    <summary><span class="panel-head" style="margin:0"><h2>Year by year</h2><span class="aside">Optional · tap to ${hasData ? 'hide' : 'add past years'}</span></span></summary>
+    <p class="hint" style="margin:12px 0 10px">${pension ? 'Paid in: everything, including tax relief and employer payments.' : 'Paid in: your own money.'} Value at 5 April: from your annual statement. Values become balances on the chart; paid-in amounts are for reference (allowances and growth per year). Leave blanks where you don't know.</p>
     <div class="table-wrap"><table>
-      <thead><tr><th>Tax year</th><th class="r">Logged</th><th class="r">Your figure</th></tr></thead>
-      <tbody>${years.map(y => `<tr><td>${tyLabel(y)}${y === cur ? ' <span class="faint">(now)</span>' : ''}</td><td class="r val faint">${gbp(loggedPaid(a, y))}</td>
-        <td class="r"><div class="money" style="max-width:150px;margin-left:auto"><span>£</span><input class="input" type="number" inputmode="decimal" min="0" step="1" data-yearly="${y}" value="${a.yearly && a.yearly[y] != null ? a.yearly[y] : ''}" aria-label="Paid in ${tyLabel(y)}"></div></td></tr>`).join('')}</tbody>
+      <thead><tr><th>Tax year</th><th class="r">Paid in</th><th class="r">Value at 5 April</th></tr></thead>
+      <tbody>${[...rows].reverse().map(r => `<tr><td><span style="white-space:nowrap">${tyLabel(r.y)}</span>${r.y === cur ? '<div class="hint">so far</div>' : ''}
+          <div style="margin-top:4px">${r.growth != null ? deltaChip(r.growth, signed(r.growth)) + (r.ret != null ? `<div class="hint">${pct(r.ret)}</div>` : '') : '<span class="hint">growth —</span>'}</div></td>
+        <td class="r"><div class="money yr-in"><span>£</span><input class="input" type="number" inputmode="decimal" min="0" step="1" data-yearly="${r.y}" value="${a.yearly && a.yearly[r.y] != null ? a.yearly[r.y] : ''}" placeholder="${Math.round(loggedPaid(a, r.y)) || ''}" aria-label="Paid in ${tyLabel(r.y)}"></div></td>
+        <td class="r">${r.y === cur ? `<span class="val mono">${r.end != null ? gbp(r.end) : '—'}</span><div class="hint">now</div>` : `<div class="money yr-in"><span>£</span><input class="input" type="number" inputmode="decimal" min="0" step="1" data-yearval="${r.y}" value="${r.exactEnd != null ? r.exactEnd : ''}" placeholder="${r.end != null ? Math.round(r.end) : ''}" aria-label="Value at 5 April ${r.y + 1}"></div>`}</td>
+      </tr>`).join('')}</tbody>
     </table></div>
-    <div class="row-actions" style="margin-top:10px"><button class="btn" data-action="save-yearly" data-id="${esc(a.id)}">Save yearly amounts</button><span class="status" id="yearly-status" role="status"></span></div>
-  </section>`;
+    <div class="row-actions" style="margin-top:10px">
+      <button class="btn" data-action="save-yearly" data-id="${esc(a.id)}">Save</button>
+      ${minY > cur - 14 ? `<button class="btn ghost" data-action="yearly-earlier" data-id="${esc(a.id)}">Add an earlier year</button>` : ''}
+      <span class="status" id="yearly-status" role="status"></span>
+    </div>
+    ${suggest ? `<p class="hint" style="margin-top:10px">Your yearly amounts add up to <b>${gbp(before)}</b> paid in before your first balance (${dateLabel(toMs(firstIso))}). <button class="btn sm ghost" data-action="use-prior" data-id="${esc(a.id)}" data-v="${before}">Use as "Total paid in so far"</button></p>` : ''}
+    ${rows.filter(r => r.growth != null).length > 1 ? '<div class="chart" id="acct-years-chart" style="margin-top:14px"></div><div class="bar-legend"><span><i class="sw" style="background:var(--c2)"></i>Paid in</span><span><i class="sw" style="background:var(--pos)"></i>Growth</span><span><i class="sw" style="background:var(--neg)"></i>Loss</span></div>' : ''}
+  </details></section>`;
+}
+function drawAcctYears(a) {
+  const host = document.getElementById('acct-years-chart');
+  if (!host) return;
+  const rows = yearRows(a).filter(r => r.growth != null);
+  barChart(host, { labels: rows.map(r => String(r.y).slice(2) + '/' + String(r.y + 1).slice(2)), titles: rows.map(r => tyLabel(r.y)), paid: rows.map(r => r.paid), growth: rows.map(r => r.growth), label: 'Paid in and growth each tax year', empty: '' });
 }
 // Provider initials (e.g. HL, NW) on a small tile edged in the account's colour.
 function initials(a) {
@@ -1912,6 +1996,7 @@ function paidAt(accts, ms) {
     const s = logsOf(a.id);
     if (!s.length || toMs(s[0].date) > ms) continue;
     t += a.priorPaid != null ? a.priorPaid : s[0].value;
+    t += yearlyExtra(a, s[0].date, msIso(ms));
     for (const f of state.flows) if (f.accountId === a.id && f.date > s[0].date && toMs(f.date) <= ms) t += f.amount;
   }
   return t;
@@ -2188,11 +2273,14 @@ function p60Form(y) {
   const v = state.profile.p60[y] || {};
   const money = (id, val, ph, label) => `<div class="field"><label for="${id}">${label}</label><div class="money"><span>£</span><input id="${id}" class="input" type="number" inputmode="decimal" min="0" step="1" placeholder="${ph}" value="${val || ''}"></div></div>`;
   return `<div class="two">${money('p60-pay', v.pay, '0', 'Pay (main job)')}${money('p60-tax', v.tax, '0', 'Tax deducted')}</div>
-    <details ${v.pay2 || v.other || v.giftAid || (v.marriage && v.marriage !== 'none') || v.code ? 'open' : ''}><summary>Second job, other income, Gift Aid, Marriage Allowance, tax code</summary>
+    <details ${v.pay2 || v.other || v.giftAid || v.expenses || v.cb || v.kids || (v.marriage && v.marriage !== 'none') || v.code ? 'open' : ''}><summary>Second job, other income, Gift Aid, work expenses, Child Benefit, Marriage Allowance, tax code</summary>
       <div class="form-grid" style="margin-top:12px">
         <div class="two">${money('p60-pay2', v.pay2, '0', 'Second job pay')}${money('p60-tax2', v.tax2, '0', 'Second job tax')}</div>
         <div class="two">${money('p60-other', v.other, '0', 'Other taxable income')}${money('p60-gift', v.giftAid, '0', 'Gift Aid donations')}</div>
         <p class="hint" style="margin-top:-8px">Other income: rental or self-employed profit, with no tax taken off. Gift Aid: what you actually gave to charity.</p>
+        <div class="two">${money('p60-exp', v.expenses, '0', 'Work expenses')}${money('p60-cb', v.cb, v.kids ? String(Math.round(childBenefit(y, v.kids))) : '0', 'Child Benefit received')}</div>
+        <div class="two"><div class="field"><label for="p60-kids">Children getting Child Benefit</label><input id="p60-kids" class="input" type="number" inputmode="numeric" min="0" max="12" value="${v.kids || ''}" placeholder="0"></div><div></div></div>
+        <p class="hint" style="margin-top:-8px">Work expenses you pay yourself and can claim (uniform, professional fees, working from home). Child Benefit: the amount received that year, or just the number of children for a full-year estimate.</p>
         <div class="two">
           <div class="field"><label for="p60-ma">Marriage Allowance</label><select id="p60-ma" class="input">${[['none', 'Not used'], ['receive', 'I receive it'], ['give', 'I transfer mine']].map(([k, l]) => `<option value="${k}" ${v.marriage === k ? 'selected' : ''}>${l}</option>`).join('')}</select></div>
           <div class="field"><label for="p60-code">Tax code</label><input id="p60-code" class="input" maxlength="8" placeholder="e.g. 1257L" value="${esc(v.code || '')}" autocapitalize="characters"></div>
@@ -2204,20 +2292,28 @@ function p60Form(y) {
 function taxEstimate(r) {
   const e = r.est, line = (k, v, note, c) => `<tr><td>${k}${note ? `<div class="hint">${note}</div>` : ''}</td><td class="r val ${c || ''}">${v}</td></tr>`;
   const net = e.net, cap = w => w[0].toUpperCase() + w.slice(1);
-  const needSA = e.other > 0 || e.savingsTax > 0.5 || e.divTax > 0.5;
+  const needSA = e.other > 0 || e.savingsTax > 0.5 || e.divTax > 0.5 || e.hicbcCharge > 0;
   const steps = [];
   if (e.relief > 0.5) steps.push(`<b>Pension relief (${gbp(e.relief)}):</b> in a Self Assessment return, enter ${gbp(r.ras)} in the pensions section. If you don't file one, call HMRC, write to them, or use your personal tax account. HMRC can also adjust your tax code for future years. <a href="https://www.gov.uk/tax-on-your-private-pension/pension-tax-relief" target="_blank" rel="noopener">gov.uk guide</a>`);
   if (e.giftRelief > 0.5) steps.push(`<b>Gift Aid (${gbp(e.giftRelief)}):</b> claimed the same way; the gross donation is ${gbp(e.giftGross)}. <a href="https://www.gov.uk/donating-to-charity/gift-aid" target="_blank" rel="noopener">gov.uk guide</a>`);
+  if (e.expRelief > 0.5) steps.push(`<b>Work expenses (${gbp(e.expRelief)}):</b> claim online if they're under £2,500, or in Self Assessment. You can usually backdate up to 4 tax years. <a href="https://www.gov.uk/tax-relief-for-employees" target="_blank" rel="noopener">gov.uk guide</a>`);
+  if (e.hicbcCharge > 0) steps.push(`<b>Child Benefit charge (${gbp(e.hicbcCharge)}):</b> usually paid through Self Assessment. Only the higher earner in a couple pays it. If you'd rather not pay it, you can stop the payments but keep the claim, which protects National Insurance credits. <a href="https://www.gov.uk/child-benefit-tax-charge" target="_blank" rel="noopener">gov.uk guide</a>`);
+  for (const tip of e.tips) {
+    if (tip.kind === 'cb') steps.push(`<b>Tip:</b> about <b>${gbp(tip.gross)}</b> more paid into a pension (gross, which costs you ${gbp(tip.gross * 0.8)} after basic-rate relief) would bring your adjusted net income to ${gbp(e.cbc.from)} and remove the ${gbp(e.hicbcCharge)} charge, as well as giving you higher-rate relief.`);
+    if (tip.kind === 'taper') steps.push(`<b>Tip:</b> between £100,000 and £125,140 you lose £1 of personal allowance for every £2 earned, an effective 60% tax rate. About <b>${gbp(tip.gross)}</b> gross more into a pension would bring your adjusted net income back to £100,000.`);
+  }
   if (needSA) steps.push(`<b>Self Assessment:</b> untaxed income (such as rental profit, or savings interest and dividends over your allowances) usually has to be declared. Online returns are due by 31 January. <a href="https://www.gov.uk/self-assessment-tax-returns" target="_blank" rel="noopener">gov.uk guide</a>`);
   if (Math.abs(e.payeDiff) >= 50) steps.push(`<b>Tax deducted looks ${e.payeDiff > 0 ? 'too high' : 'low'}:</b> check your tax code in your personal tax account. HMRC usually refunds overpaid PAYE automatically after the tax year. <a href="https://www.gov.uk/check-income-tax-current-year" target="_blank" rel="noopener">Check your Income Tax</a>`);
   if (e.maHint) steps.push(`<b>Marriage Allowance:</b> ${e.maHint} <a href="https://www.gov.uk/marriage-allowance" target="_blank" rel="noopener">gov.uk guide</a>`);
   return `<div class="table-wrap"><table><tbody>
     ${line('Tax due on your income', gbp(e.expected), `${gbp(e.income)} total income, ${cap(BANDS[r.band].word)}-rate${e.maCut ? `, less ${gbp(e.maCut)} Marriage Allowance` : ''}${e.otherTax > 0.5 ? `. Includes ${gbp(e.otherTax)} on other income, paid through Self Assessment` : ''}`)}
     ${line('Tax deducted (P60s)', gbp(e.taxPaid), Math.abs(e.payeDiff) >= 50 ? (e.payeDiff > 0 ? `About ${gbp(e.payeDiff)} more than expected` : `About ${gbp(-e.payeDiff)} less than expected: benefits, another job or your tax code may explain it`) : 'In line with what was expected')}
+    ${e.expRelief > 0.5 ? line('Relief on work expenses', '+' + gbp(e.expRelief), `On ${gbp(e.exp)} of expenses`, 'pos') : ''}
     ${e.relief > 0.5 ? line('Extra pension relief to claim', '+' + gbp(e.relief), 'Higher or additional-rate relief on relief-at-source payments', 'pos') : ''}
     ${e.giftRelief > 0.5 ? line('Gift Aid relief to claim', '+' + gbp(e.giftRelief), 'Higher or additional-rate relief on your donations', 'pos') : ''}
     ${e.savingsTax > 0.5 ? line('Tax on savings interest', '−' + gbp(e.savingsTax), 'Interest over your Personal Savings Allowance', 'neg') : ''}
     ${e.divTax > 0.5 ? line('Tax on dividends', '−' + gbp(e.divTax), 'Dividends over the Dividend Allowance', 'neg') : ''}
+    ${e.cbc ? line('High Income Child Benefit Charge', e.hicbcCharge ? '−' + gbp(e.hicbcCharge) : gbp(0), `${e.cbc.pct}% of ${gbp(e.cbAmount)} Child Benefit. Adjusted net income ${gbp(e.ani)}; the charge runs from ${gbp(e.cbc.from)} to ${gbp(e.cbc.to)}.`, e.hicbcCharge ? 'neg' : '') : ''}
     ${e.codeNote ? line('Tax code', esc(state.profile.p60[r.y].code), esc(e.codeNote)) : ''}
     <tr class="grp"><td>${net >= 0 ? 'Estimated refund due to you' : 'Estimated tax you may owe'}</td><td class="r val ${net >= 0 ? 'pos' : 'neg'}">${gbp(Math.abs(net))}</td></tr>
   </tbody></table></div>
@@ -2366,12 +2462,12 @@ function taxPanel() {
       ${row('ISA subscriptions', gbp(r.isaSubs), 'Tax-free, not reported.')}
       ${r.bonds > 0 ? row('Premium Bonds prizes', gbp(r.bonds), 'Tax-free, not reported.') : ''}
     </tbody></table></div>
-    <div class="stack" style="gap:10px;border-top:1px solid var(--line);padding-top:14px">
-      <div><b>Your P60 for ${tyLabel(y)}</b> <span class="faint">Optional</span></div>
+    <details class="fold stack" style="gap:10px;border-top:1px solid var(--line);padding-top:14px" ${state.profile.p60[y] ? 'open' : ''}>
+      <summary><h2 style="display:inline">Your P60 and refund check</h2> <span class="faint">Optional</span></summary>
       <p class="hint" style="margin:0">From the P60 your employer gives you after 5 April. Aurum then uses your real tax band for ${tyLabel(y)} and estimates any refund. Not for Scottish taxpayers, whose rates differ.</p>
       ${p60Form(y)}
       ${r.est ? taxEstimate(r) : ''}
-    </div>
+    </details>
     <div class="row-actions"><button class="btn" data-action="tax-copy" data-id="${y}">Copy summary</button><button class="btn ghost" data-action="tax-share" data-id="${y}">Share</button><span class="status" id="tax-status" role="status"></span></div>
     <p class="hint">A helper only, not tax advice. Uses ${r.fromP60 ? `your ${tyLabel(y)} P60 (${BANDS[r.band].word}-rate)` : 'your tax band from Settings'}. Check figures against your providers' annual statements and the HMRC guidance for each section.</p>
   </section>`;
@@ -3386,7 +3482,7 @@ document.addEventListener('click', async e => {
     case 'p60-save': {
       const g = k => Math.max(0, num(document.getElementById(k).value, 0));
       const v = { pay: g('p60-pay'), tax: g('p60-tax'), pay2: g('p60-pay2'), tax2: g('p60-tax2'), other: g('p60-other'), giftAid: g('p60-gift'),
-        marriage: document.getElementById('p60-ma').value, code: document.getElementById('p60-code').value.trim().toUpperCase().replace(/\s/g, '') };
+        expenses: g('p60-exp'), cb: g('p60-cb'), kids: Math.round(g('p60-kids')), marriage: document.getElementById('p60-ma').value, code: document.getElementById('p60-code').value.trim().toUpperCase().replace(/\s/g, '') };
       if (!/^[A-Z0-9]{1,8}$/.test(v.code)) v.code = '';
       if (v.pay + v.pay2 + v.other > 0) state.profile.p60[id] = v; else delete state.profile.p60[id];
       save(); render(); if (Native && store.get(TAXREM_KEY) === '1') scheduleTaxReminders().catch(() => {}); break;
@@ -3394,9 +3490,21 @@ document.addEventListener('click', async e => {
     case 'p60-clear': delete state.profile.p60[id]; save(); render(); break;
     case 'save-yearly': {
       const a = state.accounts.find(x => x.id === id);
+      clearExample([id]);
       document.querySelectorAll('[data-yearly]').forEach(inp => { if (inp.value === '') delete a.yearly[inp.dataset.yearly]; else a.yearly[inp.dataset.yearly] = Math.max(0, num(inp.value, 0)); });
+      // Values at 5 April are real balances; clearing one removes that balance.
+      document.querySelectorAll('[data-yearval]').forEach(inp => {
+        const date = `${+inp.dataset.yearval + 1}-04-05`;
+        if (inp.value === '') state.logs = state.logs.filter(l => !(l.accountId === id && l.date === date));
+        else upsertLog(id, date, Math.max(0, num(inp.value, 0)), 'Value at 5 April');
+      });
       save(); render(); setStatus('Saved.', false, 'yearly-status'); break;
     }
+    case 'yearly-earlier': {
+      const a = state.accounts.find(x => x.id === id), minY = yearRows(a)[0].y;
+      a.since = String(minY - 1); save(); render(); break;
+    }
+    case 'use-prior': { const a = state.accounts.find(x => x.id === id); a.priorPaid = +t.dataset.v; save(); render(); break; }
     case 'open-past': openPast(id); break;
     case 'past-row': document.getElementById('past-rows').insertAdjacentHTML('beforeend', pastRow()); break;
     case 'edit-entry': openLog(null, id); break;
