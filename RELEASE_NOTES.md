@@ -1,3 +1,5 @@
-- Paid in this tax year: tell Aurum what you've already put into an ISA, SIPP or pension since 6 April
-- New Allowances panel: ISA, Lifetime ISA, pension annual allowance and Junior ISA used and left, per account
-- Reminder when an account added this tax year has no payments recorded yet
+- P60 for each tax year: Aurum uses your real tax band and estimates any refund, such as higher-rate pension relief
+- Paid in each tax year: add past years' amounts for reference on any account (balances don't change)
+- New "Paid in by tax year" chart and table for ISAs and pensions
+- Pension carry-forward: unused allowance from the last three tax years
+- Tax helper uses each year's allowances (dividends, capital gains, pension annual allowance)
