@@ -354,6 +354,18 @@ body.setup .tabbar,body.setup .fab,body.setup .side-nav,body.setup .top-actions{
 .eye{padding:8px}
 .eye svg{width:18px;height:18px}
 .acct-actions{display:flex;gap:8px;flex-wrap:wrap}
+.set-group{grid-column:1/-1;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);margin:10px 2px -6px}
+.set-group:first-child{margin-top:0}
+.empty-cta{display:flex;flex-direction:column;align-items:center;gap:12px}
+.calc-display{background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:12px 14px;text-align:right;min-height:74px;display:flex;flex-direction:column;justify-content:flex-end;gap:4px;overflow:hidden}
+.calc-expr{font-family:var(--mono);font-size:14px;color:var(--ink-2);word-break:break-all}
+.calc-result{font-family:var(--mono);font-size:28px;font-weight:600;letter-spacing:-.02em}
+.calc-keys{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.calc-keys button{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:10px;padding:14px 0;font-size:18px;font-family:var(--mono)}
+.calc-keys button:active{background:var(--surface-2)}
+.calc-keys .op{color:var(--gold)}
+.calc-keys .eq{background:var(--primary);color:var(--primary-ink);border-color:var(--primary)}
+.sheet-tools{display:flex;gap:6px}
 details.fold>summary{list-style:none;cursor:pointer}
 .legend li:has(.legend-btn){display:block}
 .legend-btn{display:grid;grid-template-columns:auto 1fr auto;gap:0 8px;align-items:baseline;width:100%;border:0;background:transparent;color:inherit;text-align:left;padding:4px 6px;margin:-4px -6px;border-radius:8px;font-size:13.5px}
@@ -432,6 +444,7 @@ details.fold:not([open])>summary h2::after{content:' ▸'}
         </div>
         <div class="top-actions">
           <div class="saved" data-saved role="status"><i></i><span class="sr">Saved on this device</span></div>
+          <button class="btn ghost eye" data-action="open-calc" aria-label="Calculator"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="2.5"/><path d="M8.5 7h7M8.5 11h.01M12 11h.01M15.5 11h.01M8.5 14.5h.01M12 14.5h.01M15.5 14.5h.01M8.5 18h.01M12 18h.01M15.5 18h.01"/></svg></button>
           <button class="btn ghost eye" data-action="toggle-hide" id="eye-btn" aria-pressed="false" aria-label="Hide balances"></button>
           <button class="btn primary only-wide" data-action="open-log">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Log a value</button>
@@ -465,9 +478,10 @@ details.fold:not([open])>summary h2::after{content:' ▸'}
   <form id="log-form" method="dialog">
     <div class="sheet-head">
       <h2 id="sheet-title">Log a value</h2>
+      <span class="sheet-tools"><button type="button" class="icon-btn" data-action="open-calc" aria-label="Calculator"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="2.5"/><path d="M8.5 7h7M8.5 11h.01M12 11h.01M15.5 11h.01M8.5 14.5h.01M12 14.5h.01M15.5 14.5h.01M8.5 18h.01M12 18h.01M15.5 18h.01"/></svg></button>
       <button type="button" class="icon-btn" data-action="close-sheet" aria-label="Close">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
-      </button>
+      </button></span>
     </div>
     <p class="warn" id="log-example-note" hidden>Saving your first value clears the example figures, so only your own numbers remain.</p>
     <div class="field">
@@ -491,6 +505,7 @@ details.fold:not([open])>summary h2::after{content:' ▸'}
       </div>
       <label class="check" id="log-relief-wrap" hidden><input type="checkbox" id="log-relief"><span id="log-relief-label"></span></label>
       <p class="hint" id="log-kind-hint">Recording deposits means they are not counted as growth.</p>
+      <button type="button" class="btn sm" id="log-same" data-action="log-same" hidden style="align-self:flex-start"></button>
     </fieldset>
     <div class="field">
       <label for="log-note">Note <span class="faint">Optional</span></label>
@@ -589,9 +604,10 @@ details.fold:not([open])>summary h2::after{content:' ▸'}
   <form id="bulk-form" method="dialog">
     <div class="sheet-head">
       <h2 id="bulk-title">Update all accounts</h2>
+      <span class="sheet-tools"><button type="button" class="icon-btn" data-action="open-calc" aria-label="Calculator"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="2.5"/><path d="M8.5 7h7M8.5 11h.01M12 11h.01M15.5 11h.01M8.5 14.5h.01M12 14.5h.01M15.5 14.5h.01M8.5 18h.01M12 18h.01M15.5 18h.01"/></svg></button>
       <button type="button" class="icon-btn" data-action="close-sheet" aria-label="Close">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
-      </button>
+      </button></span>
     </div>
     <div class="field" style="max-width:220px">
       <label for="bulk-date">Date</label>
@@ -623,6 +639,22 @@ details.fold:not([open])>summary h2::after{content:' ▸'}
       <button type="button" class="btn" data-action="close-sheet">Cancel</button>
       <button type="submit" class="btn primary">Save</button>
     </div>
+  </form>
+</dialog>
+
+<dialog class="sheet" id="calc-sheet" aria-labelledby="calc-title">
+  <form id="calc-form" method="dialog">
+    <div class="sheet-head">
+      <h2 id="calc-title">Calculator</h2>
+      <button type="button" class="icon-btn" data-action="calc-close" aria-label="Close">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+    <div class="calc-display"><div class="calc-expr" id="calc-expr"></div><div class="calc-result" id="calc-result">0</div></div>
+    <div class="calc-keys">
+      <button type="button" class="" data-action="calc-key" data-id="C">C</button><button type="button" class="" data-action="calc-key" data-id="⌫">⌫</button><button type="button" class="op" data-action="calc-key" data-id="%">%</button><button type="button" class="op" data-action="calc-key" data-id="÷">÷</button><button type="button" class="" data-action="calc-key" data-id="7">7</button><button type="button" class="" data-action="calc-key" data-id="8">8</button><button type="button" class="" data-action="calc-key" data-id="9">9</button><button type="button" class="op" data-action="calc-key" data-id="×">×</button><button type="button" class="" data-action="calc-key" data-id="4">4</button><button type="button" class="" data-action="calc-key" data-id="5">5</button><button type="button" class="" data-action="calc-key" data-id="6">6</button><button type="button" class="op" data-action="calc-key" data-id="−">−</button><button type="button" class="" data-action="calc-key" data-id="1">1</button><button type="button" class="" data-action="calc-key" data-id="2">2</button><button type="button" class="" data-action="calc-key" data-id="3">3</button><button type="button" class="op" data-action="calc-key" data-id="+">+</button><button type="button" class="" data-action="calc-key" data-id="0">0</button><button type="button" class="" data-action="calc-key" data-id=".">.</button><button type="button" class="" data-action="calc-key" data-id="00">00</button><button type="button" class="eq" data-action="calc-key" data-id="=">=</button>
+    </div>
+    <button type="button" class="btn primary" data-action="calc-use" id="calc-use" hidden>Use this amount</button>
   </form>
 </dialog>
 
@@ -1299,6 +1331,8 @@ function smoothPath(p, join) {
   return s;
 }
 let gradId = 0;
+// An empty chart explains what's missing and offers the button that fixes it.
+const emptyChart = (text, act) => `<div class="chart-empty"><div class="empty-cta"><span>${esc(text)}</span>${act ? `<button class="btn sm" data-action="${act[1]}"${act[2] ? ` data-id="${esc(act[2])}"` : ''}>${esc(act[0])}</button>` : ''}</div></div>`;
 const chartConfigs = new Map();
 const chartHeight = W => W < 520 ? 210 : W < 760 ? 260 : 300;
 function chart(host, cfg) {
@@ -1308,7 +1342,7 @@ function chart(host, cfg) {
   const H = cfg.height || chartHeight(W);
   const m = { t: 12, r: 10, b: 26, l: W < 520 ? 46 : 56 };
   const n = cfg.xs.length;
-  if (n < 2) { host.innerHTML = `<div class="chart-empty">${esc(cfg.empty || 'Log at least two values to see a trend.')}</div>`; return; }
+  if (n < 2) { host.innerHTML = emptyChart(cfg.empty || 'Log at least two values to see a trend.', cfg.emptyAction); return; }
   const x0 = cfg.xs[0], x1 = cfg.xs[n - 1], span = (x1 - x0) || 1;
   let base = new Array(n).fill(0);
   // Overlay series (e.g. a "Paid in" line) are drawn on their own, never stacked.
@@ -1418,7 +1452,7 @@ function barChart(host, cfg) {
   const H = cfg.height || (W < 520 ? 200 : 240);
   const m = { t: 12, r: 10, b: 26, l: W < 520 ? 46 : 56 };
   const n = cfg.labels.length;
-  if (!n) { host.innerHTML = `<div class="chart-empty">${esc(cfg.empty)}</div>`; return; }
+  if (!n) { host.innerHTML = emptyChart(cfg.empty, cfg.emptyAction); return; }
   const segs = cfg.paid.map((p, i) => {
     const g = cfg.growth[i], up = Math.max(p, 0), down = Math.min(p, 0);
     return { p, g, top: up + Math.max(g, 0), bottom: down + Math.min(g, 0), up, down };
@@ -1757,7 +1791,7 @@ function renderOverview() {
   view.innerHTML = `<div class="stack view">${updateBanner()}${exampleNotice()}${notices.join('')}${personFilter()}<div class="summary">${statement}${kpis}</div>${holdings}<div class="grid-2">${growth}${allocation}</div>${monthly}${goals ? `<div class="grid-2">${activity}${goals}</div>` : activity}</div>`;
   barChart(document.getElementById('monthly-chart'), {
     labels: months.map(x => x.short), titles: months.map(x => x.title), paid: months.map(x => x.paid), growth: months.map(x => x.growth),
-    label: 'Money paid in and growth each month', empty: 'Log values over a few months to see this.'
+    label: 'Money paid in and growth each month', empty: 'Update your balances each month to see what you paid in and what grew.', emptyAction: ['Update all', 'open-bulk']
   });
 
   const pts = rangePoints(tl, start);
@@ -1772,7 +1806,7 @@ function renderOverview() {
   document.getElementById('growth-legend').innerHTML = series.map(s => `<span><i class="sw" style="background:${s.color}"></i>${esc(s.label)}</span>`).join('');
   const v0 = pts.length ? pts[0].total : 0;
   chart(document.getElementById('growth-chart'), {
-    xs: pts.map(p => p.t), stacked: !totalMode, fit: totalMode && ui.fit, label: 'Net worth over time', empty: 'Not enough values in this period yet.', series,
+    xs: pts.map(p => p.t), stacked: !totalMode, fit: totalMode && ui.fit, label: 'Net worth over time', empty: tl.length > 1 ? 'Not enough values in this period yet. Try a longer range.' : 'Log balances again later to see your trend here.', emptyAction: tl.length > 1 ? ['Show all time', 'range-all'] : ['Update all', 'open-bulk'], series,
     tipAlways: ui.paidLine || ui.lastYear,
     readout: totalMode ? { id: 'growth-readout', html: i => {
       const v = pts[i].total, d = v - v0;
@@ -1863,6 +1897,7 @@ function renderAccounts() {
   const deposits = flowsOf(a.id).filter(f => f.amount > 0 && !f.ytd).map(f => ({ t: toMs(f.date), label: `${dateLabel(toMs(f.date))}: ${f.employer ? 'employer paid in' : 'paid in'} ${gbp(f.amount)}` }));
   chart(document.getElementById('acct-chart'), {
     xs: pts.map(p => p.t), label: a.name + ' value over time', fit: ui.fit, tipAlways: ui.paidLine, markers: deposits,
+    empty: 'Log another balance to see how this account changes.', emptyAction: ['Log value', 'open-log', a.id],
     readout: pts.length ? { id: 'acct-readout', html: i => { const d = pts[i].v - pts[0].v; return `<span class="rv">${gbp(pts[i].v)}</span>${i ? `<span class="delta ${cls(d)}">${signed(d)}</span>` : ''}<span class="rd">${i === pts.length - 1 ? 'Now' : dateLabel(pts[i].t)}</span>`; } } : null,
     series: [{ label: a.name, color: colorOf(a), values: pts.map(p => p.v) }, ...(ui.paidLine ? [{ label: 'Paid in', color: 'var(--ink-3)', values: pts.map(p => paidAt([a], p.t)), overlay: true, dash: true, fill: false }] : [])]
   });
@@ -2001,7 +2036,7 @@ function renderAllAccounts(accts) {
   renderHistory();
   const pts = rangePoints(tl, -Infinity);
   chart(document.getElementById('all-chart'), {
-    xs: pts.map(p => p.t), label: 'All accounts over time', fit: ui.fit, tipAlways: ui.paidLine,
+    xs: pts.map(p => p.t), label: 'All accounts over time', fit: ui.fit, tipAlways: ui.paidLine, empty: 'Update your balances again later to see your trend.', emptyAction: ['Update all', 'open-bulk'],
     series: [{ label: 'All accounts', color: 'var(--c1)', values: pts.map(p => p.total) }, ...(ui.paidLine ? [{ label: 'Paid in', color: 'var(--ink-2)', values: pts.map(p => paidAt(accts, p.t)), overlay: true, dash: true, fill: false }] : [])],
     readout: pts.length ? { id: 'all-readout', html: i => { const d = pts[i].total - pts[0].total; return `<span class="rv">${gbp(pts[i].total)}</span>${i ? `<span class="delta ${cls(d)}">${signed(d)}</span>` : ''}<span class="rd">${i === pts.length - 1 ? 'Now' : dateLabel(pts[i].t)}</span>`; } } : null
   });
@@ -2830,7 +2865,23 @@ const TITLES = {
   insights: ["What's changed", () => 'A plain-English summary of your money'],
   settings: ['Settings & backup', () => 'Your data is stored on this device only']
 };
-const renderers = { overview: renderOverview, accounts: renderAccounts, planner: renderPlanner, insights: renderInsights, settings: renderSettings };
+// Settings sections under small group headings, in a fixed order.
+const SETTING_GROUPS = [['You', ['About you', 'Family']], ['Accounts', ['Accounts']], ['Data', ['Backup and restore']], ['Privacy and reminders', ['Privacy', 'Reminders']], ['App', ['Appearance', 'Get Aurum', 'Reset']]];
+function groupSettings() {
+  const grid = view.querySelector('.settings-grid');
+  if (!grid) return;
+  const byTitle = {};
+  grid.querySelectorAll(':scope > section').forEach(sec => { const h = sec.querySelector('h2'); if (h) byTitle[h.textContent.trim()] = sec; });
+  for (const [label, titles] of SETTING_GROUPS) {
+    const secs = titles.map(t => byTitle[t]).filter(Boolean);
+    if (!secs.length) continue;
+    const head = document.createElement('div');
+    head.className = 'set-group'; head.textContent = label;
+    grid.appendChild(head);
+    secs.forEach(sec => grid.appendChild(sec));
+  }
+}
+const renderers = { overview: renderOverview, accounts: renderAccounts, planner: renderPlanner, insights: renderInsights, settings: () => { renderSettings(); groupSettings(); } };
 function render() {
   chartConfigs.clear();
   const eye = document.getElementById('eye-btn');
@@ -2852,7 +2903,78 @@ function render() {
   });
   document.getElementById('page-title').textContent = TITLES[ui.tab][0];
   document.getElementById('page-sub').textContent = TITLES[ui.tab][1]();
-  renderers[ui.tab]();
+  try { renderers[ui.tab](); }
+  catch (err) {
+    // A broken screen shows a way out instead of a blank page; stored data is never touched.
+    console.error(err);
+    view.innerHTML = `<div class="stack view"><section class="panel"><div class="chart-empty"><div class="empty-cta"><b>Something went wrong showing this screen.</b><span>Your data is safe. Try reloading, or open another tab.</span><button class="btn primary" data-action="reload">Reload</button><details><summary>Details</summary><p class="hint mono" style="margin-top:8px">${esc(String(err && err.message || err))}</p></details></div></div></section></div>`;
+  }
+  moneyInputs();
+}
+
+/* ---------- amounts: "1.5k", "1200+350" ---------- */
+// Evaluates a small sum typed into an amount box. No eval(): a tiny parser for + − × ÷ % and brackets.
+function evalAmount(text) {
+  const src = String(text).replace(/[£,\s]/g, '').replace(/[×x*]/gi, '*').replace(/÷/g, '/').replace(/[−–]/g, '-')
+    .replace(/(\d+(?:\.\d+)?)k/gi, '($1*1000)').replace(/(\d+(?:\.\d+)?)m/gi, '($1*1000000)');
+  if (!src || /[^0-9.+\-*/()%]/.test(src)) return null;
+  let i = 0;
+  const peek = () => src[i];
+  function num() {
+    if (peek() === '(') { i++; const v = expr(); if (peek() !== ')') throw 0; i++; return v; }
+    if (peek() === '-') { i++; return -num(); }
+    const m = /^\d*\.?\d+|^\d+\./.exec(src.slice(i));
+    if (!m) throw 0;
+    i += m[0].length;
+    let v = parseFloat(m[0]);
+    if (peek() === '%') { i++; v /= 100; }
+    return v;
+  }
+  function term() { let v = num(); while (peek() === '*' || peek() === '/') { const op = src[i++], r = num(); v = op === '*' ? v * r : v / r; } return v; }
+  function expr() { let v = term(); while (peek() === '+' || peek() === '-') { const op = src[i++], r = term(); v = op === '+' ? v + r : v - r; } return v; }
+  try { const v = expr(); return i === src.length && isFinite(v) ? Math.round(v * 100) / 100 : null; } catch { return null; }
+}
+// Amount boxes become text boxes (so "1.5k" and sums can be typed) with the decimal keypad.
+function moneyInputs(root = document) {
+  root.querySelectorAll('.money input[type=number]').forEach(inp => { inp.type = 'text'; inp.inputMode = 'decimal'; inp.dataset.money = '1'; inp.autocomplete = 'off'; });
+}
+function settleAmount(inp) {
+  if (!inp || !inp.dataset.money || inp.value.trim() === '') return;
+  const v = evalAmount(inp.value);
+  if (v != null && String(v) !== inp.value) { inp.value = String(v); inp.dispatchEvent(new Event('input', { bubbles: true })); }
+}
+const settleAll = () => document.querySelectorAll('input[data-money]').forEach(settleAmount);
+// Work sums out before any form or button reads the boxes.
+document.addEventListener('submit', settleAll, true);
+document.addEventListener('click', e => { if (e.target.closest('button, [data-action]')) settleAll(); }, true);
+document.addEventListener('change', e => { if (e.target.dataset && e.target.dataset.money) settleAmount(e.target); }, true);
+let lastMoney = null;
+document.addEventListener('focusin', e => { if (e.target.dataset && e.target.dataset.money) lastMoney = e.target; });
+
+/* ---------- calculator ---------- */
+const calcSheet = document.getElementById('calc-sheet');
+let calcExpr = '', calcTarget = null;
+function calcShow() {
+  const v = evalAmount(calcExpr.replace(/[+\-×÷*/]$/, ''));
+  document.getElementById('calc-expr').textContent = calcExpr || ' ';
+  document.getElementById('calc-result').textContent = calcExpr === '' ? '0' : v == null ? '…' : v.toLocaleString('en-GB', { maximumFractionDigits: 2 });
+}
+function openCalc() {
+  // From inside Log or Update all, the result can go back into the amount box last used there.
+  const host = lastMoney && lastMoney.closest('dialog');
+  calcTarget = host && host.open ? lastMoney : null;
+  calcExpr = calcTarget && calcTarget.value ? String(evalAmount(calcTarget.value) ?? '') : '';
+  document.getElementById('calc-use').hidden = !calcTarget;
+  calcShow();
+  openSheet(calcSheet);
+}
+function calcKey(k) {
+  if (k === 'C') calcExpr = '';
+  else if (k === '⌫') calcExpr = calcExpr.slice(0, -1);
+  else if (k === '=') { const v = evalAmount(calcExpr); if (v != null) calcExpr = String(v); }
+  else if ('+−×÷'.includes(k)) { calcExpr = calcExpr.replace(/[+−×÷]$/, '') + (calcExpr === '' && k === '−' ? '-' : calcExpr === '' ? '' : k); }
+  else calcExpr += k;
+  calcShow();
 }
 
 /* ---------- sheets ---------- */
@@ -2882,6 +3004,9 @@ function updateLogHints() {
   if (g !== 'pension' && g !== 'isa' && a && a.type !== 'Premium Bonds') opts.push(['interest', 'Interest received']);
   kind.innerHTML = opts.map(([v, l]) => `<option value="${v}">${l}</option>`).join('');
   kind.value = opts.some(o => o[0] === prev) ? prev : 'in';
+  const last = a ? lastPaid(a.id) : 0, same = document.getElementById('log-same');
+  same.hidden = !last || !!editingEntry;
+  same.textContent = last ? `Paid in: same as last time (${gbp(last)})` : '';
   updateKindHint();
 }
 function updateKindHint() {
@@ -2911,7 +3036,8 @@ function openLog(accountId, entryId) {
   const base = visibleAccounts().length ? visibleAccounts() : state.accounts;
   const accts = found ? state.accounts.filter(a => a.id === found.e.accountId) : active(base).length ? active(base) : base;
   logAccount.innerHTML = accts.map(a => `<option value="${esc(a.id)}">${esc(a.name)}${a.provider ? ' · ' + esc(a.provider) : ''}${a.owner !== 'me' ? ' (' + esc(personName(a.owner)) + ')' : ''}</option>`).join('');
-  logAccount.value = found ? found.e.accountId : accountId || (ui.tab === 'accounts' && ui.account) || accts[0].id;
+  const remembered = accts.some(a => a.id === ui.lastLogAcct) ? ui.lastLogAcct : null;
+  logAccount.value = found ? found.e.accountId : accountId || (ui.tab === 'accounts' && ui.account !== 'all' && ui.account) || remembered || accts[0].id;
   if (!logAccount.value) logAccount.value = accts[0].id;
   logAccount.disabled = !!found;
   const dateEl = document.getElementById('log-date');
@@ -2974,6 +3100,7 @@ document.getElementById('log-form').addEventListener('submit', e => {
     }
   }
   editingEntry = null;
+  ui.lastLogAcct = accountId; saveUi();
   save();
   sheet.close();
   render();
@@ -3125,6 +3252,7 @@ function openPast(id) {
   document.getElementById('past-hint').textContent = `One row per date, oldest first is fine. "Paid in" is money you added since the row before. Dates are suggestions (5 April, when annual statements are dated); change them or leave rows blank.${a.priorPaid != null ? ' If you add balances older than your first one, update "Total paid in so far" in Edit account to what you had paid in by the earliest date.' : ''}`;
   document.getElementById('past-rows').innerHTML = dates.map(d => pastRow(d)).join('');
   document.getElementById('past-err').textContent = '';
+  moneyInputs(pastSheet);
   openSheet(pastSheet);
 }
 // A balance for the same account and date replaces the old one rather than duplicating it.
@@ -3171,6 +3299,7 @@ function openBulk() {
     </div>`;
   }).join('');
   document.getElementById('bulk-same').hidden = !accts.some(a => lastPaid(a.id));
+  moneyInputs(bulkSheet);
   openSheet(bulkSheet);
 }
 // The last amount paid in by hand (not a regular payment), for "Same as last time".
@@ -3620,8 +3749,23 @@ document.addEventListener('click', async e => {
     case 'use-prior': { const a = state.accounts.find(x => x.id === id); a.priorPaid = +t.dataset.v; save(); render(); break; }
     case 'all-type': ui.allType = ui.allType === id ? '' : id; saveUi(); render(); break;
     case 'heat': { const el = document.getElementById('heat-readout'); if (el) el.textContent = id; break; }
+    case 'open-calc': openCalc(); break;
+    case 'calc-key': calcKey(id); break;
+    case 'calc-close': calcSheet.close(); break;
+    case 'calc-use': {
+      const v = evalAmount(calcExpr);
+      if (calcTarget && v != null) { calcTarget.value = String(v); calcTarget.dispatchEvent(new Event('input', { bubbles: true })); }
+      calcSheet.close(); if (calcTarget) calcTarget.focus(); break;
+    }
+    case 'reload': location.reload(); break;
+    case 'range-all': ui.range = 'All'; saveUi(); render(); break;
+    case 'log-same': {
+      const v = lastPaid(logAccount.value);
+      if (v) { document.getElementById('log-kind').value = 'in'; updateKindHint(); document.getElementById('log-flow').value = v; }
+      break;
+    }
     case 'open-past': openPast(id); break;
-    case 'past-row': document.getElementById('past-rows').insertAdjacentHTML('beforeend', pastRow()); break;
+    case 'past-row': document.getElementById('past-rows').insertAdjacentHTML('beforeend', pastRow()); moneyInputs(pastSheet); break;
     case 'edit-entry': openLog(null, id); break;
     case 'review-share': {
       const text = reviewText(yearReview(+id));
@@ -3745,6 +3889,7 @@ document.addEventListener('submit', async e => {
   }
 });
 
+moneyInputs();
 // Native storage is the source of truth in the app if the WebView's storage was cleared.
 (async () => {
   if (Native && !store.get(STORE_KEY)) {

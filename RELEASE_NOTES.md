@@ -1,4 +1,6 @@
-- All accounts: donut by type (tap to filter), accessible vs locked-away money with when pensions unlock
-- Your money vs growth: one bar per account showing what you put in and what it earned
-- Month by month heatmap: green for growth, red for falls; tap a month for the figures
-- Account pages: a small donut of your money vs growth, and gold markers on the chart where you paid in
+- Calculator: button at the top of every screen, and inside Log and Update all to put the result straight into an amount
+- Quick amounts: type 1.5k, 20k or sums like 1200+350 into any amount box
+- Log a value remembers your last account, with "Paid in: same as last time"
+- Empty charts now explain what's needed, with a button to do it
+- Settings grouped into You, Accounts, Data, Privacy and reminders, and App
+- If a screen ever fails to load, a Reload button appears instead of a blank page
