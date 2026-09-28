@@ -355,6 +355,26 @@ body.setup .tabbar,body.setup .fab,body.setup .side-nav,body.setup .top-actions{
 .eye svg{width:18px;height:18px}
 .acct-actions{display:flex;gap:8px;flex-wrap:wrap}
 details.fold>summary{list-style:none;cursor:pointer}
+.legend li:has(.legend-btn){display:block}
+.legend-btn{display:grid;grid-template-columns:auto 1fr auto;gap:0 8px;align-items:baseline;width:100%;border:0;background:transparent;color:inherit;text-align:left;padding:4px 6px;margin:-4px -6px;border-radius:8px;font-size:13.5px}
+.legend-btn small{grid-column:2/4;color:var(--ink-3);font-size:12px}
+.legend-btn .pct{font-family:var(--mono);font-size:13px}
+.legend-btn:hover,.legend-btn.on{background:var(--surface-2)}
+.split-bar{display:flex;gap:2px;height:10px;border-radius:99px;overflow:hidden;margin:8px 0}
+.split-bar i{display:block;height:100%}
+.pg-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:14px}
+.pg-list li{display:flex;flex-direction:column;gap:6px;cursor:pointer}
+.pg-bar{display:flex;gap:2px;height:10px}
+.pg-bar i{display:block;height:100%;min-width:2px}
+.pg-bar i:first-child{border-radius:99px 0 0 99px}.pg-bar i:last-child{border-radius:0 99px 99px 0}
+.pg-bar i.loss{background:repeating-linear-gradient(135deg,var(--neg) 0 3px,transparent 3px 6px);border:1px solid var(--neg)}
+.heatmap{display:grid;grid-template-columns:22px repeat(12,minmax(0,1fr));gap:4px;align-items:center}
+.hm-h,.hm-y{font-family:var(--mono);font-size:10.5px;color:var(--ink-3);text-align:center}
+.hm-y{text-align:left}
+.hm-cell{aspect-ratio:1;border:0;border-radius:4px;padding:0;min-width:0}
+.hm-cell.empty{background:var(--surface-2);opacity:.5}
+.mini-split{display:flex;align-items:center;gap:14px;margin-top:14px}
+.mini-split svg{width:56px;height:56px;flex:none}
 .yr-in{width:112px;margin-left:auto}@media (max-width:420px){.yr-in{width:92px}}.yr-in .input{padding-left:22px;font-size:13.5px}
 details.fold>summary::-webkit-details-marker{display:none}
 details.fold>summary h2::after{content:' ▾';color:var(--ink-3);font-size:12px}
@@ -1352,6 +1372,11 @@ function chart(host, cfg) {
       : `<path class="${anim ? 'draw' : ''}" pathLength="1" d="${line}" fill="none" style="stroke:${l.color}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>`;
     if (!l.dash) shapes += `<circle cx="${up[n - 1][0].toFixed(1)}" cy="${up[n - 1][1].toFixed(1)}" r="4" style="fill:${l.color};stroke:var(--surface)" stroke-width="2"/>`;
   });
+  // Markers (e.g. deposits) as small gold ticks along the bottom of the plot.
+  if (cfg.markers) cfg.markers.filter(k => k.t >= x0 && k.t <= x1).forEach(k => {
+    const x = X(k.t).toFixed(1), y = (H - m.b).toFixed(1);
+    shapes += `<path d="M${x},${y}l-4,-7h8z" style="fill:${k.color || 'var(--gold)'}" opacity=".85"><title>${esc(k.label)}</title></path>`;
+  });
   cfg._drawn = true;
   const dots = layers.map(l => `<circle class="hover-dot" r="4.5" style="fill:${l.color};stroke:var(--surface)" stroke-width="2" visibility="hidden"/>`).join('');
   host.innerHTML = `<svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}" role="img" aria-label="${esc(cfg.label || 'Chart')}"><defs>${defs}</defs>${g}${shapes}<line class="hover-line" x1="0" x2="0" y1="${m.t}" y2="${H - m.b}" visibility="hidden"/>${dots}<rect x="${m.l}" y="0" width="${W - m.l - m.r}" height="${H}" fill="transparent"/></svg><div class="tip" hidden></div>`;
@@ -1809,6 +1834,7 @@ function renderAccounts() {
           <div class="stat"><div class="k">Return</div><div class="v ${cls(all && all.ret || 0)}">${hasRet ? pct(all.ret) : '—'}</div>${yearly != null ? `<div class="k">about ${pct(yearly)} a year${a.since ? ' since ' + esc(a.since) : ''}</div>` : ''}${realRet != null ? `<div class="k">${pct(realRet)} after inflation</div>` : ''}</div>
           <div class="stat"><div class="k">Fees a year</div><div class="v">${a.fee ? gbp(st.cur * a.fee / 100) : '—'}</div></div>
         </div>
+        ${hasRet && all.paid > 0 ? miniSplit(all.paid, st.cur) : ''}
         ${rate ? `<p class="explain" style="margin-top:12px">${rate}</p>` : ''}
         ${reg ? `<p class="hint" style="margin-top:12px">Regular payment: ${reg}.</p>` : ''}
         ${a.notes ? `<p class="hint" style="margin-top:8px;white-space:pre-wrap"><b>Notes:</b> ${esc(a.notes)}</p>` : ''}
@@ -1834,8 +1860,9 @@ function renderAccounts() {
   drawAcctYears(a);
   const pts = st.s.map(l => ({ t: toMs(l.date), v: l.value }));
   if (pts.length && pts[pts.length - 1].t < TODAY_MS) pts.push({ t: TODAY_MS, v: pts[pts.length - 1].v });
+  const deposits = flowsOf(a.id).filter(f => f.amount > 0 && !f.ytd).map(f => ({ t: toMs(f.date), label: `${dateLabel(toMs(f.date))}: ${f.employer ? 'employer paid in' : 'paid in'} ${gbp(f.amount)}` }));
   chart(document.getElementById('acct-chart'), {
-    xs: pts.map(p => p.t), label: a.name + ' value over time', fit: ui.fit, tipAlways: ui.paidLine,
+    xs: pts.map(p => p.t), label: a.name + ' value over time', fit: ui.fit, tipAlways: ui.paidLine, markers: deposits,
     readout: pts.length ? { id: 'acct-readout', html: i => { const d = pts[i].v - pts[0].v; return `<span class="rv">${gbp(pts[i].v)}</span>${i ? `<span class="delta ${cls(d)}">${signed(d)}</span>` : ''}<span class="rd">${i === pts.length - 1 ? 'Now' : dateLabel(pts[i].t)}</span>`; } } : null,
     series: [{ label: a.name, color: colorOf(a), values: pts.map(p => p.v) }, ...(ui.paidLine ? [{ label: 'Paid in', color: 'var(--ink-3)', values: pts.map(p => paidAt([a], p.t)), overlay: true, dash: true, fill: false }] : [])]
   });
@@ -1945,11 +1972,13 @@ function renderAllAccounts(accts) {
         <div class="readout" id="all-readout" style="margin-top:18px" aria-live="polite"></div>
         <div class="chart" id="all-chart"></div>
       </section>
+      ${splitPanel(accts, stats, all.cur)}
+      ${paidGrowthPanel(order)}
       <section class="panel">
-        <div class="panel-head"><h2>Every account</h2><span class="aside">All time</span></div>
+        <div class="panel-head"><h2>Every account</h2><span class="aside">${ui.allType && GROUPS[ui.allType] ? `${esc(GROUPS[ui.allType])} · <button class="btn sm ghost" data-action="all-type" data-id="">Show all</button>` : 'All time'}</span></div>
         <div class="table-wrap"><table>
           <thead><tr><th>Account</th><th class="r">Value</th><th class="r hide-sm">Paid in</th><th class="r">Growth</th><th class="r hide-sm">Return</th></tr></thead>
-          <tbody>${order.map(x => `<tr class="clickable" data-action="pick-account" data-id="${esc(x.a.id)}" tabindex="0">
+          <tbody>${order.filter(x => !ui.allType || groupOf(x.a) === ui.allType).map(x => `<tr class="clickable" data-action="pick-account" data-id="${esc(x.a.id)}" tabindex="0">
             <td><div class="acct-cell">${badge(x.a)}<div style="min-width:0"><div class="n">${esc(x.a.name)}${ownerChip(x.a)}</div><div class="p hide-sm">${esc(typeOf(x.a).label)}</div></div></div></td>
             <td class="r val">${gbp(x.st.cur)}</td>
             <td class="r val hide-sm">${x.p ? gbp(x.p.paid) : '—'}</td>
@@ -1958,6 +1987,7 @@ function renderAllAccounts(accts) {
           </tr>`).join('')}</tbody>
         </table></div>
       </section>
+      ${heatmapPanel(accts)}
       <section class="panel">
         <div class="panel-head"><h2>History</h2><span class="aside">All accounts</span></div>
         <div class="inline-form" style="margin-bottom:14px">
@@ -1975,6 +2005,89 @@ function renderAllAccounts(accts) {
     series: [{ label: 'All accounts', color: 'var(--c1)', values: pts.map(p => p.total) }, ...(ui.paidLine ? [{ label: 'Paid in', color: 'var(--ink-2)', values: pts.map(p => paidAt(accts, p.t)), overlay: true, dash: true, fill: false }] : [])],
     readout: pts.length ? { id: 'all-readout', html: i => { const d = pts[i].total - pts[0].total; return `<span class="rv">${gbp(pts[i].total)}</span>${i ? `<span class="delta ${cls(d)}">${signed(d)}</span>` : ''}<span class="rd">${i === pts.length - 1 ? 'Now' : dateLabel(pts[i].t)}</span>`; } } : null
   });
+}
+// Your money vs growth for one account, as a small donut with the split in words.
+function miniSplit(paid, cur) {
+  const g = cur - paid;
+  const parts = g >= 0 ? [{ value: paid, color: 'var(--c2)' }, { value: g, color: 'var(--pos)' }] : [{ value: cur, color: 'var(--c2)' }, { value: -g, color: 'var(--neg)' }];
+  const tot = parts.reduce((t, x) => t + x.value, 0) || 1;
+  return `<div class="mini-split">${donut(parts, tot)}<div class="explain">${g >= 0
+    ? `<b>${(paid / tot * 100).toFixed(0)}%</b> is money you put in (${gbp(paid)}) and <b class="pos">${(g / tot * 100).toFixed(0)}%</b> is growth (${gbp(g)}).`
+    : `Worth <b>${gbp(cur)}</b> against <b>${gbp(paid)}</b> put in: <b class="neg">${gbp(-g)}</b> below what you paid.`}</div></div>`;
+}
+// Split by type as a donut (few slices, so a donut reads well), plus accessible vs locked-away money.
+function splitPanel(accts, stats, total) {
+  if (total <= 0) return '';
+  const groups = groupSummary(active(accts)).filter(g => g.value > 0);
+  const locked = stats.filter(x => groupOf(x.a) === 'pension' && !x.a.archived).reduce((t, x) => t + x.st.cur, 0);
+  const free = total - locked, dob = state.profile.dob, age = accessAge(dob);
+  const unlock = dob ? `${+dob.slice(0, 4) + age}${dob.slice(4)}` : '';
+  return `<section class="panel">
+    <div class="panel-head"><h2>Where it is</h2><span class="aside">Tap a type to filter</span></div>
+    <div class="donut-wrap">
+      <div class="donut-box">${donut(groups.map(g => ({ value: g.value, color: g.color })), total)}
+        <div class="donut-center"><b class="mono">${compact(total)}</b><span>${groups.length} type${groups.length === 1 ? '' : 's'}</span></div>
+      </div>
+      <ul class="legend">${groups.map(g => `<li><button class="legend-btn${ui.allType === g.g ? ' on' : ''}" data-action="all-type" data-id="${g.g}"><i class="sw" style="background:${g.color}"></i><span>${esc(g.label)}</span><span class="pct">${(g.value / total * 100).toFixed(0)}%</span><small class="num">${gbp(g.value)}</small></button></li>`).join('')}</ul>
+    </div>
+    <div style="margin-top:18px">
+      <div class="goal-top"><span><b>Accessible now</b> <span class="mono">${gbp(free)}</span></span><span><b>Locked</b> <span class="mono">${gbp(locked)}</span></span></div>
+      <div class="split-bar" role="img" aria-label="Accessible ${gbp(free)}, locked ${gbp(locked)}"><i style="flex:${Math.max(free, 0)};background:var(--c2)"></i><i style="flex:${locked};background:var(--c1)"></i></div>
+      <div class="goal-meta"><span>${(free / total * 100).toFixed(0)}% ISAs, savings and investments</span><span>${locked ? `Pensions from age ${age}${unlock ? ` (${monthYear(toMs(unlock))})` : ''}` : ''}</span></div>
+    </div>
+  </section>`;
+}
+// Each account as one bar: your money (ivory) then growth (green), or the part lost (red), scaled to the largest.
+function paidGrowthPanel(order) {
+  const rows = order.filter(x => x.p && (x.st.s.length > 1 || x.a.priorPaid != null || Object.keys(x.a.yearly || {}).length));
+  if (!rows.length) return '';
+  const max = Math.max(1, ...rows.map(x => Math.max(x.p.paid, x.st.cur)));
+  const w = v => (Math.max(0, v) / max * 100).toFixed(2) + '%';
+  return `<section class="panel">
+    <div class="panel-head"><h2>Your money vs growth</h2><span class="aside">All time</span></div>
+    <ul class="pg-list">${[...rows].sort((a, b) => b.st.cur - a.st.cur).map(x => {
+      const paid = x.p.paid, g = x.st.cur - paid;
+      return `<li data-action="pick-account" data-id="${esc(x.a.id)}" tabindex="0">
+        <div class="al-top"><span class="nm">${esc(x.a.name)}</span><b>${gbp(x.st.cur)}</b><span class="pc ${cls(g)}">${x.p.ret != null ? pct(x.p.ret) : ''}</span></div>
+        <span class="pg-bar">${g >= 0 ? `<i style="width:${w(paid)};background:var(--c2)"></i><i style="width:${w(g)};background:var(--pos)"></i>` : `<i style="width:${w(x.st.cur)};background:var(--c2)"></i><i class="loss" style="width:${w(-g)}"></i>`}</span>
+      </li>`;
+    }).join('')}</ul>
+    <div class="bar-legend"><span><i class="sw" style="background:var(--c2)"></i>Your money</span><span><i class="sw" style="background:var(--pos)"></i>Growth</span><span><i class="sw" style="background:var(--neg)"></i>Loss</span></div>
+  </section>`;
+}
+// Month-by-month growth as a heatmap: rows are years, cells are months, green for growth and red for a fall.
+function heatmapPanel(accts) {
+  const firsts = accts.map(a => logsOf(a.id)[0]).filter(Boolean).map(l => l.date).sort();
+  if (!firsts.length) return '';
+  const [fy, fm] = firsts[0].split('-').map(Number), [ty, tm] = TODAY.split('-').map(Number);
+  if ((ty - fy) * 12 + (tm - fm) < 2) return '';
+  const cells = {};
+  let maxAbs = 0;
+  for (let y = fy; y <= ty; y++) for (let m = 1; m <= 12; m++) {
+    if ((y === fy && m <= fm) || (y === ty && m > tm)) continue;
+    const t = periodTotals(accts, Date.UTC(y, m - 1, 0), Math.min(TODAY_MS, Date.UTC(y, m, 0)));
+    if (!t.rows.length) continue;
+    const ret = t.base > 0 ? t.growth / t.base * 100 : 0;
+    cells[`${y}-${m}`] = { g: t.growth, ret };
+    maxAbs = Math.max(maxAbs, Math.abs(ret));
+  }
+  const years = []; for (let y = Math.max(fy, ty - 9); y <= ty; y++) years.push(y);
+  const M = ['J', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D'];
+  const cell = (y, m) => {
+    const c = cells[`${y}-${m}`];
+    if (!c) return '<span class="hm-cell empty"></span>';
+    const a = maxAbs ? 0.18 + 0.82 * Math.min(1, Math.abs(c.ret) / maxAbs) : 0.2;
+    const label = `${monthYear(Date.UTC(y, m - 1, 1))}: ${c.g >= 0 ? 'growth' : 'fall'} ${signed(c.g)} (${pct(c.ret)})`;
+    return `<button class="hm-cell" data-action="heat" data-id="${esc(label)}" title="${esc(label)}" aria-label="${esc(label)}" style="background:var(${c.g >= 0 ? '--pos' : '--neg'});opacity:${Math.abs(c.g) < 0.5 ? 0.12 : a.toFixed(2)}"></button>`;
+  };
+  return `<section class="panel">
+    <div class="panel-head"><h2>Month by month</h2><span class="aside">Growth, not money paid in</span></div>
+    <div class="heatmap">
+      <span></span>${M.map(x => `<span class="hm-h">${x}</span>`).join('')}
+      ${years.map(y => `<span class="hm-y">${String(y).slice(2)}</span>${Array.from({ length: 12 }, (_, i) => cell(y, i + 1)).join('')}`).join('')}
+    </div>
+    <p class="hint" id="heat-readout" style="margin-top:10px">Tap a month to see its figures. Stronger colour means a bigger move.</p>
+  </section>`;
 }
 // "Effective rate" for Premium Bonds and savings over the last 12 months, against the advertised rate.
 function rateInfo(a) {
@@ -3505,6 +3618,8 @@ document.addEventListener('click', async e => {
       a.since = String(minY - 1); save(); render(); break;
     }
     case 'use-prior': { const a = state.accounts.find(x => x.id === id); a.priorPaid = +t.dataset.v; save(); render(); break; }
+    case 'all-type': ui.allType = ui.allType === id ? '' : id; saveUi(); render(); break;
+    case 'heat': { const el = document.getElementById('heat-readout'); if (el) el.textContent = id; break; }
     case 'open-past': openPast(id); break;
     case 'past-row': document.getElementById('past-rows').insertAdjacentHTML('beforeend', pastRow()); break;
     case 'edit-entry': openLog(null, id); break;

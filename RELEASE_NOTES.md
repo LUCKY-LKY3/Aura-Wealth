@@ -1,6 +1,4 @@
-- Year by year on each account: paid in and value at 5 April for past tax years, with growth for each year and a chart
-- Past yearly payments now count as money in for all-time growth, and can fill in "Total paid in so far" for you
-- High Income Child Benefit Charge, with how much more pension would remove it
-- Work expenses relief (uniform, professional fees, working from home)
-- Tip for the £100,000 personal allowance trap
-- The optional tax and yearly sections now fold away
+- All accounts: donut by type (tap to filter), accessible vs locked-away money with when pensions unlock
+- Your money vs growth: one bar per account showing what you put in and what it earned
+- Month by month heatmap: green for growth, red for falls; tap a month for the figures
+- Account pages: a small donut of your money vs growth, and gold markers on the chart where you paid in
