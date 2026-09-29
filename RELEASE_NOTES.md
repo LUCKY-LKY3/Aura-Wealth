@@ -1,6 +1,7 @@
-- Calculator: button at the top of every screen, and inside Log and Update all to put the result straight into an amount
-- Quick amounts: type 1.5k, 20k or sums like 1200+350 into any amount box
-- Log a value remembers your last account, with "Paid in: same as last time"
-- Empty charts now explain what's needed, with a button to do it
-- Settings grouped into You, Accounts, Data, Privacy and reminders, and App
-- If a screen ever fails to load, a Reload button appears instead of a blank page
+- Payments logged without a balance now move the balance (shown as "est." until you enter a real one); regular payments do the same
+- History, Year by year and the P60 check fold away behind a clear round button, and remember how you left them
+- "Saved ✓" confirmation, a light vibration, and the changed row briefly glows
+- Swipe left or right to change tabs; tap the tab you're on to jump to the top
+- Account types as tap-to-pick chips; Save buttons stay visible at the bottom of forms
+- Shorter dates in tables on phones, bigger tap targets, the account strip stays at the top while scrolling
+- Clearer chart axis labels when zoomed in
