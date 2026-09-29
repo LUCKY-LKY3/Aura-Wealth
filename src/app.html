@@ -323,6 +323,28 @@ tr.grp td.val{font-size:12.5px;letter-spacing:0;text-transform:none;color:var(--
 .goal-meta{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font-size:12.5px;color:var(--ink-3)}
 .check{display:flex;gap:9px;align-items:flex-start;font-size:13.5px;color:var(--ink-2);cursor:pointer}
 .check input{margin-top:3px;accent-color:var(--primary);width:16px;height:16px;flex:none}
+/* Switches: for settings that apply straight away. Checkboxes stay inside forms saved with a button. */
+input.switch,.check.tgl input{appearance:none;-webkit-appearance:none;width:42px;height:24px;margin:0;border-radius:12px;background:var(--line-strong);position:relative;cursor:pointer;flex:none;transition:background .18s}
+input.switch::after,.check.tgl input::after{content:'';position:absolute;left:3px;top:3px;width:18px;height:18px;border-radius:50%;background:var(--ink-3);transition:transform .18s,background .18s}
+input.switch:checked,.check.tgl input:checked{background:var(--gold)}
+input.switch:checked::after,.check.tgl input:checked::after{transform:translateX(18px);background:#0b0a08}
+input.switch:focus-visible,.check.tgl input:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.check.tgl{align-items:center;justify-content:space-between;gap:14px}
+.check.tgl input{order:2}
+.check.tgl>span{flex:1;min-width:0}
+.check.tgl.mini>span{flex:0 1 auto}
+.check.tgl.mini{justify-content:flex-start;gap:9px}
+.check.tgl.mini input{order:0;width:34px;height:20px}
+.check.tgl.mini input::after{width:14px;height:14px}
+.check.tgl.mini input:checked::after{transform:translateX(14px)}
+.set-grp{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);margin:6px 0 -6px}
+.set-card{border:1px solid var(--line);border-radius:12px;background:var(--surface-2);overflow:hidden}
+.set-row{display:flex;align-items:center;gap:12px;padding:11px 14px;cursor:pointer}
+.set-row+.set-row,.move-opts+.set-row{border-top:1px solid var(--line)}
+.set-row .note-ic{background:var(--surface)}
+.set-txt{flex:1;min-width:0;display:flex;flex-direction:column}
+.set-txt b{font-weight:550;color:var(--ink);font-size:14px}.set-txt small{color:var(--ink-3);font-size:12px;margin-top:1px}
+.move-opts{padding:2px 14px 14px 58px}
 fieldset.field{border:0;padding:0;margin:0;min-width:0}
 fieldset.field legend{padding:0;margin-bottom:6px}
 .two{display:grid;gap:12px;grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
@@ -1837,9 +1859,9 @@ function renderOverview() {
       <div class="chart" id="growth-chart"></div>
       <div class="legend-inline" id="growth-legend"></div>
       <div class="row-actions" style="margin-top:12px;gap:16px">
-        ${ui.stackBy === 'total' ? `<label class="check"><input type="checkbox" id="opt-fit" ${ui.fit ? 'checked' : ''}>Zoom to fit</label>` : ''}
-        <label class="check"><input type="checkbox" id="opt-paid" ${ui.paidLine ? 'checked' : ''}>Show money paid in</label>
-        <label class="check"><input type="checkbox" id="opt-lastyear" ${ui.lastYear ? 'checked' : ''}>Compare with a year earlier</label>
+        ${ui.stackBy === 'total' ? `<label class="check tgl mini"><input type="checkbox" role="switch" id="opt-fit" ${ui.fit ? 'checked' : ''}><span>Zoom to fit</span></label>` : ''}
+        <label class="check tgl mini"><input type="checkbox" role="switch" id="opt-paid" ${ui.paidLine ? 'checked' : ''}><span>Show money paid in</span></label>
+        <label class="check tgl mini"><input type="checkbox" role="switch" id="opt-lastyear" ${ui.lastYear ? 'checked' : ''}><span>Compare with a year earlier</span></label>
       </div>
     </section>`;
 
@@ -1977,7 +1999,7 @@ function renderAccounts() {
         ${a.priorPaid == null && st.s.length ? `<p class="hint" style="margin-top:8px">Had gains before you started tracking? <button class="btn sm ghost" data-action="edit-acct" data-id="${esc(a.id)}">Add total paid in so far</button> or <button class="btn sm ghost" data-action="open-past" data-id="${esc(a.id)}">add past balances</button></p>` : `<div class="row-actions" style="margin-top:8px"><button class="btn sm ghost" data-action="open-past" data-id="${esc(a.id)}">Add past balances</button></div>`}
         <div class="readout" id="acct-readout" style="margin-top:18px" aria-live="polite"></div>
         <div class="chart" id="acct-chart"></div>
-        <label class="check" style="margin-top:10px"><input type="checkbox" id="opt-fit" ${ui.fit ? 'checked' : ''}>Zoom to fit</label>
+        <label class="check tgl mini" style="margin-top:10px"><input type="checkbox" role="switch" id="opt-fit" ${ui.fit ? 'checked' : ''}><span>Zoom to fit</span></label>
       </section>
       ${yearlyPanel(a)}
       <section class="panel">
@@ -2390,7 +2412,7 @@ function renderPlanner() {
               <label for="plan-target">Target pot <span class="faint">Optional</span></label>
               <div class="money"><span>£</span><input id="plan-target" class="input" type="number" inputmode="decimal" min="0" step="1000" value="${ui.plan.target || ''}" placeholder="e.g. 750000"></div>
             </div>
-            <label class="check"><input type="checkbox" id="plan-real" ${ui.plan.real ? 'checked' : ''}>Show figures in today's money</label>
+            <label class="check tgl mini"><input type="checkbox" role="switch" id="plan-real" ${ui.plan.real ? 'checked' : ''}><span>Show figures in today's money</span></label>
           </div>
           <div>
             <div class="eyebrow" style="margin-bottom:8px">Accounts and monthly payments</div>
@@ -2834,7 +2856,7 @@ function renderInsights() {
 /* ---------- settings ---------- */
 const hasCrypto = !!(window.crypto && crypto.subtle && window.TextEncoder);
 function renderSettings() {
-  const moveOpts = noteOn('moves') ? `<div class="stack" style="gap:8px;padding-left:28px">
+  const moveOpts = noteOn('moves') ? `<div class="stack move-opts" style="gap:8px">
           <span class="hint" style="margin:0">Notify when a balance or my net worth moves by</span>
           <div class="seg scroll" role="group" aria-label="Amount">${[1, 2, 5, 10, 15, 20].map(v => `<button data-action="move-pct" data-id="${v}" aria-pressed="${ui.notes.move.pct === v}">${v}%</button>`).join('')}</div>
           <label class="hint" style="margin:0;display:flex;align-items:center;gap:8px">Or your own: <input class="input" id="move-custom" type="text" inputmode="decimal" style="width:80px;padding:6px 8px" placeholder="e.g. 7.5" value="${[1, 2, 5, 10, 15, 20].includes(ui.notes.move.pct) ? '' : ui.notes.move.pct}"> %</label>
@@ -2886,7 +2908,7 @@ function renderSettings() {
 
       <section class="panel stack">
         <h2>Privacy</h2>
-        <label class="check"><input type="checkbox" id="set-hidden" ${ui.hidden ? 'checked' : ''}><span><b style="color:var(--ink);font-weight:550">Hide balances</b><br>Shows £•••• instead of amounts. Also on the eye button at the top.</span></label>
+        <label class="check tgl"><input type="checkbox" role="switch" id="set-hidden" ${ui.hidden ? 'checked' : ''}><span><b style="color:var(--ink);font-weight:550">Hide balances</b><br>Shows £•••• instead of amounts. Also on the eye button at the top.</span></label>
         <div class="stack" style="gap:10px">
           <div><b style="font-weight:550">PIN lock</b> <span class="faint">${locked ? 'On' : 'Off'}</span></div>
           ${!hasCrypto ? '<p class="hint">PIN lock needs a secure (https) connection.</p>' : `
@@ -2895,7 +2917,7 @@ function renderSettings() {
             <button class="btn" type="submit">${locked ? 'Change PIN' : 'Set PIN'}</button>
             ${locked ? '<button class="btn danger" type="button" data-action="pin-off">Turn off</button>' : ''}
           </form>
-          ${Native && locked && bioOk ? `<label class="check"><input type="checkbox" id="set-bio" ${store.get(BIO_KEY) === '1' ? 'checked' : ''}><span><b style="color:var(--ink);font-weight:550">Unlock with fingerprint</b><br>Uses your phone's fingerprint or face unlock. The PIN still works.</span></label>` : ''}
+          ${Native && locked && bioOk ? `<label class="check tgl"><input type="checkbox" role="switch" id="set-bio" ${store.get(BIO_KEY) === '1' ? 'checked' : ''}><span><b style="color:var(--ink);font-weight:550">Unlock with fingerprint</b><br>Uses your phone's fingerprint or face unlock. The PIN still works.</span></label>` : ''}
           <p class="hint">Asks for the PIN when Aurum opens or after a minute in the background. It is a privacy screen: if you forget it, you can erase the data on this device and restore a backup.</p>`}
           <p class="status" id="pin-status" role="status"></p>
         </div>
@@ -2923,14 +2945,14 @@ function renderSettings() {
             <div class="row-actions"><label class="btn" for="csv-file">Choose CSV file</label><input id="csv-file" type="file" accept=".csv,text/csv,text/plain" class="sr"></div>
           </div>
         </details>
-        ${Native ? `<label class="check"><input type="checkbox" id="set-autobackup" ${store.get(AUTO_KEY) === '1' ? 'checked' : ''}><span><b style="color:var(--ink);font-weight:550">Automatic weekly backup</b><br>Saves a copy to Documents/Aurum on this phone${store.get(AUTO_LAST) ? `, last on ${dateLabel(toMs(store.get(AUTO_LAST)))}` : ''}. Keeps the 8 newest. Copy them to Google Drive or a computer now and then, as they are lost if the phone is.</span></label><p class="status" id="auto-status" role="status"></p>` : ''}
+        ${Native ? `<label class="check tgl"><input type="checkbox" role="switch" id="set-autobackup" ${store.get(AUTO_KEY) === '1' ? 'checked' : ''}><span><b style="color:var(--ink);font-weight:550">Automatic weekly backup</b><br>Saves a copy to Documents/Aurum on this phone${store.get(AUTO_LAST) ? `, last on ${dateLabel(toMs(store.get(AUTO_LAST)))}` : ''}. Keeps the 8 newest. Copy them to Google Drive or a computer now and then, as they are lost if the phone is.</span></label><p class="status" id="auto-status" role="status"></p>` : ''}
         <p class="status" id="backup-status" role="status"></p>
       </section>
 
       <section class="panel stack">
         <h2>Appearance</h2>
-        <label class="check"><input type="checkbox" id="set-pence" ${ui.pence ? 'checked' : ''}>Show pence (£1,234.56)</label>
-        <label class="check"><input type="checkbox" id="set-compact" ${ui.compactNums ? 'checked' : ''}>Short figures for large amounts (£104.1k)</label>
+        <label class="check tgl"><input type="checkbox" role="switch" id="set-pence" ${ui.pence ? 'checked' : ''}><span>Show pence (£1,234.56)</span></label>
+        <label class="check tgl"><input type="checkbox" role="switch" id="set-compact" ${ui.compactNums ? 'checked' : ''}><span>Short figures for large amounts (£104.1k)</span></label>
         <div class="seg" role="radiogroup" aria-label="Theme" style="width:max-content">
           ${['dark', 'light'].map(t => `<input type="radio" name="theme" id="theme-${t}" value="${t}" ${theme === t ? 'checked' : ''}><label for="theme-${t}">${t[0].toUpperCase() + t.slice(1)}</label>`).join('')}
         </div>
@@ -2944,7 +2966,7 @@ function renderSettings() {
       <section class="panel stack">
         <h2>Notifications</h2>
         <p class="explain">Shown under the bell at the top. Worked out on this device from your entries.</p>
-        ${NOTE_KINDS.map(([k, label, sub]) => `<label class="check"><input type="checkbox" data-note-kind="${k}" ${noteOn(k) ? 'checked' : ''}><span><b style="color:var(--ink);font-weight:550">${label}</b><br>${sub}</span></label>${k === 'moves' ? moveOpts : ''}`).join('')}
+        ${[['To do', ['due', 'backup', 'regular', 'stale']], ['Tax year', ['allow', 'tax']], ['Progress', ['goals', 'moves', 'app']]].map(([g, keys]) => `<div class="set-grp">${g}</div><div class="set-card">${keys.map(k => { const [, label, sub] = NOTE_KINDS.find(x => x[0] === k); return `<label class="set-row"><span class="note-ic gold"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${NOTE_ICONS[NOTE_KIND_ICON[k]]}</svg></span><span class="set-txt"><b>${label}</b><small>${k === 'moves' && noteOn(k) ? `${ui.notes.move.pct}% · ${{ both: 'up and down', up: 'up only', down: 'down only' }[ui.notes.move.dir]} · ${ui.notes.move.basis === 'month' ? 'this month' : 'since previous balance'}` : sub}</small></span><input type="checkbox" role="switch" class="switch" data-note-kind="${k}" ${noteOn(k) ? 'checked' : ''}></label>${k === 'moves' ? moveOpts : ''}`; }).join('')}</div>`).join('')}
       </section>
 
       <section class="panel stack">
@@ -2952,7 +2974,7 @@ function renderSettings() {
         ${Native ? `<div class="field" style="max-width:260px"><label for="set-reminder">Monthly reminder to update balances</label>
           <select id="set-reminder" class="input"><option value="">Off</option>${Array.from({ length: 28 }, (_, i) => `<option value="${i + 1}" ${store.get(REMINDER_KEY) === String(i + 1) ? 'selected' : ''}>On day ${i + 1}, 9am</option>`).join('')}</select></div>
           <p class="status" id="reminder-status" role="status"></p>
-          <label class="check"><input type="checkbox" id="set-taxrem" ${store.get(TAXREM_KEY) === '1' ? 'checked' : ''}><span><b style="color:var(--ink);font-weight:550">Tax reminders</b><br>Each June to add your P60, and on 10 January if your last tax year has a refund to claim or income to declare.</span></label>` : '<p class="hint">A monthly phone reminder is available in the Android app. On the website, Aurum flags accounts you have not updated for 30 days.</p>'}
+          <label class="check tgl"><input type="checkbox" role="switch" id="set-taxrem" ${store.get(TAXREM_KEY) === '1' ? 'checked' : ''}><span><b style="color:var(--ink);font-weight:550">Tax reminders</b><br>Each June to add your P60, and on 10 January if your last tax year has a refund to claim or income to declare.</span></label>` : '<p class="hint">A monthly phone reminder is available in the Android app. On the website, Aurum flags accounts you have not updated for 30 days.</p>'}
       </section>
 
       <section class="panel stack">
@@ -3729,6 +3751,7 @@ const NOTE_KINDS = [
   ['moves', 'Value moves', 'When a balance moves by your chosen amount'],
   ['app', 'App updates', 'A new version of the Android app']
 ];
+const NOTE_KIND_ICON = { due: 'list', backup: 'save', regular: 'repeat', stale: 'clock', allow: 'pound', tax: 'doc', goals: 'star', moves: 'updown', app: 'up' };
 const NOTE_CATS = { todo: 'To do', tax: 'Tax year', moves: 'Value moves', goals: 'Milestones', app: 'App' };
 const noteOn = k => ui.notes.on[k] !== false;
 const growthWord = v => `${v >= 0 ? 'up' : 'down'} ${Math.abs(v).toFixed(1)}%`;
@@ -3834,7 +3857,7 @@ const NOTE_ICONS = {
   doc: '<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/>',
   star: '<path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/>',
   target: '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/>',
-  up: '<path d="M12 19V5M5 12l7-7 7 7"/>', down: '<path d="M12 5v14M5 12l7 7 7-7"/>'
+  up: '<path d="M12 19V5M5 12l7-7 7 7"/>', updown: '<path d="M8 20V4M4 8l4-4 4 4M16 4v16M12 16l4 4 4-4"/>', down: '<path d="M12 5v14M5 12l7 7 7-7"/>'
 };
 const BELL_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>';
 let notesCache = [];

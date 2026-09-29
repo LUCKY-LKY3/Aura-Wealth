@@ -106,6 +106,8 @@ There is no local Java/Android SDK on the owner's PC — **APKs are only built b
 - Fonts: Geist (UI) + Geist Mono (table figures, chart axes). Bundled, no external font requests.
 - Logo: gold coin with an "A" on a black rounded tile (`brand/aurum-mark.svg`). Name is **Aurum**.
 - Safe areas: use `var(--sa-top)` / `var(--sa-bottom)` (Capacitor insets with `env()` fallback).
+- Switches (`.check.tgl`, `input.switch`) for anything that applies straight away (settings, chart options); checkboxes only
+  inside forms saved with a button and for picking items in a list.
 - Keep it professional and restrained: one bold element (the net-worth card), tables over cards.
 
 ## Domain notes (UK)
