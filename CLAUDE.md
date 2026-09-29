@@ -71,6 +71,8 @@ There is no local Java/Android SDK on the owner's PC — **APKs are only built b
 - Estimated balances: a payment logged without a balance (and each regular payment) adds a log `{estimated:true, flowIds}`
   = last balance + amount (`addEstimate`); deleting/editing the payment reverses it (`dropEstimate`); a real balance the
   same day replaces it (`upsertLog`). Only when the payment is on/after the latest balance.
+- Notifications (bell): `computeNotes()` derives them from data on each render (`refreshBell()`); only `ui.notes.{read,gone,on,move}`
+  is stored (in `aurum_ui`). Ids encode the date/version so a new occurrence shows again. Value moves are growth only (flows excluded, estimated logs ignored).
 - Collapsible sections use `foldOpen(key,title,sub)`/`foldClose` (round chevron); open state in `ui.folds`.
 - `income` is for the tax helper only (doesn't affect growth). Employer pension payments are flows with `employer: true, own: 0`.
 - Device-only keys (not in backups): `aurum_lock` (PIN hash), `aurum_bio`, `aurum_reminder` (day), `aurum_update` (cached release), `aurum_taxrem` (June P60 / January SA reminders), `aurum_autobackup`/`_last` (weekly copy to Documents/Aurum).

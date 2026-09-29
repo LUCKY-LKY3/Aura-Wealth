@@ -1,4 +1,6 @@
-- Fix: adding money on the same day as your last balance now updates the balance (shown as "est.")
-- Stronger vibration on save, delete and undo
-- Accounts strip: fades at the edge with round ‹ › buttons and "2 of 8 accounts", so you can see there are more
-- Smoother tab swipes: the page follows your finger and slides to the next tab
+- New notification bell at the top, with a gold badge for new items
+- To do: balances due, backup due, regular payments added, accounts not updated for 3 months
+- Tax year: ISA allowance left, pension carry-forward ending, P60 in June, Self Assessment by 31 January, new tax year
+- Milestones: goals halfway and reached, net worth milestones and new highs
+- Value moves: choose a percentage (or your own), up and/or down, since the previous balance or this month. Growth only, so money paid in doesn't count
+- Tap a notification to go straight there, swipe left to dismiss, and choose which appear in Settings
