@@ -27,6 +27,9 @@ Agreed with the owner. Nothing here is built until the owner says "go" for that 
 - Everything pension-related: tax-free cash tracker (25%, Lump Sum Allowance £268,275), salary sacrifice vs
   relief at source, drawdown, defined benefit / NHS pensions
 
+## Later (not scheduled)
+- Privacy screen: blank Aurum card in Android recent apps; blocks screenshots (with a Settings switch)
+
 ## Parked / not wanted
 - Search, home-screen shortcuts, larger text option, Scottish tax rates, live data, "advice" features
 - Fees impact — suggested, not yet chosen
