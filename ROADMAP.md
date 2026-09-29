@@ -14,6 +14,7 @@ Agreed with the owner. Nothing here is built until the owner says "go" for that 
 - Contribution streaks ("paid into your ISA 14 months in a row")
 - Encrypted backup (password-protected export/import; plain backups still import)
 - Auto-lock timer choice: immediately, 1, 5, 15 minutes, never
+- Backup health in Settings: last backup, last auto-backup, encryption password set (green/amber/red)
 
 ## 2.0
 - State Pension, debts, property
@@ -26,6 +27,15 @@ Agreed with the owner. Nothing here is built until the owner says "go" for that 
 - Two-column layout for the unfolded foldable screen
 - Everything pension-related: tax-free cash tracker (25%, Lump Sum Allowance £268,275), salary sacrifice vs
   relief at source, drawdown, defined benefit / NHS pensions
+
+## Ideas to decide on (suggested, not yet chosen)
+- Small: notes on balances shown on charts; "since last visit" strip on Overview; duplicate last entry;
+  quick date chips in Log value (Today, 1st, 5 April); account colour and icon picker
+- 2.x: emergency fund in months (enter monthly outgoings); goal buckets (split an account across goals);
+  future events (expected lump sums/costs in the planner); today's-money switch everywhere;
+  custom account types; printable one-page PDF net-worth report
+- 3.x+: couple mode (shared via backup file); estate summary for family; documents vault;
+  home-screen widget; Wear OS tile; shareable year-in-review each April
 
 ## Later (not scheduled)
 - Privacy screen: blank Aurum card in Android recent apps; blocks screenshots (with a Settings switch)
