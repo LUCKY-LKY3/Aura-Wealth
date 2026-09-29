@@ -1,6 +1,7 @@
-- New notification bell at the top, with a gold badge for new items
-- To do: balances due, backup due, regular payments added, accounts not updated for 3 months
-- Tax year: ISA allowance left, pension carry-forward ending, P60 in June, Self Assessment by 31 January, new tax year
-- Milestones: goals halfway and reached, net worth milestones and new highs
-- Value moves: choose a percentage (or your own), up and/or down, since the previous balance or this month. Growth only, so money paid in doesn't count
-- Tap a notification to go straight there, swipe left to dismiss, and choose which appear in Settings
+- Notifications now open from the bell: the panel grows out of the corner and shrinks back when you close it
+- Net worth counts up to its new value after you log a balance
+- Log value and other forms: drag the handle down to close, or up for full height
+- A gold pill in the tab bar slides to the tab you're on
+- The header shrinks to a slim bar as you scroll
+- A gold sheen on the net worth card when you reach a new high
+- Deleting an entry, goal or person happens straight away, with Undo in the message at the bottom

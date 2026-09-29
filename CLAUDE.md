@@ -95,7 +95,11 @@ There is no local Java/Android SDK on the owner's PC — **APKs are only built b
 - Rendering: each tab has a `renderX()` that sets `view.innerHTML`; events are delegated via `data-action`.
   Charts are hand-written SVG (`chart()`, `sparkline()`, `donut()`, `totalTrend()`) — no chart library.
 - Always escape user text with `esc()` when building HTML.
-- No `alert/confirm/prompt` — confirmations are inline (pendingDelete / pendingReset / pendingRemoveAcct).
+- No `alert/confirm/prompt`. Entries, goals and people delete straight away with an Undo toast (`snapshot()`);
+  removing an account and deleting all data still confirm inline (pendingRemoveAcct / pendingReset).
+- Motion (1.9.1): bell panel pops from the bell (`placeNotes`/`closeNotes`), `countUp()` for `[data-count]` figures,
+  `.grab` drag handles on phone sheets, `.tab-pill`, `body.scrolled` shrinks the sticky header, `.statement.shine` on a new high.
+  Everything respects `reduceMotion()`.
 
 ## Design rules (owner-approved — don't drift)
 

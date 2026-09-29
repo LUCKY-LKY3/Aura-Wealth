@@ -44,6 +44,50 @@ button{cursor:pointer}
 .mono{font-family:var(--mono);font-variant-numeric:tabular-nums;letter-spacing:-.01em}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 
+
+/* ---------- 1.9.1 motion ---------- */
+/* Bell panel: grows out of the bell, pointing at it. */
+#notes-sheet{position:fixed;inset:auto;top:var(--np-top,70px);right:var(--np-right,10px);left:auto;bottom:auto;margin:0;width:min(400px,calc(100vw - 20px));max-width:none;max-height:min(75vh,640px);border-radius:16px;overflow:visible;padding:0;transform-origin:calc(100% - var(--np-arrow,22px)) 0}
+@media (max-width:759px){#notes-sheet{width:calc(100vw - 20px);right:10px;border-radius:16px;margin:0;padding-bottom:0}}
+#notes-sheet .notes-wrap{max-height:calc(min(75vh,640px) - 2px);overflow:auto;border-radius:16px;padding-bottom:18px}
+#notes-sheet::before{content:'';position:absolute;top:-7px;right:calc(var(--np-arrow,22px) - 7px);width:14px;height:14px;background:var(--surface);border-left:1px solid var(--line);border-top:1px solid var(--line);transform:rotate(45deg)}
+#notes-sheet[open]{animation:npIn .26s cubic-bezier(.2,.8,.2,1)}
+#notes-sheet.closing{animation:npOut .18s ease-in forwards}
+#notes-sheet::backdrop{background:rgba(0,0,0,.35)}
+@keyframes npIn{from{opacity:0;transform:scale(.15)}to{opacity:1;transform:none}}
+@keyframes npOut{to{opacity:0;transform:scale(.2)}}
+/* Sheets on phones: drag handle, swipe down to close, drag up for full height. */
+.grab{display:none}
+@media (max-width:759px){
+  .grab{display:block;position:sticky;top:0;z-index:5;height:22px;margin-bottom:-22px;touch-action:none;cursor:grab}
+  .grab::after{content:'';position:absolute;left:50%;top:8px;width:40px;height:4px;margin-left:-20px;border-radius:2px;background:var(--line-strong)}
+  dialog.sheet:not(#notes-sheet)[open]{animation:shIn .28s cubic-bezier(.2,.8,.2,1)}
+  dialog.sheet.full{height:calc(100vh - 24px - var(--sa-top))}
+  dialog.sheet{transition:height .25s ease}
+}
+@keyframes shIn{from{transform:translateY(40%);opacity:.4}to{transform:none;opacity:1}}
+/* Tab bar: a gold pill slides to the current tab. */
+.tab-pill{position:absolute;left:0;top:8px;height:30px;width:54px;border-radius:15px;background:var(--gold-soft);border:1px solid color-mix(in srgb,var(--gold) 25%,transparent);transition:transform .32s cubic-bezier(.3,.9,.3,1);pointer-events:none;z-index:0}
+.tabbar button{position:relative;z-index:1}
+/* Header: shrinks to a slim bar when scrolling on phones. */
+@media (max-width:959px){
+  .top{position:sticky;top:0;z-index:25;background:var(--bg);margin-inline:-16px;padding-inline:16px;padding-top:calc(18px + var(--sa-top));transition:padding .2s ease,box-shadow .2s ease;flex-wrap:nowrap}
+  .top h1{transition:font-size .2s ease}
+  .top .sub{transition:opacity .15s ease,max-height .2s ease;max-height:22px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+  .top .m-brand{transition:width .2s ease,height .2s ease}
+  body.scrolled .top{padding-block:calc(8px + var(--sa-top)) 8px;box-shadow:0 1px 0 var(--line),0 10px 24px -18px rgba(0,0,0,.8)}
+  body.scrolled .top h1{font-size:17px}
+  body.scrolled .top .sub{opacity:0;max-height:0}
+  body.scrolled .top .m-brand{width:24px;height:24px}
+  .top>div:nth-child(2){min-width:0}
+}
+/* Net worth card: a slow gold sheen for a new high or milestone. */
+.statement.shine::before{content:'';position:absolute;inset:0;z-index:0;pointer-events:none;background:linear-gradient(105deg,transparent 35%,rgba(240,208,130,.16) 48%,rgba(255,236,190,.28) 50%,rgba(240,208,130,.16) 52%,transparent 65%);background-size:300% 100%;animation:sheen 3.2s ease-in-out 2 .4s both}
+@keyframes sheen{from{background-position:120% 0}to{background-position:-20% 0}}
+.shine-note{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--gold-on-navy);margin-bottom:6px}
+@media (prefers-reduced-motion:reduce){#notes-sheet[open],#notes-sheet.closing,dialog.sheet[open]{animation:fadeIn .15s ease}.statement.shine::before{animation:none}.tab-pill{transition:none}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+
 /* ---------- shell ---------- */
 .shell{display:grid;grid-template-columns:minmax(0,1fr);min-height:100%}
 @media (min-width:960px){.shell{grid-template-columns:232px minmax(0,1fr)}}
@@ -547,7 +591,7 @@ details.fold:not([open])>summary h2::after{content:' ▸'}
   </div>
 </div>
 
-<nav class="tabbar" aria-label="Sections">
+<nav class="tabbar" aria-label="Sections"><span class="tab-pill" aria-hidden="true"></span>
   <button data-action="tab" data-tab="overview"><svg><use href="#i-overview"/></svg>Overview</button>
   <button data-action="tab" data-tab="accounts"><svg><use href="#i-accounts"/></svg>Accounts</button>
   <button data-action="tab" data-tab="planner"><svg><use href="#i-planner"/></svg>Planner</button>
@@ -567,6 +611,7 @@ details.fold:not([open])>summary h2::after{content:' ▸'}
 </datalist>
 
 <dialog class="sheet" id="sheet" aria-labelledby="sheet-title">
+  <div class="grab" aria-hidden="true"></div>
   <form id="log-form" method="dialog">
     <div class="sheet-head">
       <h2 id="sheet-title">Log a value</h2>
@@ -612,6 +657,7 @@ details.fold:not([open])>summary h2::after{content:' ▸'}
 </dialog>
 
 <dialog class="sheet" id="acct-sheet" aria-labelledby="acct-title">
+  <div class="grab" aria-hidden="true"></div>
   <form id="acct-form" method="dialog">
     <div class="sheet-head">
       <h2 id="acct-title">Add account</h2>
@@ -694,6 +740,7 @@ details.fold:not([open])>summary h2::after{content:' ▸'}
 </dialog>
 
 <dialog class="sheet wide" id="bulk-sheet" aria-labelledby="bulk-title">
+  <div class="grab" aria-hidden="true"></div>
   <form id="bulk-form" method="dialog">
     <div class="sheet-head">
       <h2 id="bulk-title">Update all accounts</h2>
@@ -717,6 +764,7 @@ details.fold:not([open])>summary h2::after{content:' ▸'}
 </dialog>
 
 <dialog class="sheet wide" id="past-sheet" aria-labelledby="past-title">
+  <div class="grab" aria-hidden="true"></div>
   <form id="past-form" method="dialog">
     <div class="sheet-head">
       <h2 id="past-title">Add past balances</h2>
@@ -744,6 +792,7 @@ details.fold:not([open])>summary h2::after{content:' ▸'}
   <div id="notes-body"></div>
 </div></dialog>
 <dialog class="sheet" id="calc-sheet" aria-labelledby="calc-title">
+  <div class="grab" aria-hidden="true"></div>
   <form id="calc-form" method="dialog">
     <div class="sheet-head">
       <h2 id="calc-title">Calculator</h2>
@@ -1793,9 +1842,9 @@ function renderOverview() {
   const who = viewName();
 
   const statement = `
-    <section class="statement" aria-label="Net worth">
+    <section class="statement${shineFor(tl, total) ? ' shine' : ''}" aria-label="Net worth">
       <div class="eyebrow">${who ? esc(who) + ' · ' : ''}Total net worth</div>
-      <div class="figure num">${gbp(total)}</div>
+      <div class="figure num" data-count="net" data-value="${total}">${gbp(total)}</div>
       <div class="changes">
         ${mChange != null ? `<span><b class="${mChange >= 0 ? 'up' : 'down'}">${signed(mChange)}${monthAgo ? ` (${pct(mChange / monthAgo * 100)})` : ''}</b>last 30 days</span>` : ''}
         ${allChange != null ? `<span><b class="${allChange >= 0 ? 'up' : 'down'}">${signed(allChange)}${first ? ` (${pct(allChange / first * 100)})` : ''}</b>since ${esc(monthYear(tl[0].t))}</span>` : ''}
@@ -3082,6 +3131,8 @@ function render() {
   moneyInputs();
   setupPicker();
   refreshBell();
+  placeTabPill();
+  countUp();
   if (glowIds.length) requestAnimationFrame(glowChanged);
 }
 
@@ -3514,7 +3565,7 @@ document.getElementById('bulk-form').addEventListener('submit', e => {
   saved(`${new Set(entries.map(x => x.id)).size} account${new Set(entries.map(x => x.id)).size === 1 ? '' : 's'} updated ✓`, [...new Set(entries.map(x => x.id))]);
   render();
 });
-document.querySelectorAll('dialog.sheet').forEach(d => d.addEventListener('click', e => { if (e.target === d) d.close(); }));
+document.querySelectorAll('dialog.sheet').forEach(d => d.addEventListener('click', e => { if (e.target === d) { if (d === notesSheet) closeNotes(); else d.close(); } }));
 
 /* ---------- backup ---------- */
 const backupJson = () => JSON.stringify({ app: 'Aurum', exportedAt: new Date().toISOString(), ...state }, null, 2);
@@ -3900,7 +3951,7 @@ function renderNotes() {
     : `<div class="chart-empty"><div class="empty-cta"><b>You're all caught up.</b><span>Reminders, tax dates, milestones and value moves will appear here.</span></div></div>`;
 }
 function noteDate(iso) { const d = new Date(toMs(iso)); return d.getUTCFullYear() === +TODAY.slice(0, 4) ? `${d.getUTCDate()} ${fmtMonth.format(d).slice(0, 3)}` : monthYear(toMs(iso)); }
-function openNotes() { renderNotes(); openSheet(notesSheet); }
+function openNotes() { if (notesSheet.open) { closeNotes(); return; } renderNotes(); placeNotes(); openSheet(notesSheet); }
 function noteRead(id) { ui.notes.read[id] = 1; saveUi(); }
 function noteDismiss(id) { ui.notes.gone[id] = 1; ui.notes.read[id] = 1; saveUi(); refreshBell(); renderNotes(); }
 function noteAct(id) {
@@ -3933,6 +3984,101 @@ document.addEventListener('touchend', () => {
   if (dx < -90) { li.style.transform = 'translateX(-110%)'; li.style.opacity = '0'; setTimeout(() => noteDismiss(li.dataset.noteId), 180); buzz && buzz(); }
   else { li.style.transform = ''; li.style.opacity = ''; }
 });
+
+/* ---------- motion and feel ---------- */
+// Net worth card sheen: once per new all-time high (or milestone) logged in the last 30 days.
+let shineSeen = null;
+function shineFor(tl, total) {
+  if (tl.length < 2 || ui.hidden || daysSince(tl[tl.length - 1].date) > 30) return false;
+  const high = Math.max(...tl.slice(0, -1).map(p => p.total));
+  if (total <= high) return false;
+  const key = tl[tl.length - 1].date + ':' + Math.round(total);
+  if (shineSeen === key) return false;
+  shineSeen = key;
+  return true;
+}
+// Figures marked data-count roll from their previous value to the new one.
+const countPrev = {};
+function countUp() {
+  document.querySelectorAll('[data-count]').forEach(el => {
+    const key = el.dataset.count, to = +el.dataset.value, from = countPrev[key];
+    countPrev[key] = to;
+    if (from == null || from === to || ui.hidden || reduceMotion()) return;
+    const t0 = performance.now(), dur = 700;
+    const step = now => {
+      if (!el.isConnected) return;
+      const k = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - k, 3);
+      el.textContent = gbp(from + (to - from) * e);
+      if (k < 1) requestAnimationFrame(step); else el.textContent = gbp(to);
+    };
+    requestAnimationFrame(step);
+  });
+}
+// Tab bar pill follows the current tab.
+function placeTabPill() {
+  const pill = document.querySelector('.tab-pill'), b = document.querySelector('.tabbar [aria-current="page"]');
+  if (!pill) return;
+  pill.style.opacity = b ? '1' : '0';
+  if (!b) return;
+  const bar = b.parentElement.getBoundingClientRect(), r = b.getBoundingClientRect();
+  pill.style.transform = `translateX(${r.left - bar.left + r.width / 2 - 27}px)`;
+}
+window.addEventListener('resize', placeTabPill);
+// Header shrinks once the page scrolls.
+let scrolledTop = false;
+window.addEventListener('scroll', () => {
+  const on = window.scrollY > 24;
+  if (on !== scrolledTop) { scrolledTop = on; document.body.classList.toggle('scrolled', on); }
+}, { passive: true });
+// Bell panel: opens from the bell and shrinks back into it.
+function placeNotes() {
+  const b = document.getElementById('bell-btn').getBoundingClientRect();
+  const right = Math.max(10, window.innerWidth - b.right - 4), width = Math.min(400, window.innerWidth - 20);
+  const r = window.innerWidth < 760 ? 10 : right;
+  notesSheet.style.setProperty('--np-top', `${b.bottom + 10}px`);
+  notesSheet.style.setProperty('--np-right', `${r}px`);
+  notesSheet.style.setProperty('--np-arrow', `${Math.min(width - 20, Math.max(16, window.innerWidth - r - (b.left + b.width / 2)))}px`);
+}
+function closeNotes() {
+  if (!notesSheet.open || notesSheet.classList.contains('closing')) return;
+  if (reduceMotion()) { notesSheet.close(); return; }
+  notesSheet.classList.add('closing');
+  setTimeout(() => { notesSheet.classList.remove('closing'); notesSheet.close(); }, 170);
+}
+notesSheet.addEventListener('cancel', e => { e.preventDefault(); closeNotes(); });
+// Swipe the panel up to close it.
+let npSwipe = null;
+notesSheet.addEventListener('touchstart', e => { npSwipe = notesSheet.querySelector('.notes-wrap').scrollTop <= 0 ? { y: e.touches[0].clientY } : null; }, { passive: true });
+notesSheet.addEventListener('touchend', e => { if (npSwipe && e.changedTouches[0].clientY - npSwipe.y < -70) closeNotes(); npSwipe = null; });
+// Sheets on phones: drag the handle (or the title) down to close, up for full height.
+let drag = null;
+document.addEventListener('touchstart', e => {
+  const h = e.target.closest('.grab, dialog.sheet .sheet-head');
+  const d = h && h.closest('dialog.sheet');
+  if (!d || d.id === 'notes-sheet' || window.innerWidth >= 760 || e.target.closest('button, input, select')) { drag = null; return; }
+  drag = { d, y: e.touches[0].clientY, t: Date.now(), dy: 0 };
+  d.style.transition = 'none';
+}, { passive: true });
+document.addEventListener('touchmove', e => {
+  if (!drag) return;
+  drag.dy = e.touches[0].clientY - drag.y;
+  drag.d.style.transform = drag.dy > 0 ? `translateY(${drag.dy}px)` : `translateY(${drag.dy / 4}px)`;
+}, { passive: true });
+document.addEventListener('touchend', () => {
+  if (!drag) return;
+  const { d, dy, t } = drag; drag = null;
+  const fast = Math.abs(dy) / Math.max(1, Date.now() - t) > 0.6;
+  d.style.transition = 'transform .22s ease, height .25s ease';
+  if (dy > 110 || (fast && dy > 30)) {
+    if (d.classList.contains('full') && dy < 220 && !fast) { d.classList.remove('full'); d.style.transform = ''; return; }
+    d.style.transform = 'translateY(100%)';
+    setTimeout(() => { d.close(); d.style.transform = ''; d.style.transition = ''; d.classList.remove('full'); }, 200);
+  } else {
+    if (dy < -40) d.classList.add('full');
+    d.style.transform = '';
+  }
+});
+document.addEventListener('close', e => { if (e.target.matches && e.target.matches('dialog.sheet')) e.target.classList.remove('full'); }, true);
 
 let hiddenAt = 0;
 document.addEventListener('visibilitychange', () => {
@@ -4044,7 +4190,7 @@ document.addEventListener('click', async e => {
     case 'open-bulk': openBulk(); break;
     case 'add-acct': openAcctSheet(null); break;
     case 'edit-acct': openAcctSheet(id); break;
-    case 'close-sheet': closeSheets(); break;
+    case 'close-sheet': if (t.closest('#notes-sheet')) closeNotes(); else closeSheets(); break;
     case 'toggle-hide': ui.hidden = !ui.hidden; saveUi(); render(); break;
     case 'range': ui.range = t.dataset.range; saveUi(); render(); break;
     case 'insight-range': ui.insight = t.dataset.range; saveUi(); render(); break;
@@ -4053,12 +4199,11 @@ document.addEventListener('click', async e => {
     case 'person': ui.person = id; saveUi(); render(); break;
     case 'goto-account': ui.account = id; goTab('accounts'); break;
     case 'pick-account': ui.account = id; pendingDelete = null; saveUi(); render(); break;
-    case 'del': pendingDelete = id; render(); break;
     case 'del-no': pendingDelete = null; render(); break;
     case 'undo':
       if (undoSnap) { state = normalize(JSON.parse(undoSnap)); undoSnap = null; save(); render(); }
       document.getElementById('toast').hidden = true; break;
-    case 'del-yes':
+    case 'del': case 'del-yes': // deletes straight away; the toast offers Undo
       snapshot('Entry deleted');
       state.logs = state.logs.filter(l => l.id !== id);
       { const f = state.flows.find(x => x.id === id); if (f) dropEstimate(f); }
@@ -4083,12 +4228,11 @@ document.addEventListener('click', async e => {
       state.income = state.income.filter(x => x.accountId !== id);
       state.goals = state.goals.filter(g => g.scope !== id);
       pendingRemoveAcct = null; save(); render(); break;
-    case 'goal-del': pendingGoal = id; render(); break;
     case 'goal-del-no': pendingGoal = null; render(); break;
-    case 'goal-del-yes': snapshot('Goal deleted'); state.goals = state.goals.filter(g => g.id !== id); pendingGoal = null; save(); render(); break;
-    case 'person-del': pendingPerson = id; render(); break;
+    case 'goal-del': case 'goal-del-yes': snapshot('Goal deleted'); state.goals = state.goals.filter(g => g.id !== id); pendingGoal = null; save(); render(); break;
     case 'person-del-no': pendingPerson = null; render(); break;
-    case 'person-del-yes':
+    case 'person-del': case 'person-del-yes':
+      snapshot('Person removed');
       state.profile.people = state.profile.people.filter(p => p.id !== id);
       state.accounts.forEach(a => { if (a.owner === id) a.owner = 'me'; });
       if (ui.person === id) ui.person = 'me';
