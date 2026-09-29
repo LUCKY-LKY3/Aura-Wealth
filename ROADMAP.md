@@ -1,0 +1,44 @@
+# Aurum roadmap
+
+Agreed with the owner. Nothing here is built until the owner says "go" for that version.
+
+## Shipped
+- 1.9.0 notification bell · 1.9.1 motion and feel · 1.9.2 monthly review, streaks, encrypted backup, backup health,
+  auto-lock timer, drag/pin accounts, long-press quick actions, polish
+
+## 2.0
+- State Pension, debts, property
+- Savings rate: % of income put away each month (user enters income) — locked in by owner
+- Growth attribution: which accounts drove this year's growth
+- Cash drag warning: lots of cash in a low-interest account (user enters rate)
+- Interest checker: savings rate vs a benchmark rate the user sets
+
+## 3.x
+- Two-column layout for the unfolded foldable screen
+- Everything pension-related: tax-free cash tracker (25%, Lump Sum Allowance £268,275), salary sacrifice vs
+  relief at source, drawdown, defined benefit / NHS pensions
+
+## Ideas to decide on (suggested, not yet chosen)
+- Small: notes on balances shown on charts; "since last visit" strip on Overview; duplicate last entry;
+  quick date chips in Log value (Today, 1st, 5 April); account colour and icon picker
+- 2.x: emergency fund in months (enter monthly outgoings); goal buckets (split an account across goals);
+  future events (expected lump sums/costs in the planner); today's-money switch everywhere;
+  custom account types; printable one-page PDF net-worth report
+- 3.x+: couple mode (shared via backup file); estate summary for family; documents vault;
+  home-screen widget; Wear OS tile; shareable year-in-review each April
+
+## Monetisation (after 2.0 — owner to decide)
+- Plan: free core + one-off "Aurum Pro" unlock (~£5–£15) via Google Play; optional tip jar on the website
+- Pro candidates: encrypted backup, monthly review, tax helper, future pension tools (3.x)
+- Steps: Google Play developer account ($25), Play Billing in the app (on-device licence check, no servers),
+  privacy policy + terms, keep "illustration, not advice" wording, decide on repo privacy/licence first,
+  accountant for UK tax on income. Website stays free (or becomes a demo)
+- Avoid: adverts (tracking, off-brand), selling data (we never have it), affiliate links to platforms
+  (FCA financial promotion risk; conflicts with "no advice")
+
+## Later (not scheduled)
+- Privacy screen: blank Aurum card in Android recent apps; blocks screenshots (with a Settings switch)
+
+## Parked / not wanted
+- Search, home-screen shortcuts, larger text option, Scottish tax rates, live data, "advice" features
+- Fees impact — suggested, not yet chosen

@@ -1,7 +1,10 @@
-- Notifications now open from the bell: the panel grows out of the corner and shrinks back when you close it
-- Net worth counts up to its new value after you log a balance
-- Log value and other forms: drag the handle down to close, or up for full height
-- A gold pill in the tab bar slides to the tab you're on
-- The header shrinks to a slim bar as you scroll
-- A gold sheen on the net worth card when you reach a new high
-- Deleting an entry, goal or person happens straight away, with Undo in the message at the bottom
+- Monthly review: "Your September in money" at the start of each month (Overview, Changes tab and the bell)
+- Contribution streaks: see how many months in a row you've paid into each account
+- Encrypted backups: set a password and your exports and weekly backups are protected (AES-256)
+- Backup health in Settings: last backup, automatic backup and password at a glance
+- Choose when the PIN lock kicks in: straight away, 1, 5 or 15 minutes, or only when Aurum opens
+- Reorder accounts by dragging in Settings, and pin favourites to the top
+- Long-press an account for quick actions: Log value, Add a payment, Edit
+- Balances count up more slowly and now on each account too
+- Charts draw in, buttons react to your tap, and empty screens show a friendly next step
+- Fix: the gold tab bar pill now lines up whichever direction you move
