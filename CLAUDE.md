@@ -25,6 +25,8 @@ and a SIPP vs ISA calculator. It ships as a **website** (GitHub Pages) and an
 | `brand/` | Logo SVGs |
 | `www/`, `dist/`, `node_modules/` | Generated — gitignored, never edit |
 
+Planned work by version lives in `ROADMAP.md` — keep it updated when the owner adds, moves or drops items.
+
 ## Commands
 
 ```bash
