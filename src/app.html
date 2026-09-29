@@ -351,9 +351,46 @@ dialog.sheet.wide{width:min(620px,calc(100% - 32px))}
 body.setup .tabbar,body.setup .fab,body.setup .side-nav,body.setup .top-actions{display:none}
 .setup-card{max-width:520px;margin:4vh auto 0}
 .icon-btn.edit:hover{color:var(--gold)}
-.eye{padding:8px}
+.eye{padding:8px;min-width:40px;min-height:40px}
+.top-actions{gap:4px}
 .eye svg{width:18px;height:18px}
 .acct-actions{display:flex;gap:8px;flex-wrap:wrap}
+/* Collapsible sections: round chevron button that flips when open, gold edge on the left */
+details.fold2>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:12px;border-radius:10px;margin:-4px;padding:4px}
+details.fold2>summary::-webkit-details-marker{display:none}
+.fold-titles{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.fold-sub{font-size:12.5px;color:var(--ink-3)}
+.fold-btn{flex:none;width:36px;height:36px;border-radius:50%;background:var(--surface-2);border:1px solid var(--line-strong);color:var(--gold);display:grid;place-items:center;transition:transform .2s}
+.fold-btn svg{width:18px;height:18px}
+details.fold2[open]>summary .fold-btn{transform:rotate(180deg);border-color:color-mix(in srgb,var(--gold) 55%,transparent)}
+section.panel:has(>details.fold2[open]){box-shadow:inset 3px 0 0 var(--gold)}
+details.fold2.inner{border-top:1px solid var(--line);padding-top:14px}
+details.fold2.inner[open]{box-shadow:inset 3px 0 0 var(--gold);padding-left:12px;margin-left:-12px}
+@media (prefers-reduced-motion:reduce){.fold-btn{transition:none}}
+/* Tables: short dates on phones, estimated balances tagged */
+.d-short{display:none}
+@media (max-width:759px){.d-long{display:none}.d-short{display:inline}}
+.est{font-size:10.5px;font-weight:600;color:var(--ink-3);border:1px solid var(--line-strong);border-radius:4px;padding:0 4px;margin-left:4px;font-family:var(--font)}
+/* Bigger tap targets for small icon buttons */
+@media (pointer:coarse){.icon-btn{min-width:40px;min-height:40px}.move .icon-btn{min-height:30px}}
+/* Save buttons stay visible at the bottom of sheets, above the keyboard */
+.sheet-actions{position:sticky;bottom:0;background:var(--surface);padding:12px 0 calc(4px + var(--sa-bottom));margin-top:0;z-index:2;border-top:1px solid var(--line)}
+/* Account picker stays at the top while scrolling */
+.acct-picker{position:sticky;top:0;z-index:5;background:var(--bg)}
+/* Something just changed */
+.glow{animation:glow 1.6s ease}
+@keyframes glow{0%{background:color-mix(in srgb,var(--gold) 30%,transparent)}100%{background:transparent}}
+@media (prefers-reduced-motion:reduce){.glow{animation:none}}
+/* Start-up placeholder */
+.skel{border-radius:14px;background:linear-gradient(90deg,var(--surface) 25%,var(--surface-2) 50%,var(--surface) 75%);background-size:200% 100%;animation:shimmer 1.2s linear infinite}
+@keyframes shimmer{to{background-position:-200% 0}}
+/* Account type tiles */
+.type-tiles{display:flex;flex-direction:column;gap:10px}
+.type-tiles .tg{font-size:11px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3)}
+.type-tiles .tt{display:flex;flex-wrap:wrap;gap:6px;margin-top:5px}
+.type-tiles button{border:1px solid var(--line-strong);background:var(--surface);color:var(--ink-2);border-radius:99px;padding:6px 11px;font-size:13px;display:inline-flex;align-items:center;gap:6px}
+.type-tiles button[aria-pressed="true"]{border-color:var(--gold);color:var(--ink);background:var(--gold-soft)}
+.toast.plain [data-action=undo]{display:none}
 .set-group{grid-column:1/-1;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);margin:10px 2px -6px}
 .set-group:first-child{margin-top:0}
 .empty-cta{display:flex;flex-direction:column;align-items:center;gap:12px}
@@ -394,6 +431,7 @@ details.fold:not([open])>summary h2::after{content:' ▸'}
 .badge{flex:none;display:inline-grid;place-items:center;width:30px;height:30px;border-radius:8px;border:1.5px solid;background:var(--surface-2);color:var(--ink);font-size:10.5px;font-weight:650;letter-spacing:.02em}
 .badge.big{width:44px;height:44px;border-radius:11px;font-size:14px}
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(84px + var(--sa-bottom));z-index:60;display:flex;align-items:center;gap:14px;background:var(--surface-2);border:1px solid var(--line-strong);box-shadow:var(--shadow);border-radius:10px;padding:8px 8px 8px 14px;font-size:13.5px;max-width:calc(100% - 32px)}
+@media (max-width:759px){.toast{bottom:calc(142px + var(--sa-bottom))}}
 @media (min-width:960px){.toast{bottom:28px}}
 .move{display:inline-flex;flex-direction:column}
 .move .icon-btn{padding:1px 6px}.move .icon-btn:hover{color:var(--gold)}
@@ -444,13 +482,13 @@ details.fold:not([open])>summary h2::after{content:' ▸'}
         </div>
         <div class="top-actions">
           <div class="saved" data-saved role="status"><i></i><span class="sr">Saved on this device</span></div>
-          <button class="btn ghost eye" data-action="open-calc" aria-label="Calculator"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="2.5"/><path d="M8.5 7h7M8.5 11h.01M12 11h.01M15.5 11h.01M8.5 14.5h.01M12 14.5h.01M15.5 14.5h.01M8.5 18h.01M12 18h.01M15.5 18h.01"/></svg></button>
-          <button class="btn ghost eye" data-action="toggle-hide" id="eye-btn" aria-pressed="false" aria-label="Hide balances"></button>
+          <button class="btn ghost eye" data-action="open-calc" aria-label="Calculator" title="Calculator"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="2.5"/><path d="M8.5 7h7M8.5 11h.01M12 11h.01M15.5 11h.01M8.5 14.5h.01M12 14.5h.01M15.5 14.5h.01M8.5 18h.01M12 18h.01M15.5 18h.01"/></svg></button>
+          <button class="btn ghost eye" data-action="toggle-hide" id="eye-btn" aria-pressed="false" aria-label="Hide balances" title="Hide balances"></button>
           <button class="btn primary only-wide" data-action="open-log">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Log a value</button>
         </div>
       </header>
-      <main id="view"></main>
+      <main id="view"><div class="stack"><div class="skel" style="height:220px"></div><div class="skel" style="height:90px"></div><div class="skel" style="height:260px"></div></div></main>
     </div>
   </div>
 </div>
@@ -529,7 +567,8 @@ details.fold:not([open])>summary h2::after{content:' ▸'}
     </div>
     <div class="field">
       <label for="acct-type">Type</label>
-      <select id="acct-type" class="input"></select>
+      <div class="type-tiles" id="acct-tiles"></div>
+      <select id="acct-type" class="input sr" tabindex="-1" aria-hidden="true"></select>
     </div>
     <div class="field">
       <label for="acct-name">Name</label>
@@ -819,9 +858,11 @@ function normalize(o) {
       return acct;
     });
     const ids = new Set(accounts.map(a => a.id));
-    const logs = o.logs.filter(l => validLog(l) && ids.has(String(l.accountId))).map(l => ({
-      id: String(l.id || uid()), accountId: String(l.accountId), date: l.date, value: +l.value, note: String(l.note || '')
-    }));
+    const logs = o.logs.filter(l => validLog(l) && ids.has(String(l.accountId))).map(l => {
+      const x = { id: String(l.id || uid()), accountId: String(l.accountId), date: l.date, value: +l.value, note: String(l.note || '') };
+      if (l.estimated) { x.estimated = true; x.flowIds = Array.isArray(l.flowIds) ? l.flowIds.map(String) : []; }
+      return x;
+    });
     const flows = (Array.isArray(o.flows) ? o.flows : []).filter(f => f && isIso(f.date) && isFinite(+f.amount) && ids.has(String(f.accountId))).map(f => ({
       id: String(f.id || uid()), accountId: String(f.accountId), date: f.date, amount: +f.amount,
       own: isFinite(+f.own) && f.own !== null && f.own !== '' ? +f.own : +f.amount, note: String(f.note || ''), auto: !!f.auto, employer: !!f.employer, ytd: !!f.ytd
@@ -868,14 +909,14 @@ function loadState() {
 
 let state = loadState();
 const DEFAULT_UI = {
-  tab: 'overview', range: '1Y', custom: { n: 6, unit: 'm' }, hist: { scope: 'this', kind: 'all', year: 'all', q: '' }, fit: true, barMonths: 12, paidLine: true, lastYear: false, pence: false, compactNums: false, showClosed: false, account: null, person: 'me', hidden: false, stackBy: 'total', insight: '1M',
+  tab: 'overview', folds: {}, range: '1Y', custom: { n: 6, unit: 'm' }, hist: { scope: 'this', kind: 'all', year: 'all', q: '' }, fit: true, barMonths: 12, paidLine: true, lastYear: false, pence: false, compactNums: false, showClosed: false, account: null, person: 'me', hidden: false, stackBy: 'total', insight: '1M',
   calc: { monthly: 500, years: 20, rate: 6, draw: 20 },
   plan: { include: {}, monthly: {}, target: 0, years: 25, real: false }
 };
 let ui = (() => {
   try {
     const saved = JSON.parse(store.get(UI_KEY) || '{}');
-    return { ...DEFAULT_UI, ...saved, hist: { ...DEFAULT_UI.hist, ...(saved.hist || {}) }, custom: { ...DEFAULT_UI.custom, ...(saved.custom || {}) }, calc: { ...DEFAULT_UI.calc, ...(saved.calc || {}) }, plan: { ...DEFAULT_UI.plan, ...(saved.plan || {}) } };
+    return { ...DEFAULT_UI, ...saved, folds: { ...(saved.folds || {}) }, hist: { ...DEFAULT_UI.hist, ...(saved.hist || {}) }, custom: { ...DEFAULT_UI.custom, ...(saved.custom || {}) }, calc: { ...DEFAULT_UI.calc, ...(saved.calc || {}) }, plan: { ...DEFAULT_UI.plan, ...(saved.plan || {}) } };
   } catch { return JSON.parse(JSON.stringify(DEFAULT_UI)); }
 })();
 let pendingDelete = null, pendingReset = false, pendingRemoveAcct = null, pendingGoal = null, pendingPerson = null, pendingForgot = false;
@@ -923,6 +964,25 @@ function clearExample(keep) {
 }
 
 // Regular payments are added as money-in entries on their day each month.
+// A payment logged without a new balance moves the balance by the same amount, marked as estimated.
+// A real balance entered later takes over; deleting the payment takes its estimate back out.
+function addEstimate(f) {
+  const s = logsOf(f.accountId);
+  if (!s.length || f.ytd) return;
+  const last = s[s.length - 1];
+  if (f.date < last.date) return; // backdated: later balances already include it
+  if (last.date === f.date) {
+    if (!last.estimated) return;  // a real balance that day wins
+    last.value = Math.max(0, last.value + f.amount); last.flowIds.push(f.id); return;
+  }
+  state.logs.push({ id: uid(), accountId: f.accountId, date: f.date, value: Math.max(0, last.value + f.amount), note: '', estimated: true, flowIds: [f.id] });
+}
+function dropEstimate(f) {
+  for (const l of state.logs.filter(x => x.estimated && x.flowIds && x.flowIds.includes(f.id))) {
+    l.flowIds = l.flowIds.filter(id => id !== f.id);
+    if (!l.flowIds.length) state.logs = state.logs.filter(x => x !== l); else l.value = Math.max(0, l.value - f.amount);
+  }
+}
 function runRegular() {
   if (state.example) return false;
   let added = false;
@@ -934,7 +994,8 @@ function runRegular() {
       const date = `${y}-${pad(m)}-${pad(r.day)}`;
       if (date > TODAY) break;
       if (date >= r.since && (!r.last || date > r.last)) {
-        state.flows.push({ id: uid(), accountId: a.id, date, amount: r.relief ? r.amount * 1.25 : r.amount, own: r.amount, note: 'Regular payment', auto: true });
+        const f = { id: uid(), accountId: a.id, date, amount: r.relief ? r.amount * 1.25 : r.amount, own: r.amount, note: 'Regular payment', auto: true };
+        state.flows.push(f); addEstimate(f);
         r.last = date; added = true;
       }
       m++; if (m > 12) { m = 1; y++; }
@@ -971,6 +1032,7 @@ const fmtDay = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short'
 const dateLabel = ms => fmtDate.format(new Date(ms));
 const tickLabel = ms => { const d = new Date(ms); return fmtMonth.format(d).slice(0, 3) + ' ' + String(d.getUTCFullYear()).slice(2); };
 const dayLabel = ms => fmtDay.format(new Date(ms));
+const shortDate = iso => { const d = new Date(toMs(iso)); return `${d.getUTCDate()} ${fmtMonth.format(d).slice(0, 3)} ${String(d.getUTCFullYear()).slice(2)}`; };
 const monthYear = ms => `${fmtMonth.format(new Date(ms))} ${new Date(ms).getUTCFullYear()}`;
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const cls = n => n > 0 ? 'pos' : n < 0 ? 'neg' : 'muted';
@@ -1279,7 +1341,7 @@ function emergencyFund() {
   return { cash, spend, months: cash / spend };
 }
 const lisaUsed = () => allowanceUsed(mine().filter(a => a.type === 'LISA'), 'isa');
-const staleAccounts = accts => active(accts).filter(a => { const s = logsOf(a.id); return !s.length || daysSince(s[s.length - 1].date) > 30; });
+const staleAccounts = accts => active(accts).filter(a => { const s = logsOf(a.id).filter(l => !l.estimated); return !s.length || daysSince(s[s.length - 1].date) > 30; });
 function ageOn(dob, iso) {
   const [y1, m1, d1] = dob.split('-').map(Number), [y2, m2, d2] = iso.split('-').map(Number);
   return y2 - y1 - (m2 < m1 || (m2 === m1 && d2 < d1) ? 1 : 0);
@@ -1330,6 +1392,10 @@ function smoothPath(p, join) {
   }
   return s;
 }
+// Collapsible section: title, a one-line summary, and a round chevron button; open state is remembered.
+const CHEVRON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>';
+const foldOpen = (key, title, sub, extraCls) => `<details class="fold2${extraCls ? ' ' + extraCls : ''}" data-fold="${key}" ${ui.folds && ui.folds[key] ? 'open' : ''}><summary><span class="fold-titles"><h2>${title}</h2>${sub ? `<span class="fold-sub">${sub}</span>` : ''}</span><span class="fold-btn" aria-hidden="true">${CHEVRON}</span></summary><div class="fold-body">`;
+const foldClose = '</div></details>';
 let gradId = 0;
 // An empty chart explains what's missing and offers the button that fixes it.
 const emptyChart = (text, act) => `<div class="chart-empty"><div class="empty-cta"><span>${esc(text)}</span>${act ? `<button class="btn sm" data-action="${act[1]}"${act[2] ? ` data-id="${esc(act[2])}"` : ''}>${esc(act[0])}</button>` : ''}</div></div>`;
@@ -1365,9 +1431,12 @@ function chart(host, cfg) {
   const Y = v => m.t + (1 - (v - sc.min) / ((sc.max - sc.min) || 1)) * (H - m.t - m.b);
   const tick = cfg.tick || (span < 120 * 864e5 ? dayLabel : tickLabel);
   let g = '';
+  // Small steps (a zoomed-in chart) need a decimal so labels don't repeat, e.g. £10.2k.
+  const tstep = sc.ticks.length > 1 ? Math.abs(sc.ticks[1] - sc.ticks[0]) : 0;
+  const axisLabel = v => ui.hidden ? compact(v) : tstep && tstep < 1000 && Math.abs(v) >= 1000 && Math.abs(v) < 1e6 ? (v < 0 ? '−' : '') + '£' + (Math.abs(v) / 1000).toFixed(tstep < 100 ? 2 : 1) + 'k' : compact(v);
   sc.ticks.forEach((v, k) => {
     const y = Y(v).toFixed(1);
-    g += `<line class="${k ? 'grid' : 'base'}" x1="${m.l}" x2="${W - m.r}" y1="${y}" y2="${y}"/><text class="axis" x="${m.l - 10}" y="${y}" text-anchor="end" dominant-baseline="middle">${compact(v)}</text>`;
+    g += `<line class="${k ? 'grid' : 'base'}" x1="${m.l}" x2="${W - m.r}" y1="${y}" y2="${y}"/><text class="axis" x="${m.l - 10}" y="${y}" text-anchor="end" dominant-baseline="middle">${axisLabel(v)}</text>`;
   });
   const ticks = Math.min(n, W < 520 ? 3 : 5);
   const used = new Set(), gap = W < 520 ? 70 : 80;
@@ -1880,14 +1949,15 @@ function renderAccounts() {
       </section>
       ${yearlyPanel(a)}
       <section class="panel">
-        <div class="panel-head"><h2>History</h2><span class="aside">${st.s.length ? 'Since ' + dateLabel(toMs(st.s[0].date)) : ''}</span></div>
-        <div class="inline-form" style="margin-bottom:14px">
+        ${foldOpen('hist', 'History', histSummary([a.id]))}
+        <div class="inline-form" style="margin:14px 0">
           <input id="hist-q" class="input" type="search" placeholder="Search notes or amounts" value="${esc(hist.q || '')}" aria-label="Search history">
           <select id="hist-scope" class="input" aria-label="Accounts"><option value="this" ${hist.scope !== 'all' ? 'selected' : ''}>This account</option><option value="all" ${hist.scope === 'all' ? 'selected' : ''}>All accounts</option></select>
           <select id="hist-kind" class="input" aria-label="Entry type">${[['all', 'Everything'], ['log', 'Balances'], ['flow', 'Payments'], ['income', 'Income and prizes']].map(([v, l]) => `<option value="${v}" ${hist.kind === v ? 'selected' : ''}>${l}</option>`).join('')}</select>
           <select id="hist-year" class="input" aria-label="Tax year"><option value="all">All tax years</option>${years.map(y => `<option value="${y}" ${hist.year === y ? 'selected' : ''}>Tax year ${y}</option>`).join('')}</select>
         </div>
         <div id="hist-body"></div>
+        ${foldClose}
       </section>
     </div>`;
   renderHistory();
@@ -1946,9 +2016,9 @@ function yearlyPanel(a) {
   const allBefore = firstIso && a.since ? rows.filter(r => r.y >= +a.since && `${r.y + 1}-04-05` <= firstIso).every(r => a.yearly && a.yearly[r.y] != null) : false;
   const suggest = before > 0 && allBefore && Math.abs((a.priorPaid || 0) - before) > 0.5;
   const minY = rows.length ? rows[0].y : cur;
-  return `<section class="panel"><details class="fold" ${hasData ? 'open' : ''}>
-    <summary><span class="panel-head" style="margin:0"><h2>Year by year</h2><span class="aside">Optional · tap to ${hasData ? 'hide' : 'add past years'}</span></span></summary>
-    <p class="hint" style="margin:12px 0 10px">${pension ? 'Paid in: everything, including tax relief and employer payments.' : 'Paid in: your own money.'} Value at 5 April: from your annual statement. Values become balances on the chart; paid-in amounts are for reference (allowances and growth per year). Leave blanks where you don't know.</p>
+  const filled = rows.filter(r => r.exactEnd != null || (a.yearly && a.yearly[r.y] != null)).length;
+  return `<section class="panel">${foldOpen('years', 'Year by year', hasData ? `${filled} of ${rows.length} years filled in` : 'Optional · add past tax years')}
+    <p class="hint" style="margin:14px 0 10px">${pension ? 'Paid in: everything, including tax relief and employer payments.' : 'Paid in: your own money.'} Value at 5 April: from your annual statement. Values become balances on the chart; paid-in amounts are for reference (allowances and growth per year). Leave blanks where you don't know.</p>
     <div class="table-wrap"><table>
       <thead><tr><th>Tax year</th><th class="r">Paid in</th><th class="r">Value at 5 April</th></tr></thead>
       <tbody>${[...rows].reverse().map(r => `<tr><td><span style="white-space:nowrap">${tyLabel(r.y)}</span>${r.y === cur ? '<div class="hint">so far</div>' : ''}
@@ -1964,11 +2034,11 @@ function yearlyPanel(a) {
     </div>
     ${suggest ? `<p class="hint" style="margin-top:10px">Your yearly amounts add up to <b>${gbp(before)}</b> paid in before your first balance (${dateLabel(toMs(firstIso))}). <button class="btn sm ghost" data-action="use-prior" data-id="${esc(a.id)}" data-v="${before}">Use as "Total paid in so far"</button></p>` : ''}
     ${rows.filter(r => r.growth != null).length > 1 ? '<div class="chart" id="acct-years-chart" style="margin-top:14px"></div><div class="bar-legend"><span><i class="sw" style="background:var(--c2)"></i>Paid in</span><span><i class="sw" style="background:var(--pos)"></i>Growth</span><span><i class="sw" style="background:var(--neg)"></i>Loss</span></div>' : ''}
-  </details></section>`;
+  ${foldClose}</section>`;
 }
 function drawAcctYears(a) {
   const host = document.getElementById('acct-years-chart');
-  if (!host) return;
+  if (!host || !host.closest('details[open]')) return;
   const rows = yearRows(a).filter(r => r.growth != null);
   barChart(host, { labels: rows.map(r => String(r.y).slice(2) + '/' + String(r.y + 1).slice(2)), titles: rows.map(r => tyLabel(r.y)), paid: rows.map(r => r.paid), growth: rows.map(r => r.growth), label: 'Paid in and growth each tax year', empty: '' });
 }
@@ -2024,13 +2094,14 @@ function renderAllAccounts(accts) {
       </section>
       ${heatmapPanel(accts)}
       <section class="panel">
-        <div class="panel-head"><h2>History</h2><span class="aside">All accounts</span></div>
-        <div class="inline-form" style="margin-bottom:14px">
+        ${foldOpen('hist-all', 'History', histSummary(accts.map(x => x.id)) + ' · all accounts')}
+        <div class="inline-form" style="margin:14px 0">
           <input id="hist-q" class="input" type="search" placeholder="Search notes or amounts" value="${esc(hist.q || '')}" aria-label="Search history">
           <select id="hist-kind" class="input" aria-label="Entry type">${[['all', 'Everything'], ['log', 'Balances'], ['flow', 'Payments'], ['income', 'Income and prizes']].map(([v, l]) => `<option value="${v}" ${hist.kind === v ? 'selected' : ''}>${l}</option>`).join('')}</select>
           <select id="hist-year" class="input" aria-label="Tax year"><option value="all">All tax years</option>${years.map(y => `<option value="${y}" ${hist.year === y ? 'selected' : ''}>Tax year ${y}</option>`).join('')}</select>
         </div>
         <div id="hist-body"></div>
+        ${foldClose}
       </section>
     </div>`;
   renderHistory();
@@ -2149,6 +2220,13 @@ function paidAt(accts, ms) {
   }
   return t;
 }
+function histSummary(ids) {
+  const set = new Set(ids);
+  const all = [...state.logs, ...state.flows, ...state.income].filter(x => set.has(x.accountId));
+  if (!all.length) return 'Nothing logged yet';
+  const last = all.reduce((m, x) => x.date > m ? x.date : m, '');
+  return `${all.length} entr${all.length === 1 ? 'y' : 'ies'} · last ${dateLabel(toMs(last))}`;
+}
 function renderHistory() {
   const host = document.getElementById('hist-body');
   if (!host) return;
@@ -2178,12 +2256,12 @@ function renderHistory() {
     <div class="table-wrap"><table>
     <thead><tr><th>Date</th><th class="r">Balance</th><th class="r">Change</th><th class="hide-sm">Note</th><th class="r"><span class="sr">Actions</span></th></tr></thead>
     <tbody>${shown.map(l => {
-      const when = dateLabel(toMs(l.date));
+      const when = dateLabel(toMs(l.date)), whenCell = `<span class="d-long">${when}</span><span class="d-short">${shortDate(l.date)}</span>`;
       if (pendingDelete === l.id) return `<tr class="confirm"><td colspan="3">Delete this ${l.kind === 'flow' ? 'payment' : l.kind === 'income' ? 'income entry' : 'valuation'} from ${when}?</td><td class="hide-sm"></td><td class="r" style="white-space:nowrap"><button class="btn sm ghost" data-action="del-no">Keep</button> <button class="btn sm danger solid" data-action="del-yes" data-id="${esc(l.id)}">Delete</button></td></tr>`;
-      if (l.kind === 'income') return `<tr><td style="white-space:nowrap">${when}${who(l)}</td><td class="r faint">${incLabel(l.incKind)}</td><td class="r"><span class="delta muted">${gbp(l.amount)}</span></td><td class="note hide-sm faint">${l.incKind === 'prize' ? 'Tax-free prize' : 'Income, for tax'}</td>${actions(l, 'income from ' + when)}</tr>`;
-      if (l.kind === 'flow') return `<tr><td style="white-space:nowrap">${when}${who(l)}</td><td class="r faint">${l.employer ? 'Employer paid in' : l.amount >= 0 ? 'Paid in' : 'Taken out'}</td><td class="r">${deltaChip(l.amount, signed(l.amount))}</td><td class="note hide-sm">${esc(l.note)}${!l.employer && l.own !== l.amount ? ` <span class="faint">(you paid ${gbp(l.own)})</span>` : ''}</td>${actions(l, 'payment from ' + when)}</tr>`;
+      if (l.kind === 'income') return `<tr data-row="${esc(l.id)}"><td style="white-space:nowrap">${whenCell}${who(l)}</td><td class="r faint">${incLabel(l.incKind)}</td><td class="r"><span class="delta muted">${gbp(l.amount)}</span></td><td class="note hide-sm faint">${l.incKind === 'prize' ? 'Tax-free prize' : 'Income, for tax'}</td>${actions(l, 'income from ' + when)}</tr>`;
+      if (l.kind === 'flow') return `<tr data-row="${esc(l.id)}"><td style="white-space:nowrap">${whenCell}${who(l)}</td><td class="r faint">${l.employer ? 'Employer paid in' : l.amount >= 0 ? 'Paid in' : 'Taken out'}</td><td class="r">${deltaChip(l.amount, signed(l.amount))}</td><td class="note hide-sm">${esc(l.note)}${!l.employer && l.own !== l.amount ? ` <span class="faint">(you paid ${gbp(l.own)})</span>` : ''}</td>${actions(l, 'payment from ' + when)}</tr>`;
       const prev = prevLog[l.id], d = prev ? l.value - prev.value : null;
-      return `<tr><td style="white-space:nowrap">${when}${who(l)}</td><td class="r val">${gbp(l.value)}</td><td class="r">${d == null ? '<span class="faint">—</span>' : deltaChip(d, signed(d))}</td><td class="note hide-sm">${esc(l.note)}</td>${actions(l, 'valuation from ' + when)}</tr>`;
+      return `<tr data-row="${esc(l.id)}"><td style="white-space:nowrap">${whenCell}${who(l)}</td><td class="r val">${gbp(l.value)}${l.estimated ? '<span class="est" title="Estimated from payments since your last balance">est.</span>' : ''}</td><td class="r">${d == null ? '<span class="faint">—</span>' : deltaChip(d, signed(d))}</td><td class="note hide-sm">${esc(l.note)}${l.estimated ? '<span class="faint">Estimated: last balance plus payments</span>' : ''}</td>${actions(l, 'valuation from ' + when)}</tr>`;
     }).join('')}</tbody></table></div>
     ${rows.length > shown.length ? `<p class="hint">Showing the latest ${shown.length}. Narrow the search to see more.</p>` : ''}`
     : `<div class="chart-empty">${q || h.kind !== 'all' || h.year !== 'all' ? 'Nothing matches these filters.' : 'Nothing logged for this account yet.'}</div>`;
@@ -2610,12 +2688,11 @@ function taxPanel() {
       ${row('ISA subscriptions', gbp(r.isaSubs), 'Tax-free, not reported.')}
       ${r.bonds > 0 ? row('Premium Bonds prizes', gbp(r.bonds), 'Tax-free, not reported.') : ''}
     </tbody></table></div>
-    <details class="fold stack" style="gap:10px;border-top:1px solid var(--line);padding-top:14px" ${state.profile.p60[y] ? 'open' : ''}>
-      <summary><h2 style="display:inline">Your P60 and refund check</h2> <span class="faint">Optional</span></summary>
-      <p class="hint" style="margin:0">From the P60 your employer gives you after 5 April. Aurum then uses your real tax band for ${tyLabel(y)} and estimates any refund. Not for Scottish taxpayers, whose rates differ.</p>
+    ${foldOpen('p60', 'Your P60 and refund check', state.profile.p60[y] ? `Saved for ${tyLabel(y)}${r.est ? ` · ${r.est.net >= 0 ? 'refund' : 'owed'} about ${gbp(Math.abs(r.est.net))}` : ''}` : 'Optional · check for a tax refund', 'inner')}
+      <div class="stack" style="gap:10px;margin-top:12px"><p class="hint" style="margin:0">From the P60 your employer gives you after 5 April. Aurum then uses your real tax band for ${tyLabel(y)} and estimates any refund. Not for Scottish taxpayers, whose rates differ.</p>
       ${p60Form(y)}
       ${r.est ? taxEstimate(r) : ''}
-    </details>
+    </div>${foldClose}
     <div class="row-actions"><button class="btn" data-action="tax-copy" data-id="${y}">Copy summary</button><button class="btn ghost" data-action="tax-share" data-id="${y}">Share</button><span class="status" id="tax-status" role="status"></span></div>
     <p class="hint">A helper only, not tax advice. Uses ${r.fromP60 ? `your ${tyLabel(y)} P60 (${BANDS[r.band].word}-rate)` : 'your tax band from Settings'}. Check figures against your providers' annual statements and the HMRC guidance for each section.</p>
   </section>`;
@@ -2910,6 +2987,7 @@ function render() {
     view.innerHTML = `<div class="stack view"><section class="panel"><div class="chart-empty"><div class="empty-cta"><b>Something went wrong showing this screen.</b><span>Your data is safe. Try reloading, or open another tab.</span><button class="btn primary" data-action="reload">Reload</button><details><summary>Details</summary><p class="hint mono" style="margin-top:8px">${esc(String(err && err.message || err))}</p></details></div></div></section></div>`;
   }
   moneyInputs();
+  if (glowIds.length) requestAnimationFrame(glowChanged);
 }
 
 /* ---------- amounts: "1.5k", "1200+350" ---------- */
@@ -2980,6 +3058,9 @@ function calcKey(k) {
 /* ---------- sheets ---------- */
 const openSheet = el => { if (typeof el.showModal === 'function') el.showModal(); else el.setAttribute('open', ''); };
 const closeSheets = () => document.querySelectorAll('dialog.sheet').forEach(d => { if (d.open) d.close(); });
+function typeTiles(sel) {
+  return Object.entries(GROUPS).map(([g, gl]) => `<div><span class="tg">${esc(gl)}</span><div class="tt">${Object.entries(TYPES).filter(([, t]) => t.group === g).map(([k, t]) => `<button type="button" data-action="pick-type" data-id="${esc(k)}" aria-pressed="${k === sel}"><i class="sw" style="background:var(--${GROUP_COLOR[g]})"></i>${esc(t.label)}</button>`).join('')}</div></div>`).join('');
+}
 function typeOptions(sel) {
   return Object.entries(GROUPS).map(([g, gl]) => `<optgroup label="${esc(gl)}">${Object.entries(TYPES).filter(([, t]) => t.group === g).map(([k, t]) => `<option value="${esc(k)}" ${k === sel ? 'selected' : ''}>${esc(t.label)}</option>`).join('')}</optgroup>`).join('')
     + (sel && !TYPES[sel] ? `<option value="${esc(sel)}" selected>${esc(sel)}</option>` : '');
@@ -3081,6 +3162,7 @@ document.getElementById('log-form').addEventListener('submit', e => {
   if (editingEntry) {
     id = editingEntry.id;
     const old = [...state.flows, ...state.logs].find(x => x.id === id);
+    if (old && state.flows.includes(old)) dropEstimate(old);
     state.logs = state.logs.filter(x => x.id !== id);
     state.flows = state.flows.filter(x => x.id !== id);
     state.income = state.income.filter(x => x.id !== id);
@@ -3091,18 +3173,24 @@ document.getElementById('log-form').addEventListener('submit', e => {
     const fid = hasV ? uid() : id, auto = !!(editingEntry && editingEntry.auto);
     const kind = document.getElementById('log-kind').value;
     if (kind === 'dividend' || kind === 'interest' || kind === 'prize') state.income.push({ id: fid, accountId, date, amount: flow, kind });
-    else if (kind === 'employer') state.flows.push({ id: fid, accountId, date, amount: flow, own: 0, note: hasV ? '' : note, auto, employer: true });
     else {
-      const out = kind === 'out';
-      const relief = !out && !document.getElementById('log-relief-wrap').hidden && document.getElementById('log-relief').checked;
-      const own = out ? -flow : flow;
-      state.flows.push({ id: fid, accountId, date, amount: relief ? own * 1.25 : own, own, note: hasV ? '' : note, auto });
+      let f;
+      if (kind === 'employer') f = { id: fid, accountId, date, amount: flow, own: 0, note: hasV ? '' : note, auto, employer: true };
+      else {
+        const out = kind === 'out';
+        const relief = !out && !document.getElementById('log-relief-wrap').hidden && document.getElementById('log-relief').checked;
+        const own = out ? -flow : flow;
+        f = { id: fid, accountId, date, amount: relief ? own * 1.25 : own, own, note: hasV ? '' : note, auto };
+      }
+      state.flows.push(f);
+      if (!hasV) addEstimate(f);
     }
   }
   editingEntry = null;
   ui.lastLogAcct = accountId; saveUi();
   save();
   sheet.close();
+  saved(hasV && hasF ? 'Balance and payment saved ✓' : hasV ? 'Balance saved ✓' : 'Payment saved ✓', [id, accountId]);
   render();
 });
 sheet.addEventListener('close', () => { editingEntry = null; logAccount.disabled = false; });
@@ -3150,6 +3238,7 @@ function openAcctSheet(id) {
   document.getElementById('acct-title').textContent = a ? 'Edit account' : 'Add account';
   document.getElementById('acct-submit').textContent = a ? 'Save changes' : 'Add account';
   document.getElementById('acct-type').innerHTML = typeOptions(a ? a.type : 'ISA');
+  document.getElementById('acct-tiles').innerHTML = typeTiles(a ? a.type : 'ISA');
   document.getElementById('acct-name').value = a ? a.name : '';
   document.getElementById('acct-provider').value = a ? a.provider : '';
   const owner = document.getElementById('acct-owner');
@@ -3228,6 +3317,7 @@ document.getElementById('acct-form').addEventListener('submit', e => {
   runRegular();
   save();
   acctSheet.close();
+  saved(editingAcct ? 'Account saved ✓' : 'Account added ✓', [ui.account]);
   render();
 });
 
@@ -3258,7 +3348,7 @@ function openPast(id) {
 // A balance for the same account and date replaces the old one rather than duplicating it.
 function upsertLog(accountId, date, value, note) {
   const ex = state.logs.find(l => l.accountId === accountId && l.date === date);
-  if (ex) { ex.value = value; if (note) ex.note = note; return ex; }
+  if (ex) { ex.value = value; if (note) ex.note = note; delete ex.estimated; delete ex.flowIds; return ex; }
   const l = { id: uid(), accountId, date, value, note: note || '' };
   state.logs.push(l);
   return l;
@@ -3317,12 +3407,16 @@ document.getElementById('bulk-form').addEventListener('submit', e => {
   });
   if (!entries.length) { bulkSheet.close(); return; }
   clearExample(entries.map(x => x.id));
+  for (const x of entries) if (x.kind === 'value') upsertLog(x.id, date, x.v, '');
   for (const x of entries) {
-    if (x.kind === 'value') upsertLog(x.id, date, x.v, '');
-    else if (x.v > 0) state.flows.push({ id: uid(), accountId: x.id, date, amount: x.v, own: x.v, note: '', auto: false });
+    if (x.kind !== 'paid' || !(x.v > 0)) continue;
+    const f = { id: uid(), accountId: x.id, date, amount: x.v, own: x.v, note: '', auto: false };
+    state.flows.push(f);
+    if (!entries.some(e => e.kind === 'value' && e.id === x.id)) addEstimate(f);
   }
   save();
   bulkSheet.close();
+  saved(`${new Set(entries.map(x => x.id)).size} account${new Set(entries.map(x => x.id)).size === 1 ? '' : 's'} updated ✓`, [...new Set(entries.map(x => x.id))]);
   render();
 });
 document.querySelectorAll('dialog.sheet').forEach(d => d.addEventListener('click', e => { if (e.target === d) d.close(); }));
@@ -3557,10 +3651,53 @@ document.addEventListener('visibilitychange', () => {
   else if (hiddenAt && Date.now() - hiddenAt > 60000) showLock();
 });
 
+document.addEventListener('toggle', e => {
+  const d = e.target;
+  if (!d.dataset || !d.dataset.fold) return;
+  ui.folds[d.dataset.fold] = d.open; saveUi();
+  if (d.open && d.querySelector('#acct-years-chart')) { const a = state.accounts.find(x => x.id === ui.account); if (a) drawAcctYears(a); }
+}, true);
+
+// Swipe left or right on the page to move between tabs (not on charts, inputs or sideways-scrolling strips).
+const TAB_ORDER = ['overview', 'accounts', 'planner', 'insights', 'settings'];
+let swipe = null;
+document.addEventListener('touchstart', e => {
+  const t = e.target;
+  if (e.touches.length !== 1 || document.querySelector('dialog[open]') || !state.profile.setupDone || t.closest('svg, input, select, textarea, .seg, .acct-picker, .table-wrap, .heatmap, .calc-keys')) { swipe = null; return; }
+  swipe = { x: e.touches[0].clientX, y: e.touches[0].clientY, t: Date.now() };
+}, { passive: true });
+document.addEventListener('touchend', e => {
+  if (!swipe) return;
+  const dx = e.changedTouches[0].clientX - swipe.x, dy = e.changedTouches[0].clientY - swipe.y, dt = Date.now() - swipe.t;
+  swipe = null;
+  if (dt > 600 || Math.abs(dx) < 70 || Math.abs(dy) > Math.abs(dx) * 0.6) return;
+  const i = TAB_ORDER.indexOf(ui.tab), next = TAB_ORDER[i + (dx < 0 ? 1 : -1)];
+  if (next) { buzz(); goTab(next); }
+}, { passive: true });
+
 /* ---------- undo ---------- */
 let undoSnap = null, toastTimer = null;
 // Call before a delete: keeps a copy of the data for a few seconds so it can be undone.
+const Haptics = Native ? capx.registerPlugin('Haptics') : null;
+const buzz = (style = 'LIGHT') => { if (Haptics) Haptics.impact({ style }).catch(() => {}); };
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.classList.add('plain'); undoSnap = null;
+  document.getElementById('toast-msg').textContent = msg;
+  t.hidden = false;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { t.hidden = true; t.classList.remove('plain'); }, 2200);
+}
+// After saving, briefly highlight what changed: history rows, holdings rows or the account figure.
+let glowIds = [];
+function glowChanged() {
+  const ids = glowIds; glowIds = [];
+  ids.forEach(id => view.querySelectorAll(`[data-row="${CSS.escape(id)}"], tr[data-id="${CSS.escape(id)}"]`).forEach(el => { el.classList.remove('glow'); void el.offsetWidth; el.classList.add('glow'); }));
+}
+function saved(msg, ids) { glowIds = ids || []; buzz(); toast(msg || 'Saved ✓'); }
 function snapshot(msg) {
+  document.getElementById('toast').classList.remove('plain');
+  buzz('MEDIUM');
   undoSnap = JSON.stringify(state);
   document.getElementById('toast-msg').textContent = msg;
   document.getElementById('toast').hidden = false;
@@ -3575,7 +3712,16 @@ document.addEventListener('click', async e => {
   if (!t) return;
   const act = t.dataset.action, id = t.dataset.id;
   switch (act) {
-    case 'tab': goTab(t.dataset.tab); break;
+    case 'tab':
+      // Tapping the tab you're on scrolls back to the top.
+      if (t.dataset.tab === ui.tab && state.profile.setupDone) window.scrollTo({ top: 0, behavior: 'smooth' }); else goTab(t.dataset.tab);
+      break;
+    case 'pick-type': {
+      const sel = document.getElementById('acct-type');
+      sel.value = id; sel.dispatchEvent(new Event('change'));
+      document.querySelectorAll('#acct-tiles button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.id === id)));
+      break;
+    }
     case 'open-log': openLog(id); break;
     case 'open-bulk': openBulk(); break;
     case 'add-acct': openAcctSheet(null); break;
@@ -3597,6 +3743,7 @@ document.addEventListener('click', async e => {
     case 'del-yes':
       snapshot('Entry deleted');
       state.logs = state.logs.filter(l => l.id !== id);
+      { const f = state.flows.find(x => x.id === id); if (f) dropEstimate(f); }
       state.flows = state.flows.filter(f => f.id !== id);
       state.income = state.income.filter(x => x.id !== id);
       pendingDelete = null; save(); render(); break;

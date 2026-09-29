@@ -68,10 +68,14 @@ There is no local Java/Android SDK on the owner's PC — **APKs are only built b
 - `account.yearly` = reference amounts paid in per tax year (`{'2024': 20000}`), used by allowances, the yearly chart and
   carry-forward via `yearPaid()`; never by balances/growth. `profile.p60[year] = {pay, tax, pay2, tax2, other, giftAid, marriage:'none'|'receive'|'give', code}` drives `incomeTax()` (E/W/NI rates
   in `taxRules(y)`) for the tax helper's band and refund estimate.
+- Estimated balances: a payment logged without a balance (and each regular payment) adds a log `{estimated:true, flowIds}`
+  = last balance + amount (`addEstimate`); deleting/editing the payment reverses it (`dropEstimate`); a real balance the
+  same day replaces it (`upsertLog`). Only when the payment is on/after the latest balance.
+- Collapsible sections use `foldOpen(key,title,sub)`/`foldClose` (round chevron); open state in `ui.folds`.
 - `income` is for the tax helper only (doesn't affect growth). Employer pension payments are flows with `employer: true, own: 0`.
 - Device-only keys (not in backups): `aurum_lock` (PIN hash), `aurum_bio`, `aurum_reminder` (day), `aurum_update` (cached release), `aurum_taxrem` (June P60 / January SA reminders), `aurum_autobackup`/`_last` (weekly copy to Documents/Aurum).
 - `archived` accounts stay in totals/charts but are hidden from pickers, Update all, reminders and the planner.
-- Native plugins: Preferences, Filesystem, Share, LocalNotifications (monthly reminder), NativeBiometric (@capgo, fingerprint).
+- Native plugins: Preferences, Filesystem, Share, LocalNotifications (monthly reminder), NativeBiometric (@capgo, fingerprint), Haptics.
   saved to `localStorage['aurum_v1']` (key name kept). UI prefs in `aurum_ui`, theme in `aurum_theme`, PIN hash in `aurum_lock`.
 - `logs` are balances; `flows` are money in (+) / out (−). `amount` is what reached the account (incl. 25% pension relief /
   LISA bonus), `own` is what the user paid (used for ISA allowances). An account's first balance counts as money in.
