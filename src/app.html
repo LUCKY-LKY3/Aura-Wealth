@@ -860,7 +860,7 @@ function normalize(o) {
     const ids = new Set(accounts.map(a => a.id));
     const logs = o.logs.filter(l => validLog(l) && ids.has(String(l.accountId))).map(l => {
       const x = { id: String(l.id || uid()), accountId: String(l.accountId), date: l.date, value: +l.value, note: String(l.note || '') };
-      if (l.estimated) { x.estimated = true; x.flowIds = Array.isArray(l.flowIds) ? l.flowIds.map(String) : []; }
+      if (l.estimated) { x.estimated = true; x.flowIds = Array.isArray(l.flowIds) ? l.flowIds.map(String) : []; if (isFinite(+l.baseValue) && l.baseValue !== null) x.baseValue = +l.baseValue; }
       return x;
     });
     const flows = (Array.isArray(o.flows) ? o.flows : []).filter(f => f && isIso(f.date) && isFinite(+f.amount) && ids.has(String(f.accountId))).map(f => ({
@@ -972,7 +972,8 @@ function addEstimate(f) {
   const last = s[s.length - 1];
   if (f.date < last.date) return; // backdated: later balances already include it
   if (last.date === f.date) {
-    if (!last.estimated) return;  // a real balance that day wins
+    // Same day as a balance: the payment came after it, so add it on. The typed value is kept to restore on delete.
+    if (!last.estimated) { last.baseValue = last.value; last.estimated = true; last.flowIds = []; }
     last.value = Math.max(0, last.value + f.amount); last.flowIds.push(f.id); return;
   }
   state.logs.push({ id: uid(), accountId: f.accountId, date: f.date, value: Math.max(0, last.value + f.amount), note: '', estimated: true, flowIds: [f.id] });
@@ -980,7 +981,9 @@ function addEstimate(f) {
 function dropEstimate(f) {
   for (const l of state.logs.filter(x => x.estimated && x.flowIds && x.flowIds.includes(f.id))) {
     l.flowIds = l.flowIds.filter(id => id !== f.id);
-    if (!l.flowIds.length) state.logs = state.logs.filter(x => x !== l); else l.value = Math.max(0, l.value - f.amount);
+    if (!l.flowIds.length && l.baseValue != null) { l.value = l.baseValue; delete l.baseValue; delete l.estimated; delete l.flowIds; }
+    else if (!l.flowIds.length) state.logs = state.logs.filter(x => x !== l);
+    else l.value = Math.max(0, l.value - f.amount);
   }
 }
 function runRegular() {
@@ -3348,7 +3351,7 @@ function openPast(id) {
 // A balance for the same account and date replaces the old one rather than duplicating it.
 function upsertLog(accountId, date, value, note) {
   const ex = state.logs.find(l => l.accountId === accountId && l.date === date);
-  if (ex) { ex.value = value; if (note) ex.note = note; delete ex.estimated; delete ex.flowIds; return ex; }
+  if (ex) { ex.value = value; if (note) ex.note = note; delete ex.estimated; delete ex.flowIds; delete ex.baseValue; return ex; }
   const l = { id: uid(), accountId, date, value, note: note || '' };
   state.logs.push(l);
   return l;
@@ -3679,7 +3682,7 @@ document.addEventListener('touchend', e => {
 let undoSnap = null, toastTimer = null;
 // Call before a delete: keeps a copy of the data for a few seconds so it can be undone.
 const Haptics = Native ? capx.registerPlugin('Haptics') : null;
-const buzz = (style = 'LIGHT') => { if (Haptics) Haptics.impact({ style }).catch(() => {}); };
+const buzz = (style = 'LIGHT') => { if (Haptics) Haptics.vibrate({ duration: style === 'LIGHT' ? 30 : 60 }).catch(() => Haptics.impact({ style }).catch(() => {})); };
 function toast(msg) {
   const t = document.getElementById('toast');
   t.classList.add('plain'); undoSnap = null;
