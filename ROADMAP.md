@@ -37,6 +37,15 @@ Agreed with the owner. Nothing here is built until the owner says "go" for that 
 - 3.x+: couple mode (shared via backup file); estate summary for family; documents vault;
   home-screen widget; Wear OS tile; shareable year-in-review each April
 
+## Monetisation (after 2.0 — owner to decide)
+- Plan: free core + one-off "Aurum Pro" unlock (~£5–£15) via Google Play; optional tip jar on the website
+- Pro candidates: encrypted backup, monthly review, tax helper, future pension tools (3.x)
+- Steps: Google Play developer account ($25), Play Billing in the app (on-device licence check, no servers),
+  privacy policy + terms, keep "illustration, not advice" wording, decide on repo privacy/licence first,
+  accountant for UK tax on income. Website stays free (or becomes a demo)
+- Avoid: adverts (tracking, off-brand), selling data (we never have it), affiliate links to platforms
+  (FCA financial promotion risk; conflicts with "no advice")
+
 ## Later (not scheduled)
 - Privacy screen: blank Aurum card in Android recent apps; blocks screenshots (with a Settings switch)
 
