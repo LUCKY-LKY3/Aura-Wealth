@@ -1,2 +1,4 @@
 - Fix: adding money on the same day as your last balance now updates the balance (shown as "est.")
 - Stronger vibration on save, delete and undo
+- Accounts strip: fades at the edge with round ‹ › buttons and "2 of 8 accounts", so you can see there are more
+- Smoother tab swipes: the page follows your finger and slides to the next tab
