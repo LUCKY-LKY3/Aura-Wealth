@@ -71,6 +71,8 @@ There is no local Java/Android SDK on the owner's PC — **APKs are only built b
 - Estimated balances: a payment logged without a balance (and each regular payment) adds a log `{estimated:true, flowIds}`
   = last balance + amount (`addEstimate`); deleting/editing the payment reverses it (`dropEstimate`); a real balance the
   same day replaces it (`upsertLog`). Only when the payment is on/after the latest balance.
+- Notifications (bell): `computeNotes()` derives them from data on each render (`refreshBell()`); only `ui.notes.{read,gone,on,move}`
+  is stored (in `aurum_ui`). Ids encode the date/version so a new occurrence shows again. Value moves are growth only (flows excluded, estimated logs ignored).
 - Collapsible sections use `foldOpen(key,title,sub)`/`foldClose` (round chevron); open state in `ui.folds`.
 - `income` is for the tax helper only (doesn't affect growth). Employer pension payments are flows with `employer: true, own: 0`.
 - Device-only keys (not in backups): `aurum_lock` (PIN hash), `aurum_bio`, `aurum_reminder` (day), `aurum_update` (cached release), `aurum_taxrem` (June P60 / January SA reminders), `aurum_autobackup`/`_last` (weekly copy to Documents/Aurum).
@@ -104,6 +106,8 @@ There is no local Java/Android SDK on the owner's PC — **APKs are only built b
 - Fonts: Geist (UI) + Geist Mono (table figures, chart axes). Bundled, no external font requests.
 - Logo: gold coin with an "A" on a black rounded tile (`brand/aurum-mark.svg`). Name is **Aurum**.
 - Safe areas: use `var(--sa-top)` / `var(--sa-bottom)` (Capacitor insets with `env()` fallback).
+- Switches (`.check.tgl`, `input.switch`) for anything that applies straight away (settings, chart options); checkboxes only
+  inside forms saved with a button and for picking items in a list.
 - Keep it professional and restrained: one bold element (the net-worth card), tables over cards.
 
 ## Domain notes (UK)

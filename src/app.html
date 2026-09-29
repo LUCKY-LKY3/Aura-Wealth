@@ -323,6 +323,30 @@ tr.grp td.val{font-size:12.5px;letter-spacing:0;text-transform:none;color:var(--
 .goal-meta{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font-size:12.5px;color:var(--ink-3)}
 .check{display:flex;gap:9px;align-items:flex-start;font-size:13.5px;color:var(--ink-2);cursor:pointer}
 .check input{margin-top:3px;accent-color:var(--primary);width:16px;height:16px;flex:none}
+/* Switches: for settings that apply straight away. Checkboxes stay inside forms saved with a button. */
+input.switch,.check.tgl input{appearance:none;-webkit-appearance:none;width:42px;height:24px;margin:0;border-radius:12px;background:var(--line-strong);position:relative;cursor:pointer;flex:none;transition:background .18s}
+input.switch::after,.check.tgl input::after{content:'';position:absolute;left:3px;top:3px;width:18px;height:18px;border-radius:50%;background:var(--ink-3);transition:transform .18s,background .18s}
+input.switch:checked,.check.tgl input:checked{background:var(--gold)}
+input.switch:checked::after,.check.tgl input:checked::after{transform:translateX(18px);background:#0b0a08}
+input.switch:focus-visible,.check.tgl input:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.check.tgl{align-items:center;justify-content:space-between;gap:14px}
+.check.tgl input{order:2}
+.check.tgl>span{flex:1;min-width:0}
+.check.tgl.mini>span{flex:0 1 auto}
+.check.tgl.mini{justify-content:flex-start;gap:9px}
+.check.tgl.mini input{order:0;width:34px;height:20px}
+.check.tgl.mini input::after{width:14px;height:14px}
+.check.tgl.mini input:checked::after{transform:translateX(14px)}
+.set-grp{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);margin:6px 0 -6px}
+.set-card{border:1px solid var(--line);border-radius:12px;background:var(--surface-2);overflow:hidden}
+.set-row{display:flex;align-items:center;gap:12px;padding:11px 14px;cursor:pointer}
+.set-row+.set-row,.move-opts+.set-row{border-top:1px solid var(--line)}
+.set-row .note-ic{background:var(--surface)}
+.set-txt{flex:1;min-width:0;display:flex;flex-direction:column}
+.set-txt b{font-weight:550;color:var(--ink);font-size:14px}.set-txt small{color:var(--ink-3);font-size:12px;margin-top:1px}
+.move-opts{padding:2px 14px 14px 58px}
+.move-opts .seg{display:flex;width:100%}.move-opts .seg button{flex:1;padding-inline:4px;white-space:nowrap}
+@media (max-width:480px){.move-opts{padding-left:14px}}
 fieldset.field{border:0;padding:0;margin:0;min-width:0}
 fieldset.field legend{padding:0;margin-bottom:6px}
 .two{display:grid;gap:12px;grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
@@ -354,6 +378,25 @@ body.setup .tabbar,body.setup .fab,body.setup .side-nav,body.setup .top-actions{
 .eye{padding:8px;min-width:40px;min-height:40px}
 .top-actions{gap:4px}
 .eye svg{width:18px;height:18px}
+.bell{position:relative}
+.bell-dot{position:absolute;top:2px;right:1px;min-width:17px;height:17px;padding:0 4px;border-radius:9px;background:var(--gold);color:#0b0a08;font:700 10.5px/17px var(--mono, monospace);text-align:center;box-shadow:0 0 0 2px var(--bg)}
+@media (max-width:480px){.top-actions{gap:2px}.top .eye{min-width:36px;padding:7px}}
+.notes-wrap{padding:22px 18px calc(18px + var(--sa-bottom))}
+#notes-sheet .sheet-tools{display:flex;align-items:center;gap:4px}
+.note-chips{margin:10px 0 4px}
+.notes{list-style:none;margin:0 -4px;padding:0}
+.note-cat{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);padding:14px 4px 6px}
+.note{display:flex;gap:11px;align-items:flex-start;padding:11px 8px;border-top:1px solid var(--line);border-radius:10px;touch-action:pan-y}
+.note.unread{background:color-mix(in srgb, var(--gold) 6%, transparent)}
+.note-ic{flex:none;width:32px;height:32px;border-radius:10px;display:grid;place-items:center;background:var(--surface-2);border:1px solid var(--line);color:var(--ink-2)}
+.note-ic svg{width:16px;height:16px}.note-ic.gold{color:var(--gold)}.note-ic.pos{color:var(--pos)}.note-ic.neg{color:var(--neg)}
+.note-main{flex:1;min-width:0}
+.note-t{font-weight:600;font-size:14.5px}
+.note-d{font-size:13px;color:var(--ink-3);margin-top:2px;line-height:1.4}
+.note-act{display:inline-block;margin-top:6px;border:0;background:none;padding:0;color:var(--gold);font:inherit;font-size:13px;font-weight:600;text-decoration:none;cursor:pointer}
+.note-side{display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+.note-when{font-size:11.5px;color:var(--ink-3);white-space:nowrap;display:flex;align-items:center;gap:6px}
+.note.unread .note-when::after{content:'';width:7px;height:7px;border-radius:50%;background:var(--gold)}
 .acct-actions{display:flex;gap:8px;flex-wrap:wrap}
 /* Collapsible sections: round chevron button that flips when open, gold edge on the left */
 details.fold2>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:12px;border-radius:10px;margin:-4px;padding:4px}
@@ -492,6 +535,7 @@ details.fold:not([open])>summary h2::after{content:' ▸'}
         </div>
         <div class="top-actions">
           <div class="saved" data-saved role="status"><i></i><span class="sr">Saved on this device</span></div>
+          <button class="btn ghost eye bell" data-action="open-notes" id="bell-btn" aria-label="Notifications" title="Notifications" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg><span class="bell-dot" id="bell-dot" hidden></span></button>
           <button class="btn ghost eye" data-action="open-calc" aria-label="Calculator" title="Calculator"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="2.5"/><path d="M8.5 7h7M8.5 11h.01M12 11h.01M15.5 11h.01M8.5 14.5h.01M12 14.5h.01M15.5 14.5h.01M8.5 18h.01M12 18h.01M15.5 18h.01"/></svg></button>
           <button class="btn ghost eye" data-action="toggle-hide" id="eye-btn" aria-pressed="false" aria-label="Hide balances" title="Hide balances"></button>
           <button class="btn primary only-wide" data-action="open-log">
@@ -691,6 +735,14 @@ details.fold:not([open])>summary h2::after{content:' ▸'}
   </form>
 </dialog>
 
+<dialog class="sheet" id="notes-sheet" aria-labelledby="notes-title"><div class="notes-wrap">
+  <div class="sheet-head">
+    <h2 id="notes-title">Notifications</h2>
+    <span class="sheet-tools"><button type="button" class="btn sm ghost" data-action="notes-read">Mark all read</button>
+    <button type="button" class="icon-btn" data-action="close-sheet" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></span>
+  </div>
+  <div id="notes-body"></div>
+</div></dialog>
 <dialog class="sheet" id="calc-sheet" aria-labelledby="calc-title">
   <form id="calc-form" method="dialog">
     <div class="sheet-head">
@@ -921,12 +973,14 @@ let state = loadState();
 const DEFAULT_UI = {
   tab: 'overview', folds: {}, range: '1Y', custom: { n: 6, unit: 'm' }, hist: { scope: 'this', kind: 'all', year: 'all', q: '' }, fit: true, barMonths: 12, paidLine: true, lastYear: false, pence: false, compactNums: false, showClosed: false, account: null, person: 'me', hidden: false, stackBy: 'total', insight: '1M',
   calc: { monthly: 500, years: 20, rate: 6, draw: 20 },
-  plan: { include: {}, monthly: {}, target: 0, years: 25, real: false }
+  plan: { include: {}, monthly: {}, target: 0, years: 25, real: false },
+  notes: { read: {}, gone: {}, on: {}, move: { pct: 5, dir: 'both', basis: 'prev' } }, noteFilter: 'all'
 };
 let ui = (() => {
   try {
     const saved = JSON.parse(store.get(UI_KEY) || '{}');
-    return { ...DEFAULT_UI, ...saved, folds: { ...(saved.folds || {}) }, hist: { ...DEFAULT_UI.hist, ...(saved.hist || {}) }, custom: { ...DEFAULT_UI.custom, ...(saved.custom || {}) }, calc: { ...DEFAULT_UI.calc, ...(saved.calc || {}) }, plan: { ...DEFAULT_UI.plan, ...(saved.plan || {}) } };
+    return { ...DEFAULT_UI, ...saved, folds: { ...(saved.folds || {}) }, hist: { ...DEFAULT_UI.hist, ...(saved.hist || {}) }, custom: { ...DEFAULT_UI.custom, ...(saved.custom || {}) }, calc: { ...DEFAULT_UI.calc, ...(saved.calc || {}) }, plan: { ...DEFAULT_UI.plan, ...(saved.plan || {}) },
+      notes: { read: {}, gone: {}, on: {}, ...(saved.notes || {}), move: { ...DEFAULT_UI.notes.move, ...((saved.notes || {}).move || {}) } } };
   } catch { return JSON.parse(JSON.stringify(DEFAULT_UI)); }
 })();
 let pendingDelete = null, pendingReset = false, pendingRemoveAcct = null, pendingGoal = null, pendingPerson = null, pendingForgot = false;
@@ -1738,17 +1792,6 @@ function renderOverview() {
   const access = total - pension;
   const who = viewName();
 
-  const notices = [];
-  const stale = staleAccounts(accts);
-  if (!state.example && stale.length && accts.length) {
-    const names = stale.slice(0, 3).map(a => esc(a.name)).join(', ') + (stale.length > 3 ? ` and ${stale.length - 3} more` : '');
-    notices.push(`<div class="notice" role="note">${icons.clock}<p><b>Time for an update.</b> ${names} ${stale.length === 1 ? 'has' : 'have'} not been updated for over 30 days.</p><button class="btn sm" data-action="open-bulk">Update all</button></div>`);
-  }
-  const lb = state.profile.lastBackup;
-  if (!state.example && state.logs.length >= 3 && (!lb || daysSince(lb) > 60)) {
-    notices.push(`<div class="notice" role="note">${icons.info}<p><b>Back up your data.</b> ${lb ? `Your last backup was ${ago(lb).toLowerCase()}.` : 'You have not exported a backup yet.'} Your data only lives on this device, so keep a copy somewhere safe.</p><button class="btn sm" data-action="export">Export backup</button></div>`);
-  }
-
   const statement = `
     <section class="statement" aria-label="Net worth">
       <div class="eyebrow">${who ? esc(who) + ' · ' : ''}Total net worth</div>
@@ -1818,9 +1861,9 @@ function renderOverview() {
       <div class="chart" id="growth-chart"></div>
       <div class="legend-inline" id="growth-legend"></div>
       <div class="row-actions" style="margin-top:12px;gap:16px">
-        ${ui.stackBy === 'total' ? `<label class="check"><input type="checkbox" id="opt-fit" ${ui.fit ? 'checked' : ''}>Zoom to fit</label>` : ''}
-        <label class="check"><input type="checkbox" id="opt-paid" ${ui.paidLine ? 'checked' : ''}>Show money paid in</label>
-        <label class="check"><input type="checkbox" id="opt-lastyear" ${ui.lastYear ? 'checked' : ''}>Compare with a year earlier</label>
+        ${ui.stackBy === 'total' ? `<label class="check tgl mini"><input type="checkbox" role="switch" id="opt-fit" ${ui.fit ? 'checked' : ''}><span>Zoom to fit</span></label>` : ''}
+        <label class="check tgl mini"><input type="checkbox" role="switch" id="opt-paid" ${ui.paidLine ? 'checked' : ''}><span>Show money paid in</span></label>
+        <label class="check tgl mini"><input type="checkbox" role="switch" id="opt-lastyear" ${ui.lastYear ? 'checked' : ''}><span>Compare with a year earlier</span></label>
       </div>
     </section>`;
 
@@ -1870,7 +1913,7 @@ function renderOverview() {
       }).join('')}</ul>` : '<div class="chart-empty">No activity yet.</div>'}
     </section>`;
 
-  view.innerHTML = `<div class="stack view">${updateBanner()}${exampleNotice()}${notices.join('')}${personFilter()}<div class="summary">${statement}${kpis}</div>${holdings}<div class="grid-2">${growth}${allocation}</div>${monthly}${goals ? `<div class="grid-2">${activity}${goals}</div>` : activity}</div>`;
+  view.innerHTML = `<div class="stack view">${updateBanner()}${exampleNotice()}${personFilter()}<div class="summary">${statement}${kpis}</div>${holdings}<div class="grid-2">${growth}${allocation}</div>${monthly}${goals ? `<div class="grid-2">${activity}${goals}</div>` : activity}</div>`;
   barChart(document.getElementById('monthly-chart'), {
     labels: months.map(x => x.short), titles: months.map(x => x.title), paid: months.map(x => x.paid), growth: months.map(x => x.growth),
     label: 'Money paid in and growth each month', empty: 'Update your balances each month to see what you paid in and what grew.', emptyAction: ['Update all', 'open-bulk']
@@ -1958,7 +2001,7 @@ function renderAccounts() {
         ${a.priorPaid == null && st.s.length ? `<p class="hint" style="margin-top:8px">Had gains before you started tracking? <button class="btn sm ghost" data-action="edit-acct" data-id="${esc(a.id)}">Add total paid in so far</button> or <button class="btn sm ghost" data-action="open-past" data-id="${esc(a.id)}">add past balances</button></p>` : `<div class="row-actions" style="margin-top:8px"><button class="btn sm ghost" data-action="open-past" data-id="${esc(a.id)}">Add past balances</button></div>`}
         <div class="readout" id="acct-readout" style="margin-top:18px" aria-live="polite"></div>
         <div class="chart" id="acct-chart"></div>
-        <label class="check" style="margin-top:10px"><input type="checkbox" id="opt-fit" ${ui.fit ? 'checked' : ''}>Zoom to fit</label>
+        <label class="check tgl mini" style="margin-top:10px"><input type="checkbox" role="switch" id="opt-fit" ${ui.fit ? 'checked' : ''}><span>Zoom to fit</span></label>
       </section>
       ${yearlyPanel(a)}
       <section class="panel">
@@ -2371,7 +2414,7 @@ function renderPlanner() {
               <label for="plan-target">Target pot <span class="faint">Optional</span></label>
               <div class="money"><span>£</span><input id="plan-target" class="input" type="number" inputmode="decimal" min="0" step="1000" value="${ui.plan.target || ''}" placeholder="e.g. 750000"></div>
             </div>
-            <label class="check"><input type="checkbox" id="plan-real" ${ui.plan.real ? 'checked' : ''}>Show figures in today's money</label>
+            <label class="check tgl mini"><input type="checkbox" role="switch" id="plan-real" ${ui.plan.real ? 'checked' : ''}><span>Show figures in today's money</span></label>
           </div>
           <div>
             <div class="eyebrow" style="margin-bottom:8px">Accounts and monthly payments</div>
@@ -2815,6 +2858,13 @@ function renderInsights() {
 /* ---------- settings ---------- */
 const hasCrypto = !!(window.crypto && crypto.subtle && window.TextEncoder);
 function renderSettings() {
+  const moveOpts = noteOn('moves') ? `<div class="stack move-opts" style="gap:8px">
+          <span class="hint" style="margin:0">Notify when a balance or my net worth moves by</span>
+          <div class="seg scroll" role="group" aria-label="Amount">${[1, 2, 5, 10, 15, 20].map(v => `<button data-action="move-pct" data-id="${v}" aria-pressed="${ui.notes.move.pct === v}">${v}%</button>`).join('')}</div>
+          <label class="hint" style="margin:0;display:flex;align-items:center;gap:8px">Or your own: <input class="input" id="move-custom" type="text" inputmode="decimal" style="width:80px;padding:6px 8px" placeholder="e.g. 7.5" value="${[1, 2, 5, 10, 15, 20].includes(ui.notes.move.pct) ? '' : ui.notes.move.pct}"> %</label>
+          <div class="seg scroll" role="group" aria-label="Direction">${[['both', 'Up and down'], ['up', 'Up only'], ['down', 'Down only']].map(([v, l]) => `<button data-action="move-dir" data-id="${v}" aria-pressed="${ui.notes.move.dir === v}">${l}</button>`).join('')}</div>
+          <div class="seg scroll" role="group" aria-label="Compared with">${[['prev', 'Since previous balance'], ['month', 'This month']].map(([v, l]) => `<button data-action="move-basis" data-id="${v}" aria-pressed="${ui.notes.move.basis === v}">${l}</button>`).join('')}</div>
+          <p class="hint" style="margin:0">Growth only: money paid in or out doesn't count, and estimated balances are ignored.</p></div>` : '';
   const theme = store.get(THEME_KEY) === 'light' ? 'light' : 'dark';
   const p = state.profile, locked = !!store.get(LOCK_KEY);
   const count = state.logs.length;
@@ -2860,7 +2910,7 @@ function renderSettings() {
 
       <section class="panel stack">
         <h2>Privacy</h2>
-        <label class="check"><input type="checkbox" id="set-hidden" ${ui.hidden ? 'checked' : ''}><span><b style="color:var(--ink);font-weight:550">Hide balances</b><br>Shows £•••• instead of amounts. Also on the eye button at the top.</span></label>
+        <label class="check tgl"><input type="checkbox" role="switch" id="set-hidden" ${ui.hidden ? 'checked' : ''}><span><b style="color:var(--ink);font-weight:550">Hide balances</b><br>Shows £•••• instead of amounts. Also on the eye button at the top.</span></label>
         <div class="stack" style="gap:10px">
           <div><b style="font-weight:550">PIN lock</b> <span class="faint">${locked ? 'On' : 'Off'}</span></div>
           ${!hasCrypto ? '<p class="hint">PIN lock needs a secure (https) connection.</p>' : `
@@ -2869,7 +2919,7 @@ function renderSettings() {
             <button class="btn" type="submit">${locked ? 'Change PIN' : 'Set PIN'}</button>
             ${locked ? '<button class="btn danger" type="button" data-action="pin-off">Turn off</button>' : ''}
           </form>
-          ${Native && locked && bioOk ? `<label class="check"><input type="checkbox" id="set-bio" ${store.get(BIO_KEY) === '1' ? 'checked' : ''}><span><b style="color:var(--ink);font-weight:550">Unlock with fingerprint</b><br>Uses your phone's fingerprint or face unlock. The PIN still works.</span></label>` : ''}
+          ${Native && locked && bioOk ? `<label class="check tgl"><input type="checkbox" role="switch" id="set-bio" ${store.get(BIO_KEY) === '1' ? 'checked' : ''}><span><b style="color:var(--ink);font-weight:550">Unlock with fingerprint</b><br>Uses your phone's fingerprint or face unlock. The PIN still works.</span></label>` : ''}
           <p class="hint">Asks for the PIN when Aurum opens or after a minute in the background. It is a privacy screen: if you forget it, you can erase the data on this device and restore a backup.</p>`}
           <p class="status" id="pin-status" role="status"></p>
         </div>
@@ -2897,14 +2947,14 @@ function renderSettings() {
             <div class="row-actions"><label class="btn" for="csv-file">Choose CSV file</label><input id="csv-file" type="file" accept=".csv,text/csv,text/plain" class="sr"></div>
           </div>
         </details>
-        ${Native ? `<label class="check"><input type="checkbox" id="set-autobackup" ${store.get(AUTO_KEY) === '1' ? 'checked' : ''}><span><b style="color:var(--ink);font-weight:550">Automatic weekly backup</b><br>Saves a copy to Documents/Aurum on this phone${store.get(AUTO_LAST) ? `, last on ${dateLabel(toMs(store.get(AUTO_LAST)))}` : ''}. Keeps the 8 newest. Copy them to Google Drive or a computer now and then, as they are lost if the phone is.</span></label><p class="status" id="auto-status" role="status"></p>` : ''}
+        ${Native ? `<label class="check tgl"><input type="checkbox" role="switch" id="set-autobackup" ${store.get(AUTO_KEY) === '1' ? 'checked' : ''}><span><b style="color:var(--ink);font-weight:550">Automatic weekly backup</b><br>Saves a copy to Documents/Aurum on this phone${store.get(AUTO_LAST) ? `, last on ${dateLabel(toMs(store.get(AUTO_LAST)))}` : ''}. Keeps the 8 newest. Copy them to Google Drive or a computer now and then, as they are lost if the phone is.</span></label><p class="status" id="auto-status" role="status"></p>` : ''}
         <p class="status" id="backup-status" role="status"></p>
       </section>
 
       <section class="panel stack">
         <h2>Appearance</h2>
-        <label class="check"><input type="checkbox" id="set-pence" ${ui.pence ? 'checked' : ''}>Show pence (£1,234.56)</label>
-        <label class="check"><input type="checkbox" id="set-compact" ${ui.compactNums ? 'checked' : ''}>Short figures for large amounts (£104.1k)</label>
+        <label class="check tgl"><input type="checkbox" role="switch" id="set-pence" ${ui.pence ? 'checked' : ''}><span>Show pence (£1,234.56)</span></label>
+        <label class="check tgl"><input type="checkbox" role="switch" id="set-compact" ${ui.compactNums ? 'checked' : ''}><span>Short figures for large amounts (£104.1k)</span></label>
         <div class="seg" role="radiogroup" aria-label="Theme" style="width:max-content">
           ${['dark', 'light'].map(t => `<input type="radio" name="theme" id="theme-${t}" value="${t}" ${theme === t ? 'checked' : ''}><label for="theme-${t}">${t[0].toUpperCase() + t.slice(1)}</label>`).join('')}
         </div>
@@ -2916,11 +2966,17 @@ function renderSettings() {
       </section>
 
       <section class="panel stack">
+        <h2>Notifications</h2>
+        <p class="explain">Shown under the bell at the top. Worked out on this device from your entries.</p>
+        ${[['To do', ['due', 'backup', 'regular', 'stale']], ['Tax year', ['allow', 'tax']], ['Progress', ['goals', 'moves', 'app']]].map(([g, keys]) => `<div class="set-grp">${g}</div><div class="set-card">${keys.map(k => { const [, label, sub] = NOTE_KINDS.find(x => x[0] === k); return `<label class="set-row"><span class="note-ic gold"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${NOTE_ICONS[NOTE_KIND_ICON[k]]}</svg></span><span class="set-txt"><b>${label}</b><small>${k === 'moves' && noteOn(k) ? `${ui.notes.move.pct}% · ${{ both: 'up and down', up: 'up only', down: 'down only' }[ui.notes.move.dir]} · ${ui.notes.move.basis === 'month' ? 'this month' : 'since previous balance'}` : sub}</small></span><input type="checkbox" role="switch" class="switch" data-note-kind="${k}" ${noteOn(k) ? 'checked' : ''}></label>${k === 'moves' ? moveOpts : ''}`; }).join('')}</div>`).join('')}
+      </section>
+
+      <section class="panel stack">
         <h2>Reminders</h2>
         ${Native ? `<div class="field" style="max-width:260px"><label for="set-reminder">Monthly reminder to update balances</label>
           <select id="set-reminder" class="input"><option value="">Off</option>${Array.from({ length: 28 }, (_, i) => `<option value="${i + 1}" ${store.get(REMINDER_KEY) === String(i + 1) ? 'selected' : ''}>On day ${i + 1}, 9am</option>`).join('')}</select></div>
           <p class="status" id="reminder-status" role="status"></p>
-          <label class="check"><input type="checkbox" id="set-taxrem" ${store.get(TAXREM_KEY) === '1' ? 'checked' : ''}><span><b style="color:var(--ink);font-weight:550">Tax reminders</b><br>Each June to add your P60, and on 10 January if your last tax year has a refund to claim or income to declare.</span></label>` : '<p class="hint">A monthly phone reminder is available in the Android app. On the website, Aurum flags accounts you have not updated for 30 days.</p>'}
+          <label class="check tgl"><input type="checkbox" role="switch" id="set-taxrem" ${store.get(TAXREM_KEY) === '1' ? 'checked' : ''}><span><b style="color:var(--ink);font-weight:550">Tax reminders</b><br>Each June to add your P60, and on 10 January if your last tax year has a refund to claim or income to declare.</span></label>` : '<p class="hint">A monthly phone reminder is available in the Android app. On the website, Aurum flags accounts you have not updated for 30 days.</p>'}
       </section>
 
       <section class="panel stack">
@@ -3025,6 +3081,7 @@ function render() {
   }
   moneyInputs();
   setupPicker();
+  refreshBell();
   if (glowIds.length) requestAnimationFrame(glowChanged);
 }
 
@@ -3068,7 +3125,7 @@ let lastMoney = null;
 document.addEventListener('focusin', e => { if (e.target.dataset && e.target.dataset.money) lastMoney = e.target; });
 
 /* ---------- calculator ---------- */
-const calcSheet = document.getElementById('calc-sheet');
+const calcSheet = document.getElementById('calc-sheet'), notesSheet = document.getElementById('notes-sheet');
 let calcExpr = '', calcTarget = null;
 function calcShow() {
   const v = evalAmount(calcExpr.replace(/[+\-×÷*/]$/, ''));
@@ -3683,6 +3740,200 @@ function updateBanner() {
   </div>`;
 }
 
+/* ---------- notifications (the bell) ---------- */
+// Worked out from the data each time; only which ones were read or dismissed is remembered (in aurum_ui).
+const NOTE_KINDS = [
+  ['due', 'Balances due', 'Accounts not updated for 30 days'],
+  ['backup', 'Backup reminder', 'After 4 weeks without a backup'],
+  ['regular', 'Regular payments added', 'For two weeks after each one'],
+  ['stale', 'Stale accounts', 'No balance for 3 months'],
+  ['allow', 'ISA and pension allowances', 'From October until 5 April'],
+  ['tax', 'Tax dates', 'P60 in June, Self Assessment by 31 January, new tax year'],
+  ['goals', 'Goals and milestones', 'Halfway, reached and net worth milestones'],
+  ['moves', 'Value moves', 'When a balance moves by your chosen amount'],
+  ['app', 'App updates', 'A new version of the Android app']
+];
+const NOTE_KIND_ICON = { due: 'list', backup: 'save', regular: 'repeat', stale: 'clock', allow: 'pound', tax: 'doc', goals: 'star', moves: 'updown', app: 'up' };
+const NOTE_CATS = { todo: 'To do', tax: 'Tax year', moves: 'Value moves', goals: 'Milestones', app: 'App' };
+const noteOn = k => ui.notes.on[k] !== false;
+const growthWord = v => `${v >= 0 ? 'up' : 'down'} ${Math.abs(v).toFixed(1)}%`;
+function noteMove(name, ret, growth, when, id, acct) {
+  const m = ui.notes.move;
+  if (ret == null || Math.abs(ret) < m.pct || (m.dir === 'up' && ret < 0) || (m.dir === 'down' && ret > 0)) return null;
+  return { id, cat: 'moves', kind: ret >= 0 ? 'up' : 'down', date: TODAY, title: `${name} ${growthWord(ret)}`,
+    body: `${signed(growth)} growth ${when}, not counting money paid in or out.`, act: acct ? { action: 'goto-account', id: acct, label: 'View' } : null };
+}
+function computeNotes() {
+  if (!state.profile.setupDone) return [];
+  const out = [], my = active(mine()), cur = +taxYearStart(TODAY).slice(0, 4), md = TODAY.slice(5);
+  const real = id => logsOf(id).filter(l => !l.estimated);
+  if (!state.example) {
+    if (noteOn('stale') || noteOn('due')) {
+      const due = [];
+      for (const a of active(state.accounts)) {
+        const s = real(a.id), last = s.length ? s[s.length - 1].date : null;
+        if (!last) continue;
+        const d = daysSince(last);
+        if (d > 90 && noteOn('stale')) out.push({ id: `stale-${a.id}-${last}`, cat: 'todo', icon: 'clock', date: TODAY, title: `${a.name} looks out of date`, body: `No balance for ${Math.floor(d / 30)} months (last ${dateLabel(toMs(last))}).`, act: { action: 'open-log', id: a.id, label: 'Log value' } });
+        else if (d > 30) due.push(a);
+      }
+      if (due.length && noteOn('due')) out.push({ id: `due-${TODAY.slice(0, 7)}`, cat: 'todo', icon: 'list', date: TODAY,
+        title: `${due.length} balance${due.length > 1 ? 's' : ''} due`, body: `${due.slice(0, 3).map(a => a.name).join(', ')}${due.length > 3 ? ` and ${due.length - 3} more` : ''} not updated for over 30 days.`, act: { action: 'open-bulk', label: 'Update all' } });
+    }
+    const lb = state.profile.lastBackup;
+    if (noteOn('backup') && state.logs.length >= 3 && (!lb || daysSince(lb) > 28))
+      out.push({ id: `backup-${lb || 'never'}`, cat: 'todo', icon: 'save', date: TODAY, title: 'Backup due', body: lb ? `Last backup ${ago(lb).toLowerCase()}. Your data only lives on this device.` : 'You have not exported a backup yet. Your data only lives on this device.', act: { action: 'export', label: 'Back up now' } });
+    if (noteOn('regular')) for (const f of state.flows) {
+      if (!f.auto || f.date > TODAY || daysSince(f.date) > 14) continue;
+      const a = state.accounts.find(x => x.id === f.accountId);
+      if (!a) continue;
+      const est = state.logs.find(l => l.accountId === a.id && l.estimated && (l.flowIds || []).includes(f.id));
+      out.push({ id: `reg-${f.id}`, cat: 'todo', icon: 'repeat', date: f.date, title: 'Regular payment added', body: `${gbp(f.amount)} to ${a.name}${est ? ` · balance estimated at ${gbp(est.value)}` : ''}.`, act: { action: 'goto-account', id: a.id, label: 'Check' } });
+    }
+    if (noteOn('allow') && (md >= '10-01' || md <= '04-05')) {
+      const end = `${cur + 1}-04-05`, weeks = Math.max(0, Math.ceil((toMs(end) - TODAY_MS) / (7 * 864e5)));
+      const isas = my.filter(a => typeOf(a).allow === 'isa');
+      if (isas.length) {
+        const used = allowanceUsed(isas, 'isa');
+        if (used < ISA_ALLOWANCE) out.push({ id: `isa-${cur}`, cat: 'tax', icon: 'pound', date: TODAY, title: `ISA allowance: ${gbp(ISA_ALLOWANCE - used)} left`, body: `${gbp(used)} of ${gbp(ISA_ALLOWANCE)} used · ${weeks} week${weeks === 1 ? '' : 's'} until 5 April.`, bar: used / ISA_ALLOWANCE });
+      }
+      const pens = mine().filter(a => groupOf(a) === 'pension'), y = cur - 3;
+      const had = pens.some(a => (a.since && +a.since <= y) || (a.yearly && a.yearly[y] != null) || logsOf(a.id).some(l => l.date <= `${y + 1}-04-05`));
+      const left = had ? Math.max(0, taxRules(y).aa - pens.reduce((t, a) => t + yearPaid(a, y), 0)) : 0;
+      if (left > 0) out.push({ id: `cf-${y}`, cat: 'tax', icon: 'clock', date: TODAY, title: 'Pension carry-forward ends 5 April', body: `About ${gbp(left)} of unused pension allowance from ${tyLabel(y)} can't be used after 5 April.`, act: { action: 'note-go', id: 'insights', label: 'Paid in by tax year' } });
+    }
+    if (noteOn('tax')) {
+      if (md >= '04-06' && md <= '04-30') out.push({ id: `ty-${cur}`, cat: 'tax', icon: 'calendar', date: `${cur}-04-06`, title: `New tax year ${tyLabel(cur)}`, body: 'Allowances have reset. Add your balances at 5 April to close off last year.', act: { action: 'open-bulk', label: 'Update all' } });
+      if (md >= '06-01' && md <= '07-31' && !state.profile.p60[cur - 1]) out.push({ id: `p60-${cur - 1}`, cat: 'tax', icon: 'doc', date: `${cur}-06-01`, title: 'Your P60 should be ready', body: `Add your ${tyLabel(cur - 1)} P60 for a tax refund estimate.`, act: { action: 'note-go', id: 'insights', fold: 'p60', label: 'Tax helper' } });
+      if (md >= '10-01' || md <= '01-31') {
+        const y = cur - 1, e = taxReport(y).est;
+        const why = e && e.net >= 50 ? `Your figures show about ${gbp(e.net)} to claim back.` : e && e.net <= -50 ? `Your figures show about ${gbp(-e.net)} to pay.` : 'If you need to file, the deadline for paying and filing online is 31 January.';
+        out.push({ id: `sa-${y}`, cat: 'tax', icon: 'doc', date: md >= '10-01' ? `${cur}-10-01` : `${cur + 1}-01-01`, title: `Self Assessment for ${tyLabel(y)}: 31 January`, body: why, act: { action: 'note-go', id: 'insights', label: 'Tax helper' } });
+      }
+    }
+    if (noteOn('goals')) {
+      for (const g of state.goals) {
+        const st = goalStatus(g);
+        if (st.done) out.push({ id: `goal-${g.id}-done`, cat: 'goals', icon: 'star', date: TODAY, title: `${g.name}: reached`, body: `${gbp(st.cur)} of ${gbp(g.target)}. Well done.`, bar: 1 });
+        else if (st.progress >= 0.5) out.push({ id: `goal-${g.id}-half`, cat: 'goals', icon: 'target', date: TODAY, title: `${g.name}: halfway`, body: `${gbp(st.cur)} of ${gbp(g.target)}.`, bar: st.progress });
+      }
+      const tl = timeline(mine());
+      if (tl.length > 1 && daysSince(tl[tl.length - 1].date) <= 60) {
+        const now = tl[tl.length - 1].total, prev = tl[tl.length - 2].total, high = Math.max(...tl.slice(0, -1).map(p => p.total));
+        const step = Math.max(10000, Math.pow(10, Math.floor(Math.log10(Math.max(now, 1))) - 1)), mark = Math.floor(now / step) * step;
+        if (mark > 0 && prev < mark && now >= mark) out.push({ id: `nw-${mark}`, cat: 'goals', icon: 'star', date: tl[tl.length - 1].date, title: `You passed ${gbp(mark)}`, body: now > high ? 'Your net worth is at an all-time high.' : `Net worth is now ${gbp(now)}.` });
+        else if (now > high && prev < high) out.push({ id: `high-${tl[tl.length - 1].date}`, cat: 'goals', icon: 'star', date: tl[tl.length - 1].date, title: 'New high', body: `Your net worth is at an all-time high of ${gbp(now)}.` });
+      }
+    }
+    if (noteOn('moves')) {
+      const basis = ui.notes.move.basis, som = Date.UTC(+TODAY.slice(0, 4), +TODAY.slice(5, 7) - 1, 0);
+      for (const a of my) {
+        const s = real(a.id);
+        if (s.length < 2) continue;
+        const l1 = s[s.length - 1];
+        if (basis === 'month') {
+          const p = periodStats(a, som);
+          if (p && toMs(s[0].date) <= som && l1.date > msIso(som)) { const n = noteMove(a.name, p.ret, p.growth, 'this month', `mv-${a.id}-m${TODAY.slice(0, 7)}-${Math.round(p.ret)}`, a.id); if (n) out.push(n); }
+          continue;
+        }
+        if (daysSince(l1.date) > 60) continue;
+        const l0 = s[s.length - 2];
+        const paid = state.flows.filter(f => f.accountId === a.id && f.date > l0.date && f.date <= l1.date).reduce((t, f) => t + f.amount, 0);
+        const growth = l1.value - l0.value - paid, base = l0.value + paid / 2;
+        const n = noteMove(a.name, base > 0 ? growth / base * 100 : null, growth, `since the previous balance (${dateLabel(toMs(l0.date))})`, `mv-${a.id}-${l1.date}`, a.id);
+        if (n) { n.date = l1.date; out.push(n); }
+      }
+      if (basis === 'month') { const t = periodTotals(my, som); const n = noteMove('Net worth', t.ret, t.growth, 'this month', `mv-all-m${TODAY.slice(0, 7)}-${Math.round(t.ret || 0)}`); if (n) out.push(n); }
+    }
+  }
+  if (noteOn('app') && update && Native) out.push({ id: `app-${update.version}`, cat: 'app', icon: 'up', date: TODAY, title: `Aurum ${update.version} is ready`, body: releaseNotes(update.notes).slice(0, 2).map(l => l.replace(/^[-*•]\s*/, '')).join(' · ') || 'Tap to download. Your data is kept.', href: update.url, act: { label: 'Download' } });
+  return out.filter(n => !ui.notes.gone[n.id]).sort((a, b) => Object.keys(NOTE_CATS).indexOf(a.cat) - Object.keys(NOTE_CATS).indexOf(b.cat) || b.date.localeCompare(a.date));
+}
+const NOTE_ICONS = {
+  list: '<path d="M9 6h11M9 12h11M9 18h11M4.5 6h.01M4.5 12h.01M4.5 18h.01"/>',
+  save: '<path d="M12 4v11M7 10l5 5 5-5M5 20h14"/>',
+  repeat: '<path d="M17 2l3 3-3 3M4 11V9a4 4 0 0 1 4-4h12M7 22l-3-3 3-3M20 13v2a4 4 0 0 1-4 4H4"/>',
+  clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  pound: '<path d="M16 7.5A3.5 3.5 0 0 0 9.5 8v9M7 12.5h6M7 18h10"/>',
+  calendar: '<rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/>',
+  doc: '<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/>',
+  star: '<path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/>',
+  target: '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/>',
+  up: '<path d="M12 19V5M5 12l7-7 7 7"/>', updown: '<path d="M8 20V4M4 8l4-4 4 4M16 4v16M12 16l4 4 4-4"/>', down: '<path d="M12 5v14M5 12l7 7 7-7"/>'
+};
+const BELL_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>';
+let notesCache = [];
+function refreshBell() {
+  notesCache = computeNotes();
+  // Forget read/dismissed marks for notifications that no longer apply.
+  const ids = new Set(notesCache.map(n => n.id));
+  for (const id of Object.keys(ui.notes.read)) if (!ids.has(id)) delete ui.notes.read[id];
+  const unread = notesCache.filter(n => !ui.notes.read[n.id]).length;
+  const btn = document.getElementById('bell-btn'), dot = document.getElementById('bell-dot');
+  if (!btn) return;
+  btn.hidden = !state.profile.setupDone;
+  dot.hidden = !unread; dot.textContent = unread > 9 ? '9+' : String(unread);
+  btn.setAttribute('aria-label', unread ? `Notifications, ${unread} new` : 'Notifications');
+  if (notesSheet.open) renderNotes();
+}
+function renderNotes() {
+  const f = ui.noteFilter || 'all', list = notesCache.filter(n => f === 'all' || n.cat === f);
+  const cats = Object.keys(NOTE_CATS).filter(c => notesCache.some(n => n.cat === c));
+  const chip = (k, label, count) => `<button data-action="note-filter" data-id="${k}" aria-pressed="${f === k}">${label}${count ? ` <span class="mono">${count}</span>` : ''}</button>`;
+  let lastCat = '';
+  document.getElementById('notes-body').innerHTML = notesCache.length ? `
+    ${cats.length > 1 ? `<div class="seg scroll note-chips" role="group" aria-label="Show">${chip('all', 'All', notesCache.length)}${cats.map(c => chip(c, NOTE_CATS[c] === 'Tax year' ? 'Tax' : NOTE_CATS[c] === 'Value moves' ? 'Moves' : NOTE_CATS[c], notesCache.filter(n => n.cat === c).length)).join('')}</div>` : ''}
+    <ul class="notes">${list.map(n => {
+      const head = n.cat !== lastCat ? `<li class="note-cat">${NOTE_CATS[n.cat]}</li>` : ''; lastCat = n.cat;
+      const icon = n.cat === 'moves' ? n.kind : n.icon;
+      const act = n.href ? `<a class="note-act" href="${esc(n.href)}" target="_blank" rel="noopener" data-note="${esc(n.id)}">${esc(n.act.label)} ›</a>`
+        : n.act ? `<button class="note-act" data-action="note-act" data-id="${esc(n.id)}">${esc(n.act.label)} ›</button>` : '';
+      return `${head}<li class="note${ui.notes.read[n.id] ? '' : ' unread'}" data-note-id="${esc(n.id)}">
+        <span class="note-ic ${n.cat === 'moves' ? (n.kind === 'up' ? 'pos' : 'neg') : n.cat === 'goals' ? 'gold' : ''}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${NOTE_ICONS[icon] || NOTE_ICONS.clock}</svg></span>
+        <div class="note-main"><div class="note-t">${esc(n.title)}</div><div class="note-d">${esc(n.body)}</div>
+          ${n.bar != null ? `<span class="progress" style="display:block;margin-top:7px"><i style="width:${clamp(n.bar * 100, 0, 100).toFixed(1)}%"></i></span>` : ''}${act}</div>
+        <div class="note-side"><span class="note-when">${n.date === TODAY ? 'Today' : noteDate(n.date)}</span>
+          <button class="icon-btn" data-action="note-dismiss" data-id="${esc(n.id)}" aria-label="Dismiss"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M7 7l10 10M17 7L7 17"/></svg></button></div>
+      </li>`;
+    }).join('')}</ul>
+    <p class="hint" style="text-align:center">Swipe left or tap ✕ to dismiss. To-dos clear themselves once done. Choose which appear in Settings.</p>`
+    : `<div class="chart-empty"><div class="empty-cta"><b>You're all caught up.</b><span>Reminders, tax dates, milestones and value moves will appear here.</span></div></div>`;
+}
+function noteDate(iso) { const d = new Date(toMs(iso)); return d.getUTCFullYear() === +TODAY.slice(0, 4) ? `${d.getUTCDate()} ${fmtMonth.format(d).slice(0, 3)}` : monthYear(toMs(iso)); }
+function openNotes() { renderNotes(); openSheet(notesSheet); }
+function noteRead(id) { ui.notes.read[id] = 1; saveUi(); }
+function noteDismiss(id) { ui.notes.gone[id] = 1; ui.notes.read[id] = 1; saveUi(); refreshBell(); renderNotes(); }
+function noteAct(id) {
+  const n = notesCache.find(x => x.id === id);
+  if (!n || !n.act) return;
+  noteRead(id); closeSheets();
+  const a = n.act;
+  if (a.action === 'note-go') { if (a.fold) ui.folds[a.fold] = true; goTab(a.id); if (a.fold) requestAnimationFrame(() => { const el = document.querySelector(`[data-fold="${a.fold}"]`); if (el) el.scrollIntoView({ block: 'start' }); }); }
+  else if (a.action === 'goto-account') { ui.account = a.id; goTab('accounts'); }
+  else if (a.action === 'open-log') openLog(a.id);
+  else if (a.action === 'open-bulk') openBulk();
+  else if (a.action === 'export') document.querySelector('[data-action="export"]') ? document.querySelector('[data-action="export"]').click() : (goTab('settings'));
+  refreshBell();
+}
+// Swipe a notification left to dismiss it.
+let noteSwipe = null;
+document.addEventListener('touchstart', e => { const li = e.target.closest('.note'); noteSwipe = li ? { li, x: e.touches[0].clientX, y: e.touches[0].clientY, dx: 0, lock: null } : null; }, { passive: true });
+document.addEventListener('touchmove', e => {
+  if (!noteSwipe) return;
+  const dx = e.touches[0].clientX - noteSwipe.x, dy = e.touches[0].clientY - noteSwipe.y;
+  if (!noteSwipe.lock && (Math.abs(dx) > 10 || Math.abs(dy) > 10)) noteSwipe.lock = Math.abs(dx) > Math.abs(dy) ? 'x' : 'y';
+  if (noteSwipe.lock !== 'x') return;
+  noteSwipe.dx = Math.min(0, dx);
+  noteSwipe.li.style.transition = 'none'; noteSwipe.li.style.transform = `translateX(${noteSwipe.dx}px)`; noteSwipe.li.style.opacity = String(1 + noteSwipe.dx / 400);
+}, { passive: true });
+document.addEventListener('touchend', () => {
+  if (!noteSwipe) return;
+  const { li, dx } = noteSwipe; noteSwipe = null;
+  li.style.transition = 'transform .2s ease, opacity .2s ease';
+  if (dx < -90) { li.style.transform = 'translateX(-110%)'; li.style.opacity = '0'; setTimeout(() => noteDismiss(li.dataset.noteId), 180); buzz && buzz(); }
+  else { li.style.transform = ''; li.style.opacity = ''; }
+});
+
 let hiddenAt = 0;
 document.addEventListener('visibilitychange', () => {
   if (document.hidden) hiddenAt = Date.now();
@@ -3964,6 +4215,14 @@ document.addEventListener('click', async e => {
     case 'all-type': ui.allType = ui.allType === id ? '' : id; saveUi(); render(); break;
     case 'heat': { const el = document.getElementById('heat-readout'); if (el) el.textContent = id; break; }
     case 'open-calc': openCalc(); break;
+    case 'open-notes': openNotes(); break;
+    case 'notes-read': notesCache.forEach(n => { ui.notes.read[n.id] = 1; }); saveUi(); refreshBell(); renderNotes(); break;
+    case 'note-filter': ui.noteFilter = id; saveUi(); renderNotes(); break;
+    case 'note-dismiss': noteDismiss(id); break;
+    case 'note-act': noteAct(id); break;
+    case 'move-pct': ui.notes.move.pct = +id; saveUi(); render(); break;
+    case 'move-dir': ui.notes.move.dir = id; saveUi(); render(); break;
+    case 'move-basis': ui.notes.move.basis = id; saveUi(); render(); break;
     case 'calc-key': calcKey(id); break;
     case 'calc-close': calcSheet.close(); break;
     case 'calc-use': {
@@ -4023,6 +4282,8 @@ document.addEventListener('change', e => {
     if (!t.checked) { store.del(BIO_KEY); return; }
     verifyBio().then(() => store.set(BIO_KEY, '1')).catch(() => { t.checked = false; });
   }
+  if (t.dataset.noteKind) { ui.notes.on[t.dataset.noteKind] = t.checked; saveUi(); render(); }
+  if (t.id === 'move-custom' && t.value !== '') { const v = clamp(num(t.value, 5), 0.5, 99); ui.notes.move.pct = v; saveUi(); render(); }
   if (t.id === 'set-taxrem') {
     if (t.checked) store.set(TAXREM_KEY, '1'); else store.del(TAXREM_KEY);
     scheduleTaxReminders().then(ok => { if (!ok) { t.checked = false; store.del(TAXREM_KEY); setStatus('Notifications are turned off for Aurum. Allow them in Android settings.', true, 'reminder-status'); } else setStatus(t.checked ? 'Tax reminders on.' : 'Tax reminders off.', false, 'reminder-status'); });
