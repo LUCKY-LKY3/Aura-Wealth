@@ -103,6 +103,12 @@ There is no local Java/Android SDK on the owner's PC — **APKs are only built b
   `.grab` drag handles on phone sheets, `.tab-pill`, `body.scrolled` shrinks the sticky header, `.statement.shine` on a new high.
   Everything respects `reduceMotion()`.
 
+- 1.9.2: `monthReview()`/`reviewCard()` (last calendar month; Overview days 1–10 until dismissed via `ui.reviewSeen`, always on Changes);
+  `streakOf(a)` = consecutive months with money paid in; `account.pinned` + `pinFirst()` order lists; drag handles `.drag-h` reorder
+  within a group; long-press (500ms) on account rows/chips opens `#menu-sheet`. Encrypted backups: `aurum_bkpass` (device-only)
+  makes `backupOut()` produce `{app:'Aurum',encrypted:1,kdf:'PBKDF2-SHA256',iter,salt,iv,data}` (AES-GCM); `importText()` asks
+  for the password. `aurum_locktime` = PIN re-lock delay in minutes ('0','5','15','never'; default 1).
+
 ## Design rules (owner-approved — don't drift)
 
 - **Black and gold, dark by default.** Dark tokens live on bare `:root`; Light is opt-in only via
