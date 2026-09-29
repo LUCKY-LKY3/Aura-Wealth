@@ -376,7 +376,17 @@ details.fold2.inner[open]{box-shadow:inset 3px 0 0 var(--gold);padding-left:12px
 /* Save buttons stay visible at the bottom of sheets, above the keyboard */
 .sheet-actions{position:sticky;bottom:0;background:var(--surface);padding:12px 0 calc(4px + var(--sa-bottom));margin-top:0;z-index:2;border-top:1px solid var(--line)}
 /* Account picker stays at the top while scrolling */
-.acct-picker{position:sticky;top:0;z-index:5;background:var(--bg)}
+.picker-wrap{position:sticky;top:0;z-index:5;background:var(--bg);padding-top:2px}
+.picker-box{position:relative}
+.picker-wrap .acct-picker{scroll-behavior:smooth}
+.pk-edge{position:absolute;top:0;bottom:1px;width:64px;display:flex;align-items:center;pointer-events:none;opacity:0;transition:opacity .15s}
+.pk-edge.on{opacity:1}
+.pk-edge.r{right:0;justify-content:flex-end;background:linear-gradient(90deg,transparent,var(--bg) 62%)}
+.pk-edge.l{left:0;justify-content:flex-start;background:linear-gradient(270deg,transparent,var(--bg) 62%)}
+.pk-btn{pointer-events:auto;width:32px;height:32px;border-radius:50%;background:var(--surface-2);border:1px solid var(--line-strong);color:var(--gold);display:grid;place-items:center;padding:0}
+.pk-btn svg{width:16px;height:16px}
+.pk-count{font-size:12px;color:var(--ink-3);padding:6px 2px 2px}
+@media (prefers-reduced-motion:reduce){.picker-wrap .acct-picker{scroll-behavior:auto}}
 /* Something just changed */
 .glow{animation:glow 1.6s ease}
 @keyframes glow{0%{background:color-mix(in srgb,var(--gold) 30%,transparent)}100%{background:transparent}}
@@ -860,7 +870,7 @@ function normalize(o) {
     const ids = new Set(accounts.map(a => a.id));
     const logs = o.logs.filter(l => validLog(l) && ids.has(String(l.accountId))).map(l => {
       const x = { id: String(l.id || uid()), accountId: String(l.accountId), date: l.date, value: +l.value, note: String(l.note || '') };
-      if (l.estimated) { x.estimated = true; x.flowIds = Array.isArray(l.flowIds) ? l.flowIds.map(String) : []; }
+      if (l.estimated) { x.estimated = true; x.flowIds = Array.isArray(l.flowIds) ? l.flowIds.map(String) : []; if (isFinite(+l.baseValue) && l.baseValue !== null) x.baseValue = +l.baseValue; }
       return x;
     });
     const flows = (Array.isArray(o.flows) ? o.flows : []).filter(f => f && isIso(f.date) && isFinite(+f.amount) && ids.has(String(f.accountId))).map(f => ({
@@ -972,7 +982,8 @@ function addEstimate(f) {
   const last = s[s.length - 1];
   if (f.date < last.date) return; // backdated: later balances already include it
   if (last.date === f.date) {
-    if (!last.estimated) return;  // a real balance that day wins
+    // Same day as a balance: the payment came after it, so add it on. The typed value is kept to restore on delete.
+    if (!last.estimated) { last.baseValue = last.value; last.estimated = true; last.flowIds = []; }
     last.value = Math.max(0, last.value + f.amount); last.flowIds.push(f.id); return;
   }
   state.logs.push({ id: uid(), accountId: f.accountId, date: f.date, value: Math.max(0, last.value + f.amount), note: '', estimated: true, flowIds: [f.id] });
@@ -980,7 +991,9 @@ function addEstimate(f) {
 function dropEstimate(f) {
   for (const l of state.logs.filter(x => x.estimated && x.flowIds && x.flowIds.includes(f.id))) {
     l.flowIds = l.flowIds.filter(id => id !== f.id);
-    if (!l.flowIds.length) state.logs = state.logs.filter(x => x !== l); else l.value = Math.max(0, l.value - f.amount);
+    if (!l.flowIds.length && l.baseValue != null) { l.value = l.baseValue; delete l.baseValue; delete l.estimated; delete l.flowIds; }
+    else if (!l.flowIds.length) state.logs = state.logs.filter(x => x !== l);
+    else l.value = Math.max(0, l.value - f.amount);
   }
 }
 function runRegular() {
@@ -1976,11 +1989,35 @@ function acctPicker(accts, a) {
   const ordered = Object.keys(GROUPS).flatMap(g => accts.filter(x => groupOf(x) === g));
   const open = ordered.filter(x => !x.archived), closed = ordered.filter(x => x.archived);
   const cur = a ? a.id : 'all';
-  return `<div class="acct-picker" role="group" aria-label="Choose account">
+  const idx = cur === 'all' ? 0 : open.findIndex(x => x.id === cur) + 1;
+  const arrow = d => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="${d}"/></svg>`;
+  return `<div class="picker-wrap"><div class="picker-box">
+  <div class="acct-picker" role="group" aria-label="Choose account" id="acct-picker">
     <button data-action="pick-account" data-id="all" aria-pressed="${cur === 'all'}">All accounts</button>
     ${open.map(x => `<button data-action="pick-account" data-id="${esc(x.id)}" aria-pressed="${x.id === cur}"><i class="sw" style="background:${colorOf(x)}"></i>${esc(x.name)}</button>`).join('')}
     ${closed.length ? (ui.showClosed || (a && a.archived) ? closed.map(x => `<button data-action="pick-account" data-id="${esc(x.id)}" aria-pressed="${x.id === cur}" class="faint"><i class="sw" style="background:${colorOf(x)};opacity:.5"></i>${esc(x.name)} (closed)</button>`).join('') : `<button data-action="show-closed">${closed.length} closed</button>`) : ''}
-  </div>`;
+  </div>
+  <span class="pk-edge l"><button class="pk-btn" data-action="pk-scroll" data-id="-1" aria-label="Earlier accounts">${arrow('M15 6l-6 6 6 6')}</button></span>
+  <span class="pk-edge r"><button class="pk-btn" data-action="pk-scroll" data-id="1" aria-label="More accounts">${arrow('M9 6l6 6-6 6')}</button></span>
+  </div><div class="pk-count" id="pk-count" hidden>${idx ? `${idx} of ${open.length} accounts` : `All ${open.length} accounts`} · swipe or tap › for more</div></div>`;
+}
+// Shows the fades, arrows and count only when accounts are hidden off the edge; keeps the chosen one in view.
+function setupPicker() {
+  const strip = document.getElementById('acct-picker');
+  if (!strip) return;
+  const box = strip.parentElement, l = box.querySelector('.pk-edge.l'), r = box.querySelector('.pk-edge.r'), count = document.getElementById('pk-count');
+  const sel = strip.querySelector('[aria-pressed="true"]');
+  if (sel && (sel.offsetLeft + sel.offsetWidth > strip.clientWidth - 60 || sel.offsetLeft < strip.scrollLeft)) {
+    strip.style.scrollBehavior = 'auto'; strip.scrollLeft = sel.offsetLeft - 40; strip.style.scrollBehavior = '';
+  }
+  const update = () => {
+    const over = strip.scrollWidth > strip.clientWidth + 4;
+    l.classList.toggle('on', over && strip.scrollLeft > 4);
+    r.classList.toggle('on', over && strip.scrollLeft + strip.clientWidth < strip.scrollWidth - 4);
+    count.hidden = !over;
+  };
+  strip.addEventListener('scroll', update, { passive: true });
+  update();
 }
 // Year by year: reference "paid in" per tax year plus the value at each 5 April (saved as balances),
 // giving growth for each tax year and a real history for the chart.
@@ -2987,6 +3024,7 @@ function render() {
     view.innerHTML = `<div class="stack view"><section class="panel"><div class="chart-empty"><div class="empty-cta"><b>Something went wrong showing this screen.</b><span>Your data is safe. Try reloading, or open another tab.</span><button class="btn primary" data-action="reload">Reload</button><details><summary>Details</summary><p class="hint mono" style="margin-top:8px">${esc(String(err && err.message || err))}</p></details></div></div></section></div>`;
   }
   moneyInputs();
+  setupPicker();
   if (glowIds.length) requestAnimationFrame(glowChanged);
 }
 
@@ -3348,7 +3386,7 @@ function openPast(id) {
 // A balance for the same account and date replaces the old one rather than duplicating it.
 function upsertLog(accountId, date, value, note) {
   const ex = state.logs.find(l => l.accountId === accountId && l.date === date);
-  if (ex) { ex.value = value; if (note) ex.note = note; delete ex.estimated; delete ex.flowIds; return ex; }
+  if (ex) { ex.value = value; if (note) ex.note = note; delete ex.estimated; delete ex.flowIds; delete ex.baseValue; return ex; }
   const l = { id: uid(), accountId, date, value, note: note || '' };
   state.logs.push(l);
   return l;
@@ -3661,25 +3699,53 @@ document.addEventListener('toggle', e => {
 // Swipe left or right on the page to move between tabs (not on charts, inputs or sideways-scrolling strips).
 const TAB_ORDER = ['overview', 'accounts', 'planner', 'insights', 'settings'];
 let swipe = null;
+const reduceMotion = () => window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+function slideView(x, opacity, ms) {
+  view.style.transition = ms ? `transform ${ms}ms cubic-bezier(.2,.7,.2,1), opacity ${ms}ms ease` : 'none';
+  view.style.transform = x ? `translateX(${x}px)` : '';
+  view.style.opacity = opacity == null ? '' : String(opacity);
+}
 document.addEventListener('touchstart', e => {
   const t = e.target;
   if (e.touches.length !== 1 || document.querySelector('dialog[open]') || !state.profile.setupDone || t.closest('svg, input, select, textarea, .seg, .acct-picker, .table-wrap, .heatmap, .calc-keys')) { swipe = null; return; }
-  swipe = { x: e.touches[0].clientX, y: e.touches[0].clientY, t: Date.now() };
+  swipe = { x: e.touches[0].clientX, y: e.touches[0].clientY, t: Date.now(), dx: 0, lock: null };
+}, { passive: true });
+document.addEventListener('touchmove', e => {
+  if (!swipe) return;
+  const dx = e.touches[0].clientX - swipe.x, dy = e.touches[0].clientY - swipe.y;
+  // Decide once whether this is a sideways swipe or a normal scroll.
+  if (!swipe.lock && (Math.abs(dx) > 10 || Math.abs(dy) > 10)) swipe.lock = Math.abs(dx) > Math.abs(dy) * 1.4 ? 'x' : 'y';
+  if (swipe.lock !== 'x') return;
+  swipe.dx = dx;
+  const i = TAB_ORDER.indexOf(ui.tab), atEnd = (dx < 0 && i === TAB_ORDER.length - 1) || (dx > 0 && i === 0);
+  if (!reduceMotion()) slideView(dx * (atEnd ? 0.15 : 0.45), 1 - Math.min(0.35, Math.abs(dx) / 900), 0);
 }, { passive: true });
 document.addEventListener('touchend', e => {
   if (!swipe) return;
-  const dx = e.changedTouches[0].clientX - swipe.x, dy = e.changedTouches[0].clientY - swipe.y, dt = Date.now() - swipe.t;
-  swipe = null;
-  if (dt > 600 || Math.abs(dx) < 70 || Math.abs(dy) > Math.abs(dx) * 0.6) return;
+  const s0 = swipe; swipe = null;
+  if (s0.lock !== 'x') return;
+  const dx = e.changedTouches[0].clientX - s0.x, dt = Date.now() - s0.t;
   const i = TAB_ORDER.indexOf(ui.tab), next = TAB_ORDER[i + (dx < 0 ? 1 : -1)];
-  if (next) { buzz(); goTab(next); }
+  const go = next && (Math.abs(dx) > 70 || (Math.abs(dx) > 30 && Math.abs(dx) / dt > 0.5));
+  if (!go) { slideView(0, null, 200); return; }
+  buzz();
+  if (reduceMotion()) { slideView(0, null, 0); goTab(next); return; }
+  const w = view.clientWidth, dir = dx < 0 ? -1 : 1;
+  slideView(dir * w * 0.35, 0, 140);
+  setTimeout(() => {
+    goTab(next);
+    slideView(-dir * 48, 0, 0);
+    requestAnimationFrame(() => requestAnimationFrame(() => slideView(0, 1, 220)));
+    setTimeout(() => slideView(0, null, 0), 260);
+  }, 140);
 }, { passive: true });
+document.addEventListener('touchcancel', () => { if (swipe) { swipe = null; slideView(0, null, 200); } }, { passive: true });
 
 /* ---------- undo ---------- */
 let undoSnap = null, toastTimer = null;
 // Call before a delete: keeps a copy of the data for a few seconds so it can be undone.
 const Haptics = Native ? capx.registerPlugin('Haptics') : null;
-const buzz = (style = 'LIGHT') => { if (Haptics) Haptics.impact({ style }).catch(() => {}); };
+const buzz = (style = 'LIGHT') => { if (Haptics) Haptics.vibrate({ duration: style === 'LIGHT' ? 30 : 60 }).catch(() => Haptics.impact({ style }).catch(() => {})); };
 function toast(msg) {
   const t = document.getElementById('toast');
   t.classList.add('plain'); undoSnap = null;
@@ -3716,6 +3782,7 @@ document.addEventListener('click', async e => {
       // Tapping the tab you're on scrolls back to the top.
       if (t.dataset.tab === ui.tab && state.profile.setupDone) window.scrollTo({ top: 0, behavior: 'smooth' }); else goTab(t.dataset.tab);
       break;
+    case 'pk-scroll': { const strip = document.getElementById('acct-picker'); if (strip) strip.scrollBy({ left: +id * strip.clientWidth * 0.7 }); break; }
     case 'pick-type': {
       const sel = document.getElementById('acct-type');
       sel.value = id; sel.dispatchEvent(new Event('change'));

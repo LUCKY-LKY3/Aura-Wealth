@@ -1,7 +1,4 @@
-- Payments logged without a balance now move the balance (shown as "est." until you enter a real one); regular payments do the same
-- History, Year by year and the P60 check fold away behind a clear round button, and remember how you left them
-- "Saved ✓" confirmation, a light vibration, and the changed row briefly glows
-- Swipe left or right to change tabs; tap the tab you're on to jump to the top
-- Account types as tap-to-pick chips; Save buttons stay visible at the bottom of forms
-- Shorter dates in tables on phones, bigger tap targets, the account strip stays at the top while scrolling
-- Clearer chart axis labels when zoomed in
+- Fix: adding money on the same day as your last balance now updates the balance (shown as "est.")
+- Stronger vibration on save, delete and undo
+- Accounts strip: fades at the edge with round ‹ › buttons and "2 of 8 accounts", so you can see there are more
+- Smoother tab swipes: the page follows your finger and slides to the next tab
