@@ -21,6 +21,10 @@ Agreed with the owner. Nothing here is built until the owner says "go" for that 
   real data untouched, nothing saved, backups/reminders/notifications paused; gold "Demo mode · Exit" bar;
   exiting asks for the PIN if one is set
 
+## Tax return helper upgrade (version to decide)
+- Engine + 25 test cases saved in `docs/tax-helper-spec.md` (dividend/savings stacking, starting rate for savings,
+  PSA, CGT 18%/24% with losses and AEA, HMRC SA102/SA100/SA108 box numbers, required UI wording)
+
 ## 2.0
 - State Pension, debts, property
 - Savings rate: % of income put away each month (user enters income) — locked in by owner
