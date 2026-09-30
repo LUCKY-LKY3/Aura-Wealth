@@ -1,10 +1,7 @@
-- Monthly review: "Your September in money" at the start of each month (Overview, Changes tab and the bell)
-- Contribution streaks: see how many months in a row you've paid into each account
-- Encrypted backups: set a password and your exports and weekly backups are protected (AES-256)
-- Backup health in Settings: last backup, automatic backup and password at a glance
-- Choose when the PIN lock kicks in: straight away, 1, 5 or 15 minutes, or only when Aurum opens
-- Reorder accounts by dragging in Settings, and pin favourites to the top
-- Long-press an account for quick actions: Log value, Add a payment, Edit
-- Balances count up more slowly and now on each account too
-- Charts draw in, buttons react to your tap, and empty screens show a friendly next step
-- Fix: the gold tab bar pill now lines up whichever direction you move
+- "Welcome back" strip: what changed since your last visit, when you open Aurum each day
+- Quick dates in Log value: Today, Yesterday, 1st of month, 5 April
+- "What's changed" is now called Insights
+- Smoother tab swipes: the tab bar stays still, only the gold pill moves
+- Reorder accounts: each group is shown as its own box, and it's clearer that accounts stay in their group
+- Backup password: type it twice to confirm, with a Show button; you need the current password to change or turn it off
+- Export: no more "Export cancelled" message after saving, plus a new "Save to phone" button (Documents/Aurum)

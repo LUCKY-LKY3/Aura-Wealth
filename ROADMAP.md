@@ -4,15 +4,8 @@ Agreed with the owner. Nothing here is built until the owner says "go" for that 
 
 ## Shipped
 - 1.9.0 notification bell · 1.9.1 motion and feel · 1.9.2 monthly review, streaks, encrypted backup, backup health,
-  auto-lock timer, drag/pin accounts, long-press quick actions, polish
-
-## 1.9.3 (next)
-- Settings → Accounts: show each group as a labelled box; while dragging, other groups fade and the current one gets a gold
-  outline; hint "Accounts stay in their group — change the type in Edit to move one"
-- Backup password: enter twice to confirm, show/hide eye, re-enter before changing or turning off
-- Export: prepare the file before opening the share sheet; don't show "cancelled" as an error; add "Save to phone" (Documents/Aurum)
-- Tab bar stays completely still during tab swipes (only the pill moves); keep the shrinking header as is
-- Rename the "Changes" tab to "Insights"
+  auto-lock timer, drag/pin accounts, long-press quick actions, polish · 1.9.3 welcome-back strip, quick dates,
+  Insights rename, still tab bar, grouped reorder, password confirm, export fix + Save to phone
 
 ## 2.0
 - State Pension, debts, property
