@@ -109,6 +109,10 @@ There is no local Java/Android SDK on the owner's PC — **APKs are only built b
   makes `backupOut()` produce `{app:'Aurum',encrypted:1,kdf:'PBKDF2-SHA256',iter,salt,iv,data}` (AES-GCM); `importText()` asks
   for the password. `aurum_locktime` = PIN re-lock delay in minutes ('0','5','15','never'; default 1).
 
+- 1.9.3: `visitStrip()` compares my net worth with `ui.lastVisit` ({date,total}, saved on each Overview render) once per app start;
+  `dateChips()` in Log value; `html{overflow-x:hidden}` + `overflow-x:clip` stop tab swipes widening the page; Settings reorder is
+  per-group boxes (`.reorder-grp`); backup password needs confirm, and the current one to change/turn off; `save-phone` action.
+
 ## Design rules (owner-approved — don't drift)
 
 - **Black and gold, dark by default.** Dark tokens live on bare `:root`; Light is opt-in only via

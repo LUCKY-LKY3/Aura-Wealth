@@ -4,7 +4,8 @@ Agreed with the owner. Nothing here is built until the owner says "go" for that 
 
 ## Shipped
 - 1.9.0 notification bell · 1.9.1 motion and feel · 1.9.2 monthly review, streaks, encrypted backup, backup health,
-  auto-lock timer, drag/pin accounts, long-press quick actions, polish
+  auto-lock timer, drag/pin accounts, long-press quick actions, polish · 1.9.3 welcome-back strip, quick dates,
+  Insights rename, still tab bar, grouped reorder, password confirm, export fix + Save to phone
 
 ## 2.0
 - State Pension, debts, property
@@ -17,6 +18,12 @@ Agreed with the owner. Nothing here is built until the owner says "go" for that 
 - Two-column layout for the unfolded foldable screen
 - Everything pension-related: tax-free cash tracker (25%, Lump Sum Allowance £268,275), salary sacrifice vs
   relief at source, drawdown, defined benefit / NHS pensions
+
+## Live prices (version to decide)
+- Holdings with live prices: enter ticker + quantity, app fetches price on-device (only the ticker leaves the phone)
+  - Crypto first via CoinGecko (free, no key); read-only crypto wallet balances from public addresses (never private keys)
+  - Stocks/ETFs later once a price source is chosen (free tiers have limits; UK OEIC funds patchy)
+  - Not planned: broker/Open Banking linking (needs paid, FCA-regulated partner and servers)
 
 ## Ideas to decide on (suggested, not yet chosen)
 - Small: notes on balances shown on charts; "since last visit" strip on Overview; duplicate last entry;

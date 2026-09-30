@@ -36,6 +36,8 @@
 }
 *{box-sizing:border-box}
 html,body{background:var(--bg)}
+/* Sideways tab swipes must never make the page wider than the screen (Android would zoom out and nudge the tab bar). */
+html{overflow-x:hidden}body,.main,#view{overflow-x:clip}
 body{font-family:var(--font);color:var(--ink);font-size:14.5px;line-height:1.5;-webkit-font-smoothing:antialiased;font-feature-settings:"ss01"}
 button,input,select,textarea{font:inherit;color:inherit}
 button{cursor:pointer}
@@ -70,6 +72,8 @@ button{cursor:pointer}
 .tab-pill{position:absolute;left:6px;top:8px;height:30px;width:calc((100% - 12px) / 5);transition:transform .32s cubic-bezier(.3,.9,.3,1);pointer-events:none;z-index:0}
 .tab-pill::before{content:'';position:absolute;left:50%;top:0;width:54px;height:30px;margin-left:-27px;border-radius:15px;background:var(--gold-soft);border:1px solid color-mix(in srgb,var(--gold) 25%,transparent)}
 .tabbar button{position:relative;z-index:1}
+.tabbar{transform:translateZ(0);will-change:transform;contain:layout paint}
+body.swiping .tabbar button:active{transform:none}
 /* Header: shrinks to a slim bar when scrolling on phones. */
 @media (max-width:959px){
   .top{position:sticky;top:0;z-index:25;background:var(--bg);margin-inline:-16px;padding-inline:16px;padding-top:calc(18px + var(--sa-top));transition:padding .2s ease,box-shadow .2s ease;flex-wrap:nowrap}
@@ -133,6 +137,21 @@ tr.clickable:active,.set-row:active,.note:active,.pressing{opacity:.7}
 .hdot.green{background:var(--pos)}.hdot.amber{background:var(--gold)}.hdot.red{background:var(--neg)}
 @media (prefers-reduced-motion:reduce){.stmt-trend.reveal svg{animation:none}.btn:active,.icon-btn:active,.tabbar button:active,.acct-picker button:active,.seg button:active,.pk-btn:active{transform:none}}
 
+
+/* ---------- 1.9.3 ---------- */
+.reorder-grp{transition:opacity .2s ease}
+.reorder-grp .set-grp{margin:10px 0 6px}
+.reorder-grp.drag-dim{opacity:.35}
+.reorder-grp.drag-here .acct-list{border-color:var(--gold);box-shadow:0 0 0 1px color-mix(in srgb,var(--gold) 35%,transparent)}
+.date-chips{margin-top:8px;display:flex;width:max-content;max-width:100%}
+.date-chips button{white-space:nowrap}
+.visit{display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:12px;background:linear-gradient(90deg,color-mix(in srgb,var(--gold) 14%,var(--surface)),var(--surface));border:1px solid color-mix(in srgb,var(--gold) 30%,var(--line));font-size:13.5px;color:var(--ink-2);animation:visitIn .45s cubic-bezier(.2,.8,.2,1) both;cursor:pointer;transition:opacity .25s ease,transform .25s ease}
+.visit b{color:var(--ink);font-weight:600}.visit .v-dot{width:8px;height:8px;border-radius:50%;background:var(--gold);flex:none}
+.visit p{margin:0;flex:1;min-width:0}
+.visit.out{opacity:0;transform:translateY(-6px)}
+@keyframes visitIn{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.visit{animation:none}}
+
 /* ---------- shell ---------- */
 .shell{display:grid;grid-template-columns:minmax(0,1fr);min-height:100%}
 @media (min-width:960px){.shell{grid-template-columns:232px minmax(0,1fr)}}
@@ -161,7 +180,7 @@ tr.clickable:active,.set-row:active,.note:active,.pressing{opacity:.7}
 .tabbar{position:fixed;left:0;right:0;bottom:0;z-index:30;display:flex;justify-content:space-around;background:var(--surface);border-top:1px solid var(--line);padding:6px 6px calc(8px + var(--sa-bottom))}
 .tabbar button{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;border:0;background:transparent;color:var(--ink-3);font-size:11px;font-weight:500;padding:6px 2px;border-radius:8px}
 .tabbar svg{width:22px;height:22px}
-.tabbar button[aria-current="page"]{color:var(--ink);font-weight:600}
+.tabbar button[aria-current="page"]{color:var(--ink)}
 .tabbar button[aria-current="page"] svg{color:var(--gold)}
 @media (min-width:960px){.tabbar{display:none}}
 
@@ -605,7 +624,7 @@ details.fold:not([open])>summary h2::after{content:' ▸'}
       <button class="nav-btn" data-action="tab" data-tab="overview"><svg><use href="#i-overview"/></svg>Overview</button>
       <button class="nav-btn" data-action="tab" data-tab="accounts"><svg><use href="#i-accounts"/></svg>Accounts</button>
       <button class="nav-btn" data-action="tab" data-tab="planner"><svg><use href="#i-planner"/></svg>Planner &amp; goals</button>
-      <button class="nav-btn" data-action="tab" data-tab="insights"><svg><use href="#i-insights"/></svg>What's changed</button>
+      <button class="nav-btn" data-action="tab" data-tab="insights"><svg><use href="#i-insights"/></svg>Insights</button>
       <div class="label" style="margin-top:18px">Data</div>
       <button class="nav-btn" data-action="tab" data-tab="settings"><svg><use href="#i-settings"/></svg>Settings &amp; backup</button>
     </nav>
@@ -640,7 +659,7 @@ details.fold:not([open])>summary h2::after{content:' ▸'}
   <button data-action="tab" data-tab="overview"><svg><use href="#i-overview"/></svg>Overview</button>
   <button data-action="tab" data-tab="accounts"><svg><use href="#i-accounts"/></svg>Accounts</button>
   <button data-action="tab" data-tab="planner"><svg><use href="#i-planner"/></svg>Planner</button>
-  <button data-action="tab" data-tab="insights"><svg><use href="#i-insights"/></svg>Changes</button>
+  <button data-action="tab" data-tab="insights"><svg><use href="#i-insights"/></svg>Insights</button>
   <button data-action="tab" data-tab="settings"><svg><use href="#i-settings"/></svg>Settings</button>
 </nav>
 
@@ -673,6 +692,7 @@ details.fold:not([open])>summary h2::after{content:' ▸'}
     <div class="field">
       <label for="log-date">Date</label>
       <input id="log-date" class="input" type="date" required>
+      <div class="seg scroll date-chips" role="group" aria-label="Quick dates" id="log-date-chips"></div>
     </div>
     <div class="field" id="log-value-field">
       <label for="log-value">Current balance</label>
@@ -2014,7 +2034,7 @@ function renderOverview() {
       }).join('')}</ul>` : '<div class="chart-empty">No activity yet.</div>'}
     </section>`;
 
-  view.innerHTML = `<div class="stack view">${updateBanner()}${exampleNotice()}${!state.example && ui.person === 'me' && showReviewCard(monthReview()) ? reviewCard(monthReview(), true) : ''}${personFilter()}<div class="summary">${statement}${kpis}</div>${holdings}<div class="grid-2">${growth}${allocation}</div>${monthly}${goals ? `<div class="grid-2">${activity}${goals}</div>` : activity}</div>`;
+  view.innerHTML = `<div class="stack view">${updateBanner()}${exampleNotice()}${visitStrip(total)}${!state.example && ui.person === 'me' && showReviewCard(monthReview()) ? reviewCard(monthReview(), true) : ''}${personFilter()}<div class="summary">${statement}${kpis}</div>${holdings}<div class="grid-2">${growth}${allocation}</div>${monthly}${goals ? `<div class="grid-2">${activity}${goals}</div>` : activity}</div>`;
   barChart(document.getElementById('monthly-chart'), {
     labels: months.map(x => x.short), titles: months.map(x => x.title), paid: months.map(x => x.paid), growth: months.map(x => x.growth),
     label: 'Money paid in and growth each month', empty: 'Update your balances each month to see what you paid in and what grew.', emptyAction: ['Update all', 'open-bulk']
@@ -3003,12 +3023,12 @@ function renderSettings() {
 
       <section class="panel stack">
         <div class="panel-head" style="margin-bottom:0"><h2>Accounts</h2><button class="btn sm" data-action="add-acct">${icons.plus}Add account</button></div>
-        <p class="hint">Drag ⋮⋮ to reorder within each group. Pinned accounts come first in lists and the account strip.</p>
-        ${state.accounts.length ? `<ul class="acct-list">
-          ${Object.keys(GROUPS).flatMap(g => pinFirst(state.accounts.filter(a => groupOf(a) === g))).map(a => pendingRemoveAcct === a.id ? `
+        <p class="hint">Drag ⋮⋮ to reorder. Accounts stay in their group: to move one to another group, change its type in Edit. Pinned accounts come first in lists and the account strip.</p>
+        ${state.accounts.length ? Object.keys(GROUPS).filter(g => state.accounts.some(a => groupOf(a) === g)).map(g => `<div class="reorder-grp" data-group="${g}"><div class="set-grp">${esc(GROUPS[g])}</div><ul class="acct-list">
+          ${pinFirst(state.accounts.filter(a => groupOf(a) === g)).map(a => pendingRemoveAcct === a.id ? `
             <li style="background:var(--neg-soft)"><span class="grow">Remove <b>${esc(a.name)}</b> and its ${accountStats(a.id).s.length} valuations?</span><button class="btn sm ghost" data-action="remove-acct-no">Keep</button><button class="btn sm danger solid" data-action="remove-acct-yes" data-id="${esc(a.id)}">Remove</button></li>` : `
             <li data-acct="${esc(a.id)}" data-group="${groupOf(a)}"><span class="drag-h" title="Drag to reorder" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="6" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="18" r="1.6"/></svg></span>${badge(a)}<span class="grow"><b>${esc(a.name)}${ownerChip(a)}</b><span class="faint">${esc(a.provider)}${a.provider ? ' · ' : ''}${esc(typeOf(a).label)}</span></span><button class="icon-btn pin${a.pinned ? ' on' : ''}" data-action="pin-acct" data-id="${esc(a.id)}" aria-pressed="${!!a.pinned}" aria-label="${a.pinned ? 'Unpin' : 'Pin'} ${esc(a.name)}" title="${a.pinned ? 'Pinned to the top' : 'Pin to the top'}"><svg viewBox="0 0 24 24" fill="${a.pinned ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M9 3h6l-1 6 4 4H6l4-4z"/><path d="M12 13v8" fill="none"/></svg></button><button class="icon-btn edit" data-action="edit-acct" data-id="${esc(a.id)}" aria-label="Edit ${esc(a.name)}">${icons.edit}</button><button class="icon-btn" data-action="remove-acct" data-id="${esc(a.id)}" aria-label="Remove ${esc(a.name)}">${icons.trash}</button></li>`).join('')}
-        </ul>` : '<p class="hint">No accounts yet.</p>'}
+        </ul></div>`).join('') : '<p class="hint">No accounts yet.</p>'}
       </section>
 
       <section class="panel stack">
@@ -3035,13 +3055,19 @@ function renderSettings() {
         ${backupHealth()}
         <div class="row-actions">
           <button class="btn primary" data-action="export">Export backup</button>
+          ${Native ? '<button class="btn" data-action="save-phone">Save to phone</button>' : ''}
           <label class="btn" for="import-file">Import backup file</label>
           <input id="import-file" type="file" accept="application/json,.json" class="sr">
         </div>
         <div id="import-pw-box" class="inline-form" ${pendingImport ? '' : 'hidden'}><input id="import-pw" class="input" type="password" placeholder="Backup password" aria-label="Backup password" autocomplete="off"><button class="btn primary" type="button" data-action="import-unlock">Unlock and import</button></div>
         ${hasCrypto ? `<div class="stack" style="gap:8px">
           <div><b style="font-weight:550">Password protection</b> <span class="faint">${store.get(BKPASS_KEY) ? 'On' : 'Off'}</span></div>
-          <form id="bkpw-form" class="inline-form"><input id="bkpw-new" class="input" type="password" minlength="6" placeholder="${store.get(BKPASS_KEY) ? 'New password' : 'At least 6 characters'}" autocomplete="new-password" aria-label="Backup password"><button class="btn" type="submit">${store.get(BKPASS_KEY) ? 'Change' : 'Set password'}</button>${store.get(BKPASS_KEY) ? '<button class="btn danger" type="button" data-action="bkpw-off">Turn off</button>' : ''}</form>
+          <form id="bkpw-form" class="stack" style="gap:8px;max-width:360px">
+            ${store.get(BKPASS_KEY) ? '<input id="bkpw-cur" data-pw class="input" type="password" placeholder="Current password" autocomplete="current-password" aria-label="Current password">' : ''}
+            <input id="bkpw-new" data-pw class="input" type="password" minlength="6" placeholder="${store.get(BKPASS_KEY) ? 'New password' : 'Password (at least 6 characters)'}" autocomplete="new-password" aria-label="New password">
+            <input id="bkpw-confirm" data-pw class="input" type="password" placeholder="Type it again" autocomplete="new-password" aria-label="Confirm password">
+            <div class="row-actions"><button class="btn" type="submit">${store.get(BKPASS_KEY) ? 'Change password' : 'Set password'}</button><button class="btn ghost" type="button" data-action="pw-eye" aria-pressed="false">Show</button>${store.get(BKPASS_KEY) ? '<button class="btn danger" type="button" data-action="bkpw-off">Turn off</button>' : ''}</div>
+          </form>
           <p class="hint">When on, exported and automatic backups are encrypted (AES-256), so they are safe to keep in Google Drive. You need the password to restore them and it can't be recovered, so keep it somewhere safe. It is remembered on this device only.</p>
           <p class="status" id="bkpw-status" role="status"></p>
         </div>` : ''}
@@ -3144,7 +3170,7 @@ const TITLES = {
   overview: ['Overview', () => fmtLong.format(new Date(TODAY_MS))],
   accounts: ['Accounts', () => `${visibleAccounts().length} accounts · ${state.logs.length} valuations`],
   planner: ['Planner & goals', () => 'Project your retirement and track goals'],
-  insights: ["What's changed", () => 'A plain-English summary of your money'],
+  insights: ['Insights', () => 'A plain-English summary of your money'],
   settings: ['Settings & backup', () => 'Your data is stored on this device only']
 };
 // Settings sections under small group headings, in a fixed order.
@@ -3318,8 +3344,14 @@ function updateKindHint() {
 document.getElementById('log-kind').addEventListener('change', updateKindHint);
 let editingEntry = null;
 // Opens the sheet to log something new, or (with entryId) to edit an existing balance, payment or income entry.
+function dateChips(cur) {
+  const y = +TODAY.slice(0, 4), apr5 = TODAY >= `${y}-04-05` ? `${y}-04-05` : `${y - 1}-04-05`;
+  const chips = [['Today', TODAY], ['Yesterday', msIso(TODAY_MS - 864e5)], ['1st of month', TODAY.slice(0, 8) + '01'], ['5 April', apr5]];
+  document.getElementById('log-date-chips').innerHTML = chips.filter((c, i, a) => a.findIndex(x => x[1] === c[1]) === i).map(([l, d]) => `<button type="button" data-action="log-date" data-id="${d}" aria-pressed="${d === cur}">${l}</button>`).join('');
+}
 function openLog(accountId, entryId) {
   if (!state.accounts.length) { openAcctSheet(null); return; }
+  setTimeout(() => dateChips(document.getElementById('log-date').value), 0);
   const found = entryId ? (state.logs.find(x => x.id === entryId) && { kind: 'log', e: state.logs.find(x => x.id === entryId) })
     || (state.flows.find(x => x.id === entryId) && { kind: 'flow', e: state.flows.find(x => x.id === entryId) })
     || (state.income.find(x => x.id === entryId) && { kind: 'income', e: state.income.find(x => x.id === entryId) }) : null;
@@ -4159,7 +4191,7 @@ function streakOf(a) {
 const FLAME = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c1 4 5 6 5 11a5 5 0 0 1-10 0c0-3 2-4 2-7 2 1 3 3 3 5"/></svg>';
 const streakLine = a => { const n = streakOf(a); return n >= 2 ? `<div class="streak">${FLAME}${n} months in a row paid in</div>` : ''; };
 const fmtMonthLong = new Intl.DateTimeFormat('en-GB', { month: 'long', timeZone: 'UTC' });
-// Last calendar month in numbers, for the Overview card, the Changes tab and the bell.
+// Last calendar month in numbers, for the Overview card, the Insights tab and the bell.
 function monthReview() {
   const y = +TODAY.slice(0, 4), m = +TODAY.slice(5, 7);
   const start = Date.UTC(y, m - 2, 0), end = Date.UTC(y, m - 1, 0);
@@ -4235,6 +4267,7 @@ document.addEventListener('pointerdown', e => {
   const li = h.closest('li');
   dragAcct = { li, list: li.parentElement, group: li.dataset.group, y0: e.clientY };
   li.classList.add('dragging');
+  document.querySelectorAll('.reorder-grp').forEach(g => g.classList.toggle(g.dataset.group === dragAcct.group ? 'drag-here' : 'drag-dim', true));
   try { h.setPointerCapture(e.pointerId); } catch {}
   buzz();
 });
@@ -4264,6 +4297,7 @@ function endDrag() {
   if (!dragAcct) return;
   const { li, list, group } = dragAcct; dragAcct = null;
   li.classList.remove('dragging'); li.style.transform = '';
+  document.querySelectorAll('.reorder-grp').forEach(g => g.classList.remove('drag-here', 'drag-dim'));
   const ids = [...list.querySelectorAll(`li[data-group="${group}"]`)].map(x => x.dataset.acct);
   const slots = state.accounts.map((a, i) => ids.includes(a.id) ? i : -1).filter(i => i >= 0);
   const moved = ids.map(id => state.accounts.find(a => a.id === id));
@@ -4334,6 +4368,36 @@ function backupHealth() {
   return `<ul class="health" aria-label="Backup health">${rows.map(([c, l, v]) => `<li><i class="hdot ${c}" aria-hidden="true"></i><span>${l}</span><b>${v}</b></li>`).join('')}</ul>`;
 }
 
+
+/* ---------- 1.9.3: since your last visit ---------- */
+// Worked out once per app start from the net worth saved on the previous day the app was opened (device-only, in aurum_ui).
+let visitInfo = undefined;
+function visitStrip(total) {
+  if (state.example || ui.person !== 'me' || !state.profile.setupDone) return '';
+  const mineTotal = mine().reduce((t, a) => t + accountStats(a.id).cur, 0);
+  if (visitInfo === undefined) {
+    const prev = ui.lastVisit;
+    visitInfo = null;
+    if (prev && prev.date < TODAY && isFinite(prev.total)) {
+      const regs = state.flows.filter(f => f.auto && f.date > prev.date && f.date <= TODAY).length;
+      const logs = state.logs.filter(l => !l.estimated && l.date > prev.date).length;
+      const top = active(mine()).map(a => ({ a, n: streakOf(a) })).filter(x => x.n >= 2).sort((x, y) => y.n - x.n)[0];
+      visitInfo = { since: prev.date, change: mineTotal - prev.total, regs, logs, top };
+      setTimeout(() => { const el = document.getElementById('visit-strip'); if (el) { el.classList.add('out'); setTimeout(() => el.remove(), 250); } visitInfo = null; }, 9000);
+    }
+  }
+  if (!ui.lastVisit || ui.lastVisit.date !== TODAY || ui.lastVisit.total !== mineTotal) { ui.lastVisit = { date: TODAY, total: mineTotal }; saveUi(); }
+  const v = visitInfo;
+  if (!v) return '';
+  const d = daysSince(v.since), when = d === 1 ? 'yesterday' : d < 7 ? new Intl.DateTimeFormat('en-GB', { weekday: 'long', timeZone: 'UTC' }).format(new Date(toMs(v.since))) : dateLabel(toMs(v.since));
+  const bits = [`<b class="${cls(v.change)}">${signed(v.change)}</b>`];
+  if (v.logs) bits.push(`${v.logs} balance${v.logs === 1 ? '' : 's'} logged`);
+  if (v.regs) bits.push(`${v.regs} regular payment${v.regs === 1 ? '' : 's'} added`);
+  if (v.top) bits.push(`${esc(v.top.a.name)} streak ${v.top.n} months`);
+  const name = (state.profile.name || '').split(' ')[0];
+  return `<div class="visit" id="visit-strip" role="status" data-action="visit-hide" title="Tap to hide"><i class="v-dot" aria-hidden="true"></i><p><b>Welcome back${name ? ', ' + esc(name) : ''}.</b> Since ${esc(when)}: ${bits.join(' · ')}</p></div>`;
+}
+
 let hiddenAt = 0;
 document.addEventListener('visibilitychange', () => {
   if (document.hidden) hiddenAt = Date.now();
@@ -4367,6 +4431,7 @@ document.addEventListener('touchmove', e => {
   // Decide once whether this is a sideways swipe or a normal scroll.
   if (!swipe.lock && (Math.abs(dx) > 10 || Math.abs(dy) > 10)) swipe.lock = Math.abs(dx) > Math.abs(dy) * 1.4 ? 'x' : 'y';
   if (swipe.lock !== 'x') return;
+  document.body.classList.add('swiping');
   swipe.dx = dx;
   const i = TAB_ORDER.indexOf(ui.tab), atEnd = (dx < 0 && i === TAB_ORDER.length - 1) || (dx > 0 && i === 0);
   if (!reduceMotion()) slideView(dx * (atEnd ? 0.15 : 0.45), 1 - Math.min(0.35, Math.abs(dx) / 900), 0);
@@ -4374,6 +4439,7 @@ document.addEventListener('touchmove', e => {
 document.addEventListener('touchend', e => {
   if (!swipe) return;
   const s0 = swipe; swipe = null;
+  document.body.classList.remove('swiping');
   if (s0.lock !== 'x') return;
   const dx = e.changedTouches[0].clientX - s0.x, dt = Date.now() - s0.t;
   const i = TAB_ORDER.indexOf(ui.tab), next = TAB_ORDER[i + (dx < 0 ? 1 : -1)];
@@ -4390,7 +4456,7 @@ document.addEventListener('touchend', e => {
     setTimeout(() => slideView(0, null, 0), 260);
   }, 140);
 }, { passive: true });
-document.addEventListener('touchcancel', () => { if (swipe) { swipe = null; slideView(0, null, 200); } }, { passive: true });
+document.addEventListener('touchcancel', () => { document.body.classList.remove('swiping'); if (swipe) { swipe = null; slideView(0, null, 200); } }, { passive: true });
 
 /* ---------- undo ---------- */
 let undoSnap = null, toastTimer = null;
@@ -4515,9 +4581,11 @@ document.addEventListener('click', async e => {
           markBackedUp(); render();
           setStatus('Backup ready. Save it somewhere safe, such as Google Drive or Files.');
         } catch (err) {
+          // Some apps (Files, Drive) report "cancelled" even after saving, so this isn't shown as an error.
           const cancelled = /cancel/i.test(String(err && err.message));
-          if (!cancelled && await copyText(json)) { markBackedUp(); setStatus('Sharing is unavailable, so the backup was copied to your clipboard.'); }
-          else setStatus(cancelled ? 'Export cancelled.' : 'Could not export. Use "Copy current backup" instead.', !cancelled);
+          if (cancelled) setStatus('Share sheet closed. If you saved the backup, you are all set. Or use "Save to phone" below.');
+          else if (await copyText(json)) { markBackedUp(); setStatus('Sharing is unavailable, so the backup was copied to your clipboard.'); }
+          else setStatus('Could not export. Use "Save to phone" or "Copy current backup" instead.', true);
         }
         break;
       }
@@ -4533,6 +4601,16 @@ document.addEventListener('click', async e => {
       setStatus(copied ? 'Backup exported. A copy is also on your clipboard.' : 'Backup exported to your downloads.');
       break;
     }
+    case 'save-phone': {
+      try {
+        await Native.Filesystem.writeFile({ path: `Aurum/aurum-backup-${TODAY}.json`, data: await backupOut(), directory: 'DOCUMENTS', encoding: 'utf8', recursive: true });
+        markBackedUp(); render(); setStatus(`Saved to Documents/Aurum on this phone as aurum-backup-${TODAY}.json.`);
+      } catch { setStatus('Could not save to Documents on this phone. Use Export backup instead.', true); }
+      break;
+    }
+    case 'pw-eye': { const f = t.closest('form'); const show = f.querySelector('input[type=password]'); f.querySelectorAll('input[data-pw]').forEach(i => { i.type = show ? 'text' : 'password'; }); t.setAttribute('aria-pressed', String(!!show)); break; }
+    case 'log-date': { const d = document.getElementById('log-date'); d.value = id; d.dispatchEvent(new Event('change', { bubbles: true })); document.querySelectorAll('.date-chips button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.id === id))); break; }
+    case 'visit-hide': { const el = document.getElementById('visit-strip'); if (el) { el.classList.add('out'); setTimeout(() => el.remove(), 250); } visitInfo = null; break; }
     case 'copy-backup': {
       const json = await backupOut();
       if (await copyText(json)) { markBackedUp(); setStatus('Backup copied to your clipboard.'); }
@@ -4620,7 +4698,7 @@ document.addEventListener('click', async e => {
     case 'menu-edit': closeSheets(); openAcctSheet(id); break;
     case 'review-hide': { const r = monthReview(); if (r) ui.reviewSeen = r.key; saveUi(); render(); break; }
     case 'pin-acct': { const a = state.accounts.find(x => x.id === id); if (a) { a.pinned = !a.pinned; buzz(); save(); render(); } break; }
-    case 'bkpw-off': store.del(BKPASS_KEY); render(); setStatus('Password protection off. New backups are plain files.', false, 'bkpw-status'); break;
+    case 'bkpw-off': { const cur = document.getElementById('bkpw-cur'); if (!cur || cur.value !== store.get(BKPASS_KEY)) { setStatus('Type your current password to turn protection off.', true, 'bkpw-status'); if (cur) cur.focus(); break; } } store.del(BKPASS_KEY); render(); setStatus('Password protection off. New backups are plain files.', false, 'bkpw-status'); break;
     case 'import-unlock': if (pendingImport) importText(pendingImport); break;
     case 'notes-read': notesCache.forEach(n => { ui.notes.read[n.id] = 1; }); saveUi(); refreshBell(); renderNotes(); break;
     case 'note-filter': ui.noteFilter = id; saveUi(); renderNotes(); break;
@@ -4764,8 +4842,10 @@ document.addEventListener('submit', async e => {
     save(); render();
   } else if (f.id === 'bkpw-form') {
     e.preventDefault();
-    const pw = document.getElementById('bkpw-new').value;
+    const pw = document.getElementById('bkpw-new').value, again = document.getElementById('bkpw-confirm').value, cur = document.getElementById('bkpw-cur');
+    if (cur && cur.value !== store.get(BKPASS_KEY)) { setStatus('Your current password is not right.', true, 'bkpw-status'); return; }
     if (pw.length < 6) { setStatus('Use at least 6 characters.', true, 'bkpw-status'); return; }
+    if (pw !== again) { setStatus("The two passwords don't match. Type them again.", true, 'bkpw-status'); return; }
     store.set(BKPASS_KEY, pw);
     render(); setStatus('Password protection is on. Export a new backup now so your copy is protected.', false, 'bkpw-status');
   } else if (f.id === 'pin-form') {
