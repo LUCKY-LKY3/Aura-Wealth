@@ -16,7 +16,10 @@ Agreed with the owner. Nothing here is built until the owner says "go" for that 
 - Unlock animation: the coin shrinks up into the header and the app fades in (~0.5s)
 - Too many wrong PINs: after 5, wait 30 seconds, doubling after each further miss
 - Keypad feel: light buzz + gold ripple per key, one firm buzz on a correct PIN
-- (To decide) Splash screen restyled to match the new lock screen
+- Splash screen restyled to match the new lock screen (gold glow + coin, lined up so it flows into the lock screen)
+- Demo mode (proposed, owner to confirm): Settings switch / bell-area shortcut swaps in example data in memory only;
+  real data untouched, nothing saved, backups/reminders/notifications paused; gold "Demo mode · Exit" bar;
+  exiting asks for the PIN if one is set
 
 ## 2.0
 - State Pension, debts, property
