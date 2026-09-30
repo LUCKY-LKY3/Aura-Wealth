@@ -7,6 +7,10 @@ Agreed with the owner. Nothing here is built until the owner says "go" for that 
   auto-lock timer, drag/pin accounts, long-press quick actions, polish · 1.9.3 welcome-back strip, quick dates,
   Insights rename, still tab bar, grouped reorder, password confirm, export fix + Save to phone
 
+## 1.9.4 (next)
+- Wrong password feedback: a clear red "Incorrect password" right under the password box (with a small shake and buzz)
+  when changing or turning off the backup password, unlocking an encrypted backup, and on the PIN lock screen
+
 ## 2.0
 - State Pension, debts, property
 - Savings rate: % of income put away each month (user enters income) — locked in by owner
