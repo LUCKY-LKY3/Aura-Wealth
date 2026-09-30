@@ -10,6 +10,9 @@ Agreed with the owner. Nothing here is built until the owner says "go" for that 
 ## 1.9.4 (next)
 - Wrong password feedback: a clear red "Incorrect password" right under the password box (with a small shake and buzz)
   when changing or turning off the backup password, unlocking an encrypted backup, and on the PIN lock screen
+- New lock screen (mock-up A): gold glow behind a large gradient coin, spaced "AURUM" + "Your wealth, privately",
+  PIN dots that fill gold (shake and turn red on a wrong PIN), round gold-outlined keypad with Forgot and ⌫,
+  "Use fingerprint" below; optionally a "Good evening, Sam" greeting
 
 ## 2.0
 - State Pension, debts, property
