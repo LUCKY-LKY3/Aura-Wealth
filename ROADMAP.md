@@ -17,7 +17,7 @@ Agreed with the owner. Nothing here is built until the owner says "go" for that 
 - Too many wrong PINs: after 5, wait 30 seconds, doubling after each further miss
 - Keypad feel: light buzz + gold ripple per key, one firm buzz on a correct PIN
 - Splash screen restyled to match the new lock screen (gold glow + coin, lined up so it flows into the lock screen)
-- Demo mode (proposed, owner to confirm): Settings switch / bell-area shortcut swaps in example data in memory only;
+- Demo mode: Settings switch / bell-area shortcut swaps in example data in memory only;
   real data untouched, nothing saved, backups/reminders/notifications paused; gold "Demo mode · Exit" bar;
   exiting asks for the PIN if one is set
 
