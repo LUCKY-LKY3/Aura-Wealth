@@ -13,6 +13,10 @@ Agreed with the owner. Nothing here is built until the owner says "go" for that 
 - New lock screen (mock-up A): gold glow behind a large gradient coin, spaced "AURUM" + "Your wealth, privately",
   PIN dots that fill gold (shake and turn red on a wrong PIN), round gold-outlined keypad with Forgot and ⌫,
   "Use fingerprint" below; optionally a "Good evening, Sam" greeting
+- Unlock animation: the coin shrinks up into the header and the app fades in (~0.5s)
+- Too many wrong PINs: after 5, wait 30 seconds, doubling after each further miss
+- Keypad feel: light buzz + gold ripple per key, one firm buzz on a correct PIN
+- (To decide) Splash screen restyled to match the new lock screen
 
 ## 2.0
 - State Pension, debts, property
