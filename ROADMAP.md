@@ -26,6 +26,12 @@ Agreed with the owner. Nothing here is built until the owner says "go" for that 
 - Everything pension-related: tax-free cash tracker (25%, Lump Sum Allowance £268,275), salary sacrifice vs
   relief at source, drawdown, defined benefit / NHS pensions
 
+## Live prices (version to decide)
+- Holdings with live prices: enter ticker + quantity, app fetches price on-device (only the ticker leaves the phone)
+  - Crypto first via CoinGecko (free, no key); read-only crypto wallet balances from public addresses (never private keys)
+  - Stocks/ETFs later once a price source is chosen (free tiers have limits; UK OEIC funds patchy)
+  - Not planned: broker/Open Banking linking (needs paid, FCA-regulated partner and servers)
+
 ## Ideas to decide on (suggested, not yet chosen)
 - Small: notes on balances shown on charts; "since last visit" strip on Overview; duplicate last entry;
   quick date chips in Log value (Today, 1st, 5 April); account colour and icon picker
