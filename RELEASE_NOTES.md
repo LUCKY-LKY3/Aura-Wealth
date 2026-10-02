@@ -1,7 +1,6 @@
-- New Income tab: add your salary and any other income, then log each payment as it arrives
-- Savings rate: how much of your take-home pay went into your accounts, by month, tax year or 12 months
-- Typical rate leaves out one-offs like bonuses and gifts; a second rate includes pension money from work
-- "Where it went" shows each account's share of your pay, and a monthly chart shows saved vs everything else
-- Optional payslip details (gross, tax, NI, pension, student loan), with an option to log the pension deduction into your pension
-- Payday reminders, a note when your pay changes by 10% or more, and your best savings rate yet
-- Savings rate added to Overview, Insights and the monthly review; the tax helper can fill in pay and tax from your payslips
+- Started tracking an account after 6 April? Split its first balance into what was there on 5 April and what you paid in each month, so this tax year and your savings rate are right
+- New accounts added mid-year offer the same split straight away
+- Mark a payment as money moved from savings you already had: it still counts for growth, but not as new saving
+- ISA transfers from another ISA no longer use up your £20,000 allowance
+- Payslip breakdown on Income: where your gross pay went (tax, NI, pension, student loan) and how much of every £1 you kept
+- A reminder when a month's pay is missing this tax year, with one tap to fill in your usual pay

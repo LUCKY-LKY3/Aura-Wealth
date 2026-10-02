@@ -8,7 +8,9 @@ Agreed with the owner. Nothing here is built until the owner says "go" for that 
   Insights rename, still tab bar, grouped reorder, password confirm, export fix + Save to phone ·
   1.9.4 new lock screen + keypad, unlock animation, PIN lockout, wrong-password feedback, splash restyle, demo mode ·
   1.9.5 Income tab: income sources, pay log (net first, payslip optional), savings rate (total, typical without one-offs,
-  including work pension), where it went, payday/pay-change/best-rate notifications, P60 fill from payslips
+  including work pension), where it went, payday/pay-change/best-rate notifications, P60 fill from payslips ·
+  1.9.6 split a mid-year first balance (5 April balance + monthly payments), "moved from savings" and ISA transfer flags,
+  payslip breakdown, missing-pay reminder
 
 ## 2.0 (next)
 - Tax return helper upgrade: build the engine + 25 test cases in `docs/tax-helper-spec.md` (dividend/savings stacking,

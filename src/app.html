@@ -426,6 +426,7 @@ details summary{cursor:pointer;color:var(--ink-2);font-size:13px;font-weight:550
 .period-sum b{font-family:var(--mono);font-weight:600;margin-right:4px}
 tr.grp td{background:var(--surface-2);font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-2);font-weight:600;padding-block:8px}
 tr.grp td.val{font-size:12.5px;letter-spacing:0;text-transform:none;color:var(--ink)}
+.slip-bar{display:block;width:100%;height:14px;border-radius:7px;overflow:hidden;margin:4px 0 10px}
 .owner{font-size:11px;font-weight:600;padding:1px 6px;border-radius:5px;background:var(--gold-soft);color:var(--gold);margin-left:6px;white-space:nowrap}
 .progress{height:6px;border-radius:99px;background:var(--surface-2);overflow:hidden}
 .progress i{display:block;height:100%;background:var(--gold);border-radius:99px}
@@ -753,6 +754,8 @@ details.fold:not([open])>summary h2::after{content:' ▸'}
         <div class="money"><span>£</span><input id="log-flow" class="input" type="number" inputmode="decimal" step="0.01" min="0" placeholder="0.00" aria-label="Amount"></div>
       </div>
       <label class="check" id="log-relief-wrap" hidden><input type="checkbox" id="log-relief"><span id="log-relief-label"></span></label>
+      <label class="check" id="log-move-wrap" hidden><input type="checkbox" id="log-move"><span>Moved from savings I already had <span class="faint">Still money in for growth, but not new saving in your savings rate</span></span></label>
+      <label class="check" id="log-isat-wrap" hidden><input type="checkbox" id="log-isat"><span>ISA transfer from another ISA <span class="faint">Doesn't use this year's allowance</span></span></label>
       <p class="hint" id="log-kind-hint">Recording deposits means they are not counted as growth.</p>
       <button type="button" class="btn sm" id="log-same" data-action="log-same" hidden style="align-self:flex-start"></button>
     </fieldset>
@@ -805,6 +808,7 @@ details.fold:not([open])>summary h2::after{content:' ▸'}
         <input id="acct-open-date" class="input" type="date">
       </div>
     </div>
+    <label class="check" id="acct-split-wrap" hidden><input type="checkbox" id="acct-split"><span>Some of this was there before 6 April, or went in over several months <span class="faint">Next you can add the 5 April balance and what you paid in each month, so this tax year and your savings rate are right</span></span></label>
     <div class="field">
       <label for="acct-fee">Yearly fees <span class="faint">Optional, %</span></label>
       <input id="acct-fee" class="input" type="number" inputmode="decimal" step="0.01" min="0" max="5" placeholder="e.g. 0.45">
@@ -888,6 +892,33 @@ details.fold:not([open])>summary h2::after{content:' ▸'}
     <div id="past-rows"></div>
     <button type="button" class="btn sm ghost" data-action="past-row" style="align-self:flex-start">+ Add another row</button>
     <p class="status err" id="past-err" role="alert"></p>
+    <div class="sheet-actions">
+      <button type="button" class="btn" data-action="close-sheet">Cancel</button>
+      <button type="submit" class="btn primary">Save</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog class="sheet" id="ty-sheet" aria-labelledby="ty-title">
+  <div class="grab" aria-hidden="true"></div>
+  <form id="ty-form" method="dialog">
+    <div class="sheet-head">
+      <h2 id="ty-title">Before and since 6 April</h2>
+      <button type="button" class="icon-btn" data-action="close-sheet" aria-label="Close">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+    <p class="hint" id="ty-hint"></p>
+    <div class="field">
+      <label for="ty-april">Balance on 5 April <span class="faint">0 if the account opened after</span></label>
+      <div class="money"><span>£</span><input id="ty-april" class="input" type="number" inputmode="decimal" step="0.01" min="0" placeholder="From your statement"></div>
+    </div>
+    <fieldset class="field">
+      <legend class="label">Paid in since 6 April <span class="faint">Leave months blank if nothing went in</span></legend>
+      <div id="ty-rows" class="stack" style="gap:8px"></div>
+      <p class="hint" id="ty-rows-hint"></p>
+    </fieldset>
+    <p class="status err" id="ty-err" role="alert"></p>
     <div class="sheet-actions">
       <button type="button" class="btn" data-action="close-sheet">Cancel</button>
       <button type="submit" class="btn primary">Save</button>
@@ -1214,7 +1245,8 @@ function normalize(o) {
     });
     const flows = (Array.isArray(o.flows) ? o.flows : []).filter(f => f && isIso(f.date) && isFinite(+f.amount) && ids.has(String(f.accountId))).map(f => ({
       id: String(f.id || uid()), accountId: String(f.accountId), date: f.date, amount: +f.amount,
-      own: isFinite(+f.own) && f.own !== null && f.own !== '' ? +f.own : +f.amount, note: String(f.note || ''), auto: !!f.auto, employer: !!f.employer, ytd: !!f.ytd
+      own: isFinite(+f.own) && f.own !== null && f.own !== '' ? +f.own : +f.amount, note: String(f.note || ''), auto: !!f.auto, employer: !!f.employer, ytd: !!f.ytd,
+      ...(f.transfer ? { transfer: true } : {}), ...(f.isaTransfer ? { isaTransfer: true } : {})
     }));
     const income = (Array.isArray(o.income) ? o.income : []).filter(x => x && isIso(x.date) && isFinite(+x.amount) && +x.amount > 0 && ids.has(String(x.accountId))).map(x => ({
       id: String(x.id || uid()), accountId: String(x.accountId), date: x.date, amount: +x.amount, kind: ['dividend', 'prize'].includes(x.kind) ? x.kind : 'interest'
@@ -1574,7 +1606,7 @@ function monthlyIn(a) {
 function allowanceUsed(accts, kind) {
   const start = taxYearStart(TODAY);
   const ids = new Set(accts.filter(a => typeOf(a).allow === kind).map(a => a.id));
-  return state.flows.filter(f => ids.has(f.accountId) && f.date >= start && f.date <= TODAY && f.own > 0).reduce((t, f) => t + f.own, 0);
+  return state.flows.filter(f => ids.has(f.accountId) && f.date >= start && f.date <= TODAY && f.own > 0 && !f.isaTransfer).reduce((t, f) => t + f.own, 0);
 }
 // Income tax rules for England, Wales and Northern Ireland, by the year a tax year starts.
 function taxRules(y) {
@@ -1609,9 +1641,9 @@ function incomeTax(pay, y, ext = 0, paAdj = 0) {
 function yearPaid(a, y) {
   if (a.yearly && a.yearly[y] != null) return a.yearly[y];
   const s = `${y}-04-06`, e = `${y + 1}-04-05`, pension = groupOf(a) === 'pension';
-  return state.flows.filter(f => f.accountId === a.id && f.date >= s && f.date <= e).reduce((t, f) => t + Math.max(0, pension ? f.amount : f.own), 0);
+  return state.flows.filter(f => f.accountId === a.id && f.date >= s && f.date <= e && !f.isaTransfer).reduce((t, f) => t + Math.max(0, pension ? f.amount : f.own), 0);
 }
-const loggedPaid = (a, y) => { const s = `${y}-04-06`, e = `${y + 1}-04-05`, pension = groupOf(a) === 'pension'; return state.flows.filter(f => f.accountId === a.id && f.date >= s && f.date <= e).reduce((t, f) => t + Math.max(0, pension ? f.amount : f.own), 0); };
+const loggedPaid = (a, y) => { const s = `${y}-04-06`, e = `${y + 1}-04-05`, pension = groupOf(a) === 'pension'; return state.flows.filter(f => f.accountId === a.id && f.date >= s && f.date <= e && !f.isaTransfer).reduce((t, f) => t + Math.max(0, pension ? f.amount : f.own), 0); };
 // Figures for one tax year (starting 6 April of `y`) to help with a Self Assessment return.
 function taxReport(y) {
   const start = `${y}-04-06`, end = `${y + 1}-04-05`, last = end < TODAY ? end : TODAY;
@@ -2209,7 +2241,7 @@ function renderOverview() {
       <div class="panel-head"><h2>Recent activity</h2><button class="btn ghost sm" data-action="tab" data-tab="accounts">View all</button></div>
       ${recent.length ? `<ul class="activity">${recent.map(l => {
         const a = accById[l.accountId];
-        if (l.kind === 'flow') return `<li><i class="sw" style="background:${colorOf(a)}"></i><div><div>${esc(a.name)}</div><div class="when">${dateLabel(toMs(l.date))} · ${l.employer ? 'Employer paid in' : l.amount >= 0 ? 'Paid in' : 'Taken out'}${l.note ? ' · ' + esc(l.note) : ''}</div></div><div><div class="amt ${cls(l.amount)}">${signed(l.amount)}</div></div></li>`;
+        if (l.kind === 'flow') return `<li><i class="sw" style="background:${colorOf(a)}"></i><div><div>${esc(a.name)}</div><div class="when">${dateLabel(toMs(l.date))} · ${l.employer ? 'Employer paid in' : l.isaTransfer ? 'ISA transfer' : l.transfer ? 'Moved in' : l.amount >= 0 ? 'Paid in' : 'Taken out'}${l.note ? ' · ' + esc(l.note) : ''}</div></div><div><div class="amt ${cls(l.amount)}">${signed(l.amount)}</div></div></li>`;
         const s = logsOf(l.accountId), i = s.findIndex(x => x.id === l.id), d = i > 0 ? l.value - s[i - 1].value : null;
         return `<li><i class="sw" style="background:${colorOf(a)}"></i><div><div>${esc(a.name)}</div><div class="when">${dateLabel(toMs(l.date))}${l.note ? ' · ' + esc(l.note) : ''}</div></div><div><div class="amt">${gbp(l.value)}</div>${d != null ? `<div class="d ${cls(d)}">${signed(d)}</div>` : ''}</div></li>`;
       }).join('')}</ul>` : '<div class="chart-empty">No activity yet.</div>'}
@@ -2299,7 +2331,8 @@ function renderAccounts() {
         ${rate ? `<p class="explain" style="margin-top:12px">${rate}</p>` : ''}
         ${reg ? `<p class="hint" style="margin-top:12px">Regular payment: ${reg}.</p>` : ''}
         ${a.notes ? `<p class="hint" style="margin-top:8px;white-space:pre-wrap"><b>Notes:</b> ${esc(a.notes)}</p>` : ''}
-        ${ytdForm(a.type) && st.s.length && st.s[0].date >= taxYearStart(TODAY) && !ytdFlow(a) ? `<p class="hint" style="margin-top:8px">Paid into this account since 6 April? <button class="btn sm ghost" data-action="edit-acct" data-id="${esc(a.id)}">Add it for your ${taxYear(TODAY)} allowance</button></p>` : ''}
+        ${canSplit(a) ? `<p class="hint" style="margin-top:8px">First balance is after 6 April, so all of it counts as paid in this tax year. <button class="btn sm ghost" data-action="open-ty" data-id="${esc(a.id)}">Split it: 5 April balance and monthly payments</button></p>` : ''}
+        ${ytdForm(a.type) && st.s.length && st.s[0].date >= taxYearStart(TODAY) && !ytdFlow(a) && !canSplit(a) ? `<p class="hint" style="margin-top:8px">Paid into this account since 6 April? <button class="btn sm ghost" data-action="edit-acct" data-id="${esc(a.id)}">Add it for your ${taxYear(TODAY)} allowance</button></p>` : ''}
         ${a.priorPaid == null && st.s.length ? `<p class="hint" style="margin-top:8px">Had gains before you started tracking? <button class="btn sm ghost" data-action="edit-acct" data-id="${esc(a.id)}">Add total paid in so far</button> or <button class="btn sm ghost" data-action="open-past" data-id="${esc(a.id)}">add past balances</button></p>` : `<div class="row-actions" style="margin-top:8px"><button class="btn sm ghost" data-action="open-past" data-id="${esc(a.id)}">Add past balances</button></div>`}
         <div class="readout" id="acct-readout" style="margin-top:18px" aria-live="polite"></div>
         <div class="chart" id="acct-chart"></div>
@@ -2641,7 +2674,7 @@ function renderHistory() {
       const when = dateLabel(toMs(l.date)), whenCell = `<span class="d-long">${when}</span><span class="d-short">${shortDate(l.date)}</span>`;
       if (pendingDelete === l.id) return `<tr class="confirm"><td colspan="3">Delete this ${l.kind === 'flow' ? 'payment' : l.kind === 'income' ? 'income entry' : 'valuation'} from ${when}?</td><td class="hide-sm"></td><td class="r" style="white-space:nowrap"><button class="btn sm ghost" data-action="del-no">Keep</button> <button class="btn sm danger solid" data-action="del-yes" data-id="${esc(l.id)}">Delete</button></td></tr>`;
       if (l.kind === 'income') return `<tr data-row="${esc(l.id)}"><td style="white-space:nowrap">${whenCell}${who(l)}</td><td class="r faint">${incLabel(l.incKind)}</td><td class="r"><span class="delta muted">${gbp(l.amount)}</span></td><td class="note hide-sm faint">${l.incKind === 'prize' ? 'Tax-free prize' : 'Income, for tax'}</td>${actions(l, 'income from ' + when)}</tr>`;
-      if (l.kind === 'flow') return `<tr data-row="${esc(l.id)}"><td style="white-space:nowrap">${whenCell}${who(l)}</td><td class="r faint">${l.employer ? 'Employer paid in' : l.amount >= 0 ? 'Paid in' : 'Taken out'}</td><td class="r">${deltaChip(l.amount, signed(l.amount))}</td><td class="note hide-sm">${esc(l.note)}${!l.employer && l.own !== l.amount ? ` <span class="faint">(you paid ${gbp(l.own)})</span>` : ''}</td>${actions(l, 'payment from ' + when)}</tr>`;
+      if (l.kind === 'flow') return `<tr data-row="${esc(l.id)}"><td style="white-space:nowrap">${whenCell}${who(l)}</td><td class="r faint">${l.employer ? 'Employer paid in' : l.isaTransfer ? 'ISA transfer' : l.transfer ? 'Moved in' : l.amount >= 0 ? 'Paid in' : 'Taken out'}</td><td class="r">${deltaChip(l.amount, signed(l.amount))}</td><td class="note hide-sm">${esc(l.note)}${!l.employer && l.own !== l.amount ? ` <span class="faint">(you paid ${gbp(l.own)})</span>` : ''}</td>${actions(l, 'payment from ' + when)}</tr>`;
       const prev = prevLog[l.id], d = prev ? l.value - prev.value : null;
       return `<tr data-row="${esc(l.id)}"><td style="white-space:nowrap">${whenCell}${who(l)}</td><td class="r val">${gbp(l.value)}${l.estimated ? '<span class="est" title="Estimated from payments since your last balance">est.</span>' : ''}</td><td class="r">${d == null ? '<span class="faint">—</span>' : deltaChip(d, signed(d))}</td><td class="note hide-sm">${esc(l.note)}${l.estimated ? '<span class="faint">Estimated: last balance plus payments</span>' : ''}</td>${actions(l, 'valuation from ' + when)}</tr>`;
     }).join('')}</tbody></table></div>
@@ -3183,7 +3216,7 @@ function payStats(from, to) {
   const ids = new Set(mine().map(a => a.id)), byAcct = {};
   let paidIn = 0, takenOut = 0, employer = 0;
   for (const f of state.flows) {
-    if (!ids.has(f.accountId) || !inR(f) || f.ytd) continue;
+    if (!ids.has(f.accountId) || !inR(f) || f.ytd || f.transfer) continue;
     if (f.employer) { employer += f.amount; continue; }
     if (f.own >= 0) paidIn += f.own; else takenOut -= f.own;
     byAcct[f.accountId] = (byAcct[f.accountId] || 0) + f.own;
@@ -3218,6 +3251,30 @@ function incomeBounds(k) {
 function incomeRangeName(k) {
   if (k === 'month' || k === 'last') return monthYear(toMs(incomeBounds(k)[0]));
   return k === 'TY' ? `tax year ${taxYear(TODAY)}` : 'the past 12 months';
+}
+// Months this tax year (before the current one) with money paid in or pay logged around them, but no pay from a regular source.
+// Starts from the earlier of the source's first pay and the first payment into my accounts, so a new job isn't nagged about.
+function missingPay(src) {
+  if (src.archived || !src.regular || !src.regular.net) return [];
+  const start = taxYearStart(TODAY), cur = TODAY.slice(0, 7);
+  const list = state.pay.filter(p => p.source === src.id);
+  if (!list.length) return [];
+  const ids = new Set(mine().map(a => a.id));
+  const dates = [...list.map(p => p.date), ...state.flows.filter(f => ids.has(f.accountId) && !f.ytd && !f.employer && !f.transfer && f.own > 0 && f.date >= start).map(f => f.date)].sort();
+  const from = (dates[0] > start ? dates[0] : start).slice(0, 7), have = new Set(list.map(p => p.date.slice(0, 7))), out = [];
+  for (let ym = from; ym < cur; ym = msIso(Date.UTC(+ym.slice(0, 4), +ym.slice(5, 7), 1)).slice(0, 7)) if (!have.has(ym)) out.push(ym);
+  return out;
+}
+const monthList = ms => { const n = ms.map(m => fmtMonthLong.format(new Date(toMs(m + '-01')))); return n.length > 1 ? n.slice(0, -1).join(', ') + ' and ' + n[n.length - 1] : n[0]; };
+function fillPay(id) {
+  const src = sourceOf(id), miss = src ? missingPay(src) : [];
+  if (!miss.length) return;
+  snapshot(`Added usual pay for ${miss.length} month${miss.length > 1 ? 's' : ''}`);
+  for (const ym of miss) {
+    const last = new Date(Date.UTC(+ym.slice(0, 4), +ym.slice(5, 7), 0)).getUTCDate();
+    state.pay.push({ id: uid(), date: `${ym}-${pad(Math.min(src.regular.day || last, last))}`, source: src.id, net: src.regular.net, gross: 0, tax: 0, ni: 0, pension: 0, studentLoan: 0, other: 0, note: 'Usual pay', oneOff: false });
+  }
+  save(); render();
 }
 // Small strip on Overview: last month's savings rate, tapping through to Income.
 function payStrip() {
@@ -3269,6 +3326,8 @@ function renderIncome() {
     <p class="hint" style="margin-bottom:0">Saved is your own money paid into your accounts, less anything taken out. Tax relief, bonuses and employer payments aren't counted. Everything else is spending and money left in your current account.</p>
   </section>`;
 
+  const misses = state.example ? [] : srcs.map(x => [x, missingPay(x)]).filter(([, m]) => m.length);
+  const missPanel = misses.map(([x, m]) => `<p class="hint" style="margin:0">No ${esc(x.name)} pay logged for ${esc(monthList(m))}. <button class="btn sm ghost" data-action="fill-pay" data-id="${esc(x.id)}">Fill in usual ${gbp(x.regular.net)}</button></p>`).join('');
   const n = [12, 24].includes(ui.payMonths) ? ui.payMonths : 12, months = payMonths(n);
   const chartPanel = `<section class="panel">
     <div class="panel-head"><h2>Income and saving by month</h2>
@@ -3316,7 +3375,7 @@ function renderIncome() {
         <button class="icon-btn" data-action="del-pay" data-id="${esc(p.id)}" aria-label="Delete">${icons.trash}</button></div></li>`).join('')}</ul>
     ${foldClose}</section>` : '';
 
-  view.innerHTML = `<div class="stack view">${exampleNotice()}${summary}${chartPanel}<div class="grid-2">${wherePanel || ''}${sourcesPanel}</div>${histPanel}
+  view.innerHTML = `<div class="stack view">${exampleNotice()}${missPanel}${summary}${payslipPanel(key, from, to)}${chartPanel}<div class="grid-2">${wherePanel || ''}${sourcesPanel}</div>${histPanel}
     <p class="hint">Worked out on this device from your own entries. Figures are estimates, not financial advice.</p></div>`;
   barChart(document.getElementById('pay-chart'), {
     labels: months.map(x => x.short), titles: months.map(x => x.title),
@@ -3325,6 +3384,38 @@ function renderIncome() {
     extra: i => `<div class="tip-row total"><span>Income</span><b>${gbp(months[i].st.net)}</b></div><div class="tip-row"><span>Savings rate</span><b>${rateText(months[i].st.rate)}</b></div>`,
     label: 'Take-home income split into saved and everything else, by month', empty: 'Log your pay each month to see how much of it you save.', emptyAction: ['Log pay', 'open-pay']
   });
+}
+
+// Payslip breakdown (1.9.6): where gross pay went, from payslips that have the optional details filled in.
+const SLIP_ROWS = [['tax', 'Income tax', 'var(--c3)'], ['ni', 'National Insurance', 'var(--c2)'], ['pension', 'Pension', 'var(--c4)'], ['studentLoan', 'Student loan', 'var(--c5)'], ['other', 'Other deductions', 'var(--c6)']];
+function slipSum(from, to) {
+  const all = state.pay.filter(p => p.date >= from && p.date <= to && p.date <= TODAY), slips = all.filter(p => p.gross > 0);
+  const t = { n: slips.length, of: all.length, gross: 0, net: 0 };
+  SLIP_ROWS.forEach(([k]) => { t[k] = 0; });
+  for (const p of slips) { t.gross += p.gross; t.net += p.net; SLIP_ROWS.forEach(([k]) => { t[k] += p[k] || 0; }); }
+  return t;
+}
+function payslipPanel(key, from, to) {
+  if (!state.pay.some(p => p.gross > 0)) return '';
+  const st = slipSum(from, to), ty = slipSum(taxYearStart(TODAY), TODAY), both = key !== 'TY';
+  const head = `<div class="panel-head"><h2>Payslip breakdown</h2><span class="aside">${esc(incomeRangeName(key))}</span></div>`;
+  if (!st.n) return `<section class="panel">${head}<p class="hint" style="margin:0">Gross pay and deductions aren't logged for ${esc(incomeRangeName(key))}. Add them under "Payslip details" when you log pay.</p></section>`;
+  const pc = v => st.gross > 0 ? (v / st.gross * 100).toFixed(1) + '%' : '—';
+  const parts = [['net', 'Take-home', 'var(--c1)'], ...SLIP_ROWS].filter(([k]) => st[k] > 0.005);
+  let x = 0;
+  const bar = `<svg class="slip-bar" viewBox="0 0 100 8" preserveAspectRatio="none" role="img" aria-label="Gross pay split: ${parts.map(([k, l]) => `${l} ${pc(st[k])}`).join(', ')}">${parts.map(([k, , c]) => { const w = st[k] / Math.max(st.gross, st.net + SLIP_ROWS.reduce((t, [kk]) => t + st[kk], 0)) * 100, r = `<rect x="${x}" y="0" width="${Math.max(0, w - 0.4)}" height="8" fill="${c}"/>`; x += w; return r; }).join('')}</svg>`;
+  const legend = `<div class="bar-legend">${parts.map(([k, l, c]) => `<span><i class="sw" style="background:${c}"></i>${l} ${pc(st[k])}</span>`).join('')}</div>`;
+  const row = (k, l, strong) => (st[k] > 0.005 || ty[k] > 0.005) ? `<tr${strong ? ' class="total"' : ''}><td>${strong ? `<b>${l}</b>` : l}</td><td class="r val">${k === 'gross' || k === 'net' ? gbp(st[k]) : st[k] ? '−' + gbp(st[k]) : '—'}</td>${both ? `<td class="r val">${k === 'gross' || k === 'net' ? gbp(ty[k]) : ty[k] ? '−' + gbp(ty[k]) : '—'}</td>` : ''}<td class="r mono hide-sm">${pc(st[k])}</td></tr>` : '';
+  const ded = SLIP_ROWS.reduce((t, [k]) => t + st[k], 0), kept = Math.round(st.net / st.gross * 100);
+  const withPen = st.pension > 0 ? ` Counting your pension as money you keep, it's ${Math.round((st.net + st.pension) / st.gross * 100)}p.` : '';
+  return `<section class="panel">${head}
+    ${bar}${legend}
+    <div class="table-wrap"><table>
+      <thead><tr><th></th><th class="r">${both ? esc(key === '12M' ? '12 months' : fmtMonthLong.format(new Date(toMs(from)))) : 'Tax year'}</th>${both ? '<th class="r">Tax year so far</th>' : ''}<th class="r hide-sm">Of gross</th></tr></thead>
+      <tbody>${row('gross', 'Gross pay', true)}${SLIP_ROWS.map(([k, l]) => row(k, l)).join('')}${row('net', 'Take-home', true)}</tbody></table></div>
+    <p class="explain" style="margin-bottom:0">Deductions took ${pc(ded)} of your gross pay: you kept <b>${kept}p</b> of every £1 you earned.${withPen}</p>
+    ${st.n < st.of ? `<p class="hint" style="margin-bottom:0">Based on ${st.n} of ${st.of} payments; the others don't have payslip details.</p>` : ''}
+  </section>`;
 }
 
 /* ---------- settings ---------- */
@@ -3686,6 +3777,8 @@ function updateKindHint() {
   const lbl = a && k === 'in' ? topupLabel(a) : '';
   document.getElementById('log-relief-wrap').hidden = !lbl;
   document.getElementById('log-relief-label').textContent = lbl;
+  document.getElementById('log-move-wrap').hidden = k !== 'in';
+  document.getElementById('log-isat-wrap').hidden = !(a && k === 'in' && ['isa', 'jisa'].includes(typeOf(a).allow));
   document.getElementById('log-kind-hint').textContent = {
     in: 'Recording deposits means they are not counted as growth.',
     employer: 'Employer payments count towards your pension annual allowance.',
@@ -3722,6 +3815,7 @@ function openLog(accountId, entryId) {
   ['log-value', 'log-flow', 'log-note'].forEach(id => { document.getElementById(id).value = ''; });
   document.getElementById('log-kind').innerHTML = '';
   document.getElementById('log-relief').checked = false;
+  document.getElementById('log-move').checked = document.getElementById('log-isat').checked = false;
   document.getElementById('log-err').textContent = '';
   document.getElementById('log-example-note').hidden = !state.example || !!found;
   document.getElementById('sheet-title').textContent = found ? 'Edit entry' : 'Log a value';
@@ -3738,6 +3832,8 @@ function openLog(accountId, entryId) {
       updateKindHint();
       const relief = found.kind === 'flow' && !e.employer && e.amount > 0 && Math.abs(e.amount - e.own) > 0.005;
       document.getElementById('log-relief').checked = relief;
+      document.getElementById('log-move').checked = !!e.transfer;
+      document.getElementById('log-isat').checked = !!e.isaTransfer;
       document.getElementById('log-flow').value = found.kind === 'income' ? e.amount : e.employer ? e.amount : Math.abs(relief ? e.own : e.amount);
     }
   }
@@ -3777,6 +3873,10 @@ document.getElementById('log-form').addEventListener('submit', e => {
         const relief = !out && !document.getElementById('log-relief-wrap').hidden && document.getElementById('log-relief').checked;
         const own = out ? -flow : flow;
         f = { id: fid, accountId, date, amount: relief ? own * 1.25 : own, own, note: hasV ? '' : note, auto };
+        // Money moved from existing savings: still money in for growth, but not new saving.
+        const isat = !out && !document.getElementById('log-isat-wrap').hidden && document.getElementById('log-isat').checked;
+        if (isat) f.isaTransfer = true;
+        if (isat || (!out && document.getElementById('log-move').checked)) f.transfer = true;
       }
       state.flows.push(f);
       if (!hasV) addEstimate(f);
@@ -3913,7 +4013,9 @@ function updateAcctRelief() {
   document.getElementById('acct-rate-field').hidden = TYPES[document.getElementById('acct-type').value]?.group !== 'cash' && document.getElementById('acct-type').value !== 'Cash ISA';
   const type = document.getElementById('acct-type').value;
   const f = ytdForm(type);
-  document.getElementById('acct-ytd-field').hidden = !f || !ytdEligible;
+  const split = !editingAcct && document.getElementById('acct-open-date').value > taxYearStart(TODAY) && document.getElementById('acct-open-value').value.trim() !== '';
+  document.getElementById('acct-split-wrap').hidden = !split;
+  document.getElementById('acct-ytd-field').hidden = !f || !ytdEligible || (split && document.getElementById('acct-split').checked);
   if (f) { document.getElementById('acct-ytd-label').textContent = f.label; document.getElementById('acct-ytd-hint').textContent = f.hint; }
 }
 // "Paid in this tax year so far": how each account type phrases it, and how it's stored.
@@ -3956,6 +4058,7 @@ function openAcctSheet(id) {
   document.getElementById('acct-open-value').value = '';
   document.getElementById('acct-open-date').value = TODAY;
   document.getElementById('acct-open-date').max = TODAY;
+  document.getElementById('acct-split').checked = false;
   document.getElementById('acct-fee').value = a && a.fee ? a.fee : '';
   document.getElementById('acct-reg-day').innerHTML = Array.from({ length: 28 }, (_, i) => `<option value="${i + 1}">Day ${i + 1}</option>`).join('');
   document.getElementById('acct-reg-amount').value = a && a.regular ? a.regular.amount : '';
@@ -3983,6 +4086,7 @@ document.getElementById('acct-type').addEventListener('change', () => {
   if (!editingAcct && t && (!name.value || name.dataset.auto === '1')) { name.value = t.label; name.dataset.auto = '1'; }
 });
 document.getElementById('acct-name').addEventListener('input', e => { e.target.dataset.auto = ''; });
+['acct-open-value', 'acct-open-date', 'acct-split'].forEach(id => document.getElementById(id).addEventListener(id === 'acct-split' ? 'change' : 'input', updateAcctRelief));
 document.getElementById('acct-form').addEventListener('submit', e => {
   e.preventDefault();
   const name = document.getElementById('acct-name').value.trim();
@@ -4016,7 +4120,8 @@ document.getElementById('acct-form').addEventListener('submit', e => {
     state.accounts.push(a);
     const open = parseFloat(document.getElementById('acct-open-value').value);
     if (isFinite(open) && open >= 0) state.logs.push({ id: uid(), accountId: a.id, date: document.getElementById('acct-open-date').value || TODAY, value: open, note: 'Opening balance' });
-    setYtd(a, document.getElementById('acct-ytd').value);
+    if (!document.getElementById('acct-split-wrap').hidden && document.getElementById('acct-split').checked && logsOf(a.id).length) splitNext = a.id;
+    else setYtd(a, document.getElementById('acct-ytd').value);
     ui.account = a.id;
     if (a.owner !== ui.person && ui.person !== 'all') ui.person = a.owner;
     if (ui.tab !== 'settings') ui.tab = 'accounts';
@@ -4026,6 +4131,57 @@ document.getElementById('acct-form').addEventListener('submit', e => {
   save();
   acctSheet.close();
   saved(editingAcct ? 'Account saved ✓' : 'Account added ✓', [ui.account]);
+  render();
+  if (splitNext) { const id = splitNext; splitNext = null; setTimeout(() => openTy(id), 250); }
+});
+
+// Split an account's first balance this tax year: what was there on 5 April and what was paid in each month since.
+// The 5 April balance becomes the first balance, so only the monthly payments count as money in this year.
+const tySheet = document.getElementById('ty-sheet');
+let tyAcct = null, splitNext = null;
+const canSplit = a => { const s = logsOf(a.id); return s.length > 0 && s[0].date > taxYearStart(TODAY) && s[0].date <= TODAY; };
+function openTy(id) {
+  const a = state.accounts.find(x => x.id === id);
+  if (!a || !canSplit(a)) return;
+  tyAcct = id;
+  const first = logsOf(id)[0], start = taxYearStart(TODAY), y = +start.slice(0, 4), lbl = topupLabel(a);
+  document.getElementById('ty-title').textContent = `${a.name}: before and since 6 April`;
+  document.getElementById('ty-hint').textContent = `Your first balance here is ${gbp(first.value)} on ${dateLabel(toMs(first.date))}, so it all counts as paid in this tax year. Split it into what was already there on 5 April ${y} and what you paid in each month.`;
+  document.getElementById('ty-rows-hint').textContent = lbl ? 'Enter what you paid. ' + lbl + '.' : 'Your own money paid in. Dates are suggestions; change them if needed.';
+  document.getElementById('ty-april').value = '';
+  const rows = [], day = a.regular ? a.regular.day : 1;
+  for (let k = 0; ; k++) {
+    const m = new Date(Date.UTC(y, 3 + k, 1)), ym = msIso(+m).slice(0, 7);
+    if (ym > first.date.slice(0, 7)) break;
+    const last = new Date(Date.UTC(m.getUTCFullYear(), m.getUTCMonth() + 1, 0)).getUTCDate();
+    let d = `${ym}-${pad(Math.min(day, last))}`;
+    if (d < start) d = start;
+    if (d > first.date) d = first.date;
+    rows.push(`<div class="two"><input class="input" type="date" data-ty="date" value="${d}" min="${start}" max="${TODAY}" aria-label="Date"><div class="money"><span>£</span><input class="input" type="number" inputmode="decimal" step="0.01" min="0" data-ty="amt" placeholder="${esc(fmtMonthLong.format(m))}" aria-label="Paid in ${esc(fmtMonthLong.format(m))}"></div></div>`);
+  }
+  document.getElementById('ty-rows').innerHTML = rows.join('');
+  document.getElementById('ty-err').textContent = '';
+  moneyInputs(tySheet);
+  openSheet(tySheet);
+  setTimeout(() => document.getElementById('ty-april').focus(), 50);
+}
+document.getElementById('ty-form').addEventListener('submit', e => {
+  e.preventDefault();
+  const a = state.accounts.find(x => x.id === tyAcct), err = document.getElementById('ty-err');
+  if (!a) return;
+  const start = taxYearStart(TODAY), rawA = document.getElementById('ty-april').value.trim(), april = rawA === '' ? null : evalAmount(rawA);
+  if (rawA !== '' && (april == null || april < 0)) { err.textContent = 'Enter the 5 April balance, or 0.'; return; }
+  const rows = [...tySheet.querySelectorAll('#ty-rows .two')].map(r => ({ date: r.querySelector('[data-ty=date]').value, v: evalAmount(r.querySelector('[data-ty=amt]').value) }))
+    .filter(r => r.v != null && r.v > 0);
+  if (april == null && !rows.length) { err.textContent = 'Enter the 5 April balance, or at least one payment.'; return; }
+  if (rows.some(r => !isIso(r.date) || r.date < start || r.date > TODAY)) { err.textContent = 'Payment dates need to be between 6 April and today.'; return; }
+  clearExample([a.id]);
+  const old = ytdFlow(a), relief = !!topupLabel(a);
+  if (old) { if (rows.length) state.flows = state.flows.filter(f => f !== old); else delete old.ytd; }
+  if (april != null) upsertLog(a.id, msIso(toMs(start) - 864e5), april, 'Balance at 5 April');
+  for (const r of rows) state.flows.push({ id: uid(), accountId: a.id, date: r.date, amount: relief ? r.v * 1.25 : r.v, own: r.v, note: 'Paid in', auto: false });
+  save(); tySheet.close();
+  saved('Tax year split saved ✓', [a.id]);
   render();
 });
 
@@ -4564,7 +4720,9 @@ function computeNotes() {
   if (!state.example && noteOn('pay')) {
     const [y, mo] = TODAY.split('-').map(Number), lastDay = new Date(Date.UTC(y, mo, 0)).getUTCDate();
     for (const src of state.profile.sources) {
-      const list = state.pay.filter(p => p.source === src.id).sort(byDate);
+      const list = state.pay.filter(p => p.source === src.id).sort(byDate), miss = missingPay(src);
+      if (miss.length) out.push({ id: `paymiss-${src.id}-${miss.join('.')}`, cat: 'todo', icon: 'pound', date: TODAY, title: `${src.name}: pay missing for ${miss.length} month${miss.length > 1 ? 's' : ''}`,
+        body: `Nothing logged for ${monthList(miss)}. Fill in your usual ${gbp(src.regular.net)} to keep this tax year's savings rate right.`, act: { action: 'fill-pay', id: src.id, label: 'Fill in' } });
       if (!src.archived && src.regular && src.regular.day) {
         const due = `${TODAY.slice(0, 8)}${pad(Math.min(src.regular.day, lastDay))}`;
         if (daysSince(due) >= 3 && !list.some(p => p.date >= msIso(toMs(due) - 10 * 864e5)))
@@ -5352,6 +5510,8 @@ document.addEventListener('click', async e => {
       break;
     }
     case 'open-past': openPast(id); break;
+    case 'open-ty': openTy(id); break;
+    case 'fill-pay': fillPay(id); break;
     case 'past-row': document.getElementById('past-rows').insertAdjacentHTML('beforeend', pastRow()); moneyInputs(pastSheet); break;
     case 'edit-entry': openLog(null, id); break;
     case 'review-share': {
