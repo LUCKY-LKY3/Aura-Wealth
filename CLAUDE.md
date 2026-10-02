@@ -58,10 +58,11 @@ There is no local Java/Android SDK on the owner's PC — **APKs are only built b
 
 ## App architecture (src/app.html)
 
-- State (v2): `{ version: 2, example, profile: {name,dob,retireAge,band,growth,inflation,drawRate,people:[{id,name}],lastBackup,setupDone},
+- State (v2): `{ version: 2, example, profile: {name,dob,retireAge,band,growth,inflation,drawRate,people:[{id,name}],sources:[…],p60,lastBackup,setupDone},
   accounts: [{id,name,provider,type,color,owner,fee,rate,notes,archived,priorPaid,since,regular:{amount,day,relief,since,last}|null}],
   logs: [{id,accountId,date:'YYYY-MM-DD',value,note}], flows: [{id,accountId,date,amount,own,note,auto,employer}],
-  income: [{id,accountId,date,amount,kind:'dividend'|'interest'|'prize'}], goals: [{id,name,target,date,scope}] }`
+  income: [{id,accountId,date,amount,kind:'dividend'|'interest'|'prize'}], goals: [{id,name,target,date,scope}],
+  pay: [{id,date,source,net,…}] }` (sources/pay: see 1.9.5 below)
 - "Paid in this tax year" is a flow with `ytd: true` dated on the account's first balance: it counts for allowances
   (dated this tax year) but not as money in for growth (flows on/before the first balance are ignored). SIPP stores gross
   (`own` = amount/1.25), LISA stores own + 25% bonus. Only offered for accounts first logged this tax year.
@@ -76,7 +77,7 @@ There is no local Java/Android SDK on the owner's PC — **APKs are only built b
 - Notifications (bell): `computeNotes()` derives them from data on each render (`refreshBell()`); only `ui.notes.{read,gone,on,move}`
   is stored (in `aurum_ui`). Ids encode the date/version so a new occurrence shows again. Value moves are growth only (flows excluded, estimated logs ignored).
 - Collapsible sections use `foldOpen(key,title,sub)`/`foldClose` (round chevron); open state in `ui.folds`.
-- `income` is for the tax helper only (doesn't affect growth). Employer pension payments are flows with `employer: true, own: 0`.
+- `income` (interest/dividends/prizes) is for the tax helper and shown on Income, but doesn't affect growth or the savings rate. Employer pension payments are flows with `employer: true, own: 0`.
 - Device-only keys (not in backups): `aurum_lock` (PIN hash), `aurum_bio`, `aurum_reminder` (day), `aurum_update` (cached release), `aurum_taxrem` (June P60 / January SA reminders), `aurum_autobackup`/`_last` (weekly copy to Documents/Aurum).
 - `archived` accounts stay in totals/charts but are hidden from pickers, Update all, reminders and the planner.
 - Native plugins: Preferences, Filesystem, Share, LocalNotifications (monthly reminder), NativeBiometric (@capgo, fingerprint), Haptics.
@@ -146,3 +147,8 @@ not advice — keep that disclaimer.
   `payStats(from,to)`: saved = Σ `own` of my non-employer, non-ytd flows (withdrawals net off); rate = saved/net; `coreRate` leaves
   out one-offs (assumed saved first); `fullRate` adds employer flows. Interest/dividends shown but not in the rate. Only "me".
   A pension deduction can create a linked employer flow (`flowId`, own 0) only when ticked; `removePay()` drops it. Notes kind `pay`.
+
+## Status (latest)
+
+- 1.9.5 (Income tab + savings rate) is merged, deployed and released. Next planned work is 2.0 in `ROADMAP.md`.
+- Helper mode ("?" explainer bubbles) is in ROADMAP "Later" — owner said not for now; don't build until asked.

@@ -50,6 +50,9 @@ Agreed with the owner. Nothing here is built until the owner says "go" for that 
   (FCA financial promotion risk; conflicts with "no advice")
 
 ## Later (not scheduled)
+- Helper mode: a Settings switch that adds small "?" bubbles next to sections and figures (net worth, paid in vs
+  growth, savings rate, allowances, planner, tax helper…); tapping one pops up a short plain-English explanation of what
+  it means and how it's worked out. Off by default, can dismiss each tip, and a first-time hint offers to turn it on
 - Privacy screen: blank Aurum card in Android recent apps; blocks screenshots (with a Settings switch)
 
 ## Parked / not wanted
