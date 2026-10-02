@@ -166,10 +166,10 @@ tr.clickable:active,.set-row:active,.note:active,.pressing{opacity:.7}
 }
 .lockup{display:flex;align-items:center;gap:10px;padding:0 8px}
 .lockup .word{font-size:20px;font-weight:650;letter-spacing:-.025em}
-.lockup .tag{display:block;font-size:11px;font-weight:500;letter-spacing:.04em;color:var(--ink-3);margin-top:-2px}
+.lockup .tag{display:block;font-size:12px;font-weight:500;letter-spacing:.04em;color:var(--ink-3);margin-top:-2px}
 .mark{flex:none;display:block}
 .side-nav{display:flex;flex-direction:column;gap:2px}
-.side-nav .label{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);padding:0 10px 8px}
+.side-nav .label{font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);padding:0 10px 8px}
 .nav-btn{display:flex;align-items:center;gap:11px;border:0;background:transparent;color:var(--ink-2);padding:9px 10px;border-radius:8px;font-weight:500;font-size:14px;text-align:left;width:100%}
 .nav-btn svg{width:18px;height:18px;flex:none}
 .nav-btn:hover{background:var(--surface-2);color:var(--ink)}
@@ -183,7 +183,7 @@ tr.clickable:active,.set-row:active,.note:active,.pressing{opacity:.7}
 @keyframes pulse{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--pos) 55%,transparent)}100%{box-shadow:0 0 0 7px transparent}}
 
 .tabbar{position:fixed;left:0;right:0;bottom:0;z-index:30;display:flex;justify-content:space-around;background:var(--surface);border-top:1px solid var(--line);padding:6px 6px calc(8px + var(--sa-bottom))}
-.tabbar button{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;border:0;background:transparent;color:var(--ink-3);font-size:11px;font-weight:500;padding:6px 2px;border-radius:8px}
+.tabbar button{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;border:0;background:transparent;color:var(--ink-3);font-size:12px;font-weight:500;padding:6px 2px;border-radius:8px}
 .tabbar svg{width:22px;height:22px}
 .tabbar button[aria-current="page"]{color:var(--ink)}
 .tabbar button[aria-current="page"] svg{color:var(--gold)}
@@ -234,7 +234,7 @@ a.btn{text-decoration:none}
 .panel-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:16px}
 h2{font-size:15px;font-weight:600;letter-spacing:-.01em;margin:0}
 .panel-head .aside{font-size:12px;color:var(--ink-3)}
-.eyebrow{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+.eyebrow{font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
 .muted{color:var(--ink-2)} .faint{color:var(--ink-3)}
 .pos{color:var(--pos)} .neg{color:var(--neg)}
 .delta{display:inline-flex;align-items:center;gap:3px;font-weight:600;font-size:12px;padding:2px 7px;border-radius:6px;white-space:nowrap}
@@ -304,10 +304,10 @@ h2{font-size:15px;font-weight:600;letter-spacing:-.01em;margin:0}
 .goal-row{display:grid;grid-template-columns:44px 1fr;gap:12px;align-items:center}
 .ring{width:44px;height:44px;position:relative}
 .ring svg{width:44px;height:44px;transform:rotate(-90deg)}
-.ring span{position:absolute;inset:0;display:grid;place-items:center;font-size:11px;font-weight:600;font-family:var(--mono)}
+.ring span{position:absolute;inset:0;display:grid;place-items:center;font-size:12px;font-weight:600;font-family:var(--mono)}
 .bar-legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:12px;color:var(--ink-2);margin-top:10px}
 .chart .base{stroke:var(--line-strong);stroke-width:1}
-.chart .axis{fill:var(--ink-3);font-size:11px;font-family:var(--mono)}
+.chart .axis{fill:var(--ink-3);font-size:12px;font-family:var(--mono)}
 .chart .hover-line{stroke:var(--ink-3);stroke-width:1}
 .chart-empty{display:grid;place-items:center;min-height:190px;color:var(--ink-3);font-size:13px;text-align:center;border:1px dashed var(--line-strong);border-radius:10px;padding:16px}
 .legend-inline{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:12px;color:var(--ink-2);margin-top:10px}
@@ -324,7 +324,7 @@ h2{font-size:15px;font-weight:600;letter-spacing:-.01em;margin:0}
 .donut-box svg{width:132px;height:132px}
 .donut-center{position:absolute;inset:0;display:grid;place-content:center;text-align:center}
 .donut-center b{font-size:18px;font-weight:600;letter-spacing:-.02em}
-.donut-center span{font-size:11px;color:var(--ink-3)}
+.donut-center span{font-size:12px;color:var(--ink-3)}
 .legend{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:12px;width:100%}
 .legend li{display:grid;grid-template-columns:auto 1fr auto;gap:0 8px;align-items:baseline;font-size:13px}
 .legend .pct{font-family:var(--mono);font-size:13px}
@@ -333,7 +333,7 @@ h2{font-size:15px;font-weight:600;letter-spacing:-.01em;margin:0}
 /* ---------- tables ---------- */
 .table-wrap{overflow-x:auto;margin:0 -4px}
 table{width:100%;border-collapse:collapse;font-size:13px}
-th{text-align:left;font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3);font-weight:600;padding:0 12px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+th{text-align:left;font-size:12px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3);font-weight:600;padding:0 12px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
 td{padding:12px;border-bottom:1px solid var(--line);vertical-align:middle}
 tbody tr:last-child td{border-bottom:0}
 td.r,th.r{text-align:right}
@@ -343,7 +343,7 @@ tr.clickable:hover td{background:var(--surface-2)}
 .acct-cell{display:flex;align-items:center;gap:10px;min-width:180px}
 .acct-cell .n{font-weight:600}
 .acct-cell .p{font-size:12px;color:var(--ink-3)}
-.type{font-size:11px;font-weight:600;letter-spacing:.05em;padding:2px 7px;border-radius:5px;background:var(--surface-2);color:var(--ink-2);border:1px solid var(--line)}
+.type{font-size:12px;font-weight:600;letter-spacing:.05em;padding:2px 7px;border-radius:5px;background:var(--surface-2);color:var(--ink-2);border:1px solid var(--line)}
 .weight{display:flex;align-items:center;gap:8px;justify-content:flex-end;min-width:110px}
 .weight .bar{width:56px;height:4px;border-radius:99px;background:var(--surface-2);overflow:hidden}
 .weight .bar i{display:block;height:100%}
@@ -419,16 +419,18 @@ details summary{cursor:pointer;color:var(--ink-2);font-size:13px;font-weight:550
 /* ---------- v2 additions ---------- */
 .seg.scroll{max-width:100%;overflow-x:auto;scrollbar-width:none}
 .seg.scroll button{flex:none}
+@media (max-width:759px){.seg.scroll.more{-webkit-mask-image:linear-gradient(to right,#000 80%,transparent);mask-image:linear-gradient(to right,#000 80%,transparent)}}
+@media (pointer:coarse),(max-width:759px){.seg button{min-height:36px}.btn.sm{min-height:40px;padding-inline:12px}}
 .range-bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 .custom-range{display:flex;gap:6px;align-items:center;font-size:12px;color:var(--ink-2)}
 .custom-range .input{width:auto;padding:5px 8px;font-size:13px}
 .custom-range input.input{width:64px}
 .period-sum{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:13px;color:var(--ink-2);margin:-4px 0 14px}
 .period-sum b{font-family:var(--mono);font-weight:600;margin-right:4px}
-tr.grp td{background:var(--surface-2);font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-2);font-weight:600;padding-block:8px}
+tr.grp td{background:var(--surface-2);font-size:12px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-2);font-weight:600;padding-block:8px}
 tr.grp td.val{font-size:12px;letter-spacing:0;text-transform:none;color:var(--ink)}
 .why{background:none;border:0;padding:8px;margin:-8px -4px;display:inline-flex;align-items:center;gap:6px;color:var(--gold);font:inherit;font-size:12px;cursor:pointer;vertical-align:middle}
-.why i{width:16px;height:16px;flex:none;border:1.4px solid currentColor;border-radius:50%;display:grid;place-items:center;font-style:normal;font-size:11px;font-weight:650;line-height:1}
+.why i{width:16px;height:16px;flex:none;border:1.4px solid currentColor;border-radius:50%;display:grid;place-items:center;font-style:normal;font-size:12px;font-weight:650;line-height:1}
 .why:hover i,.why:focus-visible i{background:var(--gold);color:var(--bg)}
 .faq{border-top:1px solid var(--line);padding:12px 0}
 .faq:first-of-type{border-top:0}
@@ -439,7 +441,7 @@ tr.grp td.val{font-size:12px;letter-spacing:0;text-transform:none;color:var(--in
 .faq>div{color:var(--ink-2);font-size:13px;line-height:1.55;margin-top:8px}
 .faq.flash>summary{color:var(--gold)}
 .slip-bar{display:block;width:100%;height:14px;border-radius:7px;overflow:hidden;margin:4px 0 10px}
-.owner{font-size:11px;font-weight:600;padding:1px 6px;border-radius:5px;background:var(--gold-soft);color:var(--gold);margin-left:6px;white-space:nowrap}
+.owner{font-size:12px;font-weight:600;padding:1px 6px;border-radius:5px;background:var(--gold-soft);color:var(--gold);margin-left:6px;white-space:nowrap}
 .progress{height:6px;border-radius:99px;background:var(--surface-2);overflow:hidden}
 .progress i{display:block;height:100%;background:var(--gold);border-radius:99px}
 .goal-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:16px}
@@ -463,7 +465,7 @@ input.switch:focus-visible,.check.tgl input:focus-visible{outline:2px solid var(
 .check.tgl.mini input{order:0;width:34px;height:20px}
 .check.tgl.mini input::after{width:14px;height:14px}
 .check.tgl.mini input:checked::after{transform:translateX(14px)}
-.set-grp{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);margin:6px 0 -6px}
+.set-grp{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);margin:6px 0 -6px}
 .set-card{border:1px solid var(--line);border-radius:12px;background:var(--surface-2);overflow:hidden}
 .set-row{display:flex;align-items:center;gap:12px;padding:11px 14px;cursor:pointer}
 .set-row+.set-row,.move-opts+.set-row{border-top:1px solid var(--line)}
@@ -541,7 +543,7 @@ body.setup .tabbar,body.setup .fab,body.setup .side-nav,body.setup .top-actions{
 #notes-sheet .sheet-tools{display:flex;align-items:center;gap:4px}
 .note-chips{margin:10px 0 4px}
 .notes{list-style:none;margin:0 -4px;padding:0}
-.note-cat{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);padding:14px 4px 6px}
+.note-cat{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);padding:14px 4px 6px}
 .note{display:flex;gap:11px;align-items:flex-start;padding:11px 8px;border-top:1px solid var(--line);border-radius:10px;touch-action:pan-y}
 .note.unread{background:color-mix(in srgb, var(--gold) 6%, transparent)}
 .note-ic{flex:none;width:32px;height:32px;border-radius:10px;display:grid;place-items:center;background:var(--surface-2);border:1px solid var(--line);color:var(--ink-2)}
@@ -569,7 +571,7 @@ details.fold2.inner[open]{box-shadow:inset 3px 0 0 var(--gold);padding-left:12px
 /* Tables: short dates on phones, estimated balances tagged */
 .d-short{display:none}
 @media (max-width:759px){.d-long{display:none}.d-short{display:inline}}
-.est{font-size:11px;font-weight:600;color:var(--ink-3);border:1px solid var(--line-strong);border-radius:4px;padding:0 4px;margin-left:4px;font-family:var(--font)}
+.est{font-size:12px;font-weight:600;color:var(--ink-3);border:1px solid var(--line-strong);border-radius:4px;padding:0 4px;margin-left:4px;font-family:var(--font)}
 /* Bigger tap targets for small icon buttons */
 @media (pointer:coarse){.icon-btn{min-width:40px;min-height:40px}.move .icon-btn{min-height:30px}}
 /* Save buttons stay visible at the bottom of sheets, above the keyboard */
@@ -595,12 +597,12 @@ details.fold2.inner[open]{box-shadow:inset 3px 0 0 var(--gold);padding-left:12px
 @keyframes shimmer{to{background-position:-200% 0}}
 /* Account type tiles */
 .type-tiles{display:flex;flex-direction:column;gap:10px}
-.type-tiles .tg{font-size:11px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3)}
+.type-tiles .tg{font-size:12px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3)}
 .type-tiles .tt{display:flex;flex-wrap:wrap;gap:6px;margin-top:5px}
 .type-tiles button{border:1px solid var(--line-strong);background:var(--surface);color:var(--ink-2);border-radius:99px;padding:6px 11px;font-size:13px;display:inline-flex;align-items:center;gap:6px}
 .type-tiles button[aria-pressed="true"]{border-color:var(--gold);color:var(--ink);background:var(--gold-soft)}
 .toast.plain [data-action=undo]{display:none}
-.set-group{grid-column:1/-1;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);margin:10px 2px -6px}
+.set-group{grid-column:1/-1;font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);margin:10px 2px -6px}
 .set-group:first-child{margin-top:0}
 .empty-cta{display:flex;flex-direction:column;align-items:center;gap:12px}
 .calc-display{background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:12px 14px;text-align:right;min-height:74px;display:flex;flex-direction:column;justify-content:flex-end;gap:4px;overflow:hidden}
@@ -627,7 +629,7 @@ details.fold>summary{list-style:none;cursor:pointer}
 .pg-bar i:first-child{border-radius:99px 0 0 99px}.pg-bar i:last-child{border-radius:0 99px 99px 0}
 .pg-bar i.loss{background:repeating-linear-gradient(135deg,var(--neg) 0 3px,transparent 3px 6px);border:1px solid var(--neg)}
 .heatmap{display:grid;grid-template-columns:22px repeat(12,minmax(0,1fr));gap:4px;align-items:center}
-.hm-h,.hm-y{font-family:var(--mono);font-size:11px;color:var(--ink-3);text-align:center}
+.hm-h,.hm-y{font-family:var(--mono);font-size:12px;color:var(--ink-3);text-align:center}
 .hm-y{text-align:left}
 .hm-cell{aspect-ratio:1;border:0;border-radius:4px;padding:0;min-width:0}
 .hm-cell.empty{background:var(--surface-2);opacity:.5}
@@ -637,7 +639,7 @@ details.fold>summary{list-style:none;cursor:pointer}
 details.fold>summary::-webkit-details-marker{display:none}
 details.fold>summary h2::after{content:' ▾';color:var(--ink-3);font-size:12px}
 details.fold:not([open])>summary h2::after{content:' ▸'}
-.badge{flex:none;display:inline-grid;place-items:center;width:30px;height:30px;border-radius:8px;border:1.5px solid;background:var(--surface-2);color:var(--ink);font-size:11px;font-weight:650;letter-spacing:.02em}
+.badge{flex:none;display:inline-grid;place-items:center;width:30px;height:30px;border-radius:8px;border:1.5px solid;background:var(--surface-2);color:var(--ink);font-size:12px;font-weight:650;letter-spacing:.02em}
 .badge.big{width:44px;height:44px;border-radius:11px;font-size:14px}
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(84px + var(--sa-bottom));z-index:60;display:flex;align-items:center;gap:14px;background:var(--surface-2);border:1px solid var(--line-strong);box-shadow:var(--shadow);border-radius:10px;padding:8px 8px 8px 14px;font-size:13px;max-width:calc(100% - 32px)}
 @media (max-width:759px){.toast{bottom:calc(142px + var(--sa-bottom))}}
@@ -2204,7 +2206,7 @@ function renderOverview() {
   const growth = `
     <section class="panel">
       <div class="panel-head">
-        <h2>Performance</h2>
+        <div><h2>Performance</h2><span class="aside">Your total balance over time</span></div>
         <div class="seg" role="group" aria-label="Chart breakdown">${[['total', 'Total'], ['group', 'By type'], ['account', 'By account']].map(([k, l]) => `<button data-action="stack-by" data-id="${k}" aria-pressed="${ui.stackBy === k}">${l}</button>`).join('')}</div>
       </div>
       <div style="margin-bottom:12px">${rangeBar('range')}</div>
@@ -2220,8 +2222,7 @@ function renderOverview() {
     </section>`;
 
   const allocation = `
-    <section class="panel">
-      <div class="panel-head"><h2>Allocation</h2><span class="aside">Tap a type for its accounts</span></div>
+    <section class="panel">${foldOpen('ov-alloc', 'Allocation', 'How your money is split · tap a type for its accounts')}
       ${total > 0 ? `<ul class="alloc-list">${groups.map(g => {
         const rows = stats.filter(x => groupOf(x.a) === g.g && x.cur > 0).sort((p, q) => q.cur - p.cur);
         return `<li><details><summary>
@@ -2229,20 +2230,19 @@ function renderOverview() {
           <span class="al-bar"><i style="width:${(g.value / total * 100).toFixed(2)}%;background:${g.color}"></i></span>
         </summary><ul class="al-sub">${rows.map(x => `<li><span>${esc(x.a.name)}${ownerChip(x.a)}</span><span class="mono">${gbp(x.cur)}</span><span class="mono faint">${(x.cur / total * 100).toFixed(1)}%</span></li>`).join('')}</ul></details></li>`;
       }).join('')}</ul>` : '<div class="chart-empty">Your split between account types shows here.</div>'}
-    </section>`;
+    ${foldClose}</section>`;
 
   const barMonths = [6, 12, 24].includes(ui.barMonths) ? ui.barMonths : 12;
   const months = monthlySplit(accts, barMonths);
   const mPaid = months.reduce((t, x) => t + x.paid, 0), mGrowth = months.reduce((t, x) => t + x.growth, 0);
   const monthly = `
     <section class="panel">
-      <div class="panel-head"><h2>Paid in vs growth, by month</h2>
-        <div class="seg" role="group" aria-label="Months">${[6, 12, 24].map(k => `<button data-action="bar-months" data-id="${k}" aria-pressed="${barMonths === k}">${k}M</button>`).join('')}</div>
-      </div>
+      ${foldOpen('ov-monthly', 'Paid in vs growth, by month', 'Each month: what you paid in and what your money earned')}
+        <div class="seg" role="group" aria-label="Months" style="margin-bottom:12px">${[6, 12, 24].map(k => `<button data-action="bar-months" data-id="${k}" aria-pressed="${barMonths === k}">${k}M</button>`).join('')}</div>
       ${months.length ? `<div class="period-sum"><span><b>${gbp(mPaid)}</b>paid in</span><span><b class="${cls(mGrowth)}">${signed(mGrowth)}</b>growth</span><span>growth beat what you paid in for <b>${months.filter(x => x.growth > x.paid && x.growth > 0).length}</b> of ${months.length} months</span></div>` : ''}
       <div class="chart" id="monthly-chart"></div>
       <div class="bar-legend"><span><i class="sw" style="background:var(--c2)"></i>Paid in</span><span><i class="sw" style="background:var(--pos)"></i>Growth</span><span><i class="sw" style="background:var(--neg)"></i>Loss</span></div>
-    </section>`;
+    ${foldClose}</section>`;
 
   const goals = state.goals.length && ui.person === 'me' ? `
     <section class="panel">
@@ -5282,10 +5282,16 @@ document.addEventListener('visibilitychange', () => {
   else if (hiddenAt) { const lt = store.get(LOCKT_KEY) || '1'; if (lt !== 'never' && Date.now() - hiddenAt >= +lt * 60000) showLock(); }
 });
 
+// Fade the right edge of sideways-scrolling button rows while more buttons are hidden.
+const markMore = el => el.classList.toggle('more', el.scrollWidth - el.clientWidth - el.scrollLeft > 4);
+document.addEventListener('scroll', e => { if (e.target.classList && e.target.classList.contains('scroll')) markMore(e.target); }, true);
+new MutationObserver(() => document.querySelectorAll('.seg.scroll').forEach(markMore)).observe(document.getElementById('view'), { childList: true });
 document.addEventListener('toggle', e => {
   const d = e.target;
   if (!d.dataset || !d.dataset.fold) return;
   ui.folds[d.dataset.fold] = d.open; saveUi();
+  const mc = d.open && d.querySelector('#monthly-chart');
+  if (mc && chartConfigs.get(mc)) barChart(mc, chartConfigs.get(mc));
   if (d.open && d.querySelector('#acct-years-chart')) { const a = state.accounts.find(x => x.id === ui.account); if (a) drawAcctYears(a); }
 }, true);
 
