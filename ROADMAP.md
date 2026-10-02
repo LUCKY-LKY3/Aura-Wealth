@@ -6,14 +6,16 @@ Agreed with the owner. Nothing here is built until the owner says "go" for that 
 - 1.9.0 notification bell · 1.9.1 motion and feel · 1.9.2 monthly review, streaks, encrypted backup, backup health,
   auto-lock timer, drag/pin accounts, long-press quick actions, polish · 1.9.3 welcome-back strip, quick dates,
   Insights rename, still tab bar, grouped reorder, password confirm, export fix + Save to phone ·
-  1.9.4 new lock screen + keypad, unlock animation, PIN lockout, wrong-password feedback, splash restyle, demo mode
+  1.9.4 new lock screen + keypad, unlock animation, PIN lockout, wrong-password feedback, splash restyle, demo mode ·
+  1.9.5 Income tab: income sources, pay log (net first, payslip optional), savings rate (total, typical without one-offs,
+  including work pension), where it went, payday/pay-change/best-rate notifications, P60 fill from payslips
 
 ## 2.0 (next)
 - Tax return helper upgrade: build the engine + 25 test cases in `docs/tax-helper-spec.md` (dividend/savings stacking,
   starting rate for savings, PSA, CGT 18%/24% with losses and AEA, HMRC box numbers, required UI wording); keep the
   existing P60/Gift Aid/marriage allowance/HICBC features and show refunds as well as tax to pay
 - State Pension, debts, property
-- Savings rate: % of income put away each month (user enters income) — locked in by owner
+- Income follow-ups: household / partner income (owner per source), goal dates from current savings rate
 - Growth attribution: which accounts drove this year's growth
 - Cash drag warning: lots of cash in a low-interest account (user enters rate)
 - Interest checker: savings rate vs a benchmark rate the user sets

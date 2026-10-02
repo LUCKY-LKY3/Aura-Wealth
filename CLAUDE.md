@@ -140,3 +140,9 @@ not advice — keep that disclaimer.
   backups/import/auto backup blocked; `endDemo()` asks for the PIN. Lock screen colours are fixed dark in both themes.
   Splash drawables in `android/app/src/main/res/drawable*/splash.png` match the lock screen (glow + `#aurum-coin`).
 
+
+- 1.9.5 Income tab (`renderIncome`): `profile.sources` `[{id,name,kind,regular:{net,day}|null,archived}]` (kinds in `SOURCE_KINDS`,
+  `ONE_OFF` = bonus/gift/windfall) and top-level `pay` `[{id,date,source,net,gross,tax,ni,pension,studentLoan,other,note,oneOff,flowId?}]`.
+  `payStats(from,to)`: saved = Σ `own` of my non-employer, non-ytd flows (withdrawals net off); rate = saved/net; `coreRate` leaves
+  out one-offs (assumed saved first); `fullRate` adds employer flows. Interest/dividends shown but not in the rate. Only "me".
+  A pension deduction can create a linked employer flow (`flowId`, own 0) only when ticked; `removePay()` drops it. Notes kind `pay`.
