@@ -150,7 +150,7 @@ not advice — keep that disclaimer.
 
 - 1.9.6: `openTy(id)`/`#ty-sheet` splits a first balance dated after 6 April (`canSplit(a)`): adds a 5 April balance (`upsertLog`)
   and real monthly flows (an old `ytd` flow is dropped, or turned into a normal flow if no months were entered); new accounts offer it via
-  `#acct-split` (`splitNext`). Flows can carry `transfer: true` (money moved from existing savings: excluded from `payStats` saved) and
+  `#acct-split` (`splitNext`). Flows can carry `transfer: true` (money moved between own accounts or from existing savings, in or out: excluded from `payStats`) and
   `isaTransfer: true` (also excluded from ISA allowance in `allowanceUsed`/`yearPaid`/`loggedPaid`). `payslipPanel()` on Income
   (from pay entries with `gross > 0`; `SLIP_ROWS`). `missingPay(src)` gives bell note `paymiss-*` and an Income line; `fillPay()` adds usual net (Undo).
 

@@ -754,7 +754,7 @@ details.fold:not([open])>summary h2::after{content:' ▸'}
         <div class="money"><span>£</span><input id="log-flow" class="input" type="number" inputmode="decimal" step="0.01" min="0" placeholder="0.00" aria-label="Amount"></div>
       </div>
       <label class="check" id="log-relief-wrap" hidden><input type="checkbox" id="log-relief"><span id="log-relief-label"></span></label>
-      <label class="check" id="log-move-wrap" hidden><input type="checkbox" id="log-move"><span>Moved from savings I already had <span class="faint">Still money in for growth, but not new saving in your savings rate</span></span></label>
+      <label class="check" id="log-move-wrap" hidden><input type="checkbox" id="log-move"><span id="log-move-label">Moved from savings I already had</span> <span class="faint" id="log-move-hint"></span></span></label>
       <label class="check" id="log-isat-wrap" hidden><input type="checkbox" id="log-isat"><span>ISA transfer from another ISA <span class="faint">Doesn't use this year's allowance</span></span></label>
       <p class="hint" id="log-kind-hint">Recording deposits means they are not counted as growth.</p>
       <button type="button" class="btn sm" id="log-same" data-action="log-same" hidden style="align-self:flex-start"></button>
@@ -2241,7 +2241,7 @@ function renderOverview() {
       <div class="panel-head"><h2>Recent activity</h2><button class="btn ghost sm" data-action="tab" data-tab="accounts">View all</button></div>
       ${recent.length ? `<ul class="activity">${recent.map(l => {
         const a = accById[l.accountId];
-        if (l.kind === 'flow') return `<li><i class="sw" style="background:${colorOf(a)}"></i><div><div>${esc(a.name)}</div><div class="when">${dateLabel(toMs(l.date))} · ${l.employer ? 'Employer paid in' : l.isaTransfer ? 'ISA transfer' : l.transfer ? 'Moved in' : l.amount >= 0 ? 'Paid in' : 'Taken out'}${l.note ? ' · ' + esc(l.note) : ''}</div></div><div><div class="amt ${cls(l.amount)}">${signed(l.amount)}</div></div></li>`;
+        if (l.kind === 'flow') return `<li><i class="sw" style="background:${colorOf(a)}"></i><div><div>${esc(a.name)}</div><div class="when">${dateLabel(toMs(l.date))} · ${l.employer ? 'Employer paid in' : l.isaTransfer ? 'ISA transfer' : l.transfer ? (l.amount < 0 ? 'Moved out' : 'Moved in') : l.amount >= 0 ? 'Paid in' : 'Taken out'}${l.note ? ' · ' + esc(l.note) : ''}</div></div><div><div class="amt ${cls(l.amount)}">${signed(l.amount)}</div></div></li>`;
         const s = logsOf(l.accountId), i = s.findIndex(x => x.id === l.id), d = i > 0 ? l.value - s[i - 1].value : null;
         return `<li><i class="sw" style="background:${colorOf(a)}"></i><div><div>${esc(a.name)}</div><div class="when">${dateLabel(toMs(l.date))}${l.note ? ' · ' + esc(l.note) : ''}</div></div><div><div class="amt">${gbp(l.value)}</div>${d != null ? `<div class="d ${cls(d)}">${signed(d)}</div>` : ''}</div></li>`;
       }).join('')}</ul>` : '<div class="chart-empty">No activity yet.</div>'}
@@ -2674,7 +2674,7 @@ function renderHistory() {
       const when = dateLabel(toMs(l.date)), whenCell = `<span class="d-long">${when}</span><span class="d-short">${shortDate(l.date)}</span>`;
       if (pendingDelete === l.id) return `<tr class="confirm"><td colspan="3">Delete this ${l.kind === 'flow' ? 'payment' : l.kind === 'income' ? 'income entry' : 'valuation'} from ${when}?</td><td class="hide-sm"></td><td class="r" style="white-space:nowrap"><button class="btn sm ghost" data-action="del-no">Keep</button> <button class="btn sm danger solid" data-action="del-yes" data-id="${esc(l.id)}">Delete</button></td></tr>`;
       if (l.kind === 'income') return `<tr data-row="${esc(l.id)}"><td style="white-space:nowrap">${whenCell}${who(l)}</td><td class="r faint">${incLabel(l.incKind)}</td><td class="r"><span class="delta muted">${gbp(l.amount)}</span></td><td class="note hide-sm faint">${l.incKind === 'prize' ? 'Tax-free prize' : 'Income, for tax'}</td>${actions(l, 'income from ' + when)}</tr>`;
-      if (l.kind === 'flow') return `<tr data-row="${esc(l.id)}"><td style="white-space:nowrap">${whenCell}${who(l)}</td><td class="r faint">${l.employer ? 'Employer paid in' : l.isaTransfer ? 'ISA transfer' : l.transfer ? 'Moved in' : l.amount >= 0 ? 'Paid in' : 'Taken out'}</td><td class="r">${deltaChip(l.amount, signed(l.amount))}</td><td class="note hide-sm">${esc(l.note)}${!l.employer && l.own !== l.amount ? ` <span class="faint">(you paid ${gbp(l.own)})</span>` : ''}</td>${actions(l, 'payment from ' + when)}</tr>`;
+      if (l.kind === 'flow') return `<tr data-row="${esc(l.id)}"><td style="white-space:nowrap">${whenCell}${who(l)}</td><td class="r faint">${l.employer ? 'Employer paid in' : l.isaTransfer ? 'ISA transfer' : l.transfer ? (l.amount < 0 ? 'Moved out' : 'Moved in') : l.amount >= 0 ? 'Paid in' : 'Taken out'}</td><td class="r">${deltaChip(l.amount, signed(l.amount))}</td><td class="note hide-sm">${esc(l.note)}${!l.employer && l.own !== l.amount ? ` <span class="faint">(you paid ${gbp(l.own)})</span>` : ''}</td>${actions(l, 'payment from ' + when)}</tr>`;
       const prev = prevLog[l.id], d = prev ? l.value - prev.value : null;
       return `<tr data-row="${esc(l.id)}"><td style="white-space:nowrap">${whenCell}${who(l)}</td><td class="r val">${gbp(l.value)}${l.estimated ? '<span class="est" title="Estimated from payments since your last balance">est.</span>' : ''}</td><td class="r">${d == null ? '<span class="faint">—</span>' : deltaChip(d, signed(d))}</td><td class="note hide-sm">${esc(l.note)}${l.estimated ? '<span class="faint">Estimated: last balance plus payments</span>' : ''}</td>${actions(l, 'valuation from ' + when)}</tr>`;
     }).join('')}</tbody></table></div>
@@ -3777,7 +3777,9 @@ function updateKindHint() {
   const lbl = a && k === 'in' ? topupLabel(a) : '';
   document.getElementById('log-relief-wrap').hidden = !lbl;
   document.getElementById('log-relief-label').textContent = lbl;
-  document.getElementById('log-move-wrap').hidden = k !== 'in';
+  document.getElementById('log-move-wrap').hidden = k !== 'in' && k !== 'out';
+  document.getElementById('log-move-label').textContent = k === 'out' ? 'Moved to another of my accounts' : 'Moved from savings I already had';
+  document.getElementById('log-move-hint').textContent = k === 'out' ? 'Not counted as taking money out of your savings' : 'Still money in for growth, but not new saving in your savings rate';
   document.getElementById('log-isat-wrap').hidden = !(a && k === 'in' && ['isa', 'jisa'].includes(typeOf(a).allow));
   document.getElementById('log-kind-hint').textContent = {
     in: 'Recording deposits means they are not counted as growth.',
@@ -3876,7 +3878,7 @@ document.getElementById('log-form').addEventListener('submit', e => {
         // Money moved from existing savings: still money in for growth, but not new saving.
         const isat = !out && !document.getElementById('log-isat-wrap').hidden && document.getElementById('log-isat').checked;
         if (isat) f.isaTransfer = true;
-        if (isat || (!out && document.getElementById('log-move').checked)) f.transfer = true;
+        if (isat || document.getElementById('log-move').checked) f.transfer = true;
       }
       state.flows.push(f);
       if (!hasV) addEstimate(f);
