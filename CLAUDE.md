@@ -162,5 +162,8 @@ not advice — keep that disclaimer.
 
 ## Status (latest)
 
-- 1.9.6 released. 1.9.7 (FAQ, income extras, balance-jump prompt, copy payslip) built on `claude/read-claude-md-1d3dhv`, not yet released. Next planned work is 2.0 in `ROADMAP.md`.
+- 1.9.7 (Help and FAQ with gold ? buttons, income extras, balance-jump prompt, copy last payslip) is merged and released.
+  Next planned work is 2.0 in `ROADMAP.md` (tax helper upgrade incl. estimated interest from cash balances, State Pension, etc.).
+- Ideas discussed but parked: savings counted payday to payday (ROADMAP "Later"). When a new feature needs explaining, add an
+  `FAQ` entry and, if it's a common question, a `why()` button next to it.
 - Helper mode ("?" explainer bubbles) is in ROADMAP "Later" — owner said not for now; don't build until asked.
