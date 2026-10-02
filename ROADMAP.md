@@ -16,6 +16,10 @@ Agreed with the owner. Nothing here is built until the owner says "go" for that 
 - Tax return helper upgrade: build the engine + 25 test cases in `docs/tax-helper-spec.md` (dividend/savings stacking,
   starting rate for savings, PSA, CGT 18%/24% with losses and AEA, HMRC box numbers, required UI wording); keep the
   existing P60/Gift Aid/marriage allowance/HICBC features and show refunds as well as tax to pay
+- Estimated interest for the tax helper: for taxable cash accounts (not Cash ISA/LISA, not Premium Bonds, not investments),
+  use logged interest where there is some, otherwise balance growth in the tax year, marked "estimated from balances" with a
+  "Log as interest" button; Personal Savings Allowance meter by band (£1,000 / £500 / £0); flag growth far above the account's
+  advertised rate as a probably unlogged payment rather than interest
 - State Pension, debts, property
 - Income follow-ups: household / partner income (owner per source), goal dates from current savings rate
 - Growth attribution: which accounts drove this year's growth
