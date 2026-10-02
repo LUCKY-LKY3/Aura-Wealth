@@ -5,23 +5,10 @@ Agreed with the owner. Nothing here is built until the owner says "go" for that 
 ## Shipped
 - 1.9.0 notification bell · 1.9.1 motion and feel · 1.9.2 monthly review, streaks, encrypted backup, backup health,
   auto-lock timer, drag/pin accounts, long-press quick actions, polish · 1.9.3 welcome-back strip, quick dates,
-  Insights rename, still tab bar, grouped reorder, password confirm, export fix + Save to phone
+  Insights rename, still tab bar, grouped reorder, password confirm, export fix + Save to phone ·
+  1.9.4 new lock screen + keypad, unlock animation, PIN lockout, wrong-password feedback, splash restyle, demo mode
 
-## 1.9.4 (next)
-- Wrong password feedback: a clear red "Incorrect password" right under the password box (with a small shake and buzz)
-  when changing or turning off the backup password, unlocking an encrypted backup, and on the PIN lock screen
-- New lock screen (mock-up A): gold glow behind a large gradient coin, spaced "AURUM" + "Your wealth, privately",
-  PIN dots that fill gold (shake and turn red on a wrong PIN), round gold-outlined keypad with Forgot and ⌫,
-  "Use fingerprint" below; optionally a "Good evening, Sam" greeting
-- Unlock animation: the coin shrinks up into the header and the app fades in (~0.5s)
-- Too many wrong PINs: after 5, wait 30 seconds, doubling after each further miss
-- Keypad feel: light buzz + gold ripple per key, one firm buzz on a correct PIN
-- Splash screen restyled to match the new lock screen (gold glow + coin, lined up so it flows into the lock screen)
-- Demo mode: Settings switch / bell-area shortcut swaps in example data in memory only;
-  real data untouched, nothing saved, backups/reminders/notifications paused; gold "Demo mode · Exit" bar;
-  exiting asks for the PIN if one is set
-
-## 2.0
+## 2.0 (next)
 - Tax return helper upgrade: build the engine + 25 test cases in `docs/tax-helper-spec.md` (dividend/savings stacking,
   starting rate for savings, PSA, CGT 18%/24% with losses and AEA, HMRC box numbers, required UI wording); keep the
   existing P60/Gift Aid/marriage allowance/HICBC features and show refunds as well as tax to pay

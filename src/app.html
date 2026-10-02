@@ -476,10 +476,40 @@ dialog.sheet.wide{width:min(620px,calc(100% - 32px))}
 .plan-accts li:first-child{border-top:0}
 .plan-accts .money .input{padding-block:6px;font-size:13.5px}
 .big-figure{font-size:clamp(30px,6vw,40px);font-weight:600;letter-spacing:-.035em;line-height:1.1}
-.lock{position:fixed;inset:0;z-index:100;background:var(--bg);display:grid;place-items:center;padding:24px}
-.lock-box{display:flex;flex-direction:column;align-items:center;gap:14px;width:min(320px,100%);text-align:center}
-.lock-box .input{text-align:center;font-family:var(--mono);font-size:22px;letter-spacing:.4em}
-.lock-box .btn{width:100%}
+.lock{position:fixed;inset:0;z-index:100;background:#080807;color:#F3EFE6;display:grid;place-items:center;padding:calc(24px + var(--sa-top)) 24px calc(24px + var(--sa-bottom));overflow:auto;transition:opacity .45s ease}
+.lock-glow{position:absolute;left:50%;top:22%;width:520px;height:520px;transform:translate(-50%,-50%);background:radial-gradient(closest-side,rgba(212,175,90,.26),rgba(212,175,90,.08) 55%,transparent);pointer-events:none}
+.lock-box{position:relative;display:flex;flex-direction:column;align-items:center;gap:14px;width:min(300px,100%);text-align:center}
+.lock-coin{display:block;filter:drop-shadow(0 10px 30px rgba(212,175,90,.35));transition:transform .5s cubic-bezier(.6,0,.3,1),opacity .5s ease}
+.lock-brand{display:flex;flex-direction:column;gap:6px;margin-top:4px}
+.lock-word{font-size:15px;font-weight:600;letter-spacing:.42em;padding-left:.42em;color:#D9B666}
+.lock-tag{font-size:13px;color:#A49D8F}
+.pin-dots{display:flex;gap:14px;height:16px;align-items:center;margin-top:14px}
+.pin-dots i{width:12px;height:12px;border-radius:50%;border:1.5px solid rgba(217,182,102,.6);transition:background .15s,border-color .15s,transform .15s}
+.pin-dots i.on{background:#D9B666;border-color:#D9B666;transform:scale(1.1)}
+.pin-dots.bad i{border-color:#E5604F}.pin-dots.bad i.on{background:#E5604F}
+.lock-err{min-height:18px;font-size:13px;color:#E5604F;margin:0}
+.keypad{display:grid;grid-template-columns:repeat(3,72px);gap:14px 22px;justify-content:center}
+.key{position:relative;overflow:hidden;width:72px;height:72px;border-radius:50%;border:1px solid rgba(217,182,102,.45);background:rgba(255,255,255,.02);color:#F3EFE6;font:500 26px/1 var(--sans,inherit);display:grid;place-items:center;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.key.txt{border-color:transparent;background:none;font-size:13px;color:#A49D8F}
+.key:disabled{opacity:.35;cursor:default}
+.key:focus-visible{outline:2px solid #D9B666;outline-offset:2px}
+.key .rip{position:absolute;left:50%;top:50%;width:72px;height:72px;margin:-36px 0 0 -36px;border-radius:50%;background:rgba(217,182,102,.38);animation:rip .45s ease-out forwards;pointer-events:none}
+@keyframes rip{from{transform:scale(.2);opacity:1}to{transform:scale(1.3);opacity:0}}
+.lock .btn.ghost{color:#D9B666}
+#lock-forgot{min-height:20px}#lock-forgot .hint{color:#A49D8F}
+.lock.out{opacity:0;pointer-events:none}
+@media (max-height:640px){.lock-coin{width:72px;height:72px}.keypad{grid-template-columns:repeat(3,62px);gap:10px 20px}.key{width:62px;height:62px}}
+.shake{animation:shake .4s}
+@keyframes shake{20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}
+.pw-err{color:var(--neg);font-size:13px;font-weight:550;margin:4px 0 0}
+.input.bad{border-color:var(--neg)}
+.demo-bar{display:none;position:fixed;top:0;left:0;right:0;z-index:60;height:calc(34px + var(--sa-top));box-sizing:border-box;align-items:center;justify-content:center;gap:12px;padding:calc(6px + var(--sa-top)) 16px 6px;background:var(--gold);color:#080807;font-size:13px;font-weight:600}
+.demo-bar button{border:0;background:#080807;color:var(--gold);border-radius:99px;padding:4px 12px;font:inherit;font-size:12.5px;cursor:pointer}
+body.demo .demo-bar{display:flex}
+body.demo{padding-top:calc(34px + var(--sa-top))}
+body.demo .side{top:calc(34px + var(--sa-top))}
+@media (max-width:959px){body.demo .top{top:calc(34px + var(--sa-top));padding-top:14px}}
+@media (prefers-reduced-motion:reduce){.shake,.key .rip{animation:none}.lock-coin,.lock{transition:none}}
 body.setup .tabbar,body.setup .fab,body.setup .side-nav,body.setup .top-actions{display:none}
 .setup-card{max-width:520px;margin:4vh auto 0}
 .icon-btn.edit:hover{color:var(--gold)}
@@ -599,6 +629,13 @@ details.fold:not([open])>summary h2::after{content:' ▸'}
 </style>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="aurum-coin" viewBox="0 0 48 48">
+    <defs><linearGradient id="coin-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F6E3A6"/><stop offset=".45" stop-color="#D9B666"/><stop offset="1" stop-color="#9C7A31"/></linearGradient></defs>
+    <circle cx="24" cy="24" r="22" fill="url(#coin-g)"/>
+    <circle cx="24" cy="24" r="18.6" fill="none" stroke="#0B0A08" stroke-opacity=".28" stroke-width="1"/>
+    <path d="M15.6 31.8L24 14.8l8.4 17" fill="none" stroke="#0B0A08" stroke-opacity=".82" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M18.9 26h10.2" stroke="#0B0A08" stroke-opacity=".82" stroke-width="2.8" stroke-linecap="round"/>
+  </symbol>
   <symbol id="aurum-mark" viewBox="0 0 48 48">
     <rect x=".5" y=".5" width="47" height="47" rx="11.5" fill="#0B0A08" stroke="#D4AF5A" stroke-opacity=".35"/>
     <circle cx="24" cy="24" r="14.5" fill="none" stroke="#D4AF5A" stroke-width="2.2"/>
@@ -612,6 +649,8 @@ details.fold:not([open])>summary h2::after{content:' ▸'}
   <symbol id="i-insights" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M19 16l.8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8z"/></g></symbol>
   <symbol id="i-settings" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></g></symbol>
 </svg>
+
+<div class="demo-bar" id="demo-bar" role="status"><span>Demo mode · example data, nothing is saved</span><button type="button" data-action="demo-exit">Exit</button></div>
 
 <div class="shell">
   <aside class="side" aria-label="Aurum">
@@ -883,13 +922,21 @@ details.fold:not([open])>summary h2::after{content:' ▸'}
 <div class="toast" id="toast" role="status" hidden><span id="toast-msg"></span><button class="btn sm" data-action="undo">Undo</button></div>
 
 <div class="lock" id="lock" hidden>
-  <form class="lock-box" id="lock-form">
-    <svg class="mark" width="52" height="52" aria-hidden="true"><use href="#aurum-mark"/></svg>
-    <h2>Aurum is locked</h2>
-    <input id="lock-pin" class="input" type="password" inputmode="numeric" autocomplete="off" maxlength="8" aria-label="PIN" placeholder="PIN">
-    <p class="status err" id="lock-err" role="alert"></p>
-    <button class="btn primary" type="submit">Unlock</button>
+  <div class="lock-glow" aria-hidden="true"></div>
+  <form class="lock-box" id="lock-form" autocomplete="off">
+    <svg class="lock-coin" id="lock-coin" width="104" height="104" aria-hidden="true"><use href="#aurum-coin"/></svg>
+    <div class="lock-brand"><span class="lock-word">AURUM</span><span class="lock-tag" id="lock-greet">Your wealth, privately</span></div>
+    <div class="pin-dots" id="pin-dots" aria-hidden="true"></div>
+    <p class="lock-err" id="lock-err" role="alert"></p>
+    <div class="keypad" id="keypad" role="group" aria-label="Keypad">
+      <button type="button" class="key" data-key="1">1</button><button type="button" class="key" data-key="2">2</button><button type="button" class="key" data-key="3">3</button>
+      <button type="button" class="key" data-key="4">4</button><button type="button" class="key" data-key="5">5</button><button type="button" class="key" data-key="6">6</button>
+      <button type="button" class="key" data-key="7">7</button><button type="button" class="key" data-key="8">8</button><button type="button" class="key" data-key="9">9</button>
+      <button type="button" class="key txt" id="key-left" data-key="forgot">Forgot</button><button type="button" class="key" data-key="0">0</button><button type="button" class="key txt" data-key="back" aria-label="Delete"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5h11a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H9l-6-7z"/><path d="M12 9.5l5 5M17 9.5l-5 5"/></svg></button>
+    </div>
     <div id="lock-forgot"></div>
+  </form>
+</div>
   </form>
 </div>
 
@@ -1104,6 +1151,8 @@ let ui = (() => {
       notes: { read: {}, gone: {}, on: {}, ...(saved.notes || {}), move: { ...DEFAULT_UI.notes.move, ...((saved.notes || {}).move || {}) } } };
   } catch { return JSON.parse(JSON.stringify(DEFAULT_UI)); }
 })();
+// 1.9.4 demo mode: example data in memory only. `demo` holds the real state and UI prefs until exit.
+let demo = null;
 let pendingDelete = null, pendingReset = false, pendingRemoveAcct = null, pendingGoal = null, pendingPerson = null, pendingForgot = false;
 
 const savedEls = document.querySelectorAll('[data-saved]');
@@ -1127,12 +1176,13 @@ const Native = isNative ? {
 } : null;
 
 function save() {
+  if (demo) { setSaved(true, 'Demo mode: nothing is saved'); return; }
   const json = JSON.stringify(state);
   let ok = store.set(STORE_KEY, json);
   if (Native) { Native.Preferences.set({ key: STORE_KEY, value: json }).catch(() => {}); ok = true; }
   setSaved(ok, ok ? 'Saved on this device' : 'Not saved. Export a backup');
 }
-const saveUi = () => store.set(UI_KEY, JSON.stringify(ui));
+const saveUi = () => { if (!demo) store.set(UI_KEY, JSON.stringify(ui)); };
 (() => { const ok = store.set('aurum_probe', '1'); store.del('aurum_probe'); if (!ok) setSaved(false, 'Storage is blocked here'); })();
 
 // Drops the example data. `keep` lists demo accounts the user has started using for real.
@@ -3033,6 +3083,7 @@ function renderSettings() {
 
       <section class="panel stack">
         <h2>Privacy</h2>
+        <label class="check tgl"><input type="checkbox" role="switch" id="set-demo" ${demo ? 'checked' : ''}><span><b style="color:var(--ink);font-weight:550">Demo mode</b><br>Shows example data, to try things out or show someone Aurum. Your own data is untouched and nothing is saved. Backups, reminders and notifications pause until you exit${store.get(LOCK_KEY) ? ', which asks for your PIN' : ''}.</span></label>
         <label class="check tgl"><input type="checkbox" role="switch" id="set-hidden" ${ui.hidden ? 'checked' : ''}><span><b style="color:var(--ink);font-weight:550">Hide balances</b><br>Shows £•••• instead of amounts. Also on the eye button at the top.</span></label>
         <div class="stack" style="gap:10px">
           <div><b style="font-weight:550">PIN lock</b> <span class="faint">${locked ? 'On' : 'Off'}</span></div>
@@ -3732,7 +3783,7 @@ function importCsv(text) {
 // Weekly copy to Documents/Aurum on the phone, keeping the 8 newest files.
 const AUTO_KEY = 'aurum_autobackup', AUTO_LAST = 'aurum_autobackup_last';
 async function autoBackup(force) {
-  if (!Native || store.get(AUTO_KEY) !== '1' || state.example || !state.profile.setupDone) return null;
+  if (!Native || demo || store.get(AUTO_KEY) !== '1' || state.example || !state.profile.setupDone) return null;
   const last = store.get(AUTO_LAST);
   if (!force && last && daysSince(last) < 7) return null;
   const FS = Native.Filesystem;
@@ -3756,33 +3807,140 @@ async function setAutoBackup(on) {
   else { store.del(AUTO_KEY); const el = document.getElementById('set-autobackup'); if (el) el.checked = false; setStatus('Could not save to Documents on this phone. Use Export backup instead.', true, 'auto-status'); }
 }
 
+/* ---------- demo mode ---------- */
+function startDemo() {
+  if (demo || !state.profile.setupDone) return;
+  demo = { state, ui: JSON.stringify(ui) };
+  const d = seedExample({ ...state.profile, people: [] });
+  d.example = false;
+  state = d; ui.person = 'me'; ui.account = null;
+  document.body.classList.add('demo'); closeSheets();
+  render(); window.scrollTo(0, 0);
+}
+function endDemo() {
+  if (!demo) return;
+  const go = () => {
+    if (!demo) return;
+    state = demo.state; ui = JSON.parse(demo.ui); demo = null;
+    document.body.classList.remove('demo'); closeSheets();
+    setSaved(true, 'Saved on this device'); render();
+  };
+  if (store.get(LOCK_KEY) && hasCrypto) { onUnlock = go; showLock(); } else go();
+}
+
 /* ---------- PIN lock ---------- */
 const lockEl = document.getElementById('lock');
 async function hashPin(pin) {
   const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode('aurum:' + pin));
   return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, '0')).join('');
 }
-function showLock() {
-  if (!store.get(LOCK_KEY) || !hasCrypto) return;
+// 1.9.4: keypad lock. The PIN length (`aurum_lockn`) lets it check as soon as the last digit is typed;
+// `aurum_lockfail` = { n, until } keeps the wait after 5 wrong PINs (30s, doubling) across restarts.
+const LOCKN_KEY = 'aurum_lockn', FAIL_KEY = 'aurum_lockfail';
+let pinEntry = '', lockBusy = false, lockTimer = 0, onUnlock = null;
+const pinLen = () => +store.get(LOCKN_KEY) || 0;
+const lockErr = t => { document.getElementById('lock-err').textContent = t; };
+function failInfo() { try { const f = JSON.parse(store.get(FAIL_KEY)); return f && typeof f === 'object' ? f : { n: 0, until: 0 }; } catch { return { n: 0, until: 0 }; } }
+function drawDots(bad) {
+  const el = document.getElementById('pin-dots'), n = pinLen() || Math.max(4, pinEntry.length);
+  el.innerHTML = Array.from({ length: n }, (_, i) => `<i class="${i < pinEntry.length ? 'on' : ''}"></i>`).join('');
+  el.classList.toggle('bad', !!bad);
+  const left = document.getElementById('key-left');
+  left.dataset.key = pinLen() ? 'forgot' : 'ok'; left.textContent = pinLen() ? 'Forgot' : 'OK';
+}
+const shakeEl = el => { if (reduceMotion()) return; el.classList.remove('shake'); void el.offsetWidth; el.classList.add('shake'); };
+const buzzErr = () => { buzz('HEAVY'); setTimeout(() => buzz('HEAVY'), 140); };
+function lockWait() {
+  const left = Math.ceil((failInfo().until - Date.now()) / 1000);
+  document.querySelectorAll('#keypad .key').forEach(k => { k.disabled = left > 0 && k.dataset.key !== 'forgot'; });
+  clearTimeout(lockTimer);
+  if (left > 0) { lockErr(`Too many wrong PINs. Try again in ${left}s.`); lockTimer = setTimeout(lockWait, 1000); return true; }
+  if (/^Too many/.test(document.getElementById('lock-err').textContent)) lockErr('');
+  return false;
+}
+function showLock(intro) {
+  if (!store.get(LOCK_KEY) || !hasCrypto || !lockEl.hidden) return;
   closeSheets();
-  pendingForgot = false;
-  renderForgot();
-  document.getElementById('lock-pin').value = '';
-  document.getElementById('lock-err').textContent = '';
+  pendingForgot = false; pinEntry = ''; lockBusy = false;
+  renderForgot(); drawDots(); lockErr('');
+  const h = new Date().getHours(), first = (state.profile.name || '').split(' ')[0];
+  document.getElementById('lock-greet').innerHTML = `Your wealth, privately${first ? `<br><span style="color:#F3EFE6">${h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening'}, ${esc(first)}</span>` : ''}`;
+  lockEl.classList.remove('out');
+  const coin = document.getElementById('lock-coin');
+  coin.style.transition = 'none'; coin.style.transform = '';
   lockEl.hidden = false;
+  lockWait();
+  // From the splash screen: the coin starts in the middle of the screen, as on the splash, and glides up.
+  if (intro && !reduceMotion()) {
+    const r = coin.getBoundingClientRect();
+    coin.style.transform = `translateY(${innerHeight / 2 - (r.top + r.height / 2)}px) scale(1.15)`;
+    void coin.offsetWidth;
+  }
+  requestAnimationFrame(() => { coin.style.transition = ''; coin.style.transform = ''; });
   if (Native && store.get(BIO_KEY) === '1') tryBio();
-  else setTimeout(() => document.getElementById('lock-pin').focus(), 50);
+}
+function unlock() {
+  const coin = document.getElementById('lock-coin');
+  const done = () => { lockEl.hidden = true; lockEl.classList.remove('out'); coin.style.transform = ''; pinEntry = ''; const cb = onUnlock; onUnlock = null; if (cb) cb(); };
+  if (reduceMotion()) { done(); return; }
+  // The coin shrinks up into the header logo while the app fades in behind.
+  const target = [...document.querySelectorAll('.top .m-brand, .side .mark')].find(m => m.getBoundingClientRect().width);
+  if (target) {
+    const c = coin.getBoundingClientRect(), r = target.getBoundingClientRect();
+    coin.style.transform = `translate(${r.left + r.width / 2 - (c.left + c.width / 2)}px,${r.top + r.height / 2 - (c.top + c.height / 2)}px) scale(${r.width / c.width})`;
+  }
+  lockEl.classList.add('out');
+  setTimeout(done, 500);
+}
+async function checkPin(silent) {
+  const pin = pinEntry;
+  if (await hashPin(pin) === store.get(LOCK_KEY)) {
+    if (lockEl.hidden || lockBusy) return;
+    lockBusy = true;
+    store.del(FAIL_KEY); if (!pinLen()) store.set(LOCKN_KEY, String(pin.length));
+    pinEntry = ''.padEnd(pin.length, '•'); drawDots(); buzz('HEAVY'); unlock();
+    setTimeout(() => { lockBusy = false; }, 600);
+    return;
+  }
+  if (silent || pin !== pinEntry) return;
+  const f = failInfo(); f.n = (f.n || 0) + 1;
+  if (f.n >= 5) f.until = Date.now() + 30000 * 2 ** (f.n - 5);
+  store.set(FAIL_KEY, JSON.stringify(f));
+  lockBusy = true; drawDots(true); shakeEl(document.getElementById('pin-dots')); buzzErr();
+  lockErr(f.n >= 5 ? '' : f.n === 4 ? 'Incorrect PIN. One more try before a short wait.' : 'Incorrect PIN');
+  setTimeout(() => { lockBusy = false; pinEntry = ''; drawDots(); lockWait(); }, 650);
+}
+function pressKey(k) {
+  if (lockBusy || lockEl.hidden) return;
+  if (k === 'forgot') { pendingForgot = true; renderForgot(); return; }
+  if (lockWait()) return;
+  if (k === 'back') { pinEntry = pinEntry.slice(0, -1); buzz(); drawDots(); return; }
+  if (k === 'ok') { if (pinEntry.length >= 4) checkPin(false); else { shakeEl(document.getElementById('pin-dots')); lockErr('Your PIN has at least 4 digits.'); } return; }
+  if (!/^\d$/.test(k) || pinEntry.length >= 8) return;
+  pinEntry += k; buzz(); lockErr(''); drawDots();
+  const n = pinLen();
+  if (n ? pinEntry.length === n : pinEntry.length >= 4) checkPin(!n);
 }
 function renderForgot() {
+  const bio = Native && store.get(BIO_KEY) === '1';
   document.getElementById('lock-forgot').innerHTML = pendingForgot
     ? `<p class="hint" style="margin-bottom:10px">This erases all Aurum data on this device. You can then restore a backup.</p><div class="row-actions" style="justify-content:center"><button class="btn sm ghost" type="button" data-action="forgot-no">Cancel</button><button class="btn sm danger solid" type="button" data-action="forgot-yes">Erase data</button></div>`
-    : `${Native && store.get(BIO_KEY) === '1' ? '<button class="btn sm" type="button" data-action="bio-unlock" style="margin-bottom:8px">Use fingerprint</button><br>' : ''}<button class="btn ghost sm" type="button" data-action="forgot">Forgot PIN?</button>`;
+    : `${bio ? '<button class="btn ghost sm" type="button" data-action="bio-unlock">Use fingerprint</button>' : ''}${pinLen() ? '' : `${bio ? '<br>' : ''}<button class="btn ghost sm" type="button" data-action="forgot">Forgot PIN?</button>`}`;
 }
-document.getElementById('lock-form').addEventListener('submit', async e => {
+document.getElementById('lock-form').addEventListener('submit', e => { e.preventDefault(); pressKey('ok'); });
+document.getElementById('keypad').addEventListener('pointerdown', e => {
+  const k = e.target.closest('.key');
+  if (!k || k.disabled || reduceMotion()) return;
+  const r = document.createElement('span'); r.className = 'rip'; k.appendChild(r); setTimeout(() => r.remove(), 460);
+});
+document.getElementById('keypad').addEventListener('click', e => { const k = e.target.closest('.key'); if (k) pressKey(k.dataset.key); });
+document.addEventListener('keydown', e => {
+  if (lockEl.hidden || e.target.closest && e.target.closest('#lock-forgot')) return;
+  if (/^\d$/.test(e.key)) pressKey(e.key);
+  else if (e.key === 'Backspace') pressKey('back');
+  else if (e.key === 'Enter') { e.preventDefault(); pressKey('ok'); }
+  else return;
   e.preventDefault();
-  const pin = document.getElementById('lock-pin').value;
-  if (await hashPin(pin) === store.get(LOCK_KEY)) { lockEl.hidden = true; document.getElementById('lock-pin').value = ''; }
-  else { document.getElementById('lock-err').textContent = 'That PIN is not right.'; document.getElementById('lock-pin').select(); }
 });
 /* ---------- fingerprint unlock (Android app) ---------- */
 const BIO_KEY = 'aurum_bio';
@@ -3793,7 +3951,7 @@ async function verifyBio() {
 }
 async function tryBio() {
   if (!Native || store.get(BIO_KEY) !== '1' || lockEl.hidden) return;
-  try { await verifyBio(); lockEl.hidden = true; } catch {}
+  try { await verifyBio(); store.del(FAIL_KEY); buzz('HEAVY'); unlock(); } catch {}
 }
 
 /* ---------- monthly reminder (Android app) ---------- */
@@ -3899,7 +4057,7 @@ function noteMove(name, ret, growth, when, id, acct) {
     body: `${signed(growth)} growth ${when}, not counting money paid in or out.`, act: acct ? { action: 'goto-account', id: acct, label: 'View' } : null };
 }
 function computeNotes() {
-  if (!state.profile.setupDone) return [];
+  if (!state.profile.setupDone || demo) return [];
   const out = [], my = active(mine()), cur = +taxYearStart(TODAY).slice(0, 4), md = TODAY.slice(5);
   const real = id => logsOf(id).filter(l => !l.estimated);
   if (!state.example) {
@@ -4039,7 +4197,8 @@ function renderNotes() {
       </li>`;
     }).join('')}</ul>
     <p class="hint" style="text-align:center">Swipe left or tap ✕ to dismiss. To-dos clear themselves once done. Choose which appear in Settings.</p>`
-    : `<div class="chart-empty"><div class="empty-cta">${emptyArt('bell')}<b>You're all caught up.</b><span>Reminders, tax dates, milestones and value moves will appear here.</span></div></div>`;
+    : `<div class="chart-empty"><div class="empty-cta">${emptyArt('bell')}<b>${demo ? 'Notifications are paused in demo mode.' : "You're all caught up."}</b><span>${demo ? 'Your real reminders come back when you exit.' : 'Reminders, tax dates, milestones and value moves will appear here.'}</span></div></div>`;
+  document.getElementById('notes-body').insertAdjacentHTML('beforeend', `<p style="text-align:center;margin:10px 0 0"><button class="btn sm ghost" data-action="${demo ? 'demo-exit' : 'demo-start'}">${demo ? 'Exit demo mode' : 'Try demo mode'}</button></p>`);
 }
 function noteDate(iso) { const d = new Date(toMs(iso)); return d.getUTCFullYear() === +TODAY.slice(0, 4) ? `${d.getUTCDate()} ${fmtMonth.format(d).slice(0, 3)}` : monthYear(toMs(iso)); }
 function openNotes() { if (notesSheet.open) { closeNotes(); return; } renderNotes(); placeNotes(); openSheet(notesSheet); }
@@ -4325,9 +4484,21 @@ async function decryptBackup(o, pw) {
   const plain = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: fromB64(o.iv) }, await bkKey(pw, fromB64(o.salt), +o.iter || 250000), fromB64(o.data));
   return new TextDecoder().decode(plain);
 }
+// 1.9.4: red "Incorrect password" straight under the box, with a shake and a buzz. Cleared when typing again.
+function pwWrong(input, after) {
+  if (!input) return;
+  const anchor = after || input;
+  let msg = anchor.nextElementSibling;
+  if (!msg || !msg.classList.contains('pw-err')) { msg = document.createElement('p'); msg.className = 'pw-err'; msg.setAttribute('role', 'alert'); anchor.after(msg); }
+  msg.textContent = 'Incorrect password';
+  input.classList.add('bad'); shakeEl(input); buzzErr();
+  input.value = ''; input.focus();
+  input.addEventListener('input', () => { input.classList.remove('bad'); msg.remove(); }, { once: true });
+}
 const backupOut = async () => { const json = backupJson(), pw = store.get(BKPASS_KEY); return pw && hasCrypto ? encryptBackup(json, pw) : json; };
 let pendingImport = null;
 async function importText(text) {
+  if (demo) { setStatus('Backups are paused in demo mode. Exit demo mode first.', true); return; }
   let o;
   try { o = JSON.parse(text); } catch { setStatus('That text is not valid JSON. Check you copied the whole backup.', true); return; }
   if (o && o.encrypted) {
@@ -4338,8 +4509,9 @@ async function importText(text) {
     if (plain == null) {
       pendingImport = text;
       const box = document.getElementById('import-pw-box'); if (box) box.hidden = false;
-      setStatus(typed ? 'That password did not unlock the backup. Try again.' : 'This backup is password protected. Enter its password to import it.', !!typed);
-      const f = document.getElementById('import-pw'); if (f) { f.value = ''; f.focus(); }
+      setStatus('This backup is password protected. Enter its password to import it.');
+      const f = document.getElementById('import-pw');
+      if (typed) pwWrong(f, box); else if (f) { f.value = ''; f.focus(); }
       return;
     }
     text = plain;
@@ -4495,7 +4667,10 @@ document.addEventListener('click', async e => {
   const t = e.target.closest('[data-action]');
   if (!t) return;
   const act = t.dataset.action, id = t.dataset.id;
+  if (demo && ['export', 'save-phone', 'copy-backup', 'import-paste', 'import-unlock'].includes(act)) { setStatus('Backups are paused in demo mode. Exit demo mode first.', true); return; }
   switch (act) {
+    case 'demo-start': startDemo(); break;
+    case 'demo-exit': endDemo(); break;
     case 'tab':
       // Tapping the tab you're on scrolls back to the top.
       if (t.dataset.tab === ui.tab && state.profile.setupDone) window.scrollTo({ top: 0, behavior: 'smooth' }); else goTab(t.dataset.tab);
@@ -4564,11 +4739,11 @@ document.addEventListener('click', async e => {
       state = seedExample({ ...state.profile, name, dob });
       ui.tab = 'overview'; saveUi(); save(); render(); break;
     }
-    case 'pin-off': store.del(LOCK_KEY); store.del(BIO_KEY); render(); setStatus('PIN lock turned off.', false, 'pin-status'); break;
+    case 'pin-off': [LOCK_KEY, BIO_KEY, LOCKN_KEY, FAIL_KEY].forEach(k => store.del(k)); render(); setStatus('PIN lock turned off.', false, 'pin-status'); break;
     case 'forgot': pendingForgot = true; renderForgot(); break;
     case 'forgot-no': pendingForgot = false; renderForgot(); break;
     case 'forgot-yes':
-      [STORE_KEY, ...OLD_KEYS, ...Object.values(LEGACY_KEYS), LOCK_KEY, BIO_KEY, UI_KEY].forEach(k => store.del(k));
+      [STORE_KEY, ...OLD_KEYS, ...Object.values(LEGACY_KEYS), LOCK_KEY, BIO_KEY, LOCKN_KEY, FAIL_KEY, UI_KEY].forEach(k => store.del(k)); demo = null; document.body.classList.remove('demo');
       if (Native) Native.Preferences.remove({ key: STORE_KEY }).catch(() => {});
       state = emptyState(); ui = JSON.parse(JSON.stringify(DEFAULT_UI));
       lockEl.hidden = true; save(); render(); break;
@@ -4698,7 +4873,7 @@ document.addEventListener('click', async e => {
     case 'menu-edit': closeSheets(); openAcctSheet(id); break;
     case 'review-hide': { const r = monthReview(); if (r) ui.reviewSeen = r.key; saveUi(); render(); break; }
     case 'pin-acct': { const a = state.accounts.find(x => x.id === id); if (a) { a.pinned = !a.pinned; buzz(); save(); render(); } break; }
-    case 'bkpw-off': { const cur = document.getElementById('bkpw-cur'); if (!cur || cur.value !== store.get(BKPASS_KEY)) { setStatus('Type your current password to turn protection off.', true, 'bkpw-status'); if (cur) cur.focus(); break; } } store.del(BKPASS_KEY); render(); setStatus('Password protection off. New backups are plain files.', false, 'bkpw-status'); break;
+    case 'bkpw-off': { const cur = document.getElementById('bkpw-cur'); if (!cur || cur.value !== store.get(BKPASS_KEY)) { if (cur && cur.value) { setStatus('', false, 'bkpw-status'); pwWrong(cur); } else { setStatus('Type your current password to turn protection off.', true, 'bkpw-status'); if (cur) cur.focus(); } break; } } store.del(BKPASS_KEY); render(); setStatus('Password protection off. New backups are plain files.', false, 'bkpw-status'); break;
     case 'import-unlock': if (pendingImport) importText(pendingImport); break;
     case 'notes-read': notesCache.forEach(n => { ui.notes.read[n.id] = 1; }); saveUi(); refreshBell(); renderNotes(); break;
     case 'note-filter': ui.noteFilter = id; saveUi(); renderNotes(); break;
@@ -4762,6 +4937,7 @@ document.addEventListener('change', e => {
   if (t.id === 'hist-scope' || t.id === 'hist-kind' || t.id === 'hist-year') { ui.hist[t.id.slice(5)] = t.value; saveUi(); renderHistory(); }
   if (t.id === 'set-autobackup') setAutoBackup(t.checked);
   if (t.id === 'set-locktime') { if (t.value === '1') store.del(LOCKT_KEY); else store.set(LOCKT_KEY, t.value); setStatus('Saved.', false, 'pin-status'); }
+  if (t.id === 'set-demo') { if (t.checked) startDemo(); else { t.checked = true; endDemo(); } }
   if (t.id === 'set-hidden') { ui.hidden = t.checked; saveUi(); render(); }
   if (t.id === 'set-bio') {
     if (!t.checked) { store.del(BIO_KEY); return; }
@@ -4843,7 +5019,8 @@ document.addEventListener('submit', async e => {
   } else if (f.id === 'bkpw-form') {
     e.preventDefault();
     const pw = document.getElementById('bkpw-new').value, again = document.getElementById('bkpw-confirm').value, cur = document.getElementById('bkpw-cur');
-    if (cur && cur.value !== store.get(BKPASS_KEY)) { setStatus('Your current password is not right.', true, 'bkpw-status'); return; }
+    if (cur && !cur.value) { setStatus('Type your current password first.', true, 'bkpw-status'); cur.focus(); return; }
+    if (cur && cur.value !== store.get(BKPASS_KEY)) { setStatus('', false, 'bkpw-status'); pwWrong(cur); return; }
     if (pw.length < 6) { setStatus('Use at least 6 characters.', true, 'bkpw-status'); return; }
     if (pw !== again) { setStatus("The two passwords don't match. Type them again.", true, 'bkpw-status'); return; }
     store.set(BKPASS_KEY, pw);
@@ -4852,7 +5029,7 @@ document.addEventListener('submit', async e => {
     e.preventDefault();
     const pin = document.getElementById('pin-new').value;
     if (!/^\d{4,8}$/.test(pin)) { setStatus('Use 4 to 8 digits.', true, 'pin-status'); return; }
-    store.set(LOCK_KEY, await hashPin(pin));
+    store.set(LOCK_KEY, await hashPin(pin)); store.set(LOCKN_KEY, String(pin.length)); store.del(FAIL_KEY);
     render(); setStatus('PIN lock is on.', false, 'pin-status');
   }
 });
@@ -4868,7 +5045,7 @@ moneyInputs();
   }
   if (runRegular()) save();
   render();
-  showLock();
+  showLock(true);
   if (Native) {
     const day = +store.get(REMINDER_KEY);
     if (day) scheduleReminder(day).catch(() => {});
