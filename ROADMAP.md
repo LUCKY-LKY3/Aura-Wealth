@@ -19,6 +19,9 @@ Agreed with the owner. Nothing here is built until the owner says "go" for that 
 - Growth attribution: which accounts drove this year's growth
 - Cash drag warning: lots of cash in a low-interest account (user enters rate)
 - Interest checker: savings rate vs a benchmark rate the user sets
+- Helper mode: a Settings switch that adds small "?" bubbles next to sections and figures (net worth, paid in vs
+  growth, savings rate, allowances, planner, tax helper…); tapping one pops up a short plain-English explanation of what
+  it means and how it's worked out. Off by default, can dismiss each tip, and a first-time hint offers to turn it on
 
 ## 3.x
 - Two-column layout for the unfolded foldable screen
