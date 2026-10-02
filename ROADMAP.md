@@ -12,7 +12,17 @@ Agreed with the owner. Nothing here is built until the owner says "go" for that 
   1.9.6 split a mid-year first balance (5 April balance + monthly payments), "moved from savings" and ISA transfer flags,
   payslip breakdown, missing-pay reminder
 
-## 2.0 (next)
+## 1.9.7 (agreed, on hold until the owner says go)
+- Income: "Still to come this month" (regular sources not yet logged, This month view only); "% of income" column in Income
+  sources plus a one-line note when one source is over ~80% (only with 2+ sources; take-home pay only); one-offs this tax
+  year line; year-on-year take-home for the same months (only once a full year of pay is logged)
+- Balance-jump prompt: a balance rising well beyond expected growth with no payment logged asks "Did you pay money in?"
+  (Paid in / Moved / It's growth)
+- Copy last payslip: fill gross, tax, NI etc. from the previous payslip when logging pay
+- Duplicate last entry: re-log the last payment with today's date
+- Later: savings counted payday to payday (optional setting)
+
+## 2.0 (after 1.9.7)
 - Tax return helper upgrade: build the engine + 25 test cases in `docs/tax-helper-spec.md` (dividend/savings stacking,
   starting rate for savings, PSA, CGT 18%/24% with losses and AEA, HMRC box numbers, required UI wording); keep the
   existing P60/Gift Aid/marriage allowance/HICBC features and show refunds as well as tax to pay
