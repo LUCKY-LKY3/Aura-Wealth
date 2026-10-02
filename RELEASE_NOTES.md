@@ -1,7 +1,6 @@
-- "Welcome back" strip: what changed since your last visit, when you open Aurum each day
-- Quick dates in Log value: Today, Yesterday, 1st of month, 5 April
-- "What's changed" is now called Insights
-- Smoother tab swipes: the tab bar stays still, only the gold pill moves
-- Reorder accounts: each group is shown as its own box, and it's clearer that accounts stay in their group
-- Backup password: type it twice to confirm, with a Show button; you need the current password to change or turn it off
-- Export: no more "Export cancelled" message after saving, plus a new "Save to phone" button (Documents/Aurum)
+- New lock screen: gold coin, PIN dots and a round keypad, with a greeting and "Use fingerprint"
+- Unlocking: the coin glides up into the header as the app fades in, with a firm buzz on the right PIN
+- Wrong PIN: the dots shake and turn red. After 5 wrong tries you wait 30 seconds, doubling each time
+- Wrong backup password: a clear red "Incorrect password" right under the box
+- New splash screen to match the lock screen
+- Demo mode (Settings, or the bell panel): explore with example data. Your own data is untouched and nothing is saved

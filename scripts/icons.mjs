@@ -24,10 +24,22 @@ function svg({ size, background = 'none', scale = 1, rounded = false, edge = fal
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="${size}" height="${size}">${bg}<g transform="translate(24 24) scale(${scale}) translate(-24 -24)">${coin}</g></svg>`;
 }
 
+// 1.9.4 splash: gold glow behind the gradient coin, as on the lock screen.
+function splashSvg({ size }) {
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="${size}" height="${size}"><defs>
+  <radialGradient id="glow"><stop offset="0" stop-color="${GOLD}" stop-opacity=".26"/><stop offset=".55" stop-color="${GOLD}" stop-opacity=".08"/><stop offset="1" stop-color="${GOLD}" stop-opacity="0"/></radialGradient>
+  <linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F6E3A6"/><stop offset=".45" stop-color="#D9B666"/><stop offset="1" stop-color="#9C7A31"/></linearGradient></defs>
+  <rect width="48" height="48" fill="#080807"/><circle cx="24" cy="24" r="9" fill="url(#glow)"/>
+  <g transform="translate(24 24) scale(.09) translate(-24 -24)"><circle cx="24" cy="24" r="22" fill="url(#g)"/>
+  <circle cx="24" cy="24" r="18.6" fill="none" stroke="#0B0A08" stroke-opacity=".28" stroke-width="1"/>
+  <path d="M15.6 31.8L24 14.8l8.4 17" fill="none" stroke="#0B0A08" stroke-opacity=".82" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M18.9 26h10.2" stroke="#0B0A08" stroke-opacity=".82" stroke-width="2.8" stroke-linecap="round"/></g></svg>`;
+}
+
 async function png(file, opts) {
   const out = path.join(root, file);
   fs.mkdirSync(path.dirname(out), { recursive: true });
-  await sharp(Buffer.from(svg(opts))).resize(opts.size, opts.size).png().toFile(out);
+  await sharp(Buffer.from(opts.splash ? splashSvg(opts) : svg(opts))).resize(opts.size, opts.size).png().toFile(out);
   console.log('wrote', file);
 }
 
@@ -35,8 +47,8 @@ async function png(file, opts) {
 await png('resources/icon-only.png', { size: 1024, background: BLACK, scale: 1.15 });
 await png('resources/icon-foreground.png', { size: 1024, scale: 0.9 });
 await png('resources/icon-background.png', { size: 1024, background: BLACK, scale: 0.0001 });
-await png('resources/splash.png', { size: 2732, background: '#080807', scale: 0.3 });
-await png('resources/splash-dark.png', { size: 2732, background: '#080807', scale: 0.3 });
+await png('resources/splash.png', { size: 2732, splash: true });
+await png('resources/splash-dark.png', { size: 2732, splash: true });
 
 // Website / installable web app icons.
 await png('public/icons/icon-192.png', { size: 192, background: BLACK, scale: 1, rounded: true, edge: true });

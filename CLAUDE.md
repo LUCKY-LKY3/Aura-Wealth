@@ -132,3 +132,11 @@ GBP only, `en-GB` formatting. Tax year starts 6 April. ISA allowance £20,000/yr
 (net ÷ 0.8), higher/additional-rate reclaim 20%/25% of gross. 25% tax-free lump sum capped by the
 Lump Sum Allowance £268,275. Pension access age 57 from April 2028. Calculator output is illustration,
 not advice — keep that disclaimer.
+
+- 1.9.4: keypad lock (`showLock(intro)`, `pressKey`, `checkPin`, `unlock()` coin-to-header animation; `onUnlock` callback).
+  Device-only `aurum_lockn` (PIN length, so it checks on the last digit; old PINs without it check silently from 4 digits and
+  need OK to count a miss) and `aurum_lockfail` `{n,until}` (5 misses → 30s wait, doubling). `pwWrong(input, after)` shows
+  "Incorrect password". Demo mode: `demo = {state, ui}` holds the real data; `save()`/`saveUi()` no-op, `computeNotes()` empty,
+  backups/import/auto backup blocked; `endDemo()` asks for the PIN. Lock screen colours are fixed dark in both themes.
+  Splash drawables in `android/app/src/main/res/drawable*/splash.png` match the lock screen (glow + `#aurum-coin`).
+
