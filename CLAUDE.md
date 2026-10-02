@@ -154,7 +154,13 @@ not advice — keep that disclaimer.
   `isaTransfer: true` (also excluded from ISA allowance in `allowanceUsed`/`yearPaid`/`loggedPaid`). `payslipPanel()` on Income
   (from pay entries with `gross > 0`; `SLIP_ROWS`). `missingPay(src)` gives bell note `paymiss-*` and an Income line; `fillPay()` adds usual net (Undo).
 
+- 1.9.7: `FAQ` array `[id, question, answerHtml]` rendered in Settings (`#faq`, `details.faq#faq-<id>`); `openFaq(id)` closes open
+  dialogs, goes to Settings and opens/scrolls; `why(id,ariaLabel,text?)` builds the gold circled "?" help button (`.why`, `data-action="faq"`), placed next to the label it explains, also a link in the bell.
+  Add a question when a new feature needs explaining. `balanceJump()` in the Log value submit shows `#log-jump` (Paid in / Moved /
+  growth → `jumpAnswer`, `jumpOk`). `copySlip()`/`lastSlip()` in Log pay. Income: still to come (This month), `multi` "Of income"
+  column + ≥80% note, one-offs this tax year, same-months YoY on `core` take-home (needs pay from the previous tax year's start).
+
 ## Status (latest)
 
-- 1.9.6 (mid-year split, transfers, payslip breakdown, missing pay) built on `claude/read-claude-md-1d3dhv`, not yet released. Next planned work is 2.0 in `ROADMAP.md`.
+- 1.9.6 released. 1.9.7 (FAQ, income extras, balance-jump prompt, copy payslip) built on `claude/read-claude-md-1d3dhv`, not yet released. Next planned work is 2.0 in `ROADMAP.md`.
 - Helper mode ("?" explainer bubbles) is in ROADMAP "Later" — owner said not for now; don't build until asked.
