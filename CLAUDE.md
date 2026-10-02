@@ -148,7 +148,13 @@ not advice — keep that disclaimer.
   out one-offs (assumed saved first); `fullRate` adds employer flows. Interest/dividends shown but not in the rate. Only "me".
   A pension deduction can create a linked employer flow (`flowId`, own 0) only when ticked; `removePay()` drops it. Notes kind `pay`.
 
+- 1.9.6: `openTy(id)`/`#ty-sheet` splits a first balance dated after 6 April (`canSplit(a)`): adds a 5 April balance (`upsertLog`)
+  and real monthly flows (an old `ytd` flow is dropped, or turned into a normal flow if no months were entered); new accounts offer it via
+  `#acct-split` (`splitNext`). Flows can carry `transfer: true` (money moved between own accounts or from existing savings, in or out: excluded from `payStats`) and
+  `isaTransfer: true` (also excluded from ISA allowance in `allowanceUsed`/`yearPaid`/`loggedPaid`). `payslipPanel()` on Income
+  (from pay entries with `gross > 0`; `SLIP_ROWS`). `missingPay(src)` gives bell note `paymiss-*` and an Income line; `fillPay()` adds usual net (Undo).
+
 ## Status (latest)
 
-- 1.9.5 (Income tab + savings rate) is merged, deployed and released. Next planned work is 2.0 in `ROADMAP.md`.
+- 1.9.6 (mid-year split, transfers, payslip breakdown, missing pay) built on `claude/read-claude-md-1d3dhv`, not yet released. Next planned work is 2.0 in `ROADMAP.md`.
 - Helper mode ("?" explainer bubbles) is in ROADMAP "Later" — owner said not for now; don't build until asked.
