@@ -426,7 +426,9 @@ details summary{cursor:pointer;color:var(--ink-2);font-size:13px;font-weight:550
 .period-sum b{font-family:var(--mono);font-weight:600;margin-right:4px}
 tr.grp td{background:var(--surface-2);font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-2);font-weight:600;padding-block:8px}
 tr.grp td.val{font-size:12.5px;letter-spacing:0;text-transform:none;color:var(--ink)}
-.why{background:none;border:0;padding:0;color:var(--gold);font:inherit;font-size:12.5px;text-decoration:underline;text-underline-offset:2px;cursor:pointer}
+.why{background:none;border:0;padding:8px;margin:-8px -4px;display:inline-flex;align-items:center;gap:6px;color:var(--gold);font:inherit;font-size:12.5px;cursor:pointer;vertical-align:middle}
+.why i{width:16px;height:16px;flex:none;border:1.4px solid currentColor;border-radius:50%;display:grid;place-items:center;font-style:normal;font-size:10.5px;font-weight:650;line-height:1}
+.why:hover i,.why:focus-visible i{background:var(--gold);color:var(--bg)}
 .faq{border-top:1px solid var(--line);padding:12px 0}
 .faq:first-of-type{border-top:0}
 .faq>summary{list-style:none;display:flex;justify-content:space-between;gap:12px;color:var(--ink);font-size:14px;font-weight:550}
@@ -765,7 +767,7 @@ details.fold:not([open])>summary h2::after{content:' ▸'}
       <label class="check" id="log-relief-wrap" hidden><input type="checkbox" id="log-relief"><span id="log-relief-label"></span></label>
       <label class="check" id="log-move-wrap" hidden><input type="checkbox" id="log-move"><span id="log-move-label">Moved from savings I already had</span> <span class="faint" id="log-move-hint"></span></span></label>
       <label class="check" id="log-isat-wrap" hidden><input type="checkbox" id="log-isat"><span>ISA transfer from another ISA <span class="faint">Doesn't use this year's allowance</span></span></label>
-      <p class="hint" id="log-move-why" hidden style="margin:0"><button type="button" class="why" data-action="faq" data-id="move">Moving money between your accounts?</button></p>
+      <p class="hint" id="log-move-why" hidden style="margin:0"><button type="button" class="why" data-action="faq" data-id="move" aria-label="Help: moving money between your accounts"><i aria-hidden="true">?</i><span>Moving money between your accounts?</span></button></p>
       <p class="hint" id="log-kind-hint">Recording deposits means they are not counted as growth.</p>
       <button type="button" class="btn sm" id="log-same" data-action="log-same" hidden style="align-self:flex-start"></button>
     </fieldset>
@@ -2346,7 +2348,7 @@ function renderAccounts() {
         ${rate ? `<p class="explain" style="margin-top:12px">${rate}</p>` : ''}
         ${reg ? `<p class="hint" style="margin-top:12px">Regular payment: ${reg}.</p>` : ''}
         ${a.notes ? `<p class="hint" style="margin-top:8px;white-space:pre-wrap"><b>Notes:</b> ${esc(a.notes)}</p>` : ''}
-        ${canSplit(a) ? `<p class="hint" style="margin-top:8px">First balance is after 6 April, so all of it counts as paid in this tax year. ${why('april', 'Why?')} <button class="btn sm ghost" data-action="open-ty" data-id="${esc(a.id)}">Split it: 5 April balance and monthly payments</button></p>` : ''}
+        ${canSplit(a) ? `<p class="hint" style="margin-top:8px">First balance is after 6 April, so all of it counts as paid in this tax year. ${why('april', 'Help: started tracking after 6 April')} <button class="btn sm ghost" data-action="open-ty" data-id="${esc(a.id)}">Split it: 5 April balance and monthly payments</button></p>` : ''}
         ${ytdForm(a.type) && st.s.length && st.s[0].date >= taxYearStart(TODAY) && !ytdFlow(a) && !canSplit(a) ? `<p class="hint" style="margin-top:8px">Paid into this account since 6 April? <button class="btn sm ghost" data-action="edit-acct" data-id="${esc(a.id)}">Add it for your ${taxYear(TODAY)} allowance</button></p>` : ''}
         ${a.priorPaid == null && st.s.length ? `<p class="hint" style="margin-top:8px">Had gains before you started tracking? <button class="btn sm ghost" data-action="edit-acct" data-id="${esc(a.id)}">Add total paid in so far</button> or <button class="btn sm ghost" data-action="open-past" data-id="${esc(a.id)}">add past balances</button></p>` : `<div class="row-actions" style="margin-top:8px"><button class="btn sm ghost" data-action="open-past" data-id="${esc(a.id)}">Add past balances</button></div>`}
         <div class="readout" id="acct-readout" style="margin-top:18px" aria-live="polite"></div>
@@ -3345,13 +3347,13 @@ function renderIncome() {
     </div>
     ${st.net > 0 ? `<div class="review-grid">
       <div><div class="k">Take-home income</div><div class="v num">${gbp(st.net)}</div></div>
-      <div><div class="k">Saved</div><div class="v num ${cls(st.saved)}">${gbp(st.saved)}</div></div>
+      <div><div class="k">Saved ${why('saved', "Help: why isn't a payment counted as saved?")}</div><div class="v num ${cls(st.saved)}">${gbp(st.saved)}</div></div>
       <div><div class="k">Savings rate</div><div class="v num gold">${rateText(st.rate)}</div></div>
       <div><div class="k">Everything else</div><div class="v num">${gbp(st.spent)}</div></div>
     </div>
     ${lines ? `<ul class="review-list">${lines}</ul>` : ''}` : `<div class="chart-empty"><div class="empty-cta"><span>No pay logged for ${esc(incomeRangeName(key))}.</span><button class="btn sm" data-action="open-pay">Log pay</button></div></div>`}
     ${toCome.length ? `<p class="explain" style="margin-bottom:0">Still to come this month: <b>${gbp(toCome.reduce((t, x) => t + x.regular.net, 0))}</b> <span class="faint">(${toCome.map(x => esc(x.name) + (x.regular.day ? ' on the ' + ordinal(x.regular.day) : '')).join(', ')})</span></p>` : ''}
-    <p class="hint" style="margin-bottom:0">Saved is your own money paid into your accounts, less anything taken out. Tax relief, bonuses and employer payments aren't counted. Everything else is spending and money left in your current account. ${why('saved', "Payment not counted?")}</p>
+    <p class="hint" style="margin-bottom:0">Saved is your own money paid into your accounts, less anything taken out. Tax relief, bonuses and employer payments aren't counted. Everything else is spending and money left in your current account.</p>
   </section>`;
 
   const misses = state.example ? [] : srcs.map(x => [x, missingPay(x)]).filter(([, m]) => m.length);
@@ -3473,7 +3475,8 @@ function openFaq(id) {
     el.scrollIntoView({ block: 'center', behavior: reduceMotion() ? 'auto' : 'smooth' });
   }, 60);
 }
-const why = (id, label) => `<button type="button" class="why" data-action="faq" data-id="${id}">${label}</button>`;
+// Gold circled "?" that opens the matching FAQ answer; `text` adds the question beside it where it helps.
+const why = (id, label, text) => `<button type="button" class="why" data-action="faq" data-id="${id}" aria-label="${label}" title="${label}"><i aria-hidden="true">?</i>${text ? `<span>${text}</span>` : ''}</button>`;
 
 /* ---------- settings ---------- */
 const hasCrypto = !!(window.crypto && crypto.subtle && window.TextEncoder);

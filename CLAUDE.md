@@ -155,7 +155,7 @@ not advice — keep that disclaimer.
   (from pay entries with `gross > 0`; `SLIP_ROWS`). `missingPay(src)` gives bell note `paymiss-*` and an Income line; `fillPay()` adds usual net (Undo).
 
 - 1.9.7: `FAQ` array `[id, question, answerHtml]` rendered in Settings (`#faq`, `details.faq#faq-<id>`); `openFaq(id)` closes open
-  dialogs, goes to Settings and opens/scrolls; `why(id,label)` builds "Why?" links (`data-action="faq"`), also a link in the bell.
+  dialogs, goes to Settings and opens/scrolls; `why(id,ariaLabel,text?)` builds the gold circled "?" help button (`.why`, `data-action="faq"`), placed next to the label it explains, also a link in the bell.
   Add a question when a new feature needs explaining. `balanceJump()` in the Log value submit shows `#log-jump` (Paid in / Moved /
   growth → `jumpAnswer`, `jumpOk`). `copySlip()`/`lastSlip()` in Log pay. Income: still to come (This month), `multi` "Of income"
   column + ≥80% note, one-offs this tax year, same-months YoY on `core` take-home (needs pay from the previous tax year's start).

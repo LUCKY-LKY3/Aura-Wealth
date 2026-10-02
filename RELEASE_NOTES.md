@@ -1,4 +1,4 @@
-- Help and FAQ in Settings, also from the bell and "Why?" links where questions usually come up
+- Help and FAQ in Settings, also from the bell and gold ? buttons next to things that often raise questions
 - Income: what's still to come this month, each source's share of your income, one-offs this tax year, and regular take-home compared with the same months last year
 - A balance that jumps with no payment logged now asks if you paid money in, so it isn't all counted as growth
 - Copy last payslip: fills gross, tax, NI and the rest from your previous payslip
