@@ -23,7 +23,7 @@ Agreed with the owner. Nothing here is built until the owner says "go" for that 
 - Help and FAQ: short answers (2–3 sentences, say what to tap) in collapsible questions; grows each release. First batch:
   payment not counted as saved, moving money between accounts (ISA/GIA/SIPP), started tracking after 6 April, growth vs
   interest vs paid in, typical savings rate, privacy/backup/new phone, forgotten PIN, pension 25% relief, not advice.
-  Access: Settings (Help and FAQ near the top), the header menu, and small "Why?" links where confusion happens that open
+  Access: Settings (Help and FAQ near the top), a "Help" link in the bell panel, and small "Why?" links where confusion happens that open
   the matching answer (e.g. Saved on Income, the split hint, the moved tick boxes). No extra header icon.
 - Later: savings counted payday to payday (optional setting)
 
