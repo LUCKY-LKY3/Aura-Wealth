@@ -426,6 +426,15 @@ details summary{cursor:pointer;color:var(--ink-2);font-size:13px;font-weight:550
 .period-sum b{font-family:var(--mono);font-weight:600;margin-right:4px}
 tr.grp td{background:var(--surface-2);font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-2);font-weight:600;padding-block:8px}
 tr.grp td.val{font-size:12.5px;letter-spacing:0;text-transform:none;color:var(--ink)}
+.why{background:none;border:0;padding:0;color:var(--gold);font:inherit;font-size:12.5px;text-decoration:underline;text-underline-offset:2px;cursor:pointer}
+.faq{border-top:1px solid var(--line);padding:12px 0}
+.faq:first-of-type{border-top:0}
+.faq>summary{list-style:none;display:flex;justify-content:space-between;gap:12px;color:var(--ink);font-size:14px;font-weight:550}
+.faq>summary::-webkit-details-marker{display:none}
+.faq>summary::after{content:'+';color:var(--gold);font-weight:400}
+.faq[open]>summary::after{content:'−'}
+.faq>div{color:var(--ink-2);font-size:13.5px;line-height:1.55;margin-top:8px}
+.faq.flash>summary{color:var(--gold)}
 .slip-bar{display:block;width:100%;height:14px;border-radius:7px;overflow:hidden;margin:4px 0 10px}
 .owner{font-size:11px;font-weight:600;padding:1px 6px;border-radius:5px;background:var(--gold-soft);color:var(--gold);margin-left:6px;white-space:nowrap}
 .progress{height:6px;border-radius:99px;background:var(--surface-2);overflow:hidden}
@@ -756,6 +765,7 @@ details.fold:not([open])>summary h2::after{content:' ▸'}
       <label class="check" id="log-relief-wrap" hidden><input type="checkbox" id="log-relief"><span id="log-relief-label"></span></label>
       <label class="check" id="log-move-wrap" hidden><input type="checkbox" id="log-move"><span id="log-move-label">Moved from savings I already had</span> <span class="faint" id="log-move-hint"></span></span></label>
       <label class="check" id="log-isat-wrap" hidden><input type="checkbox" id="log-isat"><span>ISA transfer from another ISA <span class="faint">Doesn't use this year's allowance</span></span></label>
+      <p class="hint" id="log-move-why" hidden style="margin:0"><button type="button" class="why" data-action="faq" data-id="move">Moving money between your accounts?</button></p>
       <p class="hint" id="log-kind-hint">Recording deposits means they are not counted as growth.</p>
       <button type="button" class="btn sm" id="log-same" data-action="log-same" hidden style="align-self:flex-start"></button>
     </fieldset>
@@ -763,6 +773,10 @@ details.fold:not([open])>summary h2::after{content:' ▸'}
       <label for="log-note">Note <span class="faint">Optional</span></label>
       <input id="log-note" class="input" type="text" maxlength="80" placeholder="e.g. Monthly check-in">
     </div>
+    <div class="warn" id="log-jump" hidden><p id="log-jump-t" style="margin:0 0 8px"></p><div class="row-actions">
+      <button type="button" class="btn sm" data-action="jump" data-id="in">Yes, paid in</button>
+      <button type="button" class="btn sm" data-action="jump" data-id="moved">Moved from my savings</button>
+      <button type="button" class="btn sm ghost" data-action="jump" data-id="growth">No, it's growth</button></div></div>
     <p class="status err" id="log-err" role="alert"></p>
     <div class="sheet-actions">
       <button type="button" class="btn" data-action="close-sheet">Cancel</button>
@@ -966,6 +980,7 @@ details.fold:not([open])>summary h2::after{content:' ▸'}
           <div class="field"><label for="pay-sl">Student loan</label><div class="money"><span>£</span><input id="pay-sl" class="input" type="number" inputmode="decimal" step="0.01" min="0" placeholder="0.00"></div></div>
           <div class="field"><label for="pay-other">Other deductions</label><div class="money"><span>£</span><input id="pay-other" class="input" type="number" inputmode="decimal" step="0.01" min="0" placeholder="0.00"></div></div>
         </div>
+        <button type="button" class="btn sm" id="pay-copy" data-action="pay-copy" hidden style="align-self:flex-start"></button>
         <p class="hint" id="pay-check"></p>
         <div class="stack" id="pay-link-wrap" style="gap:8px" hidden>
           <label class="check"><input type="checkbox" id="pay-link"><span id="pay-link-label">Also log the pension deduction as a payment into</span></label>
@@ -2331,7 +2346,7 @@ function renderAccounts() {
         ${rate ? `<p class="explain" style="margin-top:12px">${rate}</p>` : ''}
         ${reg ? `<p class="hint" style="margin-top:12px">Regular payment: ${reg}.</p>` : ''}
         ${a.notes ? `<p class="hint" style="margin-top:8px;white-space:pre-wrap"><b>Notes:</b> ${esc(a.notes)}</p>` : ''}
-        ${canSplit(a) ? `<p class="hint" style="margin-top:8px">First balance is after 6 April, so all of it counts as paid in this tax year. <button class="btn sm ghost" data-action="open-ty" data-id="${esc(a.id)}">Split it: 5 April balance and monthly payments</button></p>` : ''}
+        ${canSplit(a) ? `<p class="hint" style="margin-top:8px">First balance is after 6 April, so all of it counts as paid in this tax year. ${why('april', 'Why?')} <button class="btn sm ghost" data-action="open-ty" data-id="${esc(a.id)}">Split it: 5 April balance and monthly payments</button></p>` : ''}
         ${ytdForm(a.type) && st.s.length && st.s[0].date >= taxYearStart(TODAY) && !ytdFlow(a) && !canSplit(a) ? `<p class="hint" style="margin-top:8px">Paid into this account since 6 April? <button class="btn sm ghost" data-action="edit-acct" data-id="${esc(a.id)}">Add it for your ${taxYear(TODAY)} allowance</button></p>` : ''}
         ${a.priorPaid == null && st.s.length ? `<p class="hint" style="margin-top:8px">Had gains before you started tracking? <button class="btn sm ghost" data-action="edit-acct" data-id="${esc(a.id)}">Add total paid in so far</button> or <button class="btn sm ghost" data-action="open-past" data-id="${esc(a.id)}">add past balances</button></p>` : `<div class="row-actions" style="margin-top:8px"><button class="btn sm ghost" data-action="open-past" data-id="${esc(a.id)}">Add past balances</button></div>`}
         <div class="readout" id="acct-readout" style="margin-top:18px" aria-live="polite"></div>
@@ -3305,7 +3320,19 @@ function renderIncome() {
     if (prev.rate != null) cmp.push(`<li><span>Vs ${esc(fmtMonthLong.format(new Date(toMs(monthBounds(k + 1)[0]))))}:</span> <b class="${cls(st.rate - prev.rate)}">${pointsText(st.rate - prev.rate)}</b> <span class="faint">(${rateText(prev.rate)}, ${Math.abs(st.net - prev.net) < 0.5 ? 'same income' : 'income ' + signed(st.net - prev.net)})</span></li>`);
     if (yr.rate != null) cmp.push(`<li><span>Vs a year earlier:</span> <b class="${cls(st.rate - yr.rate)}">${pointsText(st.rate - yr.rate)}</b> <span class="faint">(${rateText(yr.rate)}, ${Math.abs(st.net - yr.net) < 0.5 ? 'same income' : 'income ' + signed(st.net - yr.net)})</span></li>`);
   }
+  const y0 = +taxYearStart(TODAY).slice(0, 4), ordinal = d => d + (d % 10 === 1 && d !== 11 ? 'st' : d % 10 === 2 && d !== 12 ? 'nd' : d % 10 === 3 && d !== 13 ? 'rd' : 'th');
+  // Still to come: regular sources not yet logged this month whose payday hasn't passed.
+  const dom = +TODAY.slice(8);
+  const toCome = key === 'month' ? srcs.filter(x => !x.archived && x.regular && x.regular.net && !st.pay.some(p => p.source === x.id) && (!x.regular.day || x.regular.day >= dom)) : [];
+  // Year on year: take-home for the same stretch of the previous tax year, once that year has pay logged from its start.
+  let yoy = '';
+  if (key === 'TY' && st.core > 0 && state.pay.some(p => p.date <= `${y0 - 1}-05-05`)) {
+    // One-offs are left out on both sides, so a bonus doesn't swing it.
+    const prev = payStats(`${y0 - 1}-04-06`, `${+TODAY.slice(0, 4) - 1}${TODAY.slice(4)}`).core;
+    if (prev > 0) yoy = `<li><span>Vs the same months last tax year:</span> <b class="${cls(st.core - prev)}">${(st.core >= prev ? '+' : '−') + Math.abs((st.core - prev) / prev * 100).toFixed(1)}%</b> <span class="faint">regular take-home (${gbp(st.core)} vs ${gbp(prev)})</span></li>`;
+  }
   const lines = [
+    yoy,
     st.oneOff > 0 ? `<li><span>Typical rate:</span> <b>${rateText(st.coreRate)}</b> <span class="faint">leaving out ${gbp(st.oneOff)} of one-offs</span></li>` : '',
     st.employer > 0 ? `<li><span>Including pension from work:</span> <b>${rateText(st.fullRate)}</b> <span class="faint">with ${gbp(st.employer)} paid in by your employer or from your pay</span></li>` : '',
     st.takenOut > 0 ? `<li><span>Paid in</span> <b>${gbp(st.paidIn)}</b><span>, taken out</span> <b>${gbp(st.takenOut)}</b></li>` : '',
@@ -3323,7 +3350,8 @@ function renderIncome() {
       <div><div class="k">Everything else</div><div class="v num">${gbp(st.spent)}</div></div>
     </div>
     ${lines ? `<ul class="review-list">${lines}</ul>` : ''}` : `<div class="chart-empty"><div class="empty-cta"><span>No pay logged for ${esc(incomeRangeName(key))}.</span><button class="btn sm" data-action="open-pay">Log pay</button></div></div>`}
-    <p class="hint" style="margin-bottom:0">Saved is your own money paid into your accounts, less anything taken out. Tax relief, bonuses and employer payments aren't counted. Everything else is spending and money left in your current account.</p>
+    ${toCome.length ? `<p class="explain" style="margin-bottom:0">Still to come this month: <b>${gbp(toCome.reduce((t, x) => t + x.regular.net, 0))}</b> <span class="faint">(${toCome.map(x => esc(x.name) + (x.regular.day ? ' on the ' + ordinal(x.regular.day) : '')).join(', ')})</span></p>` : ''}
+    <p class="hint" style="margin-bottom:0">Saved is your own money paid into your accounts, less anything taken out. Tax relief, bonuses and employer payments aren't counted. Everything else is spending and money left in your current account. ${why('saved', "Payment not counted?")}</p>
   </section>`;
 
   const misses = state.example ? [] : srcs.map(x => [x, missingPay(x)]).filter(([, m]) => m.length);
@@ -3355,15 +3383,20 @@ function renderIncome() {
   const tyNet = (id, yy) => state.pay.filter(p => p.source === id && p.date >= `${yy}-04-06` && p.date <= `${yy + 1}-04-05`).reduce((t, p) => t + p.net, 0);
   const shown = srcs.filter(x => !x.archived || state.pay.some(p => p.source === x.id));
   const spark = id => payMonths(12).map(m => m.st.pay.filter(p => p.source === id).reduce((t, p) => t + p.net, 0));
+  const tyTot = srcs.reduce((t, x) => t + tyNet(x.id, y), 0), multi = srcs.filter(x => tyNet(x.id, y) > 0).length >= 2;
+  const top = multi ? [...srcs].sort((a, b) => tyNet(b.id, y) - tyNet(a.id, y))[0] : null, topShare = top ? tyNet(top.id, y) / tyTot : 0;
+  const oneOffs = state.pay.filter(p => p.oneOff && p.date >= `${y}-04-06` && p.date <= TODAY), oneOffSum = oneOffs.reduce((t, p) => t + p.net, 0);
   const sourcesPanel = `<section class="panel">
     <div class="panel-head"><h2>Income sources</h2><div class="acct-actions"><button class="btn sm" data-action="open-pay">Log pay</button><button class="btn sm" data-action="add-src">${icons.plus}Add source</button></div></div>
     <div class="table-wrap"><table>
-      <thead><tr><th>Source</th><th class="r">${tyLabel(y)}</th><th class="r hide-sm">${tyLabel(y - 1)}</th><th class="r hide-sm">12 months</th></tr></thead>
+      <thead><tr><th>Source</th><th class="r">${tyLabel(y)}</th>${multi ? '<th class="r">Of income</th>' : ''}<th class="r hide-sm">${tyLabel(y - 1)}</th><th class="r hide-sm">12 months</th></tr></thead>
       <tbody>${shown.map(x => `<tr class="clickable" data-action="edit-src" data-id="${esc(x.id)}" tabindex="0">
         <td><div class="n">${esc(x.name)}</div><div class="p faint">${esc(SOURCE_KINDS[x.kind])}${x.regular ? ` · usually ${gbp(x.regular.net)}${x.regular.day ? ` on day ${x.regular.day}` : ''}` : ''}${x.archived ? ' · ended' : ''}</div></td>
-        <td class="r val">${gbp(tyNet(x.id, y))}</td><td class="r val hide-sm">${gbp(tyNet(x.id, y - 1))}</td>
+        <td class="r val">${gbp(tyNet(x.id, y))}</td>${multi ? `<td class="r mono">${tyTot > 0 ? (tyNet(x.id, y) / tyTot * 100).toFixed(0) + '%' : '—'}</td>` : ''}<td class="r val hide-sm">${gbp(tyNet(x.id, y - 1))}</td>
         <td class="r hide-sm">${sparkline(spark(x.id), 'var(--gold)')}</td></tr>`).join('')}
       </tbody></table></div>
+    ${topShare >= 0.8 ? `<p class="hint" style="margin-bottom:0">${Math.round(topShare * 100)}% of your take-home this tax year comes from ${esc(top.name)}.</p>` : ''}
+    ${oneOffSum > 0 ? `<p class="hint" style="margin-bottom:0">One-offs this tax year: <b>${gbp(oneOffSum)}</b> (${esc([...new Set(oneOffs.map(p => sourceName(p.source)))].join(', '))})</p>` : ''}
   </section>`;
 
   const hist = [...state.pay].sort((a, b) => byDate(b, a)).slice(0, 36);
@@ -3418,6 +3451,30 @@ function payslipPanel(key, from, to) {
   </section>`;
 }
 
+// Help and FAQ (1.9.7): short answers that say what to tap. Opened from Settings, the bell and "Why?" links.
+const FAQ = [
+  ['saved', "Why isn't a payment counted as saved?", 'Saved only counts <b>payments into your own accounts</b>, in the month they are dated. It isn\'t counted if you only changed the balance (log it as <b>Paid in</b> instead), if it\'s dated in a different month from the pay, if you ticked <b>Moved</b>, or if the account belongs to someone else under Family.'],
+  ['move', 'How do I log money moved between my accounts?', 'Log it on both accounts: <b>Taken out</b> on the one it left and <b>Paid in</b> on the one it reached, ticking <b>Moved</b> on both. Your savings rate stays the same and each account\'s growth stays right. GIA to ISA uses your ISA allowance; a proper ISA to ISA transfer doesn\'t, so tick <b>ISA transfer</b>. Into a SIPP, also tick the tax relief box.'],
+  ['april', 'I started tracking after 6 April. How do I fix this tax year?', 'Open the account and tap <b>Split it: 5 April balance and monthly payments</b>. Enter what was there on 5 April (0 if it opened later) and what you paid in each month. Only those payments then count as paid in this tax year.'],
+  ['growth', "What's the difference between paid in, growth and interest?", '<b>Paid in</b> is money you (or your employer, or tax relief) put in. <b>Growth</b> is everything else: the change in balance less what was paid in, so it includes interest, dividends and price changes. Logging interest and dividends separately is only for the tax helper; it doesn\'t change growth.'],
+  ['typical', 'What is the typical savings rate?', 'Your savings rate with one-offs like bonuses and gifts left out, assuming you saved those first. It shows what you save from your normal pay. Mark pay as <b>One-off</b> when you log it.'],
+  ['relief', 'Why does my pension get 25% more than I paid?', 'With relief at source, you pay 80% and the pension provider claims 20% basic-rate tax back, so £80 becomes £100. Tick the tax relief box and Aurum adds it. Higher-rate taxpayers can claim more through a tax return; see the tax helper.'],
+  ['privacy', 'Where is my data, and how do I move to a new phone?', 'Everything stays on this device; nothing is sent anywhere. Use <b>Settings → Backup and restore → Export backup</b> regularly (you can add a password), then <b>Import backup file</b> on the new phone.'],
+  ['pin', 'What if I forget my PIN?', 'The PIN is a privacy screen, so it can\'t be recovered. Tap <b>Forgot</b> on the lock screen to erase the data on this device, then restore your latest backup.'],
+  ['advice', 'Is this financial advice?', 'No. Aurum works things out from your own entries to help you see where you stand. Figures are estimates and tax rules change, so check anything important with HMRC, your provider or a regulated adviser.']
+];
+function openFaq(id) {
+  document.querySelectorAll('dialog[open]').forEach(d => d.close());
+  goTab('settings');
+  setTimeout(() => {
+    const el = document.getElementById(id ? 'faq-' + id : 'faq');
+    if (!el) return;
+    if (el.tagName === 'DETAILS') { el.open = true; el.classList.add('flash'); }
+    el.scrollIntoView({ block: 'center', behavior: reduceMotion() ? 'auto' : 'smooth' });
+  }, 60);
+}
+const why = (id, label) => `<button type="button" class="why" data-action="faq" data-id="${id}">${label}</button>`;
+
 /* ---------- settings ---------- */
 const hasCrypto = !!(window.crypto && crypto.subtle && window.TextEncoder);
 function renderSettings() {
@@ -3448,6 +3505,11 @@ function renderSettings() {
           <p class="hint">Used by the planner, tax helper and pension access age. Stored only on this device.</p>
           <div class="row-actions"><button class="btn primary" type="submit">Save details</button><span class="status" id="profile-status" role="status"></span></div>
         </form>
+      </section>
+
+      <section class="panel stack" id="faq">
+        <h2>Help and FAQ</h2>
+        <div>${FAQ.map(([id, q, a]) => `<details class="faq" id="faq-${id}"><summary>${q}</summary><div>${a}</div></details>`).join('')}</div>
       </section>
 
       <section class="panel stack">
@@ -3777,7 +3839,7 @@ function updateKindHint() {
   const lbl = a && k === 'in' ? topupLabel(a) : '';
   document.getElementById('log-relief-wrap').hidden = !lbl;
   document.getElementById('log-relief-label').textContent = lbl;
-  document.getElementById('log-move-wrap').hidden = k !== 'in' && k !== 'out';
+  document.getElementById('log-move-wrap').hidden = document.getElementById('log-move-why').hidden = k !== 'in' && k !== 'out';
   document.getElementById('log-move-label').textContent = k === 'out' ? 'Moved to another of my accounts' : 'Moved from savings I already had';
   document.getElementById('log-move-hint').textContent = k === 'out' ? 'Not counted as taking money out of your savings' : 'Still money in for growth, but not new saving in your savings rate';
   document.getElementById('log-isat-wrap').hidden = !(a && k === 'in' && ['isa', 'jisa'].includes(typeOf(a).allow));
@@ -3819,6 +3881,7 @@ function openLog(accountId, entryId) {
   document.getElementById('log-relief').checked = false;
   document.getElementById('log-move').checked = document.getElementById('log-isat').checked = false;
   document.getElementById('log-err').textContent = '';
+  document.getElementById('log-jump').hidden = true; jumpOk = false;
   document.getElementById('log-example-note').hidden = !state.example || !!found;
   document.getElementById('sheet-title').textContent = found ? 'Edit entry' : 'Log a value';
   document.getElementById('log-value-field').hidden = !!found && found.kind !== 'log';
@@ -3851,6 +3914,17 @@ document.getElementById('log-form').addEventListener('submit', e => {
   const hasV = rawV !== '' && isFinite(value) && value >= 0, hasF = rawF !== '' && isFinite(flow) && flow > 0;
   if (!date || (!hasV && !hasF)) { document.getElementById('log-err').textContent = editingEntry ? 'Enter an amount.' : 'Enter a balance, an amount paid in or out, or both.'; return; }
   const accountId = logAccount.value, note = document.getElementById('log-note').value.trim();
+  // A balance well above the last one with no payment logged: ask before counting it all as growth.
+  if (hasV && !hasF && !editingEntry && !jumpOk) {
+    const j = balanceJump(accountId, date, value);
+    if (j) {
+      jumpAmt = j;
+      document.getElementById('log-jump-t').textContent = `That's ${gbp(j)} more than the last balance, with no payment logged. Did you pay money in?`;
+      document.getElementById('log-jump').hidden = false;
+      return;
+    }
+  }
+  jumpOk = false;
   // Editing replaces the entry, keeping its id.
   let id = uid();
   if (editingEntry) {
@@ -3893,6 +3967,28 @@ document.getElementById('log-form').addEventListener('submit', e => {
 });
 sheet.addEventListener('close', () => { editingEntry = null; logAccount.disabled = false; });
 
+// Balance jump (1.9.7): growth beyond what the account could plausibly earn since its last real balance.
+// Cash: about twice its rate (5% if unset) plus £20. Others: 10% a month, at least £500.
+let jumpOk = false, jumpAmt = 0;
+function balanceJump(id, date, value) {
+  const a = state.accounts.find(x => x.id === id), prev = logsOf(id).filter(l => !l.estimated && l.date < date).pop();
+  if (!a || !prev) return 0;
+  const paid = state.flows.filter(f => f.accountId === id && f.date > prev.date && f.date <= date).reduce((t, f) => t + f.amount, 0);
+  const jump = value - prev.value - paid, days = Math.max(1, (toMs(date) - toMs(prev.date)) / 864e5);
+  const cash = groupOf(a) === 'cash' || a.type === 'Cash ISA';
+  const limit = cash ? prev.value * Math.max(a.rate || 5, 1) / 100 * days / 365 * 2 + 20 : Math.max(500, prev.value * 0.1 * Math.max(1, days / 30));
+  return jump > limit ? Math.round(jump * 100) / 100 : 0;
+}
+function jumpAnswer(k) {
+  if (k !== 'growth') {
+    document.getElementById('log-kind').value = 'in'; updateKindHint();
+    document.getElementById('log-flow').value = jumpAmt;
+    document.getElementById('log-move').checked = k === 'moved';
+  }
+  jumpOk = true;
+  document.getElementById('log-form').requestSubmit();
+}
+
 // Log pay and income sources (1.9.5)
 const paySheet = document.getElementById('pay-sheet'), srcSheet = document.getElementById('src-sheet'), paySource = document.getElementById('pay-source');
 let editingPay = null, editingSrc = null, srcThenPay = false;
@@ -3913,6 +4009,15 @@ function updatePayCheck() {
   document.getElementById('pay-link-wrap').hidden = !(pen > 0 && pensionAccts().length);
   document.getElementById('pay-link-label').textContent = `Also log ${fmtGBP2.format(pen)} as a payment into this pension`;
 }
+const lastSlip = () => state.pay.filter(p => p.source === paySource.value && p.gross > 0 && p.id !== editingPay).sort(byDate).pop();
+function copySlip() {
+  const slip = lastSlip();
+  if (!slip) return;
+  PAY_FIELDS.forEach(([k, id]) => { document.getElementById(id).value = slip[k] || ''; });
+  const net = document.getElementById('pay-net');
+  if (!net.value) net.value = slip.net;
+  updatePayCheck();
+}
 function updatePayHints() {
   const src = sourceOf(paySource.value), reg = src ? state.pay.filter(p => p.source === src.id && !p.oneOff && p.id !== editingPay).sort(byDate) : [];
   const last = reg[reg.length - 1], same = last ? last.net : src && src.regular ? src.regular.net : 0;
@@ -3920,6 +4025,8 @@ function updatePayHints() {
   const btn = document.getElementById('pay-same');
   btn.hidden = !same || !!editingPay; btn.dataset.v = same; btn.textContent = `${last ? 'Same as last time' : 'Usual amount'}: ${fmtGBP2.format(same)}`;
   if (!editingPay) document.getElementById('pay-oneoff').checked = !!(src && ONE_OFF.includes(src.kind));
+  const slip = lastSlip(), cp = document.getElementById('pay-copy');
+  cp.hidden = !slip; if (slip) cp.textContent = `Copy last payslip (${dateLabel(toMs(slip.date))})`;
   updatePayCheck();
 }
 function openPay(srcId, entryId) {
@@ -4791,7 +4898,7 @@ function renderNotes() {
     }).join('')}</ul>
     <p class="hint" style="text-align:center">Swipe left or tap ✕ to dismiss. To-dos clear themselves once done. Choose which appear in Settings.</p>`
     : `<div class="chart-empty"><div class="empty-cta">${emptyArt('bell')}<b>${demo ? 'Notifications are paused in demo mode.' : "You're all caught up."}</b><span>${demo ? 'Your real reminders come back when you exit.' : 'Reminders, tax dates, milestones and value moves will appear here.'}</span></div></div>`;
-  document.getElementById('notes-body').insertAdjacentHTML('beforeend', `<p style="text-align:center;margin:10px 0 0"><button class="btn sm ghost" data-action="${demo ? 'demo-exit' : 'demo-start'}">${demo ? 'Exit demo mode' : 'Try demo mode'}</button></p>`);
+  document.getElementById('notes-body').insertAdjacentHTML('beforeend', `<p style="text-align:center;margin:10px 0 0"><button class="btn sm ghost" data-action="faq" data-id="">Help and FAQ</button> <button class="btn sm ghost" data-action="${demo ? 'demo-exit' : 'demo-start'}">${demo ? 'Exit demo mode' : 'Try demo mode'}</button></p>`);
 }
 function noteDate(iso) { const d = new Date(toMs(iso)); return d.getUTCFullYear() === +TODAY.slice(0, 4) ? `${d.getUTCDate()} ${fmtMonth.format(d).slice(0, 3)}` : monthYear(toMs(iso)); }
 function openNotes() { if (notesSheet.open) { closeNotes(); return; } renderNotes(); placeNotes(); openSheet(notesSheet); }
@@ -5289,6 +5396,9 @@ document.addEventListener('click', async e => {
       state.profile.sources = state.profile.sources.filter(x => x.id !== editingSrc);
       closeSheets(); save(); render(); break;
     }
+    case 'faq': openFaq(id); break;
+    case 'jump': jumpAnswer(id); break;
+    case 'pay-copy': copySlip(); break;
     case 'pay-same': { const inp = document.getElementById('pay-net'); inp.value = t.dataset.v; updatePayCheck(); break; }
     case 'income-range': ui.incomeRange = id; saveUi(); render(); break;
     case 'pay-months': ui.payMonths = +id; saveUi(); render(); break;

@@ -1,6 +1,4 @@
-- Started tracking an account after 6 April? Split its first balance into what was there on 5 April and what you paid in each month, so this tax year and your savings rate are right
-- New accounts added mid-year offer the same split straight away
-- Mark money moved between your own accounts (ISA to GIA, GIA to ISA, ISA to SIPP and so on): it still counts for each account's growth, but doesn't change your savings rate
-- ISA transfers from another ISA no longer use up your £20,000 allowance
-- Payslip breakdown on Income: where your gross pay went (tax, NI, pension, student loan) and how much of every £1 you kept
-- A reminder when a month's pay is missing this tax year, with one tap to fill in your usual pay
+- Help and FAQ in Settings, also from the bell and "Why?" links where questions usually come up
+- Income: what's still to come this month, each source's share of your income, one-offs this tax year, and regular take-home compared with the same months last year
+- A balance that jumps with no payment logged now asks if you paid money in, so it isn't all counted as growth
+- Copy last payslip: fills gross, tax, NI and the rest from your previous payslip

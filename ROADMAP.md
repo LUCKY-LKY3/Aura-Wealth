@@ -10,24 +10,13 @@ Agreed with the owner. Nothing here is built until the owner says "go" for that 
   1.9.5 Income tab: income sources, pay log (net first, payslip optional), savings rate (total, typical without one-offs,
   including work pension), where it went, payday/pay-change/best-rate notifications, P60 fill from payslips ·
   1.9.6 split a mid-year first balance (5 April balance + monthly payments), "moved from savings" and ISA transfer flags,
-  payslip breakdown, missing-pay reminder
+  payslip breakdown, missing-pay reminder · 1.9.7 Help and FAQ (Settings, bell, "Why?" links), still to come this month,
+  income share by source, one-offs this year, same-months year on year, balance-jump prompt, copy last payslip
 
-## 1.9.7 (agreed, on hold until the owner says go)
-- Income: "Still to come this month" (regular sources not yet logged, This month view only); "% of income" column in Income
-  sources plus a one-line note when one source is over ~80% (only with 2+ sources; take-home pay only); one-offs this tax
-  year line; year-on-year take-home for the same months (only once a full year of pay is logged)
-- Balance-jump prompt: a balance rising well beyond expected growth with no payment logged asks "Did you pay money in?"
-  (Paid in / Moved / It's growth)
-- Copy last payslip: fill gross, tax, NI etc. from the previous payslip when logging pay
-- Duplicate last entry: re-log the last payment with today's date
-- Help and FAQ: short answers (2–3 sentences, say what to tap) in collapsible questions; grows each release. First batch:
-  payment not counted as saved, moving money between accounts (ISA/GIA/SIPP), started tracking after 6 April, growth vs
-  interest vs paid in, typical savings rate, privacy/backup/new phone, forgotten PIN, pension 25% relief, not advice.
-  Access: Settings (Help and FAQ near the top), a "Help" link in the bell panel, and small "Why?" links where confusion happens that open
-  the matching answer (e.g. Saved on Income, the split hint, the moved tick boxes). No extra header icon.
-- Later: savings counted payday to payday (optional setting)
+## Later (from 1.9.7 talks)
+- Savings counted payday to payday (optional setting)
 
-## 2.0 (after 1.9.7)
+## 2.0 (next)
 - Tax return helper upgrade: build the engine + 25 test cases in `docs/tax-helper-spec.md` (dividend/savings stacking,
   starting rate for savings, PSA, CGT 18%/24% with losses and AEA, HMRC box numbers, required UI wording); keep the
   existing P60/Gift Aid/marriage allowance/HICBC features and show refunds as well as tax to pay
