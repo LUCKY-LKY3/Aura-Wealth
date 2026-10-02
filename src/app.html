@@ -69,7 +69,7 @@ button{cursor:pointer}
 }
 @keyframes shIn{from{transform:translateY(40%);opacity:.4}to{transform:none;opacity:1}}
 /* Tab bar: a gold pill slides to the current tab. */
-.tab-pill{position:absolute;left:6px;top:8px;height:30px;width:calc((100% - 12px) / 5);transition:transform .32s cubic-bezier(.3,.9,.3,1);pointer-events:none;z-index:0}
+.tab-pill{position:absolute;left:6px;top:8px;height:30px;width:calc((100% - 12px) / 6);transition:transform .32s cubic-bezier(.3,.9,.3,1);pointer-events:none;z-index:0}
 .tab-pill::before{content:'';position:absolute;left:50%;top:0;width:54px;height:30px;margin-left:-27px;border-radius:15px;background:var(--gold-soft);border:1px solid color-mix(in srgb,var(--gold) 25%,transparent)}
 .tabbar button{position:relative;z-index:1}
 .tabbar{transform:translateZ(0);will-change:transform;contain:layout paint}
@@ -116,6 +116,11 @@ tr.clickable:active,.set-row:active,.note:active,.pressing{opacity:.7}
 .review-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:14px 0}
 @media (min-width:760px){.review-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
 .review-grid .k{font-size:12px;color:var(--ink-3)}.review-grid .v{font-size:19px;font-weight:600;letter-spacing:-.02em}
+.v.gold{color:var(--gold)}
+.pay-strip{display:grid;grid-template-columns:1fr auto auto;gap:4px 22px;align-items:end;padding:14px 18px;cursor:pointer}
+.pay-strip .k{font-size:12px;color:var(--ink-3)}.pay-strip .v{font-size:18px;font-weight:600;letter-spacing:-.02em}.pay-strip .v .faint{font-size:13px;font-weight:500}
+.pay-strip .r{text-align:right}
+@media (max-width:759px){.pay-strip{grid-template-columns:1fr auto}}
 .review-list{list-style:none;margin:0;padding:0;font-size:13.5px;color:var(--ink-2)}
 .review-list li{padding:7px 0;border-top:1px solid var(--line)}
 .review-list b{color:var(--ink);font-weight:600}
@@ -647,6 +652,7 @@ details.fold:not([open])>summary h2::after{content:' ▸'}
   <symbol id="i-accounts" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10l9-6 9 6"/><path d="M5 10v8M9.5 10v8M14.5 10v8M19 10v8M3 20h18"/></g></symbol>
   <symbol id="i-planner" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19l5-6 4 3 7-9"/><path d="M4 4v16h16"/></g></symbol>
   <symbol id="i-insights" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M19 16l.8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8z"/></g></symbol>
+  <symbol id="i-income" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="6" width="19" height="12" rx="2"/><circle cx="12" cy="12" r="2.6"/><path d="M6 9.5v5M18 9.5v5"/></g></symbol>
   <symbol id="i-settings" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></g></symbol>
 </svg>
 
@@ -662,6 +668,7 @@ details.fold:not([open])>summary h2::after{content:' ▸'}
       <div class="label">Portfolio</div>
       <button class="nav-btn" data-action="tab" data-tab="overview"><svg><use href="#i-overview"/></svg>Overview</button>
       <button class="nav-btn" data-action="tab" data-tab="accounts"><svg><use href="#i-accounts"/></svg>Accounts</button>
+      <button class="nav-btn" data-action="tab" data-tab="income"><svg><use href="#i-income"/></svg>Income</button>
       <button class="nav-btn" data-action="tab" data-tab="planner"><svg><use href="#i-planner"/></svg>Planner &amp; goals</button>
       <button class="nav-btn" data-action="tab" data-tab="insights"><svg><use href="#i-insights"/></svg>Insights</button>
       <div class="label" style="margin-top:18px">Data</div>
@@ -697,6 +704,7 @@ details.fold:not([open])>summary h2::after{content:' ▸'}
 <nav class="tabbar" aria-label="Sections"><span class="tab-pill" aria-hidden="true"></span>
   <button data-action="tab" data-tab="overview"><svg><use href="#i-overview"/></svg>Overview</button>
   <button data-action="tab" data-tab="accounts"><svg><use href="#i-accounts"/></svg>Accounts</button>
+  <button data-action="tab" data-tab="income"><svg><use href="#i-income"/></svg>Income</button>
   <button data-action="tab" data-tab="planner"><svg><use href="#i-planner"/></svg>Planner</button>
   <button data-action="tab" data-tab="insights"><svg><use href="#i-insights"/></svg>Insights</button>
   <button data-action="tab" data-tab="settings"><svg><use href="#i-settings"/></svg>Settings</button>
@@ -887,6 +895,100 @@ details.fold:not([open])>summary h2::after{content:' ▸'}
   </form>
 </dialog>
 
+<dialog class="sheet" id="pay-sheet" aria-labelledby="pay-title">
+  <div class="grab" aria-hidden="true"></div>
+  <form id="pay-form" method="dialog">
+    <div class="sheet-head">
+      <h2 id="pay-title">Log pay</h2>
+      <button type="button" class="icon-btn" data-action="close-sheet" aria-label="Close">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+    <p class="warn" id="pay-example-note" hidden>Saving your first pay clears the example figures, so only your own numbers remain.</p>
+    <div class="field">
+      <label for="pay-source">Income source</label>
+      <select id="pay-source" class="input"></select>
+    </div>
+    <div class="field">
+      <label for="pay-date">Date received</label>
+      <input id="pay-date" class="input" type="date" required>
+      <div class="seg scroll date-chips" role="group" aria-label="Quick dates" id="pay-date-chips"></div>
+    </div>
+    <div class="field">
+      <label for="pay-net">Take-home amount</label>
+      <div class="money"><span>£</span><input id="pay-net" class="input" type="number" inputmode="decimal" step="0.01" min="0" placeholder="What reached your bank"></div>
+      <p class="hint" id="pay-prev"></p>
+      <button type="button" class="btn sm" id="pay-same" data-action="pay-same" hidden style="align-self:flex-start"></button>
+    </div>
+    <label class="check"><input type="checkbox" id="pay-oneoff"><span><b style="color:var(--ink);font-weight:550">One-off</b><br>A bonus, gift or windfall. Left out of your typical savings rate.</span></label>
+    <details id="pay-more"><summary>Add payslip details <span class="faint">Optional</span></summary>
+      <div class="form-grid" style="margin-top:12px">
+        <div class="two">
+          <div class="field"><label for="pay-gross">Gross pay</label><div class="money"><span>£</span><input id="pay-gross" class="input" type="number" inputmode="decimal" step="0.01" min="0" placeholder="0.00"></div></div>
+          <div class="field"><label for="pay-tax">Income tax</label><div class="money"><span>£</span><input id="pay-tax" class="input" type="number" inputmode="decimal" step="0.01" min="0" placeholder="0.00"></div></div>
+        </div>
+        <div class="two">
+          <div class="field"><label for="pay-ni">National Insurance</label><div class="money"><span>£</span><input id="pay-ni" class="input" type="number" inputmode="decimal" step="0.01" min="0" placeholder="0.00"></div></div>
+          <div class="field"><label for="pay-pension">Pension</label><div class="money"><span>£</span><input id="pay-pension" class="input" type="number" inputmode="decimal" step="0.01" min="0" placeholder="0.00"></div></div>
+        </div>
+        <div class="two">
+          <div class="field"><label for="pay-sl">Student loan</label><div class="money"><span>£</span><input id="pay-sl" class="input" type="number" inputmode="decimal" step="0.01" min="0" placeholder="0.00"></div></div>
+          <div class="field"><label for="pay-other">Other deductions</label><div class="money"><span>£</span><input id="pay-other" class="input" type="number" inputmode="decimal" step="0.01" min="0" placeholder="0.00"></div></div>
+        </div>
+        <p class="hint" id="pay-check"></p>
+        <div class="stack" id="pay-link-wrap" style="gap:8px" hidden>
+          <label class="check"><input type="checkbox" id="pay-link"><span id="pay-link-label">Also log the pension deduction as a payment into</span></label>
+          <select id="pay-link-acct" class="input" aria-label="Pension account"></select>
+          <p class="hint" style="margin:0">Leave this off if you already record these payments on the pension account, so they aren't counted twice.</p>
+        </div>
+      </div>
+    </details>
+    <div class="field">
+      <label for="pay-note">Note <span class="faint">Optional</span></label>
+      <input id="pay-note" class="input" type="text" maxlength="80" placeholder="e.g. Includes overtime">
+    </div>
+    <p class="status err" id="pay-err" role="alert"></p>
+    <div class="sheet-actions">
+      <button type="button" class="btn" data-action="close-sheet">Cancel</button>
+      <button type="submit" class="btn primary">Save</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog class="sheet" id="src-sheet" aria-labelledby="src-title">
+  <div class="grab" aria-hidden="true"></div>
+  <form id="src-form" method="dialog">
+    <div class="sheet-head">
+      <h2 id="src-title">Add income source</h2>
+      <button type="button" class="icon-btn" data-action="close-sheet" aria-label="Close">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+    <div class="field">
+      <label for="src-name">Name</label>
+      <input id="src-name" class="input" maxlength="40" required placeholder="e.g. Acme Ltd, Rental flat">
+    </div>
+    <div class="field">
+      <label for="src-kind">Type</label>
+      <select id="src-kind" class="input"></select>
+    </div>
+    <fieldset class="field">
+      <legend class="label">Usual take-home <span class="faint">Optional</span></legend>
+      <div class="two">
+        <div class="money"><span>£</span><input id="src-amount" class="input" type="number" inputmode="decimal" step="0.01" min="0" placeholder="Per month" aria-label="Usual monthly take-home"></div>
+        <select id="src-day" class="input" aria-label="Pay day"></select>
+      </div>
+      <p class="hint">Fills in the amount when you log pay, and reminds you if payday passes without an entry.</p>
+    </fieldset>
+    <label class="check" id="src-archived-wrap"><input type="checkbox" id="src-archived"><span><b style="color:var(--ink);font-weight:550">Ended</b><br>Hides it when logging pay. Its history stays in your totals.</span></label>
+    <div class="sheet-actions">
+      <button type="button" class="btn ghost" id="src-del" data-action="src-del" hidden>Delete</button>
+      <button type="button" class="btn" data-action="close-sheet">Cancel</button>
+      <button type="submit" class="btn primary" id="src-submit">Add source</button>
+    </div>
+  </form>
+</dialog>
+
 <dialog class="sheet" id="menu-sheet" aria-labelledby="menu-title">
   <div class="grab" aria-hidden="true"></div>
   <div style="padding:22px 18px calc(18px + var(--sa-bottom))">
@@ -977,6 +1079,9 @@ const TYPES = {
 };
 const GROUPS = { pension: 'Pensions', isa: 'ISAs', invest: 'Investments', cash: 'Cash and savings', other: 'Other' };
 const GROUP_COLOR = { pension: 'c1', isa: 'c2', invest: 'c3', cash: 'c4', other: 'c6' };
+// 1.9.5 income sources. One-off kinds are left out of the typical savings rate.
+const SOURCE_KINDS = { salary: 'Salary', bonus: 'Bonus', 'self-employed': 'Self-employed', rental: 'Rental', pension: 'Pension income', benefits: 'Benefits', side: 'Side income', gift: 'Gift', windfall: 'Windfall', other: 'Other' };
+const ONE_OFF = ['bonus', 'gift', 'windfall'];
 const ISA_ALLOWANCE = 20000, JISA_ALLOWANCE = 9000, LISA_ALLOWANCE = 4000;
 const PENSION_ANNUAL_ALLOWANCE = 60000, DIVIDEND_ALLOWANCE = 500, CGT_EXEMPT = 3000;
 const PSA = { basic: 1000, higher: 500, additional: 0 }; // Personal Savings Allowance by tax band
@@ -1027,6 +1132,12 @@ function normProfile(p, done) {
     monthlySpend: Math.max(0, num(p.monthlySpend, 0)),
     people: Array.isArray(p.people) ? p.people.filter(x => x && x.id && x.name).map(x => ({ id: String(x.id), name: String(x.name).slice(0, 30) })) : [],
     lastBackup: isIso(p.lastBackup) ? p.lastBackup : '',
+    sources: Array.isArray(p.sources) ? p.sources.filter(x => x && x.id && x.name).map(x => {
+      const src = { id: String(x.id), name: String(x.name).slice(0, 40), kind: SOURCE_KINDS[x.kind] ? x.kind : 'other', archived: !!x.archived,
+        regular: x.regular && isFinite(+x.regular.net) && +x.regular.net > 0 ? { net: +x.regular.net, day: x.regular.day ? clamp(Math.round(num(x.regular.day, 0)), 1, 31) : 0 } : null };
+      if (x.demo) src.demo = true;
+      return src;
+    }) : [],
     p60: Object.fromEntries(Object.entries(p.p60 && typeof p.p60 === 'object' ? p.p60 : {}).filter(([y, v]) => /^\d{4}$/.test(y) && v && typeof v === 'object').map(([y, v]) => [y, {
       pay: Math.max(0, num(v.pay, 0)), tax: Math.max(0, num(v.tax, 0)), pay2: Math.max(0, num(v.pay2, 0)), tax2: Math.max(0, num(v.tax2, 0)),
       other: Math.max(0, num(v.other, 0)), giftAid: Math.max(0, num(v.giftAid, 0)), expenses: Math.max(0, num(v.expenses, 0)),
@@ -1036,7 +1147,7 @@ function normProfile(p, done) {
     setupDone: p.setupDone != null ? !!p.setupDone : done
   };
 }
-const emptyState = () => ({ version: 2, example: false, profile: normProfile(null, false), accounts: [], logs: [], flows: [], income: [], goals: [] });
+const emptyState = () => ({ version: 2, example: false, profile: normProfile(null, false), accounts: [], logs: [], flows: [], income: [], goals: [], pay: [] });
 
 function seedExample(profile) {
   const today = new Date();
@@ -1062,7 +1173,15 @@ function seedExample(profile) {
     }
   }
   const goals = [{ id: uid(), name: 'ISA to £50,000', target: 50000, date: `${today.getFullYear() + 5}-04-05`, scope: 'isa', demo: true }];
-  return { version: 2, example: true, profile: normProfile({ ...profile, setupDone: true }, true), accounts, logs, flows, income: [], goals };
+  // Example pay: a monthly salary paid on the 25th, plus one bonus.
+  const sources = [{ id: 'demo_job', name: 'Employer Ltd', kind: 'salary', regular: { net: 2650, day: 25 }, demo: true }, { id: 'demo_bonus', name: 'Annual bonus', kind: 'bonus', regular: null, demo: true }];
+  const pay = [];
+  for (let i = 11; i >= 1; i--) {
+    const d = new Date(today.getFullYear(), today.getMonth() - i, 25);
+    pay.push({ id: uid(), date: isoLocal(d), source: 'demo_job', net: i > 6 ? 2580 : 2650, gross: i > 6 ? 3550 : 3650, tax: i > 6 ? 501 : 521, ni: i > 6 ? 196 : 204, pension: 178, studentLoan: 95, other: 0, note: '', oneOff: false });
+  }
+  pay.push({ id: uid(), date: isoLocal(new Date(today.getFullYear(), today.getMonth() - 4, 25)), source: 'demo_bonus', net: 1800, gross: 0, tax: 0, ni: 0, pension: 0, studentLoan: 0, other: 0, note: '', oneOff: true });
+  return { version: 2, example: true, profile: normProfile({ ...profile, sources, setupDone: true }, true), accounts, logs, flows, income: [], goals, pay };
 }
 
 const validLog = l => l && isIso(l.date) && isFinite(+l.value);
@@ -1108,7 +1227,16 @@ function normalize(o) {
     const profile = normProfile(o.profile, !o.example);
     const known = new Set(['me', ...profile.people.map(p => p.id)]);
     accounts.forEach(a => { if (!known.has(a.owner)) a.owner = 'me'; });
-    return { version: 2, example: !!o.example, profile, accounts, logs, flows, income, goals };
+    const srcIds = new Set(profile.sources.map(x => x.id)), money0 = v => Math.max(0, num(v, 0));
+    const pay = (Array.isArray(o.pay) ? o.pay : []).filter(x => x && isIso(x.date) && isFinite(+x.net) && +x.net >= 0 && srcIds.has(String(x.source))).map(x => {
+      const src = profile.sources.find(q => q.id === String(x.source));
+      const e = { id: String(x.id || uid()), date: x.date, source: String(x.source), net: +x.net, gross: money0(x.gross), tax: money0(x.tax), ni: money0(x.ni),
+        pension: money0(x.pension), studentLoan: money0(x.studentLoan), other: money0(x.other), note: String(x.note || '').slice(0, 80),
+        oneOff: x.oneOff != null ? !!x.oneOff : ONE_OFF.includes(src.kind) };
+      if (x.flowId && flows.some(f => f.id === String(x.flowId))) e.flowId = String(x.flowId);
+      return e;
+    });
+    return { version: 2, example: !!o.example, profile, accounts, logs, flows, income, goals, pay };
   }
   if (o && (Array.isArray(o.hl_sipp) || Array.isArray(o.hl_isa) || Array.isArray(o.aegon))) {
     const logs = [];
@@ -1195,6 +1323,9 @@ function clearExample(keep) {
   state.accounts = state.accounts.filter(a => !a.demo || kept.has(a.id));
   state.accounts.forEach(a => { delete a.demo; });
   state.goals = state.goals.filter(g => !g.demo);
+  state.pay = [];
+  state.profile.sources = state.profile.sources.filter(x => !x.demo || kept.has(x.id));
+  state.profile.sources.forEach(x => { delete x.demo; });
   state.example = false;
 }
 
@@ -1799,7 +1930,7 @@ function barChart(host, cfg) {
     const s = segs[i];
     hl.setAttribute('x', (m.l + slot * i).toFixed(1)); hl.setAttribute('visibility', 'visible');
     tip.innerHTML = `<div class="tip-date">${esc(cfg.titles[i])}</div>
-      ${cfg.names ? `<div class="tip-row"><i style="background:${cfg.colors[0]}"></i><span>${esc(cfg.names[0])}</span>${gbp(s.p)}</div><div class="tip-row"><i style="background:${cfg.colors[1]}"></i><span>${esc(cfg.names[1])}</span>${gbp(s.g)}</div><div class="tip-row total"><span>Total</span><b>${gbp(s.p + s.g)}</b></div>` : `
+      ${cfg.names ? `<div class="tip-row"><i style="background:${cfg.colors[0]}"></i><span>${esc(cfg.names[0])}</span>${gbp(s.p)}</div><div class="tip-row"><i style="background:${cfg.colors[1]}"></i><span>${esc(cfg.names[1])}</span>${gbp(s.g)}</div>${cfg.extra ? cfg.extra(i) : `<div class="tip-row total"><span>Total</span><b>${gbp(s.p + s.g)}</b></div>`}` : `
       <div class="tip-row"><i style="background:var(--c2)"></i><span>Paid in</span>${gbp(s.p)}</div>
       <div class="tip-row"><i style="background:var(${s.g >= 0 ? '--pos' : '--neg'})"></i><span>${s.g >= 0 ? 'Growth' : 'Loss'}</span>${signed(s.g)}</div>
       <div class="tip-row total"><span>Change</span><b>${signed(s.p + s.g)}</b></div>`}`;
@@ -2084,7 +2215,7 @@ function renderOverview() {
       }).join('')}</ul>` : '<div class="chart-empty">No activity yet.</div>'}
     </section>`;
 
-  view.innerHTML = `<div class="stack view">${updateBanner()}${exampleNotice()}${visitStrip(total)}${!state.example && ui.person === 'me' && showReviewCard(monthReview()) ? reviewCard(monthReview(), true) : ''}${personFilter()}<div class="summary">${statement}${kpis}</div>${holdings}<div class="grid-2">${growth}${allocation}</div>${monthly}${goals ? `<div class="grid-2">${activity}${goals}</div>` : activity}</div>`;
+  view.innerHTML = `<div class="stack view">${updateBanner()}${exampleNotice()}${visitStrip(total)}${!state.example && ui.person === 'me' && showReviewCard(monthReview()) ? reviewCard(monthReview(), true) : ''}${personFilter()}<div class="summary">${statement}${kpis}</div>${payStrip()}${holdings}<div class="grid-2">${growth}${allocation}</div>${monthly}${goals ? `<div class="grid-2">${activity}${goals}</div>` : activity}</div>`;
   barChart(document.getElementById('monthly-chart'), {
     labels: months.map(x => x.short), titles: months.map(x => x.title), paid: months.map(x => x.paid), growth: months.map(x => x.growth),
     label: 'Money paid in and growth each month', empty: 'Update your balances each month to see what you paid in and what grew.', emptyAction: ['Update all', 'open-bulk']
@@ -2749,7 +2880,9 @@ function updateCalc() {
 function p60Form(y) {
   const v = state.profile.p60[y] || {};
   const money = (id, val, ph, label) => `<div class="field"><label for="${id}">${label}</label><div class="money"><span>£</span><input id="${id}" class="input" type="number" inputmode="decimal" min="0" step="1" placeholder="${ph}" value="${val || ''}"></div></div>`;
-  return `<div class="two">${money('p60-pay', v.pay, '0', 'Pay (main job)')}${money('p60-tax', v.tax, '0', 'Tax deducted')}</div>
+  const slips = state.pay.filter(p => p.date >= `${y}-04-06` && p.date <= `${y + 1}-04-05` && p.gross > 0 && ['salary', 'bonus'].includes((sourceOf(p.source) || {}).kind));
+  const fromPay = slips.length ? `<p class="hint">From your pay records: ${gbp(slips.reduce((t, p) => t + p.gross, 0))} gross pay and ${gbp(slips.reduce((t, p) => t + p.tax, 0))} tax (${slips.length} payslip${slips.length === 1 ? '' : 's'}). Check against your P60. <button class="btn sm" data-action="p60-from-pay" data-id="${y}">Use these</button></p>` : '';
+  return `${fromPay}<div class="two">${money('p60-pay', v.pay, '0', 'Pay (main job)')}${money('p60-tax', v.tax, '0', 'Tax deducted')}</div>
     <details ${v.pay2 || v.other || v.giftAid || v.expenses || v.cb || v.kids || (v.marriage && v.marriage !== 'none') || v.code ? 'open' : ''}><summary>Second job, other income, Gift Aid, work expenses, Child Benefit, Marriage Allowance, tax code</summary>
       <div class="form-grid" style="margin-top:12px">
         <div class="two">${money('p60-pay2', v.pay2, '0', 'Second job pay')}${money('p60-tax2', v.tax2, '0', 'Second job tax')}</div>
@@ -2976,6 +3109,10 @@ function renderInsights() {
     const crossed = milestones(timeline(accts)).filter(m => m.t > start);
     if (crossed.length) add('◆', `You passed <b>${crossed.map(m => compact(m.v)).join(', ')}</b> in this period. Well done.`);
   }
+  if (ui.person === 'me' && state.pay.length) {
+    const ps = payStats(isFinite(start) ? msIso(start + 864e5) : '0000-01-01', TODAY);
+    if (ps.net > 0) add('£', `You saved <b>${rateText(ps.rate)}</b> of your take-home pay over ${esc(rangeName(key))}: <b>${gbp(ps.saved)}</b> of ${gbp(ps.net)}. <button class="btn sm ghost" data-action="tab" data-tab="income">Income</button>`);
+  }
   const stale = staleAccounts(accts);
   if (stale.length) add('!', `${stale.map(a => `<b>${esc(a.name)}</b>`).join(', ')} ${stale.length === 1 ? 'needs' : 'need'} an up-to-date balance (over 30 days old). <button class="btn sm" data-action="open-bulk">Update all</button>`);
   // Your own allowances are in the panel above; a child's Junior ISA shows here when viewing them.
@@ -3025,6 +3162,169 @@ function renderInsights() {
       <p class="hint">Worked out on this device from your own entries. Nothing is sent anywhere.</p>
     </div>`;
   drawYearsChart();
+}
+
+/* ---------- income and savings rate (1.9.5) ---------- */
+// Pay entries record take-home (`net`). "Saved" is the user's own money into their accounts (flows `own`, less money taken out),
+// so tax relief, LISA bonus and employer payments don't count. Interest and dividends (`income`) are shown but left out of the rate.
+const sourceOf = id => state.profile.sources.find(x => x.id === id);
+const sourceName = id => (sourceOf(id) || { name: 'Removed source' }).name;
+const rateText = r => r == null ? '—' : `${Math.round(r * 100)}%`;
+const pointsText = d => `${d > 0 ? '+' : d < 0 ? '−' : ''}${Math.abs(Math.round(d * 100))} pts`;
+// First and last day of the calendar month k months ago (0 = this month, which ends today).
+function monthBounds(k) {
+  const [y, m] = TODAY.split('-').map(Number), s = msIso(Date.UTC(y, m - 1 - k, 1)), e = msIso(Date.UTC(y, m - k, 0));
+  return [s, e < TODAY ? e : TODAY];
+}
+function payStats(from, to) {
+  const inR = x => x.date >= from && x.date <= to && x.date <= TODAY;
+  const pay = state.pay.filter(inR);
+  const net = pay.reduce((t, p) => t + p.net, 0), oneOff = pay.filter(p => p.oneOff).reduce((t, p) => t + p.net, 0);
+  const ids = new Set(mine().map(a => a.id)), byAcct = {};
+  let paidIn = 0, takenOut = 0, employer = 0;
+  for (const f of state.flows) {
+    if (!ids.has(f.accountId) || !inR(f) || f.ytd) continue;
+    if (f.employer) { employer += f.amount; continue; }
+    if (f.own >= 0) paidIn += f.own; else takenOut -= f.own;
+    byAcct[f.accountId] = (byAcct[f.accountId] || 0) + f.own;
+  }
+  const saved = paidIn - takenOut, core = net - oneOff;
+  const invest = state.income.filter(x => ids.has(x.accountId) && inR(x)).reduce((t, x) => t + x.amount, 0);
+  return {
+    pay, net, oneOff, core, paidIn, takenOut, saved, employer, invest, byAcct, spent: net - saved,
+    gross: pay.reduce((t, p) => t + (p.gross || p.net), 0),
+    rate: net > 0 ? saved / net : null,
+    // Typical rate: one-offs are assumed to be saved first, so they can't inflate it.
+    coreRate: core > 0 ? Math.max(0, saved - oneOff) / core : null,
+    fullRate: net + employer > 0 ? (saved + employer) / (net + employer) : null
+  };
+}
+function payMonths(count) {
+  const out = [];
+  for (let k = count - 1; k >= 0; k--) {
+    const [s, e] = monthBounds(k), mid = toMs(s);
+    out.push({ k, s, e, st: payStats(s, e), short: fmtMonth.format(new Date(mid)).slice(0, 3), title: monthYear(mid) });
+  }
+  while (out.length && !out[0].st.net) out.shift();
+  return out;
+}
+const INCOME_RANGES = { month: 'This month', last: 'Last month', TY: 'Tax year', '12M': '12 months' };
+function incomeBounds(k) {
+  if (k === 'month') return monthBounds(0);
+  if (k === 'last') return monthBounds(1);
+  if (k === 'TY') return [taxYearStart(TODAY), TODAY];
+  return [monthBounds(11)[0], TODAY];
+}
+function incomeRangeName(k) {
+  if (k === 'month' || k === 'last') return monthYear(toMs(incomeBounds(k)[0]));
+  return k === 'TY' ? `tax year ${taxYear(TODAY)}` : 'the past 12 months';
+}
+// Small strip on Overview: last month's savings rate, tapping through to Income.
+function payStrip() {
+  if (ui.person !== 'me' || !state.pay.length) return '';
+  const [s, e] = monthBounds(1), m = payStats(s, e), ty = payStats(taxYearStart(TODAY), TODAY);
+  if (!m.net && !ty.net) return '';
+  return `<section class="panel pay-strip clickable" data-action="tab" data-tab="income" tabindex="0" aria-label="Savings rate">
+    <div><div class="k">Saved in ${esc(fmtMonthLong.format(new Date(toMs(s))))}</div><div class="v num">${m.net ? `${gbp(m.saved)} <span class="faint">of ${gbp(m.net)}</span>` : '<span class="faint">No pay logged</span>'}</div></div>
+    <div class="r"><div class="v num gold">${rateText(m.rate)}</div><div class="k">savings rate</div></div>
+    <div class="r hide-sm"><div class="v num">${rateText(ty.rate)}</div><div class="k">tax year so far</div></div>
+  </section>`;
+}
+function renderIncome() {
+  const srcs = state.profile.sources;
+  if (!srcs.length) {
+    view.innerHTML = `<div class="stack view">${exampleNotice()}<section class="panel"><div class="chart-empty"><div class="empty-cta">${emptyArt('wallet')}
+      <b>See how much of your income you save</b>
+      <span>Add where your money comes from, such as a salary, rental or side income, then log each payment as it arrives. Aurum compares it with what you paid into your accounts.</span>
+      <button class="btn primary" data-action="add-src">${icons.plus}Add income source</button></div></div></section></div>`;
+    return;
+  }
+  const key = INCOME_RANGES[ui.incomeRange] ? ui.incomeRange : 'last';
+  const [from, to] = incomeBounds(key), st = payStats(from, to);
+  const monthMode = key === 'month' || key === 'last', k = key === 'month' ? 0 : 1;
+  const cmp = [];
+  if (monthMode && st.rate != null) {
+    const prev = payStats(...monthBounds(k + 1)), yr = payStats(...monthBounds(k + 12));
+    if (prev.rate != null) cmp.push(`<li><span>Vs ${esc(fmtMonthLong.format(new Date(toMs(monthBounds(k + 1)[0]))))}:</span> <b class="${cls(st.rate - prev.rate)}">${pointsText(st.rate - prev.rate)}</b> <span class="faint">(${rateText(prev.rate)}, ${Math.abs(st.net - prev.net) < 0.5 ? 'same income' : 'income ' + signed(st.net - prev.net)})</span></li>`);
+    if (yr.rate != null) cmp.push(`<li><span>Vs a year earlier:</span> <b class="${cls(st.rate - yr.rate)}">${pointsText(st.rate - yr.rate)}</b> <span class="faint">(${rateText(yr.rate)}, ${Math.abs(st.net - yr.net) < 0.5 ? 'same income' : 'income ' + signed(st.net - yr.net)})</span></li>`);
+  }
+  const lines = [
+    st.oneOff > 0 ? `<li><span>Typical rate:</span> <b>${rateText(st.coreRate)}</b> <span class="faint">leaving out ${gbp(st.oneOff)} of one-offs</span></li>` : '',
+    st.employer > 0 ? `<li><span>Including pension from work:</span> <b>${rateText(st.fullRate)}</b> <span class="faint">with ${gbp(st.employer)} paid in by your employer or from your pay</span></li>` : '',
+    st.takenOut > 0 ? `<li><span>Paid in</span> <b>${gbp(st.paidIn)}</b><span>, taken out</span> <b>${gbp(st.takenOut)}</b></li>` : '',
+    st.invest > 0 ? `<li><span>Interest and dividends:</span> <b>${gbp(st.invest)}</b> <span class="faint">not counted in the rate</span></li>` : '',
+    ...cmp
+  ].join('');
+  const summary = `<section class="panel">
+    <div class="panel-head" style="margin-bottom:0"><h2>Savings rate</h2>
+      <div class="seg scroll" role="group" aria-label="Period">${Object.entries(INCOME_RANGES).map(([kk, l]) => `<button data-action="income-range" data-id="${kk}" aria-pressed="${key === kk}">${l}</button>`).join('')}</div>
+    </div>
+    ${st.net > 0 ? `<div class="review-grid">
+      <div><div class="k">Take-home income</div><div class="v num">${gbp(st.net)}</div></div>
+      <div><div class="k">Saved</div><div class="v num ${cls(st.saved)}">${gbp(st.saved)}</div></div>
+      <div><div class="k">Savings rate</div><div class="v num gold">${rateText(st.rate)}</div></div>
+      <div><div class="k">Everything else</div><div class="v num">${gbp(st.spent)}</div></div>
+    </div>
+    ${lines ? `<ul class="review-list">${lines}</ul>` : ''}` : `<div class="chart-empty"><div class="empty-cta"><span>No pay logged for ${esc(incomeRangeName(key))}.</span><button class="btn sm" data-action="open-pay">Log pay</button></div></div>`}
+    <p class="hint" style="margin-bottom:0">Saved is your own money paid into your accounts, less anything taken out. Tax relief, bonuses and employer payments aren't counted. Everything else is spending and money left in your current account.</p>
+  </section>`;
+
+  const n = [12, 24].includes(ui.payMonths) ? ui.payMonths : 12, months = payMonths(n);
+  const chartPanel = `<section class="panel">
+    <div class="panel-head"><h2>Income and saving by month</h2>
+      <div class="seg" role="group" aria-label="Months">${[12, 24].map(x => `<button data-action="pay-months" data-id="${x}" aria-pressed="${n === x}">${x}M</button>`).join('')}</div>
+    </div>
+    ${months.length ? (() => { const rs = months.filter(x => x.st.rate != null).map(x => x.st.rate); return rs.length ? `<div class="period-sum"><span><b>${rateText(rs.reduce((t, r) => t + r, 0) / rs.length)}</b>average monthly rate</span><span><b>${rateText(Math.max(...rs))}</b>best month</span></div>` : ''; })() : ''}
+    <div class="chart" id="pay-chart"></div>
+    <div class="bar-legend"><span><i class="sw" style="background:var(--c1)"></i>Saved</span><span><i class="sw" style="background:var(--ink-3)"></i>Everything else</span></div>
+  </section>`;
+
+  const accById = Object.fromEntries(state.accounts.map(a => [a.id, a]));
+  const where = Object.entries(st.byAcct).filter(([id, v]) => accById[id] && Math.abs(v) >= 0.5).sort((a, b) => b[1] - a[1]);
+  const wherePanel = st.net > 0 ? `<section class="panel">
+    <div class="panel-head"><h2>Where it went</h2><span class="aside">${esc(incomeRangeName(key))}</span></div>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Account</th><th class="r">Amount</th><th class="r">Of income</th></tr></thead>
+      <tbody>${where.map(([id, v]) => `<tr class="clickable" data-action="goto-account" data-id="${esc(id)}" tabindex="0">
+        <td><div class="acct-cell" style="min-width:120px"><i class="sw" style="background:${colorOf(accById[id])}"></i><span class="n">${esc(accById[id].name)}</span></div></td>
+        <td class="r val ${v < 0 ? 'neg' : ''}">${signed(v)}</td><td class="r mono">${(v / st.net * 100).toFixed(1)}%</td></tr>`).join('')}
+        <tr><td><div class="acct-cell"><i class="sw" style="background:var(--ink-3)"></i><span class="n">Everything else</span></div></td><td class="r val">${gbp(st.spent)}</td><td class="r mono">${(st.spent / st.net * 100).toFixed(1)}%</td></tr>
+      </tbody></table></div>
+  </section>` : '';
+
+  const y = +taxYearStart(TODAY).slice(0, 4);
+  const tyNet = (id, yy) => state.pay.filter(p => p.source === id && p.date >= `${yy}-04-06` && p.date <= `${yy + 1}-04-05`).reduce((t, p) => t + p.net, 0);
+  const shown = srcs.filter(x => !x.archived || state.pay.some(p => p.source === x.id));
+  const spark = id => payMonths(12).map(m => m.st.pay.filter(p => p.source === id).reduce((t, p) => t + p.net, 0));
+  const sourcesPanel = `<section class="panel">
+    <div class="panel-head"><h2>Income sources</h2><div class="acct-actions"><button class="btn sm" data-action="open-pay">Log pay</button><button class="btn sm" data-action="add-src">${icons.plus}Add source</button></div></div>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Source</th><th class="r">${tyLabel(y)}</th><th class="r hide-sm">${tyLabel(y - 1)}</th><th class="r hide-sm">12 months</th></tr></thead>
+      <tbody>${shown.map(x => `<tr class="clickable" data-action="edit-src" data-id="${esc(x.id)}" tabindex="0">
+        <td><div class="n">${esc(x.name)}</div><div class="p faint">${esc(SOURCE_KINDS[x.kind])}${x.regular ? ` · usually ${gbp(x.regular.net)}${x.regular.day ? ` on day ${x.regular.day}` : ''}` : ''}${x.archived ? ' · ended' : ''}</div></td>
+        <td class="r val">${gbp(tyNet(x.id, y))}</td><td class="r val hide-sm">${gbp(tyNet(x.id, y - 1))}</td>
+        <td class="r hide-sm">${sparkline(spark(x.id), 'var(--gold)')}</td></tr>`).join('')}
+      </tbody></table></div>
+  </section>`;
+
+  const hist = [...state.pay].sort((a, b) => byDate(b, a)).slice(0, 36);
+  const histPanel = hist.length ? `<section class="panel">${foldOpen('payhist', 'Pay history', `${state.pay.length} entr${state.pay.length === 1 ? 'y' : 'ies'}`)}
+    <ul class="activity">${hist.map(p => `<li><i class="sw" style="background:var(--gold)"></i>
+      <div><div>${esc(sourceName(p.source))}${p.oneOff ? ' <span class="owner">One-off</span>' : ''}</div><div class="when">${dateLabel(toMs(p.date))}${p.gross ? ` · ${gbp(p.gross)} gross` : ''}${p.flowId ? ' · pension logged' : ''}${p.note ? ' · ' + esc(p.note) : ''}</div></div>
+      <div class="row-actions" style="gap:6px;align-items:center"><span class="amt">${gbp(p.net)}</span>
+        <button class="icon-btn" data-action="edit-pay" data-id="${esc(p.id)}" aria-label="Edit">${icons.edit}</button>
+        <button class="icon-btn" data-action="del-pay" data-id="${esc(p.id)}" aria-label="Delete">${icons.trash}</button></div></li>`).join('')}</ul>
+    ${foldClose}</section>` : '';
+
+  view.innerHTML = `<div class="stack view">${exampleNotice()}${summary}${chartPanel}<div class="grid-2">${wherePanel || ''}${sourcesPanel}</div>${histPanel}
+    <p class="hint">Worked out on this device from your own entries. Figures are estimates, not financial advice.</p></div>`;
+  barChart(document.getElementById('pay-chart'), {
+    labels: months.map(x => x.short), titles: months.map(x => x.title),
+    paid: months.map(x => x.st.saved), growth: months.map(x => Math.max(0, x.st.net - Math.max(0, x.st.saved))),
+    names: ['Saved', 'Everything else'], colors: ['var(--c1)', 'var(--ink-3)'],
+    extra: i => `<div class="tip-row total"><span>Income</span><b>${gbp(months[i].st.net)}</b></div><div class="tip-row"><span>Savings rate</span><b>${rateText(months[i].st.rate)}</b></div>`,
+    label: 'Take-home income split into saved and everything else, by month', empty: 'Log your pay each month to see how much of it you save.', emptyAction: ['Log pay', 'open-pay']
+  });
 }
 
 /* ---------- settings ---------- */
@@ -3220,6 +3520,7 @@ function renderSetup() {
 const TITLES = {
   overview: ['Overview', () => fmtLong.format(new Date(TODAY_MS))],
   accounts: ['Accounts', () => `${visibleAccounts().length} accounts · ${state.logs.length} valuations`],
+  income: ['Income', () => 'Pay, other income and how much of it you save'],
   planner: ['Planner & goals', () => 'Project your retirement and track goals'],
   insights: ['Insights', () => 'A plain-English summary of your money'],
   settings: ['Settings & backup', () => 'Your data is stored on this device only']
@@ -3240,7 +3541,7 @@ function groupSettings() {
     secs.forEach(sec => grid.appendChild(sec));
   }
 }
-const renderers = { overview: renderOverview, accounts: renderAccounts, planner: renderPlanner, insights: renderInsights, settings: () => { renderSettings(); groupSettings(); } };
+const renderers = { overview: renderOverview, accounts: renderAccounts, income: renderIncome, planner: renderPlanner, insights: renderInsights, settings: () => { renderSettings(); groupSettings(); } };
 function render() {
   chartConfigs.clear();
   const eye = document.getElementById('eye-btn');
@@ -3261,6 +3562,8 @@ function render() {
     if (b.dataset.tab === ui.tab) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current');
   });
   document.getElementById('page-title').textContent = TITLES[ui.tab][0];
+  // On Income the main button logs pay instead of a balance.
+  document.querySelectorAll('.fab, .top-actions [data-action="open-log"]').forEach(b => { b.lastChild.nodeValue = ui.tab === 'income' ? 'Log pay' : b.classList.contains('fab') ? 'Log value' : 'Log a value'; });
   document.getElementById('page-sub').textContent = TITLES[ui.tab][1]();
   try { renderers[ui.tab](); }
   catch (err) {
@@ -3395,10 +3698,10 @@ function updateKindHint() {
 document.getElementById('log-kind').addEventListener('change', updateKindHint);
 let editingEntry = null;
 // Opens the sheet to log something new, or (with entryId) to edit an existing balance, payment or income entry.
-function dateChips(cur) {
+function dateChips(cur, host = 'log-date-chips', input = 'log-date') {
   const y = +TODAY.slice(0, 4), apr5 = TODAY >= `${y}-04-05` ? `${y}-04-05` : `${y - 1}-04-05`;
   const chips = [['Today', TODAY], ['Yesterday', msIso(TODAY_MS - 864e5)], ['1st of month', TODAY.slice(0, 8) + '01'], ['5 April', apr5]];
-  document.getElementById('log-date-chips').innerHTML = chips.filter((c, i, a) => a.findIndex(x => x[1] === c[1]) === i).map(([l, d]) => `<button type="button" data-action="log-date" data-id="${d}" aria-pressed="${d === cur}">${l}</button>`).join('');
+  document.getElementById(host).innerHTML = chips.filter((c, i, a) => a.findIndex(x => x[1] === c[1]) === i).map(([l, d]) => `<button type="button" data-action="log-date" data-input="${input}" data-id="${d}" aria-pressed="${d === cur}">${l}</button>`).join('');
 }
 function openLog(accountId, entryId) {
   if (!state.accounts.length) { openAcctSheet(null); return; }
@@ -3487,6 +3790,118 @@ document.getElementById('log-form').addEventListener('submit', e => {
   render();
 });
 sheet.addEventListener('close', () => { editingEntry = null; logAccount.disabled = false; });
+
+// Log pay and income sources (1.9.5)
+const paySheet = document.getElementById('pay-sheet'), srcSheet = document.getElementById('src-sheet'), paySource = document.getElementById('pay-source');
+let editingPay = null, editingSrc = null, srcThenPay = false;
+const PAY_FIELDS = [['gross', 'pay-gross'], ['tax', 'pay-tax'], ['ni', 'pay-ni'], ['pension', 'pay-pension'], ['studentLoan', 'pay-sl'], ['other', 'pay-other']];
+const pensionAccts = () => state.example ? [] : active(mine()).filter(a => groupOf(a) === 'pension');
+const fieldAmount = id => { const v = evalAmount(document.getElementById(id).value); return v != null && v > 0 ? v : 0; };
+function removePay(id) {
+  const p = state.pay.find(x => x.id === id);
+  if (p && p.flowId) { const f = state.flows.find(x => x.id === p.flowId); if (f) { dropEstimate(f); state.flows = state.flows.filter(x => x !== f); } }
+  state.pay = state.pay.filter(x => x.id !== id);
+}
+function updatePayCheck() {
+  const gross = fieldAmount('pay-gross'), net = fieldAmount('pay-net');
+  const ded = PAY_FIELDS.slice(1).reduce((t, [, id]) => t + fieldAmount(id), 0), gap = gross - ded - net;
+  document.getElementById('pay-check').textContent = !gross ? '' : Math.abs(gap) <= 1 ? 'Gross less deductions matches your take-home ✓'
+    : `Gross less deductions is ${fmtGBP2.format(gross - ded)}, ${fmtGBP2.format(Math.abs(gap))} ${gap > 0 ? 'more' : 'less'} than your take-home. That's fine if your payslip has other items.`;
+  const pen = fieldAmount('pay-pension');
+  document.getElementById('pay-link-wrap').hidden = !(pen > 0 && pensionAccts().length);
+  document.getElementById('pay-link-label').textContent = `Also log ${fmtGBP2.format(pen)} as a payment into this pension`;
+}
+function updatePayHints() {
+  const src = sourceOf(paySource.value), reg = src ? state.pay.filter(p => p.source === src.id && !p.oneOff && p.id !== editingPay).sort(byDate) : [];
+  const last = reg[reg.length - 1], same = last ? last.net : src && src.regular ? src.regular.net : 0;
+  document.getElementById('pay-prev').textContent = last ? `Last time: ${fmtGBP2.format(last.net)} on ${dateLabel(toMs(last.date))}` : '';
+  const btn = document.getElementById('pay-same');
+  btn.hidden = !same || !!editingPay; btn.dataset.v = same; btn.textContent = `${last ? 'Same as last time' : 'Usual amount'}: ${fmtGBP2.format(same)}`;
+  if (!editingPay) document.getElementById('pay-oneoff').checked = !!(src && ONE_OFF.includes(src.kind));
+  updatePayCheck();
+}
+function openPay(srcId, entryId) {
+  const e = entryId ? state.pay.find(p => p.id === entryId) : null;
+  const srcs = state.profile.sources.filter(x => !x.archived || (e && x.id === e.source));
+  if (!srcs.length) { openSrc(null, true); return; }
+  editingPay = e ? e.id : null;
+  paySource.innerHTML = srcs.map(x => `<option value="${esc(x.id)}">${esc(x.name)} · ${esc(SOURCE_KINDS[x.kind])}</option>`).join('');
+  paySource.value = e ? e.source : srcs.some(x => x.id === srcId) ? srcId : srcs.some(x => x.id === ui.lastPaySrc) ? ui.lastPaySrc : srcs[0].id;
+  const dateEl = document.getElementById('pay-date');
+  dateEl.value = e ? e.date : TODAY; dateEl.max = TODAY;
+  dateChips(dateEl.value, 'pay-date-chips', 'pay-date');
+  document.getElementById('pay-net').value = e ? e.net : '';
+  PAY_FIELDS.forEach(([k, id]) => { document.getElementById(id).value = e && e[k] ? e[k] : ''; });
+  document.getElementById('pay-more').open = !!(e && PAY_FIELDS.some(([k]) => e[k]));
+  document.getElementById('pay-note').value = e ? e.note : '';
+  document.getElementById('pay-err').textContent = '';
+  document.getElementById('pay-example-note').hidden = !state.example || !!e;
+  document.getElementById('pay-title').textContent = e ? 'Edit pay' : 'Log pay';
+  const pens = pensionAccts(), flow = e && e.flowId && state.flows.find(f => f.id === e.flowId);
+  document.getElementById('pay-link-acct').innerHTML = pens.map(a => `<option value="${esc(a.id)}">${esc(a.name)}${a.provider ? ' · ' + esc(a.provider) : ''}</option>`).join('');
+  if (flow) document.getElementById('pay-link-acct').value = flow.accountId;
+  document.getElementById('pay-link').checked = !!flow;
+  updatePayHints();
+  if (e) document.getElementById('pay-oneoff').checked = e.oneOff;
+  openSheet(paySheet);
+  setTimeout(() => document.getElementById('pay-net').focus(), 50);
+}
+paySource.addEventListener('change', updatePayHints);
+document.getElementById('pay-form').addEventListener('submit', e => {
+  e.preventDefault();
+  const raw = document.getElementById('pay-net').value.trim(), net = evalAmount(raw), date = document.getElementById('pay-date').value;
+  if (!date || !raw || net == null || net < 0) { document.getElementById('pay-err').textContent = 'Enter the take-home amount.'; return; }
+  const old = editingPay && state.pay.find(p => p.id === editingPay), id = old ? old.id : uid(), source = paySource.value;
+  const linkAcct = document.getElementById('pay-link-acct').value, link = !document.getElementById('pay-link-wrap').hidden && document.getElementById('pay-link').checked;
+  if (old) removePay(old.id); else clearExample([source]);
+  const entry = { id, date, source, net, note: document.getElementById('pay-note').value.trim().slice(0, 80), oneOff: document.getElementById('pay-oneoff').checked };
+  PAY_FIELDS.forEach(([k, fid]) => { entry[k] = fieldAmount(fid); });
+  // A pension deduction can also go in as a payment into the pension; it isn't the user's take-home, so own = 0.
+  if (link && entry.pension > 0 && state.accounts.some(a => a.id === linkAcct)) {
+    const f = { id: uid(), accountId: linkAcct, date, amount: entry.pension, own: 0, note: 'Pension from pay', auto: false, employer: true };
+    state.flows.push(f); addEstimate(f); entry.flowId = f.id;
+  }
+  state.pay.push(entry);
+  ui.lastPaySrc = source; saveUi(); save();
+  paySheet.close();
+  saved(old ? 'Pay updated ✓' : 'Pay saved ✓', [id]);
+  render();
+});
+paySheet.addEventListener('close', () => { editingPay = null; });
+
+function openSrc(id, thenPay) {
+  const x = id ? sourceOf(id) : null;
+  editingSrc = x ? x.id : null; srcThenPay = !!thenPay;
+  document.getElementById('src-kind').innerHTML = Object.entries(SOURCE_KINDS).map(([k, l]) => `<option value="${k}">${l}</option>`).join('');
+  document.getElementById('src-day').innerHTML = '<option value="">Pay day (optional)</option>' + Array.from({ length: 31 }, (_, i) => `<option value="${i + 1}">Day ${i + 1}</option>`).join('');
+  document.getElementById('src-name').value = x ? x.name : '';
+  document.getElementById('src-kind').value = x ? x.kind : 'salary';
+  document.getElementById('src-amount').value = x && x.regular ? x.regular.net : '';
+  document.getElementById('src-day').value = x && x.regular && x.regular.day ? String(x.regular.day) : '';
+  document.getElementById('src-archived').checked = !!(x && x.archived);
+  document.getElementById('src-archived-wrap').hidden = !x;
+  document.getElementById('src-del').hidden = !x;
+  document.getElementById('src-title').textContent = x ? 'Edit income source' : 'Add income source';
+  document.getElementById('src-submit').textContent = x ? 'Save' : 'Add source';
+  openSheet(srcSheet);
+  setTimeout(() => document.getElementById('src-name').focus(), 50);
+}
+document.getElementById('src-form').addEventListener('submit', e => {
+  e.preventDefault();
+  const name = document.getElementById('src-name').value.trim().slice(0, 40);
+  if (!name) return;
+  const amount = fieldAmount('src-amount'), day = +document.getElementById('src-day').value || 0;
+  const vals = { name, kind: document.getElementById('src-kind').value, regular: amount > 0 ? { net: amount, day } : null, archived: !!editingSrc && document.getElementById('src-archived').checked };
+  let id = editingSrc;
+  if (id) Object.assign(sourceOf(id), vals);
+  else { clearExample([]); id = uid(); state.profile.sources.push({ id, ...vals }); }
+  save();
+  const next = srcThenPay;
+  srcSheet.close();
+  render();
+  if (next) openPay(id); else saved('Income source saved ✓');
+});
+srcSheet.addEventListener('close', () => { srcThenPay = false; });
 
 // Add or edit an account
 const acctSheet = document.getElementById('acct-sheet');
@@ -4044,9 +4459,10 @@ const NOTE_KINDS = [
   ['tax', 'Tax dates', 'P60 in June, Self Assessment by 31 January, new tax year'],
   ['goals', 'Goals and milestones', 'Halfway, reached and net worth milestones'],
   ['moves', 'Value moves', 'When a balance moves by your chosen amount'],
+  ['pay', 'Pay and savings rate', 'Payday reminders, pay changes and a new best savings rate'],
   ['app', 'App updates', 'A new version of the Android app']
 ];
-const NOTE_KIND_ICON = { due: 'list', backup: 'save', regular: 'repeat', stale: 'clock', allow: 'pound', tax: 'doc', goals: 'star', moves: 'updown', app: 'up' };
+const NOTE_KIND_ICON = { due: 'list', backup: 'save', regular: 'repeat', stale: 'clock', allow: 'pound', tax: 'doc', goals: 'star', moves: 'updown', pay: 'pound', app: 'up' };
 const NOTE_CATS = { todo: 'To do', tax: 'Tax year', moves: 'Value moves', goals: 'Milestones', app: 'App' };
 const noteOn = k => ui.notes.on[k] !== false;
 const growthWord = v => `${v >= 0 ? 'up' : 'down'} ${Math.abs(v).toFixed(1)}%`;
@@ -4145,6 +4561,23 @@ function computeNotes() {
       if (basis === 'month') { const t = periodTotals(my, som); const n = noteMove('Net worth', t.ret, t.growth, 'this month', `mv-all-m${TODAY.slice(0, 7)}-${Math.round(t.ret || 0)}`); if (n) out.push(n); }
     }
   }
+  if (!state.example && noteOn('pay')) {
+    const [y, mo] = TODAY.split('-').map(Number), lastDay = new Date(Date.UTC(y, mo, 0)).getUTCDate();
+    for (const src of state.profile.sources) {
+      const list = state.pay.filter(p => p.source === src.id).sort(byDate);
+      if (!src.archived && src.regular && src.regular.day) {
+        const due = `${TODAY.slice(0, 8)}${pad(Math.min(src.regular.day, lastDay))}`;
+        if (daysSince(due) >= 3 && !list.some(p => p.date >= msIso(toMs(due) - 10 * 864e5)))
+          out.push({ id: `payday-${src.id}-${TODAY.slice(0, 7)}`, cat: 'todo', icon: 'pound', date: due, title: `Log your ${src.name} pay`, body: `Payday was ${dateLabel(toMs(due))}. Add what reached your bank to keep your savings rate up to date.`, act: { action: 'open-pay', id: src.id, label: 'Log pay' } });
+      }
+      const reg = list.filter(p => !p.oneOff), b = reg[reg.length - 1], a = reg[reg.length - 2];
+      if (a && b && a.net > 0 && daysSince(b.date) <= 45 && Math.abs(b.net - a.net) / a.net >= 0.1)
+        out.push({ id: `paychg-${b.id}`, cat: 'moves', kind: b.net > a.net ? 'up' : 'down', date: b.date, title: `${src.name} pay ${b.net > a.net ? 'up' : 'down'} ${Math.abs((b.net - a.net) / a.net * 100).toFixed(0)}%`, body: `${gbp(b.net)} take-home, compared with ${gbp(a.net)} last time.`, act: { action: 'note-go', id: 'income', label: 'Income' } });
+    }
+    const ms = payMonths(12).filter(x => x.k > 0 && x.st.rate != null), last = ms[ms.length - 1];
+    if (ms.length >= 4 && last.k === 1 && last.st.rate > 0 && last.st.rate > Math.max(...ms.slice(0, -1).map(x => x.st.rate)))
+      out.push({ id: `ratebest-${last.s.slice(0, 7)}`, cat: 'goals', icon: 'star', date: TODAY.slice(0, 8) + '01', title: 'Your best savings rate yet', body: `You saved ${rateText(last.st.rate)} of your pay in ${last.title}.`, act: { action: 'note-go', id: 'income', label: 'Income' } });
+  }
   if (noteOn('app') && update && Native) out.push({ id: `app-${update.version}`, cat: 'app', icon: 'up', date: TODAY, title: `Aurum ${update.version} is ready`, body: releaseNotes(update.notes).slice(0, 2).map(l => l.replace(/^[-*•]\s*/, '')).join(' · ') || 'Tap to download. Your data is kept.', href: update.url, act: { label: 'Download' } });
   return out.filter(n => !ui.notes.gone[n.id]).sort((a, b) => Object.keys(NOTE_CATS).indexOf(a.cat) - Object.keys(NOTE_CATS).indexOf(b.cat) || b.date.localeCompare(a.date));
 }
@@ -4212,6 +4645,7 @@ function noteAct(id) {
   if (a.action === 'note-go') { if (a.fold) ui.folds[a.fold] = true; goTab(a.id); if (a.scroll) requestAnimationFrame(() => { const el = document.getElementById(a.scroll); if (el) el.scrollIntoView({ block: 'start' }); }); if (a.fold) requestAnimationFrame(() => { const el = document.querySelector(`[data-fold="${a.fold}"]`); if (el) el.scrollIntoView({ block: 'start' }); }); }
   else if (a.action === 'goto-account') { ui.account = a.id; goTab('accounts'); }
   else if (a.action === 'open-log') openLog(a.id);
+  else if (a.action === 'open-pay') openPay(a.id);
   else if (a.action === 'open-bulk') openBulk();
   else if (a.action === 'export') document.querySelector('[data-action="export"]') ? document.querySelector('[data-action="export"]').click() : (goTab('settings'));
   refreshBell();
@@ -4362,8 +4796,8 @@ function monthReview() {
   const best = t.rows.filter(r => r.p.growth > 0).sort((a, b) => b.p.growth - a.p.growth)[0];
   const streaks = active(accts).map(a => ({ a, n: streakOf(a) })).filter(x => x.n >= 2).sort((a, b) => b.n - a.n);
   const goals = state.goals.map(g => ({ g, st: goalStatus(g) }));
-  const mid = Date.UTC(y, m - 2, 15);
-  return { key: msIso(mid).slice(0, 7), name: fmtMonthLong.format(new Date(mid)), year: new Date(mid).getUTCFullYear(), end: t.cur, change: t.change, paid: t.paid - t.opening, growth: t.growth, ret: t.ret, best, streak: streaks[0], goals };
+  const mid = Date.UTC(y, m - 2, 15), ps = payStats(msIso(start + 864e5), msIso(end));
+  return { pay: ps.net > 0 ? ps : null, key: msIso(mid).slice(0, 7), name: fmtMonthLong.format(new Date(mid)), year: new Date(mid).getUTCFullYear(), end: t.cur, change: t.change, paid: t.paid - t.opening, growth: t.growth, ret: t.ret, best, streak: streaks[0], goals };
 }
 function reviewCard(r, dismissable) {
   if (!r) return '';
@@ -4376,6 +4810,7 @@ function reviewCard(r, dismissable) {
       <div><div class="k">Growth</div><div class="v num ${cls(r.growth)}">${signed(r.growth)}${r.ret != null ? ` <span style="font-size:13px">(${pct(r.ret)})</span>` : ''}</div></div>
     </div>
     <ul class="review-list">
+      ${r.pay ? `<li><span>Savings rate:</span> <b>${rateText(r.pay.rate)}</b> of your pay <span class="faint">(${gbp(r.pay.saved)} of ${gbp(r.pay.net)})</span></li>` : ''}
       ${r.best ? `<li><span>Best performer:</span> <b>${esc(r.best.a.name)}</b> <span class="pos">${signed(r.best.p.growth)}</span></li>` : ''}
       ${r.streak ? `<li><span>Longest streak:</span> <b>${esc(r.streak.a.name)}</b>, ${r.streak.n} months in a row paid in</li>` : ''}
       ${r.goals.map(x => `<li><span>${esc(x.g.name)}:</span> <b>${Math.round(x.st.progress * 100)}%</b> <span class="faint">${esc(x.st.text)}</span></li>`).join('')}
@@ -4584,7 +5019,7 @@ document.addEventListener('toggle', e => {
 }, true);
 
 // Swipe left or right on the page to move between tabs (not on charts, inputs or sideways-scrolling strips).
-const TAB_ORDER = ['overview', 'accounts', 'planner', 'insights', 'settings'];
+const TAB_ORDER = ['overview', 'accounts', 'income', 'planner', 'insights', 'settings'];
 let swipe = null;
 const reduceMotion = () => window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
 function slideView(x, opacity, ms) {
@@ -4682,7 +5117,27 @@ document.addEventListener('click', async e => {
       document.querySelectorAll('#acct-tiles button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.id === id)));
       break;
     }
-    case 'open-log': openLog(id); break;
+    case 'open-log': if (ui.tab === 'income' && !id && t.closest('.fab, .top-actions')) openPay(); else openLog(id); break;
+    case 'open-pay': openPay(id); break;
+    case 'add-src': openSrc(null); break;
+    case 'edit-src': openSrc(id); break;
+    case 'edit-pay': openPay(null, id); break;
+    case 'del-pay': snapshot('Pay deleted'); removePay(id); save(); render(); break;
+    case 'src-del': {
+      snapshot('Income source deleted');
+      state.pay.filter(p => p.source === editingSrc).forEach(p => removePay(p.id));
+      state.profile.sources = state.profile.sources.filter(x => x.id !== editingSrc);
+      closeSheets(); save(); render(); break;
+    }
+    case 'pay-same': { const inp = document.getElementById('pay-net'); inp.value = t.dataset.v; updatePayCheck(); break; }
+    case 'income-range': ui.incomeRange = id; saveUi(); render(); break;
+    case 'pay-months': ui.payMonths = +id; saveUi(); render(); break;
+    case 'p60-from-pay': {
+      const yy = +id, slips = state.pay.filter(p => p.date >= `${yy}-04-06` && p.date <= `${yy + 1}-04-05` && p.gross > 0 && ['salary', 'bonus'].includes((sourceOf(p.source) || {}).kind));
+      document.getElementById('p60-pay').value = Math.round(slips.reduce((s, p) => s + p.gross, 0));
+      document.getElementById('p60-tax').value = Math.round(slips.reduce((s, p) => s + p.tax, 0));
+      break;
+    }
     case 'open-bulk': openBulk(); break;
     case 'add-acct': openAcctSheet(null); break;
     case 'edit-acct': openAcctSheet(id); break;
@@ -4710,7 +5165,7 @@ document.addEventListener('click', async e => {
     case 'reset': pendingReset = true; render(); break;
     case 'reset-no': pendingReset = false; render(); break;
     case 'reset-yes': {
-      const profile = { ...state.profile, people: [], setupDone: true };
+      const profile = { ...state.profile, people: [], sources: [], setupDone: true };
       state = { ...emptyState(), profile: normProfile(profile, true) };
       pendingReset = false; save(); render(); setStatus('All data deleted.'); break;
     }
@@ -4784,7 +5239,7 @@ document.addEventListener('click', async e => {
       break;
     }
     case 'pw-eye': { const f = t.closest('form'); const show = f.querySelector('input[type=password]'); f.querySelectorAll('input[data-pw]').forEach(i => { i.type = show ? 'text' : 'password'; }); t.setAttribute('aria-pressed', String(!!show)); break; }
-    case 'log-date': { const d = document.getElementById('log-date'); d.value = id; d.dispatchEvent(new Event('change', { bubbles: true })); document.querySelectorAll('.date-chips button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.id === id))); break; }
+    case 'log-date': { const d = document.getElementById(t.dataset.input || 'log-date'); d.value = id; d.dispatchEvent(new Event('change', { bubbles: true })); t.parentElement.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.id === id))); break; }
     case 'visit-hide': { const el = document.getElementById('visit-strip'); if (el) { el.classList.add('out'); setTimeout(() => el.remove(), 250); } visitInfo = null; break; }
     case 'copy-backup': {
       const json = await backupOut();
@@ -4967,6 +5422,7 @@ document.addEventListener('change', e => {
 });
 document.addEventListener('input', e => {
   const t = e.target, c = ui.calc, p = state.profile;
+  if (t.closest && t.closest('#pay-form')) { updatePayCheck(); return; }
   const out = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
   if (t.id === 'hist-q') { ui.hist.q = t.value; saveUi(); renderHistory(); return; }
   if (t.id === 'plan-age') { p.retireAge = +t.value; out('out-age', t.value); save(); updatePlan(); return; }

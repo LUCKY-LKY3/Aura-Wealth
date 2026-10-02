@@ -1,6 +1,7 @@
-- New lock screen: gold coin, PIN dots and a round keypad, with a greeting and "Use fingerprint"
-- Unlocking: the coin glides up into the header as the app fades in, with a firm buzz on the right PIN
-- Wrong PIN: the dots shake and turn red. After 5 wrong tries you wait 30 seconds, doubling each time
-- Wrong backup password: a clear red "Incorrect password" right under the box
-- New splash screen to match the lock screen
-- Demo mode (Settings, or the bell panel): explore with example data. Your own data is untouched and nothing is saved
+- New Income tab: add your salary and any other income, then log each payment as it arrives
+- Savings rate: how much of your take-home pay went into your accounts, by month, tax year or 12 months
+- Typical rate leaves out one-offs like bonuses and gifts; a second rate includes pension money from work
+- "Where it went" shows each account's share of your pay, and a monthly chart shows saved vs everything else
+- Optional payslip details (gross, tax, NI, pension, student loan), with an option to log the pension deduction into your pension
+- Payday reminders, a note when your pay changes by 10% or more, and your best savings rate yet
+- Savings rate added to Overview, Insights and the monthly review; the tax helper can fill in pay and tax from your payslips
