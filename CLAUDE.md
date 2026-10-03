@@ -160,9 +160,13 @@ not advice — keep that disclaimer.
   growth → `jumpAnswer`, `jumpOk`). `copySlip()`/`lastSlip()` in Log pay. Income: still to come (This month), `multi` "Of income"
   column + ≥80% note, one-offs this tax year, same-months YoY on `core` take-home (needs pay from the previous tax year's start).
 
+- 1.9.8: `chart()` takes `notes` (text per point, gold `.note-dot` ring on the first series); the account chart passes balance notes
+  (not 'Opening balance') and shows them in the readout (`.rn`). Colour picker = `input[name="acct-color"]` swatches in `#acct-sheet`.
+  `payStrip()` on Overview shows saved so far this month (also without pay logged), plus last month's and the tax year's rate when pay exists.
+
 ## Status (latest)
 
-- 1.9.7 (Help and FAQ with gold ? buttons, income extras, balance-jump prompt, copy last payslip) is merged and released.
+- 1.9.7 released. 1.9.8 (UI tidy-ups, chart notes, colour picker, saved this month) is on PR #22, not yet released.
   Next planned work is 2.0 in `ROADMAP.md` (tax helper upgrade incl. estimated interest from cash balances, State Pension, etc.).
 - Ideas discussed but parked: savings counted payday to payday (ROADMAP "Later"). When a new feature needs explaining, add an
   `FAQ` entry and, if it's a common question, a `why()` button next to it.

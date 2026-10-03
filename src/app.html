@@ -289,6 +289,8 @@ h2{font-size:15px;font-weight:600;letter-spacing:-.01em;margin:0}
 .readout{display:flex;align-items:baseline;gap:6px 12px;flex-wrap:wrap;margin:-4px 0 10px;min-height:34px}
 .readout .rv{font-size:24px;font-weight:600;letter-spacing:-.025em;font-variant-numeric:tabular-nums}
 .readout .rd{font-size:12px;color:var(--ink-3)}
+.readout .rn{flex-basis:100%;display:flex;align-items:center;gap:7px;font-size:13px;color:var(--ink-2);overflow-wrap:anywhere}
+.readout .rn::before{content:"";flex:none;width:7px;height:7px;border-radius:50%;border:1.8px solid var(--gold)}
 .alloc-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:14px}
 .alloc-list summary{list-style:none;cursor:pointer;display:flex;flex-direction:column;gap:7px;color:var(--ink);font-size:13px;font-weight:500}
 .alloc-list summary::-webkit-details-marker{display:none}
@@ -597,6 +599,12 @@ details.fold2.inner[open]{box-shadow:inset 3px 0 0 var(--gold);padding-left:12px
 @keyframes shimmer{to{background-position:-200% 0}}
 /* Account type tiles */
 .type-tiles{display:flex;flex-direction:column;gap:10px}
+.swatches{display:flex;flex-wrap:wrap;gap:10px}
+.swatch{position:relative;display:grid;place-items:center;width:44px;height:44px;border-radius:50%;cursor:pointer}
+.swatch input{position:absolute;opacity:0;width:100%;height:100%;margin:0;cursor:pointer}
+.swatch i{width:30px;height:30px;border-radius:50%;box-shadow:inset 0 0 0 1px rgba(0,0,0,.25);transition:transform .15s}
+.swatch input:checked+i{box-shadow:0 0 0 2px var(--surface),0 0 0 4px var(--gold);transform:scale(1.05)}
+.swatch input:focus-visible+i{outline:2px solid var(--gold);outline-offset:5px}
 .type-tiles .tg{font-size:12px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3)}
 .type-tiles .tt{display:flex;flex-wrap:wrap;gap:6px;margin-top:5px}
 .type-tiles button{border:1px solid var(--line-strong);background:var(--surface);color:var(--ink-2);border-radius:99px;padding:6px 11px;font-size:13px;display:inline-flex;align-items:center;gap:6px}
@@ -811,6 +819,10 @@ details.fold:not([open])>summary h2::after{content:' ▸'}
     <div class="field">
       <label for="acct-provider">Provider</label>
       <input id="acct-provider" class="input" maxlength="40" list="providers" placeholder="e.g. NatWest">
+    </div>
+    <div class="field">
+      <span class="label" id="acct-color-label">Colour</span>
+      <div class="swatches" role="radiogroup" aria-labelledby="acct-color-label"><label class="swatch"><input type="radio" name="acct-color" value="c1" aria-label="Gold"><i style="background:var(--c1)"></i></label><label class="swatch"><input type="radio" name="acct-color" value="c2" aria-label="Ivory"><i style="background:var(--c2)"></i></label><label class="swatch"><input type="radio" name="acct-color" value="c3" aria-label="Copper"><i style="background:var(--c3)"></i></label><label class="swatch"><input type="radio" name="acct-color" value="c4" aria-label="Khaki"><i style="background:var(--c4)"></i></label><label class="swatch"><input type="radio" name="acct-color" value="c5" aria-label="Rose"><i style="background:var(--c5)"></i></label><label class="swatch"><input type="radio" name="acct-color" value="c6" aria-label="Stone"><i style="background:var(--c6)"></i></label></div>
     </div>
     <div class="field">
       <label for="acct-owner">Belongs to</label>
@@ -1901,6 +1913,11 @@ function chart(host, cfg) {
     const x = X(k.t).toFixed(1), y = (H - m.b).toFixed(1);
     shapes += `<path d="M${x},${y}l-4,-7h8z" style="fill:${k.color || 'var(--gold)'}" opacity=".85"><title>${esc(k.label)}</title></path>`;
   });
+  // Balances with a note: a small gold ring on the line; tapping near it shows the note in the readout.
+  if (cfg.notes) layers.slice(0, 1).forEach(l => cfg.notes.forEach((t, i) => {
+    if (!t) return;
+    shapes += `<circle class="note-dot" cx="${X(cfg.xs[i]).toFixed(1)}" cy="${Y(l.hi[i]).toFixed(1)}" r="3.5" style="fill:var(--surface);stroke:var(--gold)" stroke-width="1.8"><title>${esc(t)}</title></circle>`;
+  }));
   cfg._drawn = true;
   const dots = layers.map(l => `<circle class="hover-dot" r="4.5" style="fill:${l.color};stroke:var(--surface)" stroke-width="2" visibility="hidden"/>`).join('');
   host.innerHTML = `<svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}" role="img" aria-label="${esc(cfg.label || 'Chart')}"><defs>${defs}</defs>${g}${shapes}<line class="hover-line" x1="0" x2="0" y1="${m.t}" y2="${H - m.b}" visibility="hidden"/>${dots}<rect x="${m.l}" y="0" width="${W - m.l - m.r}" height="${H}" fill="transparent"/></svg><div class="tip" hidden></div>`;
@@ -2371,13 +2388,13 @@ function renderAccounts() {
     </div>`;
   renderHistory();
   drawAcctYears(a);
-  const pts = st.s.map(l => ({ t: toMs(l.date), v: l.value }));
-  if (pts.length && pts[pts.length - 1].t < TODAY_MS) pts.push({ t: TODAY_MS, v: pts[pts.length - 1].v });
+  const pts = st.s.map(l => ({ t: toMs(l.date), v: l.value, note: l.note && l.note !== 'Opening balance' ? l.note : '' }));
+  if (pts.length && pts[pts.length - 1].t < TODAY_MS) pts.push({ t: TODAY_MS, v: pts[pts.length - 1].v, note: '' });
   const deposits = flowsOf(a.id).filter(f => f.amount > 0 && !f.ytd).map(f => ({ t: toMs(f.date), label: `${dateLabel(toMs(f.date))}: ${f.employer ? 'employer paid in' : 'paid in'} ${gbp(f.amount)}` }));
   chart(document.getElementById('acct-chart'), {
-    xs: pts.map(p => p.t), label: a.name + ' value over time', fit: ui.fit, tipAlways: ui.paidLine, markers: deposits,
+    xs: pts.map(p => p.t), label: a.name + ' value over time', fit: ui.fit, tipAlways: ui.paidLine, markers: deposits, notes: pts.map(p => p.note),
     empty: 'Log another balance to see how this account changes.', emptyAction: ['Log value', 'open-log', a.id],
-    readout: pts.length ? { id: 'acct-readout', html: i => { const d = pts[i].v - pts[0].v; return `<span class="rv">${gbp(pts[i].v)}</span>${i ? `<span class="delta ${cls(d)}">${signed(d)}</span>` : ''}<span class="rd">${i === pts.length - 1 ? 'Now' : dateLabel(pts[i].t)}</span>`; } } : null,
+    readout: pts.length ? { id: 'acct-readout', html: i => { const d = pts[i].v - pts[0].v; return `<span class="rv">${gbp(pts[i].v)}</span>${i ? `<span class="delta ${cls(d)}">${signed(d)}</span>` : ''}<span class="rd">${i === pts.length - 1 ? 'Now' : dateLabel(pts[i].t)}</span>${pts[i].note ? `<span class="rn">${esc(pts[i].note)}</span>` : ''}`; } } : null,
     series: [{ label: a.name, color: colorOf(a), values: pts.map(p => p.v) }, ...(ui.paidLine ? [{ label: 'Paid in', color: 'var(--ink-3)', values: pts.map(p => paidAt([a], p.t)), overlay: true, dash: true, fill: false }] : [])]
   });
 }
@@ -3294,15 +3311,16 @@ function fillPay(id) {
   }
   save(); render();
 }
-// Small strip on Overview: last month's savings rate, tapping through to Income.
+// Small strip on Overview: saved so far this month, last month's savings rate and the tax year's, tapping through to Income.
 function payStrip() {
-  if (ui.person !== 'me' || !state.pay.length) return '';
-  const [s, e] = monthBounds(1), m = payStats(s, e), ty = payStats(taxYearStart(TODAY), TODAY);
-  if (!m.net && !ty.net) return '';
-  return `<section class="panel pay-strip clickable" data-action="tab" data-tab="income" tabindex="0" aria-label="Savings rate">
-    <div><div class="k">Saved in ${esc(fmtMonthLong.format(new Date(toMs(s))))}</div><div class="v num">${m.net ? `${gbp(m.saved)} <span class="faint">of ${gbp(m.net)}</span>` : '<span class="faint">No pay logged</span>'}</div></div>
-    <div class="r"><div class="v num gold">${rateText(m.rate)}</div><div class="k">savings rate</div></div>
-    <div class="r hide-sm"><div class="v num">${rateText(ty.rate)}</div><div class="k">tax year so far</div></div>
+  if (ui.person !== 'me') return '';
+  const now = payStats(...monthBounds(0)), [s, e] = monthBounds(1), m = payStats(s, e), ty = payStats(taxYearStart(TODAY), TODAY);
+  const hasPay = state.pay.length > 0 && (m.net || ty.net), moved = now.paidIn || now.takenOut;
+  if (!hasPay && !moved) return '';
+  return `<section class="panel pay-strip clickable" data-action="tab" data-tab="income" tabindex="0" aria-label="Savings this month">
+    <div><div class="k">Saved in ${esc(fmtMonthLong.format(new Date(toMs(monthBounds(0)[0]))))} so far</div><div class="v num">${gbp(now.saved)}${now.net ? ` <span class="faint">of ${gbp(now.net)}</span>` : ''}</div></div>
+    ${hasPay ? `<div class="r"><div class="v num gold">${rateText(m.rate)}</div><div class="k">${esc(fmtMonthLong.format(new Date(toMs(s))))} rate</div></div>
+    <div class="r hide-sm"><div class="v num">${rateText(ty.rate)}</div><div class="k">tax year so far</div></div>` : ''}
   </section>`;
 }
 function renderIncome() {
@@ -4164,6 +4182,9 @@ function openAcctSheet(id) {
   document.getElementById('acct-tiles').innerHTML = typeTiles(a ? a.type : 'ISA');
   document.getElementById('acct-name').value = a ? a.name : '';
   document.getElementById('acct-provider').value = a ? a.provider : '';
+  const used = new Set(state.accounts.map(x => x.color));
+  const color = a ? a.color : COLORS.find(c => !used.has(c)) || COLORS[state.accounts.length % COLORS.length];
+  acctSheet.querySelectorAll('input[name="acct-color"]').forEach(r => { r.checked = r.value === color; });
   const owner = document.getElementById('acct-owner');
   owner.innerHTML = people().map(p => `<option value="${esc(p.id)}">${esc(p.id === 'me' ? (state.profile.name ? state.profile.name + ' (me)' : 'Me') : p.name)}</option>`).join('');
   owner.value = a ? a.owner : (ui.person !== 'all' ? ui.person : 'me');
@@ -4218,6 +4239,8 @@ document.getElementById('acct-form').addEventListener('submit', e => {
     since: (v => /^(19|20)\d\d$/.test(v) && v <= TODAY.slice(0, 4) ? v : '')(document.getElementById('acct-since').value.trim()),
     archived: !!editingAcct && document.getElementById('acct-archived').checked
   };
+  const pick = acctSheet.querySelector('input[name="acct-color"]:checked');
+  if (pick && COLORS.includes(pick.value)) fields.color = pick.value;
   if (editingAcct) {
     const a = state.accounts.find(x => x.id === editingAcct);
     Object.assign(a, fields);
@@ -4229,7 +4252,7 @@ document.getElementById('acct-form').addEventListener('submit', e => {
   } else {
     clearExample([]);
     const used = new Set(state.accounts.map(a => a.color));
-    const a = { id: uid(), ...fields, color: COLORS.find(c => !used.has(c)) || COLORS[state.accounts.length % COLORS.length], regular: regAmount > 0 ? { amount: regAmount, day: regDay, relief, since: TODAY, last: '' } : null };
+    const a = { id: uid(), color: COLORS.find(c => !used.has(c)) || COLORS[state.accounts.length % COLORS.length], ...fields, regular: regAmount > 0 ? { amount: regAmount, day: regDay, relief, since: TODAY, last: '' } : null };
     state.accounts.push(a);
     const open = parseFloat(document.getElementById('acct-open-value').value);
     if (isFinite(open) && open >= 0) state.logs.push({ id: uid(), accountId: a.id, date: document.getElementById('acct-open-date').value || TODAY, value: open, note: 'Opening balance' });

@@ -13,11 +13,14 @@ Agreed with the owner. Nothing here is built until the owner says "go" for that 
   payslip breakdown, missing-pay reminder · 1.9.7 Help and FAQ (Settings, bell, "Why?" links), still to come this month,
   income share by source, one-offs this year, same-months year on year, balance-jump prompt, copy last payslip
 
-## 1.9.8 (proposed, owner to pick)
-- Done on the branch: Overview folds for Allocation and the monthly chart, chart subtitles, fade on scrolling ranges,
-  fewer font sizes, larger tap targets, 12px minimum text (owner to check on the phone, folded and unfolded, every tab)
-- Account colour picker: choose an account's colour from the six gold/ivory/copper swatches in Add/Edit account
-- Notes on charts: balances with a note get a small dot on the account chart; tap to read the note
+## 1.9.8 (built, not yet released)
+- Interface tidy-ups: Overview folds for Allocation and the monthly chart, chart subtitles, fade on scrolling ranges,
+  fewer font sizes, larger tap targets, 12px minimum text (owner checked buttons on the phone)
+- Account colour picker (six swatches in Add/Edit account)
+- Notes on charts: gold ring on the account chart for balances with a note; the note shows in the readout
+- Overview strip: saved so far this month, next to last month's savings rate
+
+## Later
 - Privacy screen: blank Aurum card in Android recent apps, optional block on screenshots (Settings switch)
 - Savings counted payday to payday: optional Income setting so the savings rate follows pay periods, not calendar months
 
