@@ -13,10 +13,21 @@ Agreed with the owner. Nothing here is built until the owner says "go" for that 
   payslip breakdown, missing-pay reminder · 1.9.7 Help and FAQ (Settings, bell, "Why?" links), still to come this month,
   income share by source, one-offs this year, same-months year on year, balance-jump prompt, copy last payslip
 
-## Later (from 1.9.7 talks)
-- Savings counted payday to payday (optional setting)
+## 1.9.8 (built, not yet released)
+- Interface tidy-ups: Overview folds for Allocation and the monthly chart, chart subtitles, fade on scrolling ranges,
+  fewer font sizes, larger tap targets, 12px minimum text (owner checked buttons on the phone)
+- Account colour picker (six swatches in Add/Edit account)
+- Notes on charts: gold ring on the account chart for balances with a note; the note shows in the readout
+- Overview strip: saved so far this month, next to last month's savings rate
+- Net worth card: 30-day change with growth (not a total-change %), all-time paid in vs growth, "balances over a month old"
+  link to Update all, drag the trend to see past totals, smaller corner ring on phones, allocation bar only with 2+ groups
+
+## Later
+- Privacy screen: blank Aurum card in Android recent apps, optional block on screenshots (Settings switch)
+- Savings counted payday to payday: optional Income setting so the savings rate follows pay periods, not calendar months
 
 ## 2.0 (next)
+- Net worth card range chips (1M · 1Y · All) setting both the change line and the trend (trend now shows the last 24 points)
 - Tax return helper upgrade: build the engine + 25 test cases in `docs/tax-helper-spec.md` (dividend/savings stacking,
   starting rate for savings, PSA, CGT 18%/24% with losses and AEA, HMRC box numbers, required UI wording); keep the
   existing P60/Gift Aid/marriage allowance/HICBC features and show refunds as well as tax to pay
@@ -42,8 +53,8 @@ Agreed with the owner. Nothing here is built until the owner says "go" for that 
   - Not planned: broker/Open Banking linking (needs paid, FCA-regulated partner and servers)
 
 ## Ideas to decide on (suggested, not yet chosen)
-- Small: notes on balances shown on charts; "since last visit" strip on Overview; duplicate last entry;
-  quick date chips in Log value (Today, 1st, 5 April); account colour and icon picker
+- Small: "since last visit" strip on Overview; duplicate last entry;
+  quick date chips in Log value (Today, 1st, 5 April); account icon picker
 - 2.x: emergency fund in months (enter monthly outgoings); goal buckets (split an account across goals);
   future events (expected lump sums/costs in the planner); today's-money switch everywhere;
   custom account types; printable one-page PDF net-worth report
@@ -63,7 +74,6 @@ Agreed with the owner. Nothing here is built until the owner says "go" for that 
 - Helper mode: a Settings switch that adds small "?" bubbles next to sections and figures (net worth, paid in vs
   growth, savings rate, allowances, planner, tax helper…); tapping one pops up a short plain-English explanation of what
   it means and how it's worked out. Off by default, can dismiss each tip, and a first-time hint offers to turn it on
-- Privacy screen: blank Aurum card in Android recent apps; blocks screenshots (with a Settings switch)
 
 ## Parked / not wanted
 - Search, home-screen shortcuts, larger text option, Scottish tax rates, live data, "advice" features

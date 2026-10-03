@@ -1,4 +1,6 @@
-- Help and FAQ in Settings, also from the bell and gold ? buttons next to things that often raise questions
-- Income: what's still to come this month, each source's share of your income, one-offs this tax year, and regular take-home compared with the same months last year
-- A balance that jumps with no payment logged now asks if you paid money in, so it isn't all counted as growth
-- Copy last payslip: fills gross, tax, NI and the rest from your previous payslip
+- Net worth card: shows growth (not money you paid in) for the last 30 days, total paid in vs growth, and a nudge when balances are over a month old
+- Drag along the net worth trend to see your total on any date
+- Overview: see what you've saved so far this month, next to last month's savings rate
+- Notes on charts: balances with a note show a gold ring on the account chart; tap near it to read the note
+- Pick a colour for each account in Add or Edit account
+- Tidier screens: Allocation and the monthly chart fold away, larger buttons and easier-to-read text
