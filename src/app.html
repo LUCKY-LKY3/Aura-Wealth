@@ -257,8 +257,14 @@ h2{font-size:15px;font-weight:600;letter-spacing:-.01em;margin:0}
 .statement .figure .p{color:var(--on-navy-2);font-size:.55em;letter-spacing:-.02em}
 .stmt-trend{position:relative;flex:1 1 96px;min-height:80px;max-height:170px;margin:18px 0 20px}
 .stmt-trend svg{position:absolute;inset:0;width:100%;height:100%}
+.stmt-trend{touch-action:pan-y;cursor:crosshair}
+.stmt-cursor{position:absolute;z-index:1;width:10px;height:10px;margin:-5px 0 0 -5px;border-radius:50%;background:#D9B666;box-shadow:0 0 0 3px rgba(217,182,102,.25);pointer-events:none}
+.stmt-at{position:absolute;z-index:1;top:-16px;left:0;font-size:12px;color:var(--on-navy-2);pointer-events:none}
+.stmt-stale{align-self:flex-start;margin-top:10px;border:0;background:none;padding:4px 0;font-size:12px;color:var(--on-navy-2);text-decoration:underline;text-decoration-color:color-mix(in srgb,var(--gold-on-navy) 50%,transparent);text-underline-offset:3px;cursor:pointer}
+@media (max-width:519px){.statement::after{width:170px;height:170px;right:-80px;top:-80px}}
 .statement .changes{display:flex;flex-wrap:wrap;gap:8px 20px;font-size:13px;color:var(--on-navy-2)}
 .statement .changes b{font-weight:600;margin-right:4px}
+.statement .changes b.plain{color:var(--on-navy)}
 .statement .up{color:#6FE0A9} .statement .down{color:#FF9A88}
 .alloc-bar{display:flex;flex:none;height:6px;border-radius:99px;overflow:hidden;gap:2px;margin-top:auto;background:var(--on-navy-line)}
 .alloc-bar i{display:block;height:100%;min-width:3px}
@@ -2040,6 +2046,28 @@ function donut(parts, total) {
   return `<svg viewBox="0 0 132 132" aria-hidden="true"><circle r="${R}" cx="66" cy="66" fill="none" style="stroke:var(--surface-2)" stroke-width="12"/>${segs}</svg>`;
 }
 // Gold trend of the total inside the net-worth card; stretches to fill the card.
+// Drag along the net worth trend: the big figure shows the value on that date, and goes back to today on release.
+let trendPts = [];
+function bindTrend() {
+  const box = view.querySelector('.stmt-trend'), fig = view.querySelector('.statement .figure');
+  if (!box || !fig || trendPts.length < 2) return;
+  const pts = trendPts, cur = box.querySelector('.stmt-cursor'), at = box.querySelector('.stmt-at');
+  const t0 = pts[0].t, span = (pts[pts.length - 1].t - t0) || 1;
+  const vals = pts.map(p => p.total), min = Math.min(...vals), rng = (Math.max(...vals) - min) || 1;
+  const move = e => {
+    const r = box.getBoundingClientRect(), f = clamp((e.clientX - r.left) / r.width, 0, 1);
+    let best = 0, bd = Infinity;
+    pts.forEach((p, i) => { const d = Math.abs((p.t - t0) / span - f); if (d < bd) { bd = d; best = i; } });
+    const p = pts[best], x = (p.t - t0) / span * 100, y = 4 + (1 - (p.total - min) / rng) * 88;
+    cur.style.left = x + '%'; cur.style.top = y + '%'; cur.hidden = false;
+    at.textContent = best === pts.length - 1 ? 'Now' : dateLabel(p.t); at.hidden = false;
+    fig.textContent = gbp(p.total);
+  };
+  const end = () => { cur.hidden = true; at.hidden = true; fig.textContent = gbp(+fig.dataset.value); };
+  box.addEventListener('pointerdown', move);
+  box.addEventListener('pointermove', e => { if (e.pointerType === 'mouse' || e.buttons) move(e); });
+  ['pointerup', 'pointerleave', 'pointercancel'].forEach(t => box.addEventListener(t, end));
+}
 function totalTrend(tl) {
   const pts = tl.slice(-24);
   if (pts.length < 2) return '<div class="stmt-trend"></div>';
@@ -2047,7 +2075,8 @@ function totalTrend(tl) {
   const t0 = pts[0].t, span = (pts[pts.length - 1].t - t0) || 1;
   const xy = pts.map(p => [((p.t - t0) / span * 100).toFixed(2), (4 + (1 - (p.total - min) / rng) * 88).toFixed(2)]);
   const line = xy.map(p => p.join(',')).join('L');
-  return `<div class="stmt-trend${tabJustOpened ? ' reveal' : ''}" aria-hidden="true"><svg viewBox="0 0 100 100" preserveAspectRatio="none">
+  trendPts = pts;
+  return `<div class="stmt-trend${tabJustOpened ? ' reveal' : ''}" aria-hidden="true"><i class="stmt-cursor" hidden></i><span class="stmt-at" hidden></span><svg viewBox="0 0 100 100" preserveAspectRatio="none">
     <defs><linearGradient id="stmt-fill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#D9B666" stop-opacity=".28"/><stop offset="1" stop-color="#D9B666" stop-opacity="0"/></linearGradient></defs>
     <path d="M${line}L100,100L0,100Z" fill="url(#stmt-fill)"/>
     <path d="M${line}" fill="none" stroke="#D9B666" stroke-width="1.8" vector-effect="non-scaling-stroke" stroke-linejoin="round" stroke-linecap="round"/>
@@ -2155,9 +2184,11 @@ function renderOverview() {
   const stats = accts.map(a => ({ a, ...accountStats(a.id) }));
   const total = stats.reduce((s, x) => s + x.cur, 0);
   const monthAgo = valueAt(tl, TODAY_MS - 30 * 864e5);
-  const first = tl.length ? tl[0].total : 0;
   const mChange = monthAgo != null ? total - monthAgo : null;
-  const allChange = tl.length > 1 ? total - first : null;
+  // Growth leaves out money paid in, so a payment never shows as a gain.
+  const mStats = mChange != null ? periodTotals(accts, TODAY_MS - 30 * 864e5) : null;
+  const life = tl.length ? periodTotals(accts, -Infinity) : null;
+  const staleN = tl.length ? staleAccounts(accts).filter(a => logsOf(a.id).some(l => !l.estimated)).length : 0;
   const groups = groupSummary(accts).filter(g => g.value > 0);
   const pension = stats.filter(x => groupOf(x.a) === 'pension').reduce((s, x) => s + x.cur, 0);
   const access = total - pension;
@@ -2168,12 +2199,13 @@ function renderOverview() {
       <div class="eyebrow">${who ? esc(who) + ' · ' : ''}Total net worth</div>
       <div class="figure num" data-count="net" data-value="${total}">${gbp(total)}</div>
       <div class="changes">
-        ${mChange != null ? `<span><b class="${mChange >= 0 ? 'up' : 'down'}">${signed(mChange)}${monthAgo ? ` (${pct(mChange / monthAgo * 100)})` : ''}</b>last 30 days</span>` : ''}
-        ${allChange != null ? `<span><b class="${allChange >= 0 ? 'up' : 'down'}">${signed(allChange)}${first ? ` (${pct(allChange / first * 100)})` : ''}</b>since ${esc(monthYear(tl[0].t))}</span>` : ''}
+        ${mChange != null ? `<span><b class="${mChange >= 0 ? 'up' : 'down'}">${signed(mChange)}</b>last 30 days, <b class="${mStats.growth >= 0 ? 'up' : 'down'}">${signed(mStats.growth)}</b>growth</span>` : ''}
+        ${life && life.rows.length && tl.length > 1 ? `<span><b class="plain">${gbp(life.paid)}</b>paid in, <b class="${life.growth >= 0 ? 'up' : 'down'}">${signed(life.growth)}</b>growth in total</span>` : ''}
         ${!tl.length ? '<span>Log your first value to start tracking.</span>' : ''}
       </div>
+      ${staleN ? `<button type="button" class="stmt-stale" data-action="open-bulk">${staleN} balance${staleN > 1 ? 's' : ''} over a month old · Update all</button>` : ''}
       ${totalTrend(tl)}
-      ${total > 0 ? `
+      ${total > 0 && groups.length > 1 ? `
         <div class="alloc-bar" aria-hidden="true">${groups.map(g => `<i style="flex:${g.value};background:${g.hi}"></i>`).join('')}</div>
         <div class="alloc-legend">${groups.map(g => `<span><i class="sw" style="background:${g.hi}"></i>${esc(g.label)} <b class="num">${(g.value / total * 100).toFixed(0)}%</b></span>`).join('')}</div>` : ''}
     </section>`;
@@ -2283,6 +2315,7 @@ function renderOverview() {
     </section>`;
 
   view.innerHTML = `<div class="stack view">${updateBanner()}${exampleNotice()}${visitStrip(total)}${!state.example && ui.person === 'me' && showReviewCard(monthReview()) ? reviewCard(monthReview(), true) : ''}${personFilter()}<div class="summary">${statement}${kpis}</div>${payStrip()}${holdings}<div class="grid-2">${growth}${allocation}</div>${monthly}${goals ? `<div class="grid-2">${activity}${goals}</div>` : activity}</div>`;
+  bindTrend();
   barChart(document.getElementById('monthly-chart'), {
     labels: months.map(x => x.short), titles: months.map(x => x.title), paid: months.map(x => x.paid), growth: months.map(x => x.growth),
     label: 'Money paid in and growth each month', empty: 'Update your balances each month to see what you paid in and what grew.', emptyAction: ['Update all', 'open-bulk']

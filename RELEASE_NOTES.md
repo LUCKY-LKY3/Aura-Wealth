@@ -1,3 +1,5 @@
+- Net worth card: shows growth (not money you paid in) for the last 30 days, total paid in vs growth, and a nudge when balances are over a month old
+- Drag along the net worth trend to see your total on any date
 - Overview: see what you've saved so far this month, next to last month's savings rate
 - Notes on charts: balances with a note show a gold ring on the account chart; tap near it to read the note
 - Pick a colour for each account in Add or Edit account
