@@ -13,7 +13,7 @@ Agreed with the owner. Nothing here is built until the owner says "go" for that 
   payslip breakdown, missing-pay reminder · 1.9.7 Help and FAQ (Settings, bell, "Why?" links), still to come this month,
   income share by source, one-offs this year, same-months year on year, balance-jump prompt, copy last payslip
 
-## 1.9.8 (built, not yet released)
+## 1.9.8 (merged, release pending)
 - Interface tidy-ups: Overview folds for Allocation and the monthly chart, chart subtitles, fade on scrolling ranges,
   fewer font sizes, larger tap targets, 12px minimum text (owner checked buttons on the phone)
 - Account colour picker (six swatches in Add/Edit account)
@@ -41,7 +41,7 @@ Agreed with the owner. Nothing here is built until the owner says "go" for that 
 - Cash drag warning: lots of cash in a low-interest account (user enters rate)
 - Interest checker: savings rate vs a benchmark rate the user sets
 
-## Insights: "what your saving means" (owner idea, version to decide)
+## 2.x — Insights: "what your saving means" (owner idea)
 Turns money saved into something personal, from the user's own data (planner growth, inflation, retirement age, goals, pay).
 Always in today's money and marked "illustration, not advice".
 - Extra this month: when a month beats your usual saving, "£150 more than usual → about £1,900 at 60 in today's money"

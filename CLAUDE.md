@@ -168,7 +168,7 @@ not advice — keep that disclaimer.
 
 ## Status (latest)
 
-- 1.9.7 released. 1.9.8 (UI tidy-ups, chart notes, colour picker, saved this month, net worth card) is on PR #22, not yet released.
+- 1.9.8 (UI tidy-ups, chart notes, colour picker, saved this month, net worth card) merged to main; owner publishes the v1.9.8 release.
   Next planned work is 2.0 in `ROADMAP.md` (tax helper upgrade incl. estimated interest from cash balances, State Pension, etc.).
 - Ideas discussed but parked: savings counted payday to payday (ROADMAP "Later"). When a new feature needs explaining, add an
   `FAQ` entry and, if it's a common question, a `why()` button next to it.
