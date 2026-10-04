@@ -102,6 +102,12 @@ Always in today's money and marked "illustration, not advice".
 - Steps: Google Play developer account ($25), Play Billing in the app (on-device licence check, no servers),
   privacy policy + terms, keep "illustration, not advice" wording, decide on repo privacy/licence first,
   accountant for UK tax on income. Website stays free (or becomes a demo)
+- While testing (before billing): every possibly-paid feature goes behind one `isPro()` check that returns true for
+  everyone; a hidden developer switch (e.g. tap the version in Settings 7 times) previews the free view. Charging later
+  only changes `isPro()`
+- When billing lands: test purchases with Play Console licence testers (real flow, no charge)
+- Limits: with a public repo and no server, a technical user can switch Pro on from source; Play Billing stops casual APK
+  copying only. Decide repo privacy before charging. Play Billing is Android-only, so the website stays free or is a demo
 - Avoid: adverts (tracking, off-brand), selling data (we never have it), affiliate links to platforms
   (FCA financial promotion risk; conflicts with "no advice")
 
