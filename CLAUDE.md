@@ -176,7 +176,7 @@ not advice — keep that disclaimer.
 ## Status (latest)
 
 - 1.9.9 merged to main (PR #23); owner publishes the v1.9.9 release. Owner says when to merge.
-  Next planned work is 2.0 in `ROADMAP.md` (tax helper upgrade incl. estimated interest from cash balances, State Pension, etc.).
+  Next planned work is 2.0 in `ROADMAP.md` (polish, charts, wealth insights); 2.x Future Me, 3.0 DB/State Pension/property/debts, 4.0 tax helper.
 - Ideas discussed but parked: savings counted payday to payday (ROADMAP "Later"). When a new feature needs explaining, add an
   `FAQ` entry and, if it's a common question, a `why()` button next to it.
 - Helper mode ("?" explainer bubbles) is in ROADMAP "Later" — owner said not for now; don't build until asked.
