@@ -1,6 +1,4 @@
-- Net worth card: shows growth (not money you paid in) for the last 30 days, total paid in vs growth, and a nudge when balances are over a month old
-- Drag along the net worth trend to see your total on any date
-- Overview: see what you've saved so far this month, next to last month's savings rate
-- Notes on charts: balances with a note show a gold ring on the account chart; tap near it to read the note
-- Pick a colour for each account in Add or Edit account
-- Tidier screens: Allocation and the monthly chart fold away, larger buttons and easier-to-read text
+- Interest, dividends and prizes paid into an account now add to its balance straight away (as growth), until you next log a real balance. Untick "Paid into this account" if they went elsewhere
+- Account history: notes sit on one tidy line under each entry instead of a squashed column; tap a note to read it all
+- Notes typed with interest or dividends are now kept
+- Help and FAQ is sorted into sections and has a search box, with new answers on each tab, estimated balances, several accounts and Family, backups and demo mode. Tap "est." on a balance to see why
