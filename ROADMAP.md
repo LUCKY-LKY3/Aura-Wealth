@@ -49,7 +49,21 @@ Always in today's money and marked "illustration, not advice".
 ## 3.x
 - Two-column layout for the unfolded foldable screen
 - Everything pension-related: tax-free cash tracker (25%, Lump Sum Allowance £268,275), salary sacrifice vs
-  relief at source, drawdown, defined benefit / NHS pensions
+  relief at source, drawdown (defined benefit / NHS pensions: see below)
+
+## Defined benefit pensions (version to decide)
+Owner's proposal (4 Oct 2026). Today the app has no DB type, so a DB pension is either left out or entered with a made-up balance.
+- Record each DB pension as yearly income (scheme name, owner, expected £/yr in today's money, scheme pension age), kept out
+  of the accounts ledger: no balances, no money in, no growth, not in allowances
+- Estimated value = yearly income × multiplier, default 20× ("balanced estimate"); choices 16× conservative, 20× balanced,
+  25× income replacement, or custom
+- Optional actual CETV from the scheme (with its date) overrides the multiplier and is marked "CETV"
+- Shown separately: Net worth (accounts) + "Pension wealth (estimated)" = Total financial wealth; each DB row shows
+  "Based on 20× yearly pension" or "CETV dated …"
+- Wording: an illustrative capital-equivalent estimate, never "HMRC valuation" or "actual value"; FAQ entry + why() button
+  explaining CETV and that the real value depends on the scheme's benefits
+- Suggested with it: planner adds DB income from the scheme pension age alongside the pot's drawdown income; optional
+  automatic lump sum (e.g. NHS 1995 section) added to the value; shares the "yearly income from an age" model with State Pension
 
 ## Live prices (version to decide)
 - Holdings with live prices: enter ticker + quantity, app fetches price on-device (only the ticker leaves the phone)
