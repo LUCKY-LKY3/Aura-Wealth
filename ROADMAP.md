@@ -41,6 +41,18 @@ Agreed with the owner. Nothing here is built until the owner says "go" for that 
 - Cash drag warning: lots of cash in a low-interest account (user enters rate)
 - Interest checker: savings rate vs a benchmark rate the user sets
 
+## Insights: "what your saving means" (owner idea, version to decide)
+Turns money saved into something personal, from the user's own data (planner growth, inflation, retirement age, goals, pay).
+Always in today's money and marked "illustration, not advice".
+- Extra this month: when a month beats your usual saving, "£150 more than usual → about £1,900 at 60 in today's money"
+- Time bought: extra saved as days of your own take-home pay ("that £500 = 6 days of work"), or as retirement time
+  ("this year's saving funds about 7 months of retirement at your planned income")
+- Goals pulled closer: "your extra £200 brings House deposit forward 3 weeks"
+- What-if slider on Insights: +£25 to +£500 a month, shows the pot at retirement, goal dates and the earliest age you could stop
+- Your own units: set personal yardsticks (a holiday = £2,000, a month's rent = £1,200); "growth this year paid for 1.5 holidays"
+- Growth as wages: "your money earned £3,200 this year, like 9 extra days at work" (hourly from logged pay)
+- Gentle flip side (off by default): a lighter month shows what it costs at retirement, without nagging
+
 ## 3.x
 - Two-column layout for the unfolded foldable screen
 - Everything pension-related: tax-free cash tracker (25%, Lump Sum Allowance £268,275), salary sacrifice vs
