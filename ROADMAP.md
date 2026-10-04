@@ -11,20 +11,9 @@ Agreed with the owner. Nothing here is built until the owner says "go" for that 
   including work pension), where it went, payday/pay-change/best-rate notifications, P60 fill from payslips ·
   1.9.6 split a mid-year first balance (5 April balance + monthly payments), "moved from savings" and ISA transfer flags,
   payslip breakdown, missing-pay reminder · 1.9.7 Help and FAQ (Settings, bell, "Why?" links), still to come this month,
-  income share by source, one-offs this year, same-months year on year, balance-jump prompt, copy last payslip
-
-## 1.9.8 (released)
-- Interface tidy-ups: Overview folds for Allocation and the monthly chart, chart subtitles, fade on scrolling ranges,
-  fewer font sizes, larger tap targets, 12px minimum text (owner checked buttons on the phone)
-- Account colour picker (six swatches in Add/Edit account)
-- Notes on charts: gold ring on the account chart for balances with a note; the note shows in the readout
-- Overview strip: saved so far this month, next to last month's savings rate
-- Net worth card: 30-day change with growth (not a total-change %), all-time paid in vs growth, "balances over a month old"
-  link to Update all, drag the trend to see past totals, smaller corner ring on phones, allocation bar only with 2+ groups
-
-## 1.9.9 (in PR)
-- Interest, dividends and prizes paid into an account raise its balance (estimated, as growth); "Paid into this account" tick
-- History: notes on one line under each entry (tap to expand) instead of a Note column; fixes notes squashing on phones
+  income share by source, one-offs this year, same-months year on year, balance-jump prompt, copy last payslip ·
+  1.9.8 tidy-ups, account colour picker, notes on charts, saved this month, net worth card upgrades ·
+  1.9.9 interest/dividends/prizes add to the balance, History notes on a line under each entry, FAQ in sections with search
 
 ## Later
 - Privacy screen: blank Aurum card in Android recent apps, optional block on screenshots (Settings switch)

@@ -77,7 +77,8 @@ There is no local Java/Android SDK on the owner's PC — **APKs are only built b
 - Notifications (bell): `computeNotes()` derives them from data on each render (`refreshBell()`); only `ui.notes.{read,gone,on,move}`
   is stored (in `aurum_ui`). Ids encode the date/version so a new occurrence shows again. Value moves are growth only (flows excluded, estimated logs ignored).
 - Collapsible sections use `foldOpen(key,title,sub)`/`foldClose` (round chevron); open state in `ui.folds`.
-- `income` (interest/dividends/prizes) is for the tax helper and shown on Income, but doesn't affect growth or the savings rate. Employer pension payments are flows with `employer: true, own: 0`.
+- `income` (interest/dividends/prizes) feeds the tax helper and is shown on Income; not money in or the savings rate. Since 1.9.9, entries
+  marked `added` raise the balance via an estimated log (so they show as growth). Employer pension payments are flows with `employer: true, own: 0`.
 - Device-only keys (not in backups): `aurum_lock` (PIN hash), `aurum_bio`, `aurum_reminder` (day), `aurum_update` (cached release), `aurum_taxrem` (June P60 / January SA reminders), `aurum_autobackup`/`_last` (weekly copy to Documents/Aurum).
 - `archived` accounts stay in totals/charts but are hidden from pickers, Update all, reminders and the planner.
 - Native plugins: Preferences, Filesystem, Share, LocalNotifications (monthly reminder), NativeBiometric (@capgo, fingerprint), Haptics.
@@ -174,7 +175,7 @@ not advice — keep that disclaimer.
 
 ## Status (latest)
 
-- 1.9.8 released. 1.9.9 (interest adds to balance, History notes on their own line) in a PR.
+- 1.9.9 merged to main (PR #23); owner publishes the v1.9.9 release. Owner says when to merge.
   Next planned work is 2.0 in `ROADMAP.md` (tax helper upgrade incl. estimated interest from cash balances, State Pension, etc.).
 - Ideas discussed but parked: savings counted payday to payday (ROADMAP "Later"). When a new feature needs explaining, add an
   `FAQ` entry and, if it's a common question, a `why()` button next to it.
