@@ -160,7 +160,16 @@ not advice — keep that disclaimer.
   growth → `jumpAnswer`, `jumpOk`). `copySlip()`/`lastSlip()` in Log pay. Income: still to come (This month), `multi` "Of income"
   column + ≥80% note, one-offs this tax year, same-months YoY on `core` take-home (needs pay from the previous tax year's start).
 
+- 1.9.8: `chart()` takes `notes` (text per point, gold `.note-dot` ring on the first series); the account chart passes balance notes
+  (not 'Opening balance') and shows them in the readout (`.rn`). Colour picker = `input[name="acct-color"]` swatches in `#acct-sheet`.
+  Net worth card: 30-day change + growth (`periodTotals`), all-time paid in/growth, `.stmt-stale` (balances >30 days → open-bulk);
+  `bindTrend()` makes `totalTrend()` scrubbable (`trendPts`, figure shows the date's total, restores on release).
+  `payStrip()` on Overview shows saved so far this month (also without pay logged), plus last month's and the tax year's rate when pay exists.
+
 ## Status (latest)
 
-- 1.9.6 released. 1.9.7 (FAQ, income extras, balance-jump prompt, copy payslip) built on `claude/read-claude-md-1d3dhv`, not yet released. Next planned work is 2.0 in `ROADMAP.md`.
+- 1.9.8 (UI tidy-ups, chart notes, colour picker, saved this month, net worth card) merged to main; owner publishes the v1.9.8 release.
+  Next planned work is 2.0 in `ROADMAP.md` (tax helper upgrade incl. estimated interest from cash balances, State Pension, etc.).
+- Ideas discussed but parked: savings counted payday to payday (ROADMAP "Later"). When a new feature needs explaining, add an
+  `FAQ` entry and, if it's a common question, a `why()` button next to it.
 - Helper mode ("?" explainer bubbles) is in ROADMAP "Later" — owner said not for now; don't build until asked.
