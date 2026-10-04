@@ -166,9 +166,14 @@ not advice — keep that disclaimer.
   `bindTrend()` makes `totalTrend()` scrubbable (`trendPts`, figure shows the date's total, restores on release).
   `payStrip()` on Overview shows saved so far this month (also without pay logged), plus last month's and the tax year's rate when pay exists.
 
+- 1.9.9: income entries can carry `note` and `added` (paid into the account; default on). `added` interest/dividends/prizes logged without a
+  balance go through `addEstimate`/`dropEstimate` like flows (their id in `flowIds`), so the balance rises as growth. History table has no
+  Note column: notes (and extras like "You paid £x") go on a `tr.hn-row` line under the entry (`.hn`, ellipsis, tap `hnote` to expand).
+  Don't give table cells the class `note`: it clashes with the bell's `.note` styles.
+
 ## Status (latest)
 
-- 1.9.8 (UI tidy-ups, chart notes, colour picker, saved this month, net worth card) merged to main; owner publishes the v1.9.8 release.
+- 1.9.8 released. 1.9.9 (interest adds to balance, History notes on their own line) in a PR.
   Next planned work is 2.0 in `ROADMAP.md` (tax helper upgrade incl. estimated interest from cash balances, State Pension, etc.).
 - Ideas discussed but parked: savings counted payday to payday (ROADMAP "Later"). When a new feature needs explaining, add an
   `FAQ` entry and, if it's a common question, a `why()` button next to it.

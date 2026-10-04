@@ -13,7 +13,7 @@ Agreed with the owner. Nothing here is built until the owner says "go" for that 
   payslip breakdown, missing-pay reminder · 1.9.7 Help and FAQ (Settings, bell, "Why?" links), still to come this month,
   income share by source, one-offs this year, same-months year on year, balance-jump prompt, copy last payslip
 
-## 1.9.8 (merged, release pending)
+## 1.9.8 (released)
 - Interface tidy-ups: Overview folds for Allocation and the monthly chart, chart subtitles, fade on scrolling ranges,
   fewer font sizes, larger tap targets, 12px minimum text (owner checked buttons on the phone)
 - Account colour picker (six swatches in Add/Edit account)
@@ -21,6 +21,10 @@ Agreed with the owner. Nothing here is built until the owner says "go" for that 
 - Overview strip: saved so far this month, next to last month's savings rate
 - Net worth card: 30-day change with growth (not a total-change %), all-time paid in vs growth, "balances over a month old"
   link to Update all, drag the trend to see past totals, smaller corner ring on phones, allocation bar only with 2+ groups
+
+## 1.9.9 (in PR)
+- Interest, dividends and prizes paid into an account raise its balance (estimated, as growth); "Paid into this account" tick
+- History: notes on one line under each entry (tap to expand) instead of a Note column; fixes notes squashing on phones
 
 ## Later
 - Privacy screen: blank Aurum card in Android recent apps, optional block on screenshots (Settings switch)

@@ -356,7 +356,14 @@ tr.clickable:hover td{background:var(--surface-2)}
 .weight .bar{width:56px;height:4px;border-radius:99px;background:var(--surface-2);overflow:hidden}
 .weight .bar i{display:block;height:100%}
 .spark{width:96px;height:28px;display:block;margin-left:auto}
-td.note{color:var(--ink-2);max-width:280px;overflow-wrap:anywhere}
+/* History notes (1.9.9): one line under the entry, cut off with an ellipsis; tap to read it all */
+tr.has-n td{border-bottom:0;padding-bottom:4px}
+tr.hn-row td{padding-top:0}
+.hn{width:0;min-width:100%;display:flex;gap:6px;align-items:baseline;font-size:12px;color:var(--ink-3);cursor:pointer;-webkit-tap-highlight-color:transparent}
+.hn::before{content:'';flex:none;width:5px;height:5px;border-radius:50%;background:var(--gold);opacity:.8;transform:translateY(-2px)}
+.hn span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hn.open span{white-space:normal;overflow-wrap:anywhere;color:var(--ink-2)}
+.hn i{font-style:normal;color:var(--ink-3)}
 tr.confirm td{background:var(--neg-soft)}
 @media (max-width:759px){.hide-sm{display:none}td,th{padding-inline:6px}td:first-child,th:first-child{padding-left:2px}.acct-cell{min-width:0}.icon-btn{padding:5px}}
 .icon-btn{border:0;background:transparent;color:var(--ink-3);padding:6px;border-radius:6px;display:inline-grid;place-items:center}
@@ -784,6 +791,7 @@ details.fold:not([open])>summary h2::after{content:' ▸'}
       <label class="check" id="log-relief-wrap" hidden><input type="checkbox" id="log-relief"><span id="log-relief-label"></span></label>
       <label class="check" id="log-move-wrap" hidden><input type="checkbox" id="log-move"><span id="log-move-label">Moved from savings I already had</span> <span class="faint" id="log-move-hint"></span></span></label>
       <label class="check" id="log-isat-wrap" hidden><input type="checkbox" id="log-isat"><span>ISA transfer from another ISA <span class="faint">Doesn't use this year's allowance</span></span></label>
+      <label class="check" id="log-added-wrap" hidden><input type="checkbox" id="log-added" checked><span>Paid into this account <span class="faint">Adds it to the balance until you next log one</span></span></label>
       <p class="hint" id="log-move-why" hidden style="margin:0"><button type="button" class="why" data-action="faq" data-id="move" aria-label="Help: moving money between your accounts"><i aria-hidden="true">?</i><span>Moving money between your accounts?</span></button></p>
       <p class="hint" id="log-kind-hint">Recording deposits means they are not counted as growth.</p>
       <button type="button" class="btn sm" id="log-same" data-action="log-same" hidden style="align-self:flex-start"></button>
@@ -1287,7 +1295,8 @@ function normalize(o) {
       ...(f.transfer ? { transfer: true } : {}), ...(f.isaTransfer ? { isaTransfer: true } : {})
     }));
     const income = (Array.isArray(o.income) ? o.income : []).filter(x => x && isIso(x.date) && isFinite(+x.amount) && +x.amount > 0 && ids.has(String(x.accountId))).map(x => ({
-      id: String(x.id || uid()), accountId: String(x.accountId), date: x.date, amount: +x.amount, kind: ['dividend', 'prize'].includes(x.kind) ? x.kind : 'interest'
+      id: String(x.id || uid()), accountId: String(x.accountId), date: x.date, amount: +x.amount, kind: ['dividend', 'prize'].includes(x.kind) ? x.kind : 'interest',
+      note: String(x.note || '').slice(0, 80), ...(x.added != null ? { added: !!x.added } : {})
     }));
     const goals = (Array.isArray(o.goals) ? o.goals : []).filter(g => g && g.name && isFinite(+g.target) && +g.target > 0).map(g => {
       const goal = { id: String(g.id || uid()), name: String(g.name).slice(0, 40), target: +g.target, date: isIso(g.date) ? g.date : '', scope: String(g.scope || 'all') };
@@ -2737,14 +2746,19 @@ function renderHistory() {
   host.innerHTML = rows.length ? `
     ${h.kind === 'flow' || q || (h.year && h.year !== 'all') ? `<p class="hint" style="margin:0 0 8px">${rows.length} entr${rows.length === 1 ? 'y' : 'ies'}${rows.some(r => r.kind === 'flow') ? ` · net paid in ${signed(totalIn)}` : ''}</p>` : ''}
     <div class="table-wrap"><table>
-    <thead><tr><th>Date</th><th class="r">Balance</th><th class="r">Change</th><th class="hide-sm">Note</th><th class="r"><span class="sr">Actions</span></th></tr></thead>
+    <thead><tr><th>Date</th><th class="r">Balance</th><th class="r">Change</th><th class="r"><span class="sr">Actions</span></th></tr></thead>
     <tbody>${shown.map(l => {
       const when = dateLabel(toMs(l.date)), whenCell = `<span class="d-long">${when}</span><span class="d-short">${shortDate(l.date)}</span>`;
-      if (pendingDelete === l.id) return `<tr class="confirm"><td colspan="3">Delete this ${l.kind === 'flow' ? 'payment' : l.kind === 'income' ? 'income entry' : 'valuation'} from ${when}?</td><td class="hide-sm"></td><td class="r" style="white-space:nowrap"><button class="btn sm ghost" data-action="del-no">Keep</button> <button class="btn sm danger solid" data-action="del-yes" data-id="${esc(l.id)}">Delete</button></td></tr>`;
-      if (l.kind === 'income') return `<tr data-row="${esc(l.id)}"><td style="white-space:nowrap">${whenCell}${who(l)}</td><td class="r faint">${incLabel(l.incKind)}</td><td class="r"><span class="delta muted">${gbp(l.amount)}</span></td><td class="note hide-sm faint">${l.incKind === 'prize' ? 'Tax-free prize' : 'Income, for tax'}</td>${actions(l, 'income from ' + when)}</tr>`;
-      if (l.kind === 'flow') return `<tr data-row="${esc(l.id)}"><td style="white-space:nowrap">${whenCell}${who(l)}</td><td class="r faint">${l.employer ? 'Employer paid in' : l.isaTransfer ? 'ISA transfer' : l.transfer ? (l.amount < 0 ? 'Moved out' : 'Moved in') : l.amount >= 0 ? 'Paid in' : 'Taken out'}</td><td class="r">${deltaChip(l.amount, signed(l.amount))}</td><td class="note hide-sm">${esc(l.note)}${!l.employer && l.own !== l.amount ? ` <span class="faint">(you paid ${gbp(l.own)})</span>` : ''}</td>${actions(l, 'payment from ' + when)}</tr>`;
+      if (pendingDelete === l.id) return `<tr class="confirm"><td colspan="3">Delete this ${l.kind === 'flow' ? 'payment' : l.kind === 'income' ? 'income entry' : 'valuation'} from ${when}?</td><td class="r" style="white-space:nowrap"><button class="btn sm ghost" data-action="del-no">Keep</button> <button class="btn sm danger solid" data-action="del-yes" data-id="${esc(l.id)}">Delete</button></td></tr>`;
+      // The note (and any extra detail) goes on a line of its own under the entry, so it never squeezes the figures.
+      const sub = (main, note, extra) => {
+        const text = [note ? esc(note) : '', extra ? `<i>${extra}</i>` : ''].filter(Boolean).join(' · ');
+        return text ? main.replace('<tr ', '<tr class="has-n" ') + `<tr class="hn-row"><td colspan="4"><div class="hn" data-action="hnote" role="button" tabindex="0" aria-expanded="false"><span>${text}</span></div></td></tr>` : main;
+      };
+      if (l.kind === 'income') return sub(`<tr data-row="${esc(l.id)}"><td style="white-space:nowrap">${whenCell}${who(l)}</td><td class="r faint">${incLabel(l.incKind)}</td><td class="r"><span class="delta muted">${gbp(l.amount)}</span></td>${actions(l, 'income from ' + when)}</tr>`, l.note, l.added === false ? 'Paid elsewhere, not in this balance' : '');
+      if (l.kind === 'flow') return sub(`<tr data-row="${esc(l.id)}"><td style="white-space:nowrap">${whenCell}${who(l)}</td><td class="r faint">${l.employer ? 'Employer paid in' : l.isaTransfer ? 'ISA transfer' : l.transfer ? (l.amount < 0 ? 'Moved out' : 'Moved in') : l.amount >= 0 ? 'Paid in' : 'Taken out'}</td><td class="r">${deltaChip(l.amount, signed(l.amount))}</td>${actions(l, 'payment from ' + when)}</tr>`, l.note, !l.employer && l.own !== l.amount ? `You paid ${gbp(l.own)}` : '');
       const prev = prevLog[l.id], d = prev ? l.value - prev.value : null;
-      return `<tr data-row="${esc(l.id)}"><td style="white-space:nowrap">${whenCell}${who(l)}</td><td class="r val">${gbp(l.value)}${l.estimated ? '<span class="est" title="Estimated from payments since your last balance">est.</span>' : ''}</td><td class="r">${d == null ? '<span class="faint">—</span>' : deltaChip(d, signed(d))}</td><td class="note hide-sm">${esc(l.note)}${l.estimated ? '<span class="faint">Estimated: last balance plus payments</span>' : ''}</td>${actions(l, 'valuation from ' + when)}</tr>`;
+      return sub(`<tr data-row="${esc(l.id)}"><td style="white-space:nowrap">${whenCell}${who(l)}</td><td class="r val">${gbp(l.value)}${l.estimated ? '<span class="est" title="Estimated: last balance plus what was added since">est.</span>' : ''}</td><td class="r">${d == null ? '<span class="faint">—</span>' : deltaChip(d, signed(d))}</td>${actions(l, 'valuation from ' + when)}</tr>`, l.note, '');
     }).join('')}</tbody></table></div>
     ${rows.length > shown.length ? `<p class="hint">Showing the latest ${shown.length}. Narrow the search to see more.</p>` : ''}`
     : `<div class="chart-empty">${q || h.kind !== 'all' || h.year !== 'all' ? 'Nothing matches these filters.' : 'Nothing logged for this account yet.'}</div>`;
@@ -3510,7 +3524,7 @@ const FAQ = [
   ['saved', "Why isn't a payment counted as saved?", 'Saved only counts <b>payments into your own accounts</b>, in the month they are dated. It isn\'t counted if you only changed the balance (log it as <b>Paid in</b> instead), if it\'s dated in a different month from the pay, if you ticked <b>Moved</b>, or if the account belongs to someone else under Family.'],
   ['move', 'How do I log money moved between my accounts?', 'Log it on both accounts: <b>Taken out</b> on the one it left and <b>Paid in</b> on the one it reached, ticking <b>Moved</b> on both. Your savings rate stays the same and each account\'s growth stays right. GIA to ISA uses your ISA allowance; a proper ISA to ISA transfer doesn\'t, so tick <b>ISA transfer</b>. Into a SIPP, also tick the tax relief box.'],
   ['april', 'I started tracking after 6 April. How do I fix this tax year?', 'Open the account and tap <b>Split it: 5 April balance and monthly payments</b>. Enter what was there on 5 April (0 if it opened later) and what you paid in each month. Only those payments then count as paid in this tax year.'],
-  ['growth', "What's the difference between paid in, growth and interest?", '<b>Paid in</b> is money you (or your employer, or tax relief) put in. <b>Growth</b> is everything else: the change in balance less what was paid in, so it includes interest, dividends and price changes. Logging interest and dividends separately is only for the tax helper; it doesn\'t change growth.'],
+  ['growth', "What's the difference between paid in, growth and interest?", '<b>Paid in</b> is money you (or your employer, or tax relief) put in. <b>Growth</b> is everything else: the change in balance less what was paid in, so it includes interest, dividends and price changes. Interest, dividends and prizes you log are growth too: if they were paid into the account (the default), Aurum adds them to its balance as an estimate until you next log a real balance. They also feed the tax helper.'],
   ['typical', 'What is the typical savings rate?', 'Your savings rate with one-offs like bonuses and gifts left out, assuming you saved those first. It shows what you save from your normal pay. Mark pay as <b>One-off</b> when you log it.'],
   ['relief', 'Why does my pension get 25% more than I paid?', 'With relief at source, you pay 80% and the pension provider claims 20% basic-rate tax back, so £80 becomes £100. Tick the tax relief box and Aurum adds it. Higher-rate taxpayers can claim more through a tax return; see the tax helper.'],
   ['privacy', 'Where is my data, and how do I move to a new phone?', 'Everything stays on this device; nothing is sent anywhere. Use <b>Settings → Backup and restore → Export backup</b> regularly (you can add a password), then <b>Import backup file</b> on the new phone.'],
@@ -3897,13 +3911,14 @@ function updateKindHint() {
   document.getElementById('log-move-wrap').hidden = document.getElementById('log-move-why').hidden = k !== 'in' && k !== 'out';
   document.getElementById('log-move-label').textContent = k === 'out' ? 'Moved to another of my accounts' : 'Moved from savings I already had';
   document.getElementById('log-move-hint').textContent = k === 'out' ? 'Not counted as taking money out of your savings' : 'Still money in for growth, but not new saving in your savings rate';
+  document.getElementById('log-added-wrap').hidden = !['interest', 'dividend', 'prize'].includes(k);
   document.getElementById('log-isat-wrap').hidden = !(a && k === 'in' && ['isa', 'jisa'].includes(typeOf(a).allow));
   document.getElementById('log-kind-hint').textContent = {
     in: 'Recording deposits means they are not counted as growth.',
     employer: 'Employer payments count towards your pension annual allowance.',
     out: 'Withdrawals are not counted as losses.',
-    dividend: 'For your tax return. Record dividends even if they were reinvested.',
-    interest: 'For your tax return. Record interest even if it stayed in the account.',
+    dividend: 'Counts as growth, and for your tax return. Record dividends even if they were reinvested.',
+    interest: 'Counts as growth, and for your tax return.',
     prize: 'Tax-free. Used to work out your effective Premium Bonds rate.'
   }[k] || '';
 }
@@ -3935,6 +3950,7 @@ function openLog(accountId, entryId) {
   document.getElementById('log-kind').innerHTML = '';
   document.getElementById('log-relief').checked = false;
   document.getElementById('log-move').checked = document.getElementById('log-isat').checked = false;
+  document.getElementById('log-added').checked = true;
   document.getElementById('log-err').textContent = '';
   document.getElementById('log-jump').hidden = true; jumpOk = false;
   document.getElementById('log-example-note').hidden = !state.example || !!found;
@@ -3954,6 +3970,7 @@ function openLog(accountId, entryId) {
       document.getElementById('log-relief').checked = relief;
       document.getElementById('log-move').checked = !!e.transfer;
       document.getElementById('log-isat').checked = !!e.isaTransfer;
+      document.getElementById('log-added').checked = found.kind !== 'income' || e.added !== false;
       document.getElementById('log-flow').value = found.kind === 'income' ? e.amount : e.employer ? e.amount : Math.abs(relief ? e.own : e.amount);
     }
   }
@@ -3984,8 +4001,8 @@ document.getElementById('log-form').addEventListener('submit', e => {
   let id = uid();
   if (editingEntry) {
     id = editingEntry.id;
-    const old = [...state.flows, ...state.logs].find(x => x.id === id);
-    if (old && state.flows.includes(old)) dropEstimate(old);
+    const old = [...state.flows, ...state.logs, ...state.income].find(x => x.id === id);
+    if (old && !state.logs.includes(old)) dropEstimate(old);
     state.logs = state.logs.filter(x => x.id !== id);
     state.flows = state.flows.filter(x => x.id !== id);
     state.income = state.income.filter(x => x.id !== id);
@@ -3995,7 +4012,12 @@ document.getElementById('log-form').addEventListener('submit', e => {
   if (hasF) {
     const fid = hasV ? uid() : id, auto = !!(editingEntry && editingEntry.auto);
     const kind = document.getElementById('log-kind').value;
-    if (kind === 'dividend' || kind === 'interest' || kind === 'prize') state.income.push({ id: fid, accountId, date, amount: flow, kind });
+    if (kind === 'dividend' || kind === 'interest' || kind === 'prize') {
+      // Interest, dividends and prizes paid into the account raise its balance (as growth, not money in).
+      const x = { id: fid, accountId, date, amount: flow, kind, note: hasV ? '' : note, added: document.getElementById('log-added').checked };
+      state.income.push(x);
+      if (!hasV && x.added) addEstimate(x);
+    }
     else {
       let f;
       if (kind === 'employer') f = { id: fid, accountId, date, amount: flow, own: 0, note: hasV ? '' : note, auto, employer: true };
@@ -4017,7 +4039,8 @@ document.getElementById('log-form').addEventListener('submit', e => {
   ui.lastLogAcct = accountId; saveUi();
   save();
   sheet.close();
-  saved(hasV && hasF ? 'Balance and payment saved ✓' : hasV ? 'Balance saved ✓' : 'Payment saved ✓', [id, accountId]);
+  const incSaved = hasF && ['dividend', 'interest', 'prize'].includes(document.getElementById('log-kind').value);
+  saved(hasV && hasF ? (incSaved ? 'Balance and income saved ✓' : 'Balance and payment saved ✓') : hasV ? 'Balance saved ✓' : incSaved ? 'Income saved ✓' : 'Payment saved ✓', [id, accountId]);
   render();
 });
 sheet.addEventListener('close', () => { editingEntry = null; logAccount.disabled = false; });
@@ -5487,13 +5510,14 @@ document.addEventListener('click', async e => {
     case 'goto-account': ui.account = id; goTab('accounts'); break;
     case 'pick-account': ui.account = id; pendingDelete = null; saveUi(); render(); break;
     case 'del-no': pendingDelete = null; render(); break;
+    case 'hnote': t.classList.toggle('open'); t.setAttribute('aria-expanded', t.classList.contains('open')); break;
     case 'undo':
       if (undoSnap) { state = normalize(JSON.parse(undoSnap)); undoSnap = null; save(); render(); }
       document.getElementById('toast').hidden = true; break;
     case 'del': case 'del-yes': // deletes straight away; the toast offers Undo
       snapshot('Entry deleted');
       state.logs = state.logs.filter(l => l.id !== id);
-      { const f = state.flows.find(x => x.id === id); if (f) dropEstimate(f); }
+      { const f = state.flows.find(x => x.id === id) || state.income.find(x => x.id === id); if (f) dropEstimate(f); }
       state.flows = state.flows.filter(f => f.id !== id);
       state.income = state.income.filter(x => x.id !== id);
       pendingDelete = null; save(); render(); break;
@@ -5705,7 +5729,7 @@ document.addEventListener('click', async e => {
   }
 });
 document.addEventListener('keydown', e => {
-  if ((e.key === 'Enter' || e.key === ' ') && e.target.matches('tr[data-action]')) { e.preventDefault(); e.target.click(); }
+  if ((e.key === 'Enter' || e.key === ' ') && e.target.matches('tr[data-action], .hn')) { e.preventDefault(); e.target.click(); }
 });
 function readFile(input, fn) {
   const reader = new FileReader();
