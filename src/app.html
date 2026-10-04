@@ -449,6 +449,7 @@ tr.grp td.val{font-size:12px;letter-spacing:0;text-transform:none;color:var(--in
 .why:hover i,.why:focus-visible i{background:var(--gold);color:var(--bg)}
 .faq{border-top:1px solid var(--line);padding:12px 0}
 .faq:first-of-type{border-top:0}
+.faq-sec{margin:20px 0 4px}.faq-sec:first-child{margin-top:4px}.faq-sec+.faq{border-top:0}
 .faq>summary{list-style:none;display:flex;justify-content:space-between;gap:12px;color:var(--ink);font-size:14px;font-weight:550}
 .faq>summary::-webkit-details-marker{display:none}
 .faq>summary::after{content:'+';color:var(--gold);font-weight:400}
@@ -586,7 +587,7 @@ details.fold2.inner[open]{box-shadow:inset 3px 0 0 var(--gold);padding-left:12px
 /* Tables: short dates on phones, estimated balances tagged */
 .d-short{display:none}
 @media (max-width:759px){.d-long{display:none}.d-short{display:inline}}
-.est{font-size:12px;font-weight:600;color:var(--ink-3);border:1px solid var(--line-strong);border-radius:4px;padding:0 4px;margin-left:4px;font-family:var(--font)}
+.est{background:none;cursor:pointer;line-height:inherit;font-size:12px;font-weight:600;color:var(--ink-3);border:1px solid var(--line-strong);border-radius:4px;padding:0 4px;margin-left:4px;font-family:var(--font)}
 /* Bigger tap targets for small icon buttons */
 @media (pointer:coarse){.icon-btn{min-width:40px;min-height:40px}.move .icon-btn{min-height:30px}}
 /* Save buttons stay visible at the bottom of sheets, above the keyboard */
@@ -2758,7 +2759,7 @@ function renderHistory() {
       if (l.kind === 'income') return sub(`<tr data-row="${esc(l.id)}"><td style="white-space:nowrap">${whenCell}${who(l)}</td><td class="r faint">${incLabel(l.incKind)}</td><td class="r"><span class="delta muted">${gbp(l.amount)}</span></td>${actions(l, 'income from ' + when)}</tr>`, l.note, l.added === false ? 'Paid elsewhere, not in this balance' : '');
       if (l.kind === 'flow') return sub(`<tr data-row="${esc(l.id)}"><td style="white-space:nowrap">${whenCell}${who(l)}</td><td class="r faint">${l.employer ? 'Employer paid in' : l.isaTransfer ? 'ISA transfer' : l.transfer ? (l.amount < 0 ? 'Moved out' : 'Moved in') : l.amount >= 0 ? 'Paid in' : 'Taken out'}</td><td class="r">${deltaChip(l.amount, signed(l.amount))}</td>${actions(l, 'payment from ' + when)}</tr>`, l.note, !l.employer && l.own !== l.amount ? `You paid ${gbp(l.own)}` : '');
       const prev = prevLog[l.id], d = prev ? l.value - prev.value : null;
-      return sub(`<tr data-row="${esc(l.id)}"><td style="white-space:nowrap">${whenCell}${who(l)}</td><td class="r val">${gbp(l.value)}${l.estimated ? '<span class="est" title="Estimated: last balance plus what was added since">est.</span>' : ''}</td><td class="r">${d == null ? '<span class="faint">—</span>' : deltaChip(d, signed(d))}</td>${actions(l, 'valuation from ' + when)}</tr>`, l.note, '');
+      return sub(`<tr data-row="${esc(l.id)}"><td style="white-space:nowrap">${whenCell}${who(l)}</td><td class="r val">${gbp(l.value)}${l.estimated ? '<button type="button" class="est" data-action="faq" data-id="est" title="Estimated: last balance plus what was added since. Tap to find out more" aria-label="Estimated balance: why?">est.</button>' : ''}</td><td class="r">${d == null ? '<span class="faint">—</span>' : deltaChip(d, signed(d))}</td>${actions(l, 'valuation from ' + when)}</tr>`, l.note, '');
     }).join('')}</tbody></table></div>
     ${rows.length > shown.length ? `<p class="hint">Showing the latest ${shown.length}. Narrow the search to see more.</p>` : ''}`
     : `<div class="chart-empty">${q || h.kind !== 'all' || h.year !== 'all' ? 'Nothing matches these filters.' : 'Nothing logged for this account yet.'}</div>`;
@@ -3520,17 +3521,35 @@ function payslipPanel(key, from, to) {
 }
 
 // Help and FAQ (1.9.7): short answers that say what to tap. Opened from Settings, the bell and "Why?" links.
+// [id, question, answer, section]. Sections show in this order; add a question to the section it belongs to.
 const FAQ = [
-  ['saved', "Why isn't a payment counted as saved?", 'Saved only counts <b>payments into your own accounts</b>, in the month they are dated. It isn\'t counted if you only changed the balance (log it as <b>Paid in</b> instead), if it\'s dated in a different month from the pay, if you ticked <b>Moved</b>, or if the account belongs to someone else under Family.'],
-  ['move', 'How do I log money moved between my accounts?', 'Log it on both accounts: <b>Taken out</b> on the one it left and <b>Paid in</b> on the one it reached, ticking <b>Moved</b> on both. Your savings rate stays the same and each account\'s growth stays right. GIA to ISA uses your ISA allowance; a proper ISA to ISA transfer doesn\'t, so tick <b>ISA transfer</b>. Into a SIPP, also tick the tax relief box.'],
-  ['april', 'I started tracking after 6 April. How do I fix this tax year?', 'Open the account and tap <b>Split it: 5 April balance and monthly payments</b>. Enter what was there on 5 April (0 if it opened later) and what you paid in each month. Only those payments then count as paid in this tax year.'],
-  ['growth', "What's the difference between paid in, growth and interest?", '<b>Paid in</b> is money you (or your employer, or tax relief) put in. <b>Growth</b> is everything else: the change in balance less what was paid in, so it includes interest, dividends and price changes. Interest, dividends and prizes you log are growth too: if they were paid into the account (the default), Aurum adds them to its balance as an estimate until you next log a real balance. They also feed the tax helper.'],
-  ['typical', 'What is the typical savings rate?', 'Your savings rate with one-offs like bonuses and gifts left out, assuming you saved those first. It shows what you save from your normal pay. Mark pay as <b>One-off</b> when you log it.'],
-  ['relief', 'Why does my pension get 25% more than I paid?', 'With relief at source, you pay 80% and the pension provider claims 20% basic-rate tax back, so £80 becomes £100. Tick the tax relief box and Aurum adds it. Higher-rate taxpayers can claim more through a tax return; see the tax helper.'],
-  ['privacy', 'Where is my data, and how do I move to a new phone?', 'Everything stays on this device; nothing is sent anywhere. Use <b>Settings → Backup and restore → Export backup</b> regularly (you can add a password), then <b>Import backup file</b> on the new phone.'],
-  ['pin', 'What if I forget my PIN?', 'The PIN is a privacy screen, so it can\'t be recovered. Tap <b>Forgot</b> on the lock screen to erase the data on this device, then restore your latest backup.'],
-  ['advice', 'Is this financial advice?', 'No. Aurum works things out from your own entries to help you see where you stand. Figures are estimates and tax rules change, so check anything important with HMRC, your provider or a regulated adviser.']
+  // Finding your way
+  ['tab-overview', 'What is on Overview?', 'Your net worth card (total, change over 30 days and how much is growth versus money you paid in, with a trend you can drag along), what you have saved this month, each account at a glance under <b>Holdings</b>, performance, allocation by type, paid in versus growth by month, goals and recent activity.', 'Finding your way'],
+  ['tab-accounts', 'What is on Accounts?', 'Pick an account at the top to see its chart, what you paid in and its growth, rate and allowance details, year by year figures at each 5 April, and its full history of balances, payments and income. You can edit or delete any entry there. <b>All</b> shows every account together.', 'Finding your way'],
+  ['tab-income', 'What is on Income?', 'Where your money comes from (salary, rental, side income and so on) and how much of it you save. Log each payment as it arrives with <b>Log pay</b>; Aurum compares it with what you paid into your accounts to give your savings rate, month by month, where the money went and an optional payslip breakdown.', 'Finding your way'],
+  ['tab-planner', 'What is on Planner?', 'The <b>retirement plan</b> projects your pensions and ISAs to your retirement age, with the income they might give. <b>Goals</b> track targets such as an ISA total by a date. <b>SIPP vs ISA</b> compares where your next pound does more. All are illustrations, not advice.', 'Finding your way'],
+  ['tab-insights', 'What is on Insights?', 'A plain-English summary of your money: last month\'s review, your ISA and pension allowances this tax year, what changed over the period you pick and by account, your year in review, paid in by tax year, the tax return helper and milestones you have reached.', 'Finding your way'],
+  ['tab-settings', 'What is in Settings?', 'About you (name, date of birth, retirement age, tax band), this help, Family, your accounts and their order, privacy (demo mode, hide balances, PIN and fingerprint lock), backup and restore, appearance, notifications and reminders.', 'Finding your way'],
+  // Accounts and balances
+  ['accounts', 'How do I track several accounts, or accounts for someone else?', 'Add each one with <b>Add account</b>: pensions, ISAs, savings, Premium Bonds and investments each get their own history and are grouped by type. Use <b>Update all</b> to log every balance in one go, pin or drag to reorder them in Settings, and tick <b>Closed account</b> in Edit when one is closed (its history stays in your totals). For accounts you hold for someone else, such as a child\'s Junior ISA, add them under <b>Settings → Family</b> and pick them as the owner. Their accounts are kept out of your own net worth; switch between you, each person or Everyone at the top of Overview and Accounts.', 'Accounts and balances'],
+  ['est', 'Why do some balances say "est."?', '<b>est.</b> means estimated. When you log a payment, interest or a regular payment without a new balance, Aurum adds it to your last balance so your totals stay up to date. It isn\'t your provider\'s real figure: growth and price changes since then are missing. Log the real balance from your provider\'s app or statement when you can (<b>Update all</b> does every account at once) and it takes over from that date. Deleting the payment takes the estimate back out.', 'Accounts and balances'],
+  ['growth', "What's the difference between paid in, growth and interest?", '<b>Paid in</b> is money you (or your employer, or tax relief) put in. <b>Growth</b> is everything else: the change in balance less what was paid in, so it includes interest, dividends and price changes. Interest, dividends and prizes you log are growth too: if they were paid into the account (the default), Aurum adds them to its balance as an estimate until you next log a real balance. They also feed the tax helper.', 'Accounts and balances'],
+  ['move', 'How do I log money moved between my accounts?', 'Log it on both accounts: <b>Taken out</b> on the one it left and <b>Paid in</b> on the one it reached, ticking <b>Moved</b> on both. Your savings rate stays the same and each account\'s growth stays right. GIA to ISA uses your ISA allowance; a proper ISA to ISA transfer doesn\'t, so tick <b>ISA transfer</b>. Into a SIPP, also tick the tax relief box.', 'Accounts and balances'],
+  ['april', 'I started tracking after 6 April. How do I fix this tax year?', 'Open the account and tap <b>Split it: 5 April balance and monthly payments</b>. Enter what was there on 5 April (0 if it opened later) and what you paid in each month. Only those payments then count as paid in this tax year.', 'Accounts and balances'],
+  // Saving and income
+  ['saved', "Why isn't a payment counted as saved?", 'Saved only counts <b>payments into your own accounts</b>, in the month they are dated. It isn\'t counted if you only changed the balance (log it as <b>Paid in</b> instead), if it\'s dated in a different month from the pay, if you ticked <b>Moved</b>, or if the account belongs to someone else under Family.', 'Saving and income'],
+  ['typical', 'What is the typical savings rate?', 'Your savings rate with one-offs like bonuses and gifts left out, assuming you saved those first. It shows what you save from your normal pay. Mark pay as <b>One-off</b> when you log it.', 'Saving and income'],
+  // Pensions and tax
+  ['relief', 'Why does my pension get 25% more than I paid?', 'With relief at source, you pay 80% and the pension provider claims 20% basic-rate tax back, so £80 becomes £100. Tick the tax relief box and Aurum adds it. Higher-rate taxpayers can claim more through a tax return; see the tax helper.', 'Pensions and tax'],
+  // Your data and privacy
+  ['backup', 'How do backups work?', 'Aurum keeps your data on this device only, so a backup is the only copy if you lose or change your phone. In <b>Settings → Backup and restore</b>: <b>Export backup</b> shares a file you can save to Google Drive or email to yourself; <b>Save to phone</b> puts it in Documents; <b>Automatic weekly backup</b> (Android app) keeps the 8 newest copies in Documents/Aurum. Add a <b>password</b> to encrypt every backup; it can\'t be recovered, so keep it safe. To restore, use <b>Import backup file</b> (or paste the text). The card at the top of that section shows when you last backed up.', 'Your data and privacy'],
+  ['privacy', 'Where is my data, and how do I move to a new phone?', 'Everything stays on this device; nothing is sent anywhere. Use <b>Settings → Backup and restore → Export backup</b> regularly (you can add a password), then <b>Import backup file</b> on the new phone.', 'Your data and privacy'],
+  ['demo', 'What is demo mode?', 'Demo mode fills Aurum with example data so you can try things out or show someone the app without showing your own figures. Turn it on in <b>Settings → Privacy</b> or from the bell. Your real data is put aside untouched, nothing you do in demo mode is saved, and backups, reminders and notifications pause. Tap <b>Exit</b> on the gold bar to go back to your own data (it asks for your PIN if you have one).', 'Your data and privacy'],
+  ['pin', 'What if I forget my PIN?', 'The PIN is a privacy screen, so it can\'t be recovered. Tap <b>Forgot</b> on the lock screen to erase the data on this device, then restore your latest backup.', 'Your data and privacy'],
+  // About Aurum
+  ['advice', 'Is this financial advice?', 'No. Aurum works things out from your own entries to help you see where you stand. Figures are estimates and tax rules change, so check anything important with HMRC, your provider or a regulated adviser.', 'About Aurum']
 ];
+const FAQ_SECS = [...new Set(FAQ.map(f => f[3]))];
 function openFaq(id) {
   document.querySelectorAll('dialog[open]').forEach(d => d.close());
   goTab('settings');
@@ -3578,7 +3597,7 @@ function renderSettings() {
 
       <section class="panel stack" id="faq">
         <h2>Help and FAQ</h2>
-        <div>${FAQ.map(([id, q, a]) => `<details class="faq" id="faq-${id}"><summary>${q}</summary><div>${a}</div></details>`).join('')}</div>
+        <div>${FAQ_SECS.map(sec => `<div class="set-grp faq-sec">${esc(sec)}</div>${FAQ.filter(f => f[3] === sec).map(([id, q, a]) => `<details class="faq" id="faq-${id}"><summary>${q}</summary><div>${a}</div></details>`).join('')}`).join('')}</div>
       </section>
 
       <section class="panel stack">

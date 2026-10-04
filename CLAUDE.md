@@ -169,7 +169,8 @@ not advice — keep that disclaimer.
 - 1.9.9: income entries can carry `note` and `added` (paid into the account; default on). `added` interest/dividends/prizes logged without a
   balance go through `addEstimate`/`dropEstimate` like flows (their id in `flowIds`), so the balance rises as growth. History table has no
   Note column: notes (and extras like "You paid £x") go on a `tr.hn-row` line under the entry (`.hn`, ellipsis, tap `hnote` to expand).
-  Don't give table cells the class `note`: it clashes with the bell's `.note` styles.
+  Don't give table cells the class `note`: it clashes with the bell's `.note` styles. FAQ entries are `[id, q, a, section]`, rendered
+  grouped in `FAQ_SECS` order (first appearance); add new questions inside their section. The `est.` badge opens FAQ `est`.
 
 ## Status (latest)
 
