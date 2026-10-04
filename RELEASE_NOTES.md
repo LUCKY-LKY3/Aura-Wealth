@@ -1,4 +1,4 @@
 - Interest, dividends and prizes paid into an account now add to its balance straight away (as growth), until you next log a real balance. Untick "Paid into this account" if they went elsewhere
 - Account history: notes sit on one tidy line under each entry instead of a squashed column; tap a note to read it all
 - Notes typed with interest or dividends are now kept
-- Help and FAQ is sorted into sections, with new answers on each tab, estimated balances, several accounts and Family, backups and demo mode. Tap "est." on a balance to see why
+- Help and FAQ is sorted into sections and has a search box, with new answers on each tab, estimated balances, several accounts and Family, backups and demo mode. Tap "est." on a balance to see why

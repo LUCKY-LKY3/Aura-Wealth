@@ -170,7 +170,7 @@ not advice — keep that disclaimer.
   balance go through `addEstimate`/`dropEstimate` like flows (their id in `flowIds`), so the balance rises as growth. History table has no
   Note column: notes (and extras like "You paid £x") go on a `tr.hn-row` line under the entry (`.hn`, ellipsis, tap `hnote` to expand).
   Don't give table cells the class `note`: it clashes with the bell's `.note` styles. FAQ entries are `[id, q, a, section]`, rendered
-  grouped in `FAQ_SECS` order (first appearance); add new questions inside their section. The `est.` badge opens FAQ `est`.
+  grouped in `FAQ_SECS` order (first appearance); add new questions inside their section. The `est.` badge opens FAQ `est`. `#faq-q` filters in place (`faqSearch`, opens up to 3 matches).
 
 ## Status (latest)
 
