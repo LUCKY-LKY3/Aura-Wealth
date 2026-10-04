@@ -173,6 +173,12 @@ not advice — keep that disclaimer.
   Don't give table cells the class `note`: it clashes with the bell's `.note` styles. FAQ entries are `[id, q, a, section]`, rendered
   grouped in `FAQ_SECS` order (first appearance); add new questions inside their section. The `est.` badge opens FAQ `est`. `#faq-q` filters in place (`faqSearch`, opens up to 3 matches).
 
+- 2.0.0: `ui.nwRange` ('1M'|'1Y'|'All', `NW_RANGES`, `nwChips()`) drives the net worth card's change line and trend (`totalTrend` thins
+  to ~120 points) and `wealthSources(t, r, sinceMs)` on Overview (paid in vs growth, by group, top 5 movers; FAQ `sources`).
+  Settings is a menu (`settingsMenu`, `SET_ICONS`) of pages: `renderSettings` builds `secs` = [pageKey, html]; `setPage` (not saved)
+  picks one; `openSetPage(k)` pushes history on phone so back returns to the menu; ≥1000px shows menu + page (default `you`).
+  `goTab('settings')` resets to the menu; `openFaq` opens page `help`. New Settings sections must go in `secs` with a page key.
+
 ## Status (latest)
 
 - 1.9.9 merged to main (PR #23); owner publishes the v1.9.9 release. Owner says when to merge.
