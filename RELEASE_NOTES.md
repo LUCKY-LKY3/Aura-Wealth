@@ -1,5 +1,4 @@
-- Net worth card: choose 1M, 1Y or All to set the change line and the trend
-- New "Where your wealth came from" on Overview: what you paid in vs what grew, by pensions, ISAs, investments and cash, for the same range
-- See which accounts drove your growth (or losses), and tap one to open it
-- Settings is now a short menu: tap a section to open it, and back to return. On a wide screen the menu stays on the left
-- Pay and savings rate notifications can now be switched off in Settings
+- Planner: a new chart shows your wealth so far, then where it's heading to retirement in today's money, with values today, in 5, 10 and 20 years and at your retirement age. Switch to the next 10 years for a closer look
+- Demo mode has two years of example data: every account type, pay with payslips, interest, dividends, Premium Bond prizes, goals and a child's Junior ISA. It starts fresh each time and nothing is saved
+- Try the demo from the PIN screen without unlocking, or from the welcome screen. Exit takes you back
+- Chart polish: rounder axis steps (£250k, £500k, £1m) and fewer crowded payment markers

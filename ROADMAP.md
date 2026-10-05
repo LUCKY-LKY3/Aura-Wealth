@@ -27,8 +27,8 @@ Order: 2.0 polish and charts → 2.x Future Me → 3.0 pensions, property and de
 ## 2.0 (next): polish, charts and wealth insights
 - Done in 2.0.0: net worth card range chips (1M · 1Y · All); "Where your wealth came from" (paid in vs growth by group;
   property and debt reduction join in 3.0); accounts that drove growth; Settings as a menu of pages
-- Actual vs projected wealth chart: history so far, then the planner's projection (today, 5, 10, 20 years, retirement)
-- Chart polish across the app (one consistent look, readouts, ranges)
+- Done in 2.0.1: actual vs projected wealth chart (Planner); chart polish (round axis steps, thinned markers); full demo
+  data (every type, pay, income, child's JISA) starting fresh each time; demo from the PIN and first-run screens
 - Cash drag warning: lots of cash in a low-interest account (user enters rate)
 - Interest checker: savings rate vs a benchmark rate the user sets
 - Income follow-ups: household / partner income (owner per source), goal dates from current savings rate
