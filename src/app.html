@@ -262,6 +262,31 @@ h2{font-size:15px;font-weight:600;letter-spacing:-.01em;margin:0}
 .stmt-at{position:absolute;z-index:1;top:-16px;left:0;font-size:12px;color:var(--on-navy-2);pointer-events:none}
 .stmt-stale{align-self:flex-start;margin-top:10px;border:0;background:none;padding:4px 0;font-size:12px;color:var(--on-navy-2);text-decoration:underline;text-decoration-color:color-mix(in srgb,var(--gold-on-navy) 50%,transparent);text-underline-offset:3px;cursor:pointer}
 @media (max-width:519px){.statement::after{width:170px;height:170px;right:-80px;top:-80px}}
+.stmt-top{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.seg.stmt-range{background:rgba(255,255,255,.04);border-color:var(--on-navy-line);flex:none}
+.seg.stmt-range button{color:var(--on-navy-2);padding:3px 9px}
+.seg.stmt-range button[aria-pressed="true"]{background:color-mix(in srgb,var(--gold-on-navy) 18%,transparent);color:var(--gold-on-navy);box-shadow:none}
+.ws-grid{display:grid;gap:22px;grid-template-columns:minmax(0,1fr)}
+@media (min-width:1000px){.ws-grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}
+.ws-head{margin:0 0 12px;font-size:15px;color:var(--ink-2)}
+.ws-head b{color:var(--ink);font-weight:600}
+.ws-split{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px 12px;align-items:center;font-size:13px;color:var(--ink-2)}
+.ws-split b{font-weight:600;text-align:right}
+.ws-bar{display:block;height:8px;border-radius:99px;background:var(--surface-2);overflow:hidden}
+.ws-bar i{display:block;height:100%;border-radius:99px}
+.ws-why{margin:12px 0 0}
+.ws-table{margin-top:14px}
+.ws-table td.r{white-space:nowrap}
+.ws-type{display:inline-flex;align-items:center;gap:8px}
+.ws-drivers h3{margin:0 0 8px;font-size:14px;font-weight:600}
+.ws-drivers ul{list-style:none;margin:0;padding:0}
+.ws-drivers li{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 12px;align-items:center;padding:9px 0;border-top:1px solid var(--line);cursor:pointer;font-size:14px}
+.ws-drivers li:first-child{border-top:0}
+.ws-drivers li .ws-bar{grid-column:1/-1;height:5px}
+.ws-val{display:flex;align-items:baseline;gap:10px}
+.ws-val b{font-weight:600}
+.ws-val .faint{font-size:12px;min-width:48px;text-align:right}
+.ws-name{display:flex;align-items:center;gap:8px;min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
 .statement .changes{display:flex;flex-wrap:wrap;gap:8px 20px;font-size:13px;color:var(--on-navy-2)}
 .statement .changes b{font-weight:600;margin-right:4px}
 .statement .changes b.plain{color:var(--on-navy)}
@@ -416,8 +441,21 @@ dialog.sheet::backdrop{background:rgba(8,12,22,.55)}
 .compare .stat .v{font-size:20px}
 .explain{font-size:14px;color:var(--ink-2);margin:0;max-width:66ch}
 .explain b{color:var(--ink);font-weight:600}
-.settings-grid{display:grid;gap:16px;grid-template-columns:minmax(0,1fr)}
-@media (min-width:1000px){.settings-grid{grid-template-columns:1fr 1fr}}
+.settings-grid{display:grid;gap:16px;grid-template-columns:minmax(0,1fr);align-items:start}
+@media (min-width:1000px){.settings-grid{grid-template-columns:minmax(260px,340px) minmax(0,1fr)}.set-menu{position:sticky;top:calc(var(--sa-top) + 84px)}}
+.set-menu{display:flex;flex-direction:column;gap:14px}
+.set-menu .set-grp{margin:4px 2px -6px}
+.set-menu .set-card{background:var(--surface)}
+.set-menu .set-row{width:100%;border:0;background:none;color:inherit;font:inherit;text-align:left}
+.set-menu .set-row[aria-current="page"]{background:var(--surface-2)}
+.set-menu .set-row .note-ic{background:var(--surface-2)}
+.set-go{flex:none;width:16px;height:16px;color:var(--ink-3)}
+.set-go svg{width:100%;height:100%;transform:rotate(-90deg)}
+.set-txt small.warn-t{color:var(--c3)}
+.set-page{gap:16px;min-width:0}
+.set-back{align-self:flex-start;display:inline-flex;align-items:center;gap:6px;border:0;background:none;padding:4px 2px;color:var(--gold);font:inherit;font-size:14px;font-weight:550;cursor:pointer}
+.set-back svg{width:16px;height:16px;transform:rotate(90deg)}
+.set-sub{margin:8px 0 0;font-size:15px;font-weight:600}
 .row-actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
 details summary{cursor:pointer;color:var(--ink-2);font-size:13px;font-weight:550}
 .acct-list{list-style:none;margin:0;padding:0;border:1px solid var(--line);border-radius:10px}
@@ -624,8 +662,6 @@ details.fold2.inner[open]{box-shadow:inset 3px 0 0 var(--gold);padding-left:12px
 .type-tiles button{border:1px solid var(--line-strong);background:var(--surface);color:var(--ink-2);border-radius:99px;padding:6px 11px;font-size:13px;display:inline-flex;align-items:center;gap:6px}
 .type-tiles button[aria-pressed="true"]{border-color:var(--gold);color:var(--ink);background:var(--gold-soft)}
 .toast.plain [data-action=undo]{display:none}
-.set-group{grid-column:1/-1;font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);margin:10px 2px -6px}
-.set-group:first-child{margin-top:0}
 .empty-cta{display:flex;flex-direction:column;align-items:center;gap:12px}
 .calc-display{background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:12px 14px;text-align:right;min-height:74px;display:flex;flex-direction:column;justify-content:flex-end;gap:4px;overflow:hidden}
 .calc-expr{font-family:var(--mono);font-size:14px;color:var(--ink-2);word-break:break-all}
@@ -1347,7 +1383,7 @@ function loadState() {
 
 let state = loadState();
 const DEFAULT_UI = {
-  tab: 'overview', folds: {}, range: '1Y', custom: { n: 6, unit: 'm' }, hist: { scope: 'this', kind: 'all', year: 'all', q: '' }, fit: true, barMonths: 12, paidLine: true, lastYear: false, pence: false, compactNums: false, showClosed: false, account: null, person: 'me', hidden: false, stackBy: 'total', insight: '1M',
+  tab: 'overview', folds: {}, range: '1Y', custom: { n: 6, unit: 'm' }, hist: { scope: 'this', kind: 'all', year: 'all', q: '' }, fit: true, barMonths: 12, paidLine: true, lastYear: false, pence: false, compactNums: false, showClosed: false, account: null, person: 'me', hidden: false, stackBy: 'total', insight: '1M', nwRange: '1M',
   calc: { monthly: 500, years: 20, rate: 6, draw: 20 },
   plan: { include: {}, monthly: {}, target: 0, years: 25, real: false },
   notes: { read: {}, gone: {}, on: {}, move: { pct: 5, dir: 'both', basis: 'prev' } }, noteFilter: 'all'
@@ -2079,7 +2115,9 @@ function bindTrend() {
   ['pointerup', 'pointerleave', 'pointercancel'].forEach(t => box.addEventListener(t, end));
 }
 function totalTrend(tl) {
-  const pts = tl.slice(-24);
+  // Long histories are thinned to about 120 points (always keeping the first and last).
+  const step = Math.ceil(tl.length / 120);
+  const pts = step > 1 ? tl.filter((p, i) => i % step === 0 || i === tl.length - 1) : tl;
   if (pts.length < 2) return '<div class="stmt-trend"></div>';
   const vals = pts.map(p => p.total), min = Math.min(...vals), max = Math.max(...vals), rng = (max - min) || 1;
   const t0 = pts[0].t, span = (pts[pts.length - 1].t - t0) || 1;
@@ -2187,17 +2225,74 @@ function goalList(goals, withDelete) {
   }).join('')}</ul>`;
 }
 
+/* ---------- 2.0: where your wealth came from ---------- */
+const NW_RANGES = { '1M': 'past month', '1Y': 'past year', 'All': 'all time' };
+const nwChips = (r, extra) => `<div class="seg ${extra || ''}" role="group" aria-label="Time range">${Object.keys(NW_RANGES).map(k => `<button data-action="nw-range" data-id="${k}" aria-pressed="${r === k}">${k}</button>`).join('')}</div>`;
+// `t` is periodTotals for the range; `sinceMs` is set when tracking started inside the range.
+function wealthSources(t, r, sinceMs) {
+  if (!t.rows.length) return '';
+  const when = r === 'All' ? 'Since you started' : sinceMs != null ? `Since you started on ${dateLabel(sinceMs)}` : `Over the ${NW_RANGES[r]}`;
+  const ret = (g, b) => b > 0 ? pct(g / b * 100) : '—';
+  const max = Math.max(Math.abs(t.paid), Math.abs(t.growth)) || 1;
+  const bar = (v, c) => `<span class="ws-bar"><i style="width:${(Math.abs(v) / max * 100).toFixed(1)}%;background:${c}"></i></span>`;
+  let reason = '';
+  if (t.paid > 0 && t.growth > 0) reason = `<b>${Math.round(t.growth / (t.paid + t.growth) * 100)}%</b> of the rise came from growth, the rest from what you paid in.`;
+  else if (t.paid > 0 && t.growth < 0) reason = `Values fell by ${gbp(-t.growth)}, so you're up less than you paid in.`;
+  else if (t.paid <= 0 && t.growth > 0) reason = t.paid < 0 ? `Growth covered the ${gbp(-t.paid)} you took out.` : 'All of it came from growth.';
+  // By type (pensions, ISAs, investments, cash).
+  const by = {};
+  for (const { a, p } of t.rows) {
+    const g = groupOf(a), o = by[g] || (by[g] = { paid: 0, growth: 0, base: 0 });
+    o.paid += p.paid; o.growth += p.growth; o.base += p.base;
+  }
+  const groups = Object.keys(GROUPS).filter(g => by[g] && (Math.abs(by[g].paid) >= 1 || Math.abs(by[g].growth) >= 1));
+  const table = groups.length ? `<div class="table-wrap"><table class="ws-table">
+    <thead><tr><th>Type</th><th class="r">Paid in</th><th class="r">Growth</th><th class="r">Return</th></tr></thead>
+    <tbody>${groups.map(g => `<tr><td><span class="ws-type"><i class="sw" style="background:var(--${GROUP_COLOR[g]})"></i>${esc(GROUPS[g])}</span></td><td class="r mono">${gbp(by[g].paid)}</td><td class="r mono ${cls(by[g].growth)}">${signed(by[g].growth)}</td><td class="r mono faint">${ret(by[g].growth, by[g].base)}</td></tr>`).join('')}
+    ${groups.length > 1 ? `<tr class="grp"><td>Total</td><td class="r mono">${gbp(t.paid)}</td><td class="r mono ${cls(t.growth)}">${signed(t.growth)}</td><td class="r mono faint">${t.ret != null ? pct(t.ret) : '—'}</td></tr>` : ''}</tbody>
+  </table></div>` : '';
+  // Accounts that drove growth: the biggest movers either way.
+  const movers = t.rows.filter(x => Math.abs(x.p.growth) >= 1).sort((x, y) => Math.abs(y.p.growth) - Math.abs(x.p.growth));
+  const top = movers.slice(0, 5), gmax = top.length ? Math.abs(top[0].p.growth) : 1;
+  const lead = movers.filter(x => x.p.growth > 0)[0];
+  const share = lead && t.growth > 0 ? lead.p.growth / t.growth * 100 : null;
+  const drivers = top.length ? `<div class="ws-drivers">
+      <h3>Accounts that drove growth</h3>
+      ${share != null && share <= 100 && movers.length > 1 ? `<p class="hint" style="margin:0 0 10px"><b>${esc(lead.a.name)}</b> made ${Math.round(share)}% of your growth.</p>` : ''}
+      <ul>${top.map(({ a, p }) => `<li data-action="goto-account" data-id="${esc(a.id)}">
+        <span class="ws-name"><i class="sw" style="background:${colorOf(a)}"></i>${esc(a.name)}${ownerChip(a)}</span>
+        <span class="ws-val"><b class="mono ${cls(p.growth)}">${signed(p.growth)}</b>${p.ret != null ? `<span class="mono faint">${pct(p.ret)}</span>` : ''}</span>
+        <span class="ws-bar"><i style="width:${(Math.abs(p.growth) / gmax * 100).toFixed(1)}%;background:var(--${p.growth >= 0 ? 'pos' : 'neg'})"></i></span>
+      </li>`).join('')}</ul>
+      ${movers.length > top.length ? `<p class="hint" style="margin:8px 0 0">${movers.length - top.length} more account${movers.length - top.length === 1 ? '' : 's'} moved less.</p>` : ''}
+    </div>` : '';
+  return `<section class="panel" aria-label="Where your wealth came from">
+    <div class="panel-head"><div><h2>Where your wealth came from ${why('sources', 'How is this worked out?')}</h2><span class="aside">What you paid in and what your money earned</span></div>${nwChips(r)}</div>
+    <div class="ws-grid"><div>
+      <p class="ws-head">${when}, your wealth ${t.change >= 0 ? 'grew' : 'fell'} by <b class="num">${gbp(Math.abs(t.change))}</b>.</p>
+      <div class="ws-split">
+        <span>Paid in</span>${bar(t.paid, 'var(--c2)')}<b class="mono">${signed(t.paid)}</b>
+        <span>Growth</span>${bar(t.growth, t.growth >= 0 ? 'var(--pos)' : 'var(--neg)')}<b class="mono ${cls(t.growth)}">${signed(t.growth)}</b>
+      </div>
+      ${reason ? `<p class="hint ws-why">${reason}</p>` : ''}
+      ${r !== 'All' && t.opening >= 1 ? `<p class="hint">Paid in includes ${gbp(t.opening)} of opening balances for accounts first logged in this period.</p>` : ''}
+      ${table}
+    </div>${drivers}</div>
+  </section>`;
+}
+
 /* ---------- overview ---------- */
 function renderOverview() {
   const accts = visibleAccounts();
   const tl = timeline(accts);
   const stats = accts.map(a => ({ a, ...accountStats(a.id) }));
   const total = stats.reduce((s, x) => s + x.cur, 0);
-  const monthAgo = valueAt(tl, TODAY_MS - 30 * 864e5);
-  const mChange = monthAgo != null ? total - monthAgo : null;
+  // 2.0: the 1M · 1Y · All chips set the card's change line, its trend and "Where your wealth came from".
+  const nwr = NW_RANGES[ui.nwRange] ? ui.nwRange : '1M';
+  const nwStart = nwr === 'All' ? -Infinity : rangeStart(nwr);
   // Growth leaves out money paid in, so a payment never shows as a gain.
-  const mStats = mChange != null ? periodTotals(accts, TODAY_MS - 30 * 864e5) : null;
-  const life = tl.length ? periodTotals(accts, -Infinity) : null;
+  const nw = tl.length ? periodTotals(accts, nwStart) : null;
+  const nwFrom = isFinite(nwStart) ? valueAt(tl, nwStart) : null;
   const staleN = tl.length ? staleAccounts(accts).filter(a => logsOf(a.id).some(l => !l.estimated)).length : 0;
   const groups = groupSummary(accts).filter(g => g.value > 0);
   const pension = stats.filter(x => groupOf(x.a) === 'pension').reduce((s, x) => s + x.cur, 0);
@@ -2206,15 +2301,16 @@ function renderOverview() {
 
   const statement = `
     <section class="statement${shineFor(tl, total) ? ' shine' : ''}" aria-label="Net worth">
-      <div class="eyebrow">${who ? esc(who) + ' · ' : ''}Total net worth</div>
+      <div class="stmt-top"><div class="eyebrow">${who ? esc(who) + ' · ' : ''}Total net worth</div>${tl.length > 1 ? nwChips(nwr, 'stmt-range') : ''}</div>
       <div class="figure num" data-count="net" data-value="${total}">${gbp(total)}</div>
       <div class="changes">
-        ${mChange != null ? `<span><b class="${mChange >= 0 ? 'up' : 'down'}">${signed(mChange)}</b>last 30 days, <b class="${mStats.growth >= 0 ? 'up' : 'down'}">${signed(mStats.growth)}</b>growth</span>` : ''}
-        ${life && life.rows.length && tl.length > 1 ? `<span><b class="plain">${gbp(life.paid)}</b>paid in, <b class="${life.growth >= 0 ? 'up' : 'down'}">${signed(life.growth)}</b>growth in total</span>` : ''}
+        ${nw && nw.rows.length && tl.length > 1 ? (nwr === 'All'
+          ? `<span><b class="plain">${gbp(nw.paid)}</b>paid in, <b class="${nw.growth >= 0 ? 'up' : 'down'}">${signed(nw.growth)}</b>growth in total</span>`
+          : `<span><b class="${nw.change >= 0 ? 'up' : 'down'}">${signed(nw.change)}</b>${nwFrom == null ? 'since ' + dateLabel(tl[0].t) : NW_RANGES[nwr]}, <b class="${nw.growth >= 0 ? 'up' : 'down'}">${signed(nw.growth)}</b>growth</span><span><b class="plain">${gbp(nw.paid)}</b>paid in</span>`) : ''}
         ${!tl.length ? '<span>Log your first value to start tracking.</span>' : ''}
       </div>
       ${staleN ? `<button type="button" class="stmt-stale" data-action="open-bulk">${staleN} balance${staleN > 1 ? 's' : ''} over a month old · Update all</button>` : ''}
-      ${totalTrend(tl)}
+      ${totalTrend(nwr === 'All' ? rangePoints(tl, -Infinity) : rangePoints(tl, nwStart))}
       ${total > 0 && groups.length > 1 ? `
         <div class="alloc-bar" aria-hidden="true">${groups.map(g => `<i style="flex:${g.value};background:${g.hi}"></i>`).join('')}</div>
         <div class="alloc-legend">${groups.map(g => `<span><i class="sw" style="background:${g.hi}"></i>${esc(g.label)} <b class="num">${(g.value / total * 100).toFixed(0)}%</b></span>`).join('')}</div>` : ''}
@@ -2324,7 +2420,7 @@ function renderOverview() {
       }).join('')}</ul>` : '<div class="chart-empty">No activity yet.</div>'}
     </section>`;
 
-  view.innerHTML = `<div class="stack view">${updateBanner()}${exampleNotice()}${visitStrip(total)}${!state.example && ui.person === 'me' && showReviewCard(monthReview()) ? reviewCard(monthReview(), true) : ''}${personFilter()}<div class="summary">${statement}${kpis}</div>${payStrip()}${holdings}<div class="grid-2">${growth}${allocation}</div>${monthly}${goals ? `<div class="grid-2">${activity}${goals}</div>` : activity}</div>`;
+  view.innerHTML = `<div class="stack view">${updateBanner()}${exampleNotice()}${visitStrip(total)}${!state.example && ui.person === 'me' && showReviewCard(monthReview()) ? reviewCard(monthReview(), true) : ''}${personFilter()}<div class="summary">${statement}${kpis}</div>${payStrip()}${holdings}${tl.length > 1 && nw ? wealthSources(nw, nwr, nwFrom == null && isFinite(nwStart) ? tl[0].t : null) : ''}<div class="grid-2">${growth}${allocation}</div>${monthly}${goals ? `<div class="grid-2">${activity}${goals}</div>` : activity}</div>`;
   bindTrend();
   barChart(document.getElementById('monthly-chart'), {
     labels: months.map(x => x.short), titles: months.map(x => x.title), paid: months.map(x => x.paid), growth: months.map(x => x.growth),
@@ -3534,6 +3630,7 @@ const FAQ = [
   ['accounts', 'How do I track several accounts, or accounts for someone else?', 'Add each one with <b>Add account</b>: pensions, ISAs, savings, Premium Bonds and investments each get their own history and are grouped by type. Use <b>Update all</b> to log every balance in one go, pin or drag to reorder them in Settings, and tick <b>Closed account</b> in Edit when one is closed (its history stays in your totals). For accounts you hold for someone else, such as a child\'s Junior ISA, add them under <b>Settings → Family</b> and pick them as the owner. Their accounts are kept out of your own net worth; switch between you, each person or Everyone at the top of Overview and Accounts.', 'Accounts and balances'],
   ['est', 'Why do some balances say "est."?', '<b>est.</b> means estimated. When you log a payment, interest or a regular payment without a new balance, Aurum adds it to your last balance so your totals stay up to date. It isn\'t your provider\'s real figure: growth and price changes since then are missing. Log the real balance from your provider\'s app or statement when you can (<b>Update all</b> does every account at once) and it takes over from that date. Deleting the payment takes the estimate back out.', 'Accounts and balances'],
   ['growth', "What's the difference between paid in, growth and interest?", '<b>Paid in</b> is money you (or your employer, or tax relief) put in. <b>Growth</b> is everything else: the change in balance less what was paid in, so it includes interest, dividends and price changes. Interest, dividends and prizes you log are growth too: if they were paid into the account (the default), Aurum adds them to its balance as an estimate until you next log a real balance. They also feed the tax helper.', 'Accounts and balances'],
+  ['sources', 'How is "Where your wealth came from" worked out?', 'For the range you pick (1M, 1Y or All, also on the net worth card), the change in your wealth is split into <b>paid in</b> (money in, less money taken out) and <b>growth</b> (everything else). For 1M and 1Y, an account first logged in that period counts its opening balance as paid in. <b>Return</b> is growth as a share of the money invested over the period. <b>Accounts that drove growth</b> lists the five that moved most, up or down; tap one to open it.', 'Accounts and balances'],
   ['move', 'How do I log money moved between my accounts?', 'Log it on both accounts: <b>Taken out</b> on the one it left and <b>Paid in</b> on the one it reached, ticking <b>Moved</b> on both. Your savings rate stays the same and each account\'s growth stays right. GIA to ISA uses your ISA allowance; a proper ISA to ISA transfer doesn\'t, so tick <b>ISA transfer</b>. Into a SIPP, also tick the tax relief box.', 'Accounts and balances'],
   ['april', 'I started tracking after 6 April. How do I fix this tax year?', 'Open the account and tap <b>Split it: 5 April balance and monthly payments</b>. Enter what was there on 5 April (0 if it opened later) and what you paid in each month. Only those payments then count as paid in this tax year.', 'Accounts and balances'],
   // Saving and income
@@ -3553,6 +3650,7 @@ const FAQ_SECS = [...new Set(FAQ.map(f => f[3]))];
 function openFaq(id) {
   document.querySelectorAll('dialog[open]').forEach(d => d.close());
   goTab('settings');
+  openSetPage('help');
   setTimeout(() => {
     const el = document.getElementById(id ? 'faq-' + id : 'faq');
     if (!el) return;
@@ -3584,6 +3682,47 @@ const why = (id, label, text) => `<button type="button" class="why" data-action=
 
 /* ---------- settings ---------- */
 const hasCrypto = !!(window.crypto && crypto.subtle && window.TextEncoder);
+// 2.0: Settings opens as a short menu; each row opens one page (on wide screens the menu stays on the left).
+let setPage = null;
+const SET_ICONS = {
+  you: '<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/>',
+  accounts: '<rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18M7 15h4"/>',
+  backup: '<path d="M7 18a5 5 0 0 1-.6-10A6 6 0 0 1 18 9a4.5 4.5 0 0 1-.5 9"/><path d="M12 12v8M9 15l3-3 3 3"/>',
+  privacy: '<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>',
+  notify: '<path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>',
+  look: '<circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 0 0 18z" fill="currentColor"/>',
+  help: '<circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.7.3-1 .9-1 1.7M12 17h.01"/>',
+  about: '<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/>'
+};
+function settingsMenu(page) {
+  const p = state.profile, lb = p.lastBackup, d = lb ? daysSince(lb) : null;
+  const notesOn = NOTE_KINDS.filter(k => noteOn(k[0])).length;
+  const rem = Native && store.get(REMINDER_KEY) ? `, reminder on day ${store.get(REMINDER_KEY)}` : '';
+  const live = state.accounts.filter(a => !a.archived).length, closed = state.accounts.length - live;
+  const pages = [
+    ['Your details', [
+      ['you', 'About you and family', [p.name, p.retireAge ? `retire at ${p.retireAge}` : '', p.people.length ? `${p.people.length} other ${p.people.length === 1 ? 'person' : 'people'}` : ''].filter(Boolean).join(' · ') || 'Name, date of birth, tax band'],
+      ['accounts', 'Accounts', live ? `${live} account${live === 1 ? '' : 's'}${closed ? `, ${closed} closed` : ''} · order and pins` : 'Add, edit and order accounts']]],
+    ['Your data', [
+      ['backup', 'Backup and restore', lb ? `Last backup ${ago(lb).toLowerCase()}` : 'Never backed up', d == null || d > 30],
+      ['privacy', 'Privacy and PIN lock', [store.get(LOCK_KEY) ? 'PIN on' : 'PIN off', ui.hidden ? 'balances hidden' : '', demo ? 'demo mode on' : ''].filter(Boolean).join(' · ')]]],
+    ['App', [
+      ['notify', 'Notifications and reminders', `${notesOn} of ${NOTE_KINDS.length} on${rem}`],
+      ['look', 'Appearance', `${store.get(THEME_KEY) === 'light' ? 'Light' : 'Dark'} · ${ui.pence ? 'with pence' : 'whole pounds'}${ui.compactNums ? ' · short figures' : ''}`],
+      ['help', 'Help and FAQ', `${FAQ.length} answers, with search`],
+      ['about', 'About Aurum', `Version ${APP_VERSION} · share, download, updates`]]]
+  ];
+  return `<nav class="set-menu" aria-label="Settings">${pages.map(([g, rows]) => `<div class="set-grp">${g}</div><div class="set-card">${rows.map(([k, t, sub, warn]) => `<button type="button" class="set-row" data-action="set-page" data-id="${k}"${page === k ? ' aria-current="page"' : ''}><span class="note-ic gold"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${SET_ICONS[k]}</svg></span><span class="set-txt"><b>${t}</b><small${warn ? ' class="warn-t"' : ''}>${esc(sub.charAt(0).toUpperCase() + sub.slice(1))}</small></span><span class="set-go" aria-hidden="true">${CHEVRON}</span></button>`).join('')}</div>`).join('')}</nav>`;
+}
+function openSetPage(k) {
+  const wasMenu = !setPage;
+  setPage = k || null;
+  if (k && wasMenu && !(window.matchMedia && matchMedia('(min-width:1000px)').matches)) { try { history.pushState({ aurumSet: 1 }, ''); } catch {} }
+  render();
+  window.scrollTo({ top: 0 });
+}
+// Browser / phone back from a Settings page returns to the menu.
+window.addEventListener('popstate', () => { if (ui.tab === 'settings' && setPage) { setPage = null; render(); } });
 function renderSettings() {
   const moveOpts = noteOn('moves') ? `<div class="stack move-opts" style="gap:8px">
           <span class="hint" style="margin:0">Notify when a balance or my net worth moves by</span>
@@ -3595,8 +3734,8 @@ function renderSettings() {
   const theme = store.get(THEME_KEY) === 'light' ? 'light' : 'dark';
   const p = state.profile, locked = !!store.get(LOCK_KEY);
   const count = state.logs.length;
-  view.innerHTML = `
-    <div class="settings-grid view">
+  const secs = [
+    ['you', `
       <section class="panel stack">
         <h2>About you</h2>
         <form id="profile-form" class="form-grid">
@@ -3612,15 +3751,15 @@ function renderSettings() {
           <p class="hint">Used by the planner, tax helper and pension access age. Stored only on this device.</p>
           <div class="row-actions"><button class="btn primary" type="submit">Save details</button><span class="status" id="profile-status" role="status"></span></div>
         </form>
-      </section>
-
+      </section>`],
+    ['help', `
       <section class="panel stack" id="faq">
         <h2>Help and FAQ</h2>
         <input id="faq-q" class="input" type="search" placeholder="Search help, e.g. backup or ISA" aria-label="Search help" autocomplete="off">
         <p class="hint" id="faq-none" hidden style="margin:0">No answers match. Try another word.</p>
         <div id="faq-list">${FAQ_SECS.map(sec => `<div class="set-grp faq-sec">${esc(sec)}</div>${FAQ.filter(f => f[3] === sec).map(([id, q, a]) => `<details class="faq" id="faq-${id}"><summary>${q}</summary><div>${a}</div></details>`).join('')}`).join('')}</div>
-      </section>
-
+      </section>`],
+    ['you', `
       <section class="panel stack">
         <h2>Family</h2>
         <p class="explain">Track accounts you hold for others, such as a child's Junior ISA. Their accounts are kept out of your own net worth, and you can view each person or everyone together.</p>
@@ -3631,8 +3770,8 @@ function renderSettings() {
           <input id="person-name" class="input" placeholder="Name, e.g. Arjun" maxlength="30" required aria-label="Name">
           <button class="btn" type="submit">${icons.plus}Add person</button>
         </form>
-      </section>
-
+      </section>`],
+    ['accounts', `
       <section class="panel stack">
         <div class="panel-head" style="margin-bottom:0"><h2>Accounts</h2><button class="btn sm" data-action="add-acct">${icons.plus}Add account</button></div>
         <p class="hint">Drag ⋮⋮ to reorder. Accounts stay in their group: to move one to another group, change its type in Edit. Pinned accounts come first in lists and the account strip.</p>
@@ -3641,8 +3780,8 @@ function renderSettings() {
             <li style="background:var(--neg-soft)"><span class="grow">Remove <b>${esc(a.name)}</b> and its ${accountStats(a.id).s.length} valuations?</span><button class="btn sm ghost" data-action="remove-acct-no">Keep</button><button class="btn sm danger solid" data-action="remove-acct-yes" data-id="${esc(a.id)}">Remove</button></li>` : `
             <li data-acct="${esc(a.id)}" data-group="${groupOf(a)}"><span class="drag-h" title="Drag to reorder" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="6" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="18" r="1.6"/></svg></span>${badge(a)}<span class="grow"><b>${esc(a.name)}${ownerChip(a)}</b><span class="faint">${esc(a.provider)}${a.provider ? ' · ' : ''}${esc(typeOf(a).label)}</span></span><button class="icon-btn pin${a.pinned ? ' on' : ''}" data-action="pin-acct" data-id="${esc(a.id)}" aria-pressed="${!!a.pinned}" aria-label="${a.pinned ? 'Unpin' : 'Pin'} ${esc(a.name)}" title="${a.pinned ? 'Pinned to the top' : 'Pin to the top'}"><svg viewBox="0 0 24 24" fill="${a.pinned ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M9 3h6l-1 6 4 4H6l4-4z"/><path d="M12 13v8" fill="none"/></svg></button><button class="icon-btn edit" data-action="edit-acct" data-id="${esc(a.id)}" aria-label="Edit ${esc(a.name)}">${icons.edit}</button><button class="icon-btn" data-action="remove-acct" data-id="${esc(a.id)}" aria-label="Remove ${esc(a.name)}">${icons.trash}</button></li>`).join('')}
         </ul></div>`).join('') : '<p class="hint">No accounts yet.</p>'}
-      </section>
-
+      </section>`],
+    ['privacy', `
       <section class="panel stack">
         <h2>Privacy</h2>
         <label class="check tgl"><input type="checkbox" role="switch" id="set-demo" ${demo ? 'checked' : ''}><span><b style="color:var(--ink);font-weight:550">Demo mode</b><br>Shows example data, to try things out or show someone Aurum. Your own data is untouched and nothing is saved. Backups, reminders and notifications pause until you exit${store.get(LOCK_KEY) ? ', which asks for your PIN' : ''}.</span></label>
@@ -3660,8 +3799,8 @@ function renderSettings() {
           <p class="hint">Asks for the PIN when Aurum opens or after the time you choose in the background. It is a privacy screen: if you forget it, you can erase the data on this device and restore a backup.</p>`}
           <p class="status" id="pin-status" role="status"></p>
         </div>
-      </section>
-
+      </section>`],
+    ['backup', `
       <section class="panel stack">
         <h2>Backup and restore</h2>
         <p class="explain">Your data is saved on this device only. Export a backup regularly and before you change phone.</p>
@@ -3700,8 +3839,8 @@ function renderSettings() {
         </details>
         ${Native ? `<label class="check tgl"><input type="checkbox" role="switch" id="set-autobackup" ${store.get(AUTO_KEY) === '1' ? 'checked' : ''}><span><b style="color:var(--ink);font-weight:550">Automatic weekly backup</b><br>Saves a copy to Documents/Aurum on this phone${store.get(AUTO_LAST) ? `, last on ${dateLabel(toMs(store.get(AUTO_LAST)))}` : ''}. Keeps the 8 newest. Copy them to Google Drive or a computer now and then, as they are lost if the phone is.</span></label><p class="status" id="auto-status" role="status"></p>` : ''}
         <p class="status" id="backup-status" role="status"></p>
-      </section>
-
+      </section>`],
+    ['look', `
       <section class="panel stack">
         <h2>Appearance</h2>
         <label class="check tgl"><input type="checkbox" role="switch" id="set-pence" ${ui.pence ? 'checked' : ''}><span>Show pence (£1,234.56)</span></label>
@@ -3709,29 +3848,30 @@ function renderSettings() {
         <div class="seg" role="radiogroup" aria-label="Theme" style="width:max-content">
           ${['dark', 'light'].map(t => `<input type="radio" name="theme" id="theme-${t}" value="${t}" ${theme === t ? 'checked' : ''}><label for="theme-${t}">${t[0].toUpperCase() + t.slice(1)}</label>`).join('')}
         </div>
-        <div class="about" style="margin-top:8px">
-          <svg class="mark" width="44" height="44" aria-hidden="true"><use href="#aurum-mark"/></svg>
-          <div><p><b>Aurum</b> <span class="mono faint" style="font-size:12px">v${esc(APP_VERSION)}</span>${IS_DEV ? ' <span class="owner">Development build</span>' : ''}</p><p class="faint" style="font-size:13px">Personal wealth ledger. No sign-in, no servers: your data never leaves this device.</p></div>
-        </div>
-        ${IS_DEV ? '<p class="hint">This is a development version: features may change and there may be rough edges. Export a backup regularly.</p>' : ''}
-      </section>
-
+      </section>`],
+    ['notify', `
       <section class="panel stack">
         <h2>Notifications</h2>
         <p class="explain">Shown under the bell at the top. Worked out on this device from your entries.</p>
-        ${[['To do', ['due', 'backup', 'regular', 'stale']], ['Tax year', ['allow', 'tax']], ['Progress', ['goals', 'moves', 'app']]].map(([g, keys]) => `<div class="set-grp">${g}</div><div class="set-card">${keys.map(k => { const [, label, sub] = NOTE_KINDS.find(x => x[0] === k); return `<label class="set-row"><span class="note-ic gold"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${NOTE_ICONS[NOTE_KIND_ICON[k]]}</svg></span><span class="set-txt"><b>${label}</b><small>${k === 'moves' && noteOn(k) ? `${ui.notes.move.pct}% · ${{ both: 'up and down', up: 'up only', down: 'down only' }[ui.notes.move.dir]} · ${ui.notes.move.basis === 'month' ? 'this month' : 'since previous balance'}` : sub}</small></span><input type="checkbox" role="switch" class="switch" data-note-kind="${k}" ${noteOn(k) ? 'checked' : ''}></label>${k === 'moves' ? moveOpts : ''}`; }).join('')}</div>`).join('')}
-      </section>
-
+        ${[['To do', ['due', 'backup', 'regular', 'stale']], ['Tax year', ['allow', 'tax']], ['Progress', ['goals', 'moves', 'pay', 'app']]].map(([g, keys]) => `<div class="set-grp">${g}</div><div class="set-card">${keys.map(k => { const [, label, sub] = NOTE_KINDS.find(x => x[0] === k); return `<label class="set-row"><span class="note-ic gold"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${NOTE_ICONS[NOTE_KIND_ICON[k]]}</svg></span><span class="set-txt"><b>${label}</b><small>${k === 'moves' && noteOn(k) ? `${ui.notes.move.pct}% · ${{ both: 'up and down', up: 'up only', down: 'down only' }[ui.notes.move.dir]} · ${ui.notes.move.basis === 'month' ? 'this month' : 'since previous balance'}` : sub}</small></span><input type="checkbox" role="switch" class="switch" data-note-kind="${k}" ${noteOn(k) ? 'checked' : ''}></label>${k === 'moves' ? moveOpts : ''}`; }).join('')}</div>`).join('')}
+      </section>`],
+    ['notify', `
       <section class="panel stack">
         <h2>Reminders</h2>
         ${Native ? `<div class="field" style="max-width:260px"><label for="set-reminder">Monthly reminder to update balances</label>
           <select id="set-reminder" class="input"><option value="">Off</option>${Array.from({ length: 28 }, (_, i) => `<option value="${i + 1}" ${store.get(REMINDER_KEY) === String(i + 1) ? 'selected' : ''}>On day ${i + 1}, 9am</option>`).join('')}</select></div>
           <p class="status" id="reminder-status" role="status"></p>
           <label class="check tgl"><input type="checkbox" role="switch" id="set-taxrem" ${store.get(TAXREM_KEY) === '1' ? 'checked' : ''}><span><b style="color:var(--ink);font-weight:550">Tax reminders</b><br>Each June to add your P60, and on 10 January if your last tax year has a refund to claim or income to declare.</span></label>` : '<p class="hint">A monthly phone reminder is available in the Android app. On the website, Aurum flags accounts you have not updated for 30 days.</p>'}
-      </section>
-
+      </section>`],
+    ['about', `
       <section class="panel stack">
-        <h2>Get Aurum</h2>
+        <h2>About Aurum</h2>
+        <div class="about">
+          <svg class="mark" width="44" height="44" aria-hidden="true"><use href="#aurum-mark"/></svg>
+          <div><p><b>Aurum</b> <span class="mono faint" style="font-size:12px">v${esc(APP_VERSION)}</span>${IS_DEV ? ' <span class="owner">Development build</span>' : ''}</p><p class="faint" style="font-size:13px">Personal wealth ledger. No sign-in, no servers: your data never leaves this device.</p></div>
+        </div>
+        ${IS_DEV ? '<p class="hint">This is a development version: features may change and there may be rough edges. Export a backup regularly.</p>' : ''}
+        <h3 class="set-sub">Get Aurum</h3>
         <p class="explain">Use it in any browser, or install the Android app. Each person's data stays on their own device.</p>
         <div class="row-actions">
           <button class="btn primary" data-action="share-site">Share website</button>
@@ -3740,8 +3880,8 @@ function renderSettings() {
         <p class="hint">Website: <span class="mono">${esc(SITE_URL.replace('https://', ''))}</span>. To install the APK, open the downloaded file and allow installs from your browser if Android asks.</p>
         ${Native ? `<div class="row-actions"><button class="btn" data-action="check-update">Check for updates</button>${update ? `<a class="btn primary" href="${esc(update.url)}" target="_blank" rel="noopener">Update to ${esc(update.version)}</a>` : ''}</div>` : ''}
         <p class="status" id="share-status" role="status"></p>
-      </section>
-
+      </section>`],
+    ['backup', `
       <section class="panel stack">
         <h2>Reset</h2>
         <p class="explain">Deletes all ${count} valuations, your accounts and goals on this device. Export a backup first if you may want them back.</p>
@@ -3750,7 +3890,17 @@ function renderSettings() {
             ? `<span>Delete everything?</span><button class="btn ghost" data-action="reset-no">Cancel</button><button class="btn danger solid" data-action="reset-yes">Delete all data</button>`
             : `<button class="btn danger" data-action="reset">Reset all data</button>`}
         </div>
-      </section>
+      </section>`]
+  ];
+  const wide = window.matchMedia && matchMedia('(min-width:1000px)').matches;
+  const page = setPage || (wide ? 'you' : null);
+  view.innerHTML = `
+    <div class="settings-grid view${page ? ' has-page' : ''}">
+      ${!page || wide ? settingsMenu(page) : ''}
+      ${page ? `<div class="set-page stack">
+        ${wide ? '' : `<button type="button" class="set-back" data-action="set-page" data-id="">${CHEVRON}All settings</button>`}
+        ${secs.filter(x => x[0] === page).map(x => x[1]).join('')}
+      </div>` : ''}
     </div>`;
 }
 
@@ -3787,23 +3937,7 @@ const TITLES = {
   insights: ['Insights', () => 'A plain-English summary of your money'],
   settings: ['Settings & backup', () => 'Your data is stored on this device only']
 };
-// Settings sections under small group headings, in a fixed order.
-const SETTING_GROUPS = [['You', ['About you', 'Family']], ['Accounts', ['Accounts']], ['Data', ['Backup and restore']], ['Privacy and reminders', ['Privacy', 'Reminders']], ['App', ['Appearance', 'Get Aurum', 'Reset']]];
-function groupSettings() {
-  const grid = view.querySelector('.settings-grid');
-  if (!grid) return;
-  const byTitle = {};
-  grid.querySelectorAll(':scope > section').forEach(sec => { const h = sec.querySelector('h2'); if (h) byTitle[h.textContent.trim()] = sec; });
-  for (const [label, titles] of SETTING_GROUPS) {
-    const secs = titles.map(t => byTitle[t]).filter(Boolean);
-    if (!secs.length) continue;
-    const head = document.createElement('div');
-    head.className = 'set-group'; head.textContent = label;
-    grid.appendChild(head);
-    secs.forEach(sec => grid.appendChild(sec));
-  }
-}
-const renderers = { overview: renderOverview, accounts: renderAccounts, income: renderIncome, planner: renderPlanner, insights: renderInsights, settings: () => { renderSettings(); groupSettings(); } };
+const renderers = { overview: renderOverview, accounts: renderAccounts, income: renderIncome, planner: renderPlanner, insights: renderInsights, settings: renderSettings };
 function render() {
   chartConfigs.clear();
   const eye = document.getElementById('eye-btn');
@@ -5037,7 +5171,7 @@ function noteAct(id) {
   else if (a.action === 'open-log') openLog(a.id);
   else if (a.action === 'open-pay') openPay(a.id);
   else if (a.action === 'open-bulk') openBulk();
-  else if (a.action === 'export') document.querySelector('[data-action="export"]') ? document.querySelector('[data-action="export"]').click() : (goTab('settings'));
+  else if (a.action === 'export') document.querySelector('[data-action="export"]') ? document.querySelector('[data-action="export"]').click() : (goTab('settings'), openSetPage('backup'));
   refreshBell();
 }
 // Swipe a notification left to dismiss it.
@@ -5493,7 +5627,7 @@ function snapshot(msg) {
 
 /* ---------- events ---------- */
 let tabJustOpened = true;
-function goTab(tab) { tabJustOpened = true; ui.tab = tab; pendingDelete = null; pendingReset = false; pendingRemoveAcct = null; pendingGoal = null; pendingPerson = null; saveUi(); render(); window.scrollTo({ top: 0 }); }
+function goTab(tab) { tabJustOpened = true; ui.tab = tab; if (tab === 'settings') setPage = null; pendingDelete = null; pendingReset = false; pendingRemoveAcct = null; pendingGoal = null; pendingPerson = null; saveUi(); render(); window.scrollTo({ top: 0 }); }
 document.addEventListener('click', async e => {
   const t = e.target.closest('[data-action]');
   if (!t) return;
@@ -5546,6 +5680,8 @@ document.addEventListener('click', async e => {
     case 'insight-range': ui.insight = t.dataset.range; saveUi(); render(); break;
     case 'bar-months': ui.barMonths = +id; saveUi(); render(); break;
     case 'stack-by': ui.stackBy = id; saveUi(); render(); break;
+    case 'nw-range': ui.nwRange = id; saveUi(); render(); break;
+    case 'set-page': if (!id && setPage && history.state && history.state.aurumSet) history.back(); else openSetPage(id); break;
     case 'person': ui.person = id; saveUi(); render(); break;
     case 'goto-account': ui.account = id; goTab('accounts'); break;
     case 'pick-account': ui.account = id; pendingDelete = null; saveUi(); render(); break;

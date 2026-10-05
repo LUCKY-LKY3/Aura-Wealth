@@ -25,10 +25,8 @@ Aurum is a personal wealth simulator, not just a net-worth tracker: show where w
 Order: 2.0 polish and charts → 2.x Future Me → 3.0 pensions, property and debts → 4.0 tax.
 
 ## 2.0 (next): polish, charts and wealth insights
-- Net worth card range chips (1M · 1Y · All) setting both the change line and the trend (trend now shows the last 24 points)
-- "Where your wealth came from" for the chosen range: paid in vs growth, split by group (pensions, ISAs, investments,
-  cash), with property and debt reduction joining once they exist (3.0)
-- Growth attribution: which accounts drove this year's growth
+- Done in 2.0.0: net worth card range chips (1M · 1Y · All); "Where your wealth came from" (paid in vs growth by group;
+  property and debt reduction join in 3.0); accounts that drove growth; Settings as a menu of pages
 - Actual vs projected wealth chart: history so far, then the planner's projection (today, 5, 10, 20 years, retirement)
 - Chart polish across the app (one consistent look, readouts, ranges)
 - Cash drag warning: lots of cash in a low-interest account (user enters rate)

@@ -1,4 +1,5 @@
-- Interest, dividends and prizes paid into an account now add to its balance straight away (as growth), until you next log a real balance. Untick "Paid into this account" if they went elsewhere
-- Account history: notes sit on one tidy line under each entry instead of a squashed column; tap a note to read it all
-- Notes typed with interest or dividends are now kept
-- Help and FAQ is sorted into sections and has a search box, with new answers on each tab, estimated balances, several accounts and Family, backups and demo mode. Tap "est." on a balance to see why
+- Net worth card: choose 1M, 1Y or All to set the change line and the trend
+- New "Where your wealth came from" on Overview: what you paid in vs what grew, by pensions, ISAs, investments and cash, for the same range
+- See which accounts drove your growth (or losses), and tap one to open it
+- Settings is now a short menu: tap a section to open it, and back to return. On a wide screen the menu stays on the left
+- Pay and savings rate notifications can now be switched off in Settings
