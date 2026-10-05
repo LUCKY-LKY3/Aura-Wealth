@@ -79,6 +79,52 @@ Always in today's money and marked "illustration, not advice".
 - Personal allowance taper (£100k–£125,140) shown clearly
 - Tax what-ifs: "what if I pay another £5k into my pension?", "what if I realise these gains next tax year?"
 
+## 5.0: Investment & Asset Tracking
+- Holdings entry: stocks, bonds, ETFs, crypto (manual entry + ticker lookup)
+- Track cost basis, current value, and performance (gain/loss, return %)
+- Investment-specific insights: sector allocation, dividend yield, tax-loss harvesting opportunities
+- Holdings shown on Overview with totals and key metrics; detailed view per holding
+- Integration with net worth and wealth sources
+
+## 6.0: Debt & Borrowing
+- Mortgage tracking: equity, interest rate, term, monthly payment
+- Refinance what-ifs: explore rate changes and early repayment scenarios
+- Student loans, personal loans, credit card balances
+- Debt payoff strategies: minimum payment vs accelerated repayment, consolidation recommendations
+- Debt reduction shown in "where your wealth came from" (like property equity)
+- Monthly debt paydown projections in the planner
+
+## 7.0: Retirement Readiness
+- Comprehensive retirement score: savings rate, pension growth trajectory, longevity assumptions
+- Retirement age flex scenarios: "retire at 60 vs 65 vs 70" showing income and longevity impact
+- Drawdown projections in today's money (accounting for inflation)
+- Years of savings left at current burn rate (emergency fund in months equivalent)
+- Retirement readiness gauge on Overview; detailed breakdown in Planner
+
+## 8.0: Partner & Family
+- Shared net worth view: merge profiles or show separate household net worth
+- Split tracking: joint accounts, separate accounts, split assets
+- Kids' financial tracking: pocket money, savings goals, university/future cost tracking (JISA extension)
+- Beneficiary planning basics: simple will-style allocations
+- Family member profiles and their contribution to household wealth
+- Shared goals and milestones
+
+## 9.0: Alerts & Automations
+- Milestone alerts: "You've reached £100k net worth", "Goal hit in 6 months"
+- Interest rate change alerts: "Your savings rate dropped from 3.5% to 3%"
+- Rebalance reminders: investment allocation drift, "Stocks now 45%, target 50%"
+- Optional bank sync read-only: savings rate nudges based on real transactions
+- Premium: auto-categorize spending from transactions (not enabled by default)
+- Recurring reminders configurable per alert type
+
+## 10.0: Benchmarking & Insights
+- Comparison view: "How do I compare?" (anonymized cohorts by age, income, region)
+- Percentile rank within your cohort for net worth, savings rate, allocation
+- Financial health score: emergency fund adequacy, debt-to-income ratio, savings rate vs peers
+- Peer insights: "People your age save 15% on average, you save 22%"
+- Content layer: guides on ISA optimization, pension allowances, tax year planning
+- Educational articles in-app (no external linking)
+
 ## Live prices (version to decide)
 - Holdings with live prices: enter ticker + quantity, app fetches price on-device (only the ticker leaves the phone)
   - Crypto first via CoinGecko (free, no key); read-only crypto wallet balances from public addresses (never private keys)
