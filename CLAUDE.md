@@ -179,6 +179,14 @@ not advice — keep that disclaimer.
   picks one; `openSetPage(k)` pushes history on phone so back returns to the menu; ≥1000px shows menu + page (default `you`).
   `goTab('settings')` resets to the menu; `openFaq` opens page `help`. New Settings sections must go in `secs` with a page key.
 
+- 2.0.1: `wealthPath()` (Planner `#path-panel`, called from `updatePlan`): timeline of included accounts + `project()` from today,
+  always in today's money, `ui.pathSpan` ('all'|'10'). `chart()` series/band values may be `null` (gaps) and `cfg.divider {t,label}`
+  draws a dashed line; non-fit axes use `niceScale`; markers closer than 12px are skipped. `seedExample()` = 24 months of every
+  account type, flows (employer, relief, transfer, isaTransfer, withdrawal), income, pay, P60, goals, child `demo_kid` with a JISA,
+  fixed seed. Demo always starts fresh and is never saved: first-run "Try the demo" and the PIN screen's `lock-demo` call `startDemo`
+  (from setup with `{name,dob}`; exit returns to setup); from the PIN screen your data stays locked and Exit asks for the PIN.
+  New first runs no longer save example data (`example: true` only remains for old saves; `clearExample` still handles it).
+
 ## Status (latest)
 
 - 1.9.9 merged to main (PR #23); owner publishes the v1.9.9 release. Owner says when to merge.
