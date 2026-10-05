@@ -29,6 +29,7 @@ Order: 2.0 polish and charts → 2.x Future Me → 3.0 pensions, property and de
   property and debt reduction join in 3.0); accounts that drove growth; Settings as a menu of pages
 - Done in 2.0.1: actual vs projected wealth chart (Planner); chart polish (round axis steps, thinned markers); full demo
   data (every type, pay, income, child's JISA) starting fresh each time; demo from the PIN and first-run screens
+- Native SVG Tooltips: hover/touch interaction on all charts showing exact data values at each point
 - Cash drag warning: lots of cash in a low-interest account (user enters rate)
 - Interest checker: savings rate vs a benchmark rate the user sets
 - Income follow-ups: household / partner income (owner per source), goal dates from current savings rate
@@ -37,9 +38,13 @@ Order: 2.0 polish and charts → 2.x Future Me → 3.0 pensions, property and de
 Turns the planner into a simulator from the user's own data (planner growth, inflation, retirement age, goals, pay).
 Always in today's money and marked "illustration, not advice".
 - Headline: "On your current path, about £X by 60" on Overview / Planner
+- "Time Machine" Mode: sandboxed future state simulator (spin forward, adjust variables, see compound effect, reset)
+- "What-If" Forecasting Engine: reallocate spending, adjust savings rate, change pension contributions, see compounds at retirement
+- Time-to-Goal Velocity Calculator: precise goal completion dates based on current trajectory and what-if changes
 - What-if scenarios, each showing the change at retirement, goal dates and the earliest age you could stop: invest £X more
   a month, retire N years earlier, raise pension contribution by N%, growth 5% instead of 7% (later: pay the mortgage off
   earlier, once debts exist)
+- "What-If" SVG Projection Overlay: projection layer on charts showing forecasted values alongside historical
 - Extra this month: when a month beats your usual saving, "£150 more than usual → about £1,900 at 60 in today's money"
 - Time bought: extra saved as days of your own take-home pay ("that £500 = 6 days of work"), or as retirement time
   ("this year's saving funds about 7 months of retirement at your planned income")
@@ -62,11 +67,13 @@ Always in today's money and marked "illustration, not advice".
   - Suggested with it: planner adds DB income from the scheme pension age alongside the pot's drawdown income; optional
     automatic lump sum (e.g. NHS 1995 section) added to the value; shares the "yearly income from an age" model with State Pension
 - State Pension: yearly amount (from the user's forecast) from State Pension age, same "yearly income from an age" model
-  as DB; in the planner, and optionally in pension wealth
+  as DB; in the planner, and optionally in pension wealth; NI Qualifying Years tracker (path to state pension eligibility)
 - Property and debts: home/property values and liabilities (mortgage, loans, cards), so net worth = assets − liabilities
   and debt reduction shows in "where your wealth came from"
 - Workplace DC pensions shown properly (employer vs own contributions, salary sacrifice vs relief at source)
 - Tax-free cash tracker (25%, Lump Sum Allowance £268,275), drawdown
+- LISA Penalty Coaching: explain 25% withdrawal penalty on lifetime ISAs, flag risky situations, provide guidance on eligible uses
+- Unified £20,000 ISA Meter: progress ring showing total ISA allowance usage across all ISA types (Cash, Stocks, Innovative Finance)
 
 ## 4.0: tax helper ("Aurum Tax", likely the Pro feature)
 - Tax return helper upgrade: build the engine + 25 test cases in `docs/tax-helper-spec.md` (dividend/savings stacking,
@@ -77,59 +84,86 @@ Always in today's money and marked "illustration, not advice".
   "Log as interest" button; Personal Savings Allowance meter by band (£1,000 / £500 / £0); flag growth far above the account's
   advertised rate as a probably unlogged payment rather than interest
 - Personal allowance taper (£100k–£125,140) shown clearly
+- HENRY Tax Trap Navigator: guide users through £50k and £100k Personal Allowance cliffs with clear impact visualization
+- "Bed & ISA" Capital Gains Harvester: scan holdings for unrealized gains/losses before 5 April, identify best candidates
+  for bed-and-ISA style maneuvers to maximize CGT efficiency
+- "Spendable" Net Worth: tax-liability lens showing wealth after estimated tax, highlighting deferred tax on investments
 - Tax what-ifs: "what if I pay another £5k into my pension?", "what if I realise these gains next tax year?"
 
-## 5.0: Investment & Asset Tracking
-- Holdings entry: stocks, bonds, ETFs, crypto (manual entry + ticker lookup)
-- Track cost basis, current value, and performance (gain/loss, return %)
-- Investment-specific insights: sector allocation, dividend yield, tax-loss harvesting opportunities
-- Holdings shown on Overview with totals and key metrics; detailed view per holding
-- Integration with net worth and wealth sources
+## 5.0: Chart Interactivity, Behavioral Insights & Portability
+**Chart Interactivity & Visual Data Exploration**
+- Tap-to-Drilldown Filtering: tap chart bars/elements to filter linked breakdowns (e.g., tap an account on the chart to isolate it)
+- Legend Isolation Toggles: tap legend items to focus on/hide specific series (e.g., show only growth bars)
+- GitHub-Style Contribution Heatmap: 52-week grid by tax year showing daily contribution intensity (color-coded savings/growth)
+- Scrubbable trend charts: scrub net worth / plan charts with finger/mouse to preview values at any date
 
-## 6.0: Debt & Borrowing
-- Mortgage tracking: equity, interest rate, term, monthly payment
+**Behavioral Finance & Gamification**
+- The Portfolio's "Daily Wage": trailing 30-day yield ÷ 30, shown as daily passive income generated
+- The "Tipping Point" Milestone: highlight when passive growth exceeds active earnings (psychological milestone)
+- "True Hourly Wage" Converter: spend any amount, see equivalent hours of your life traded (based on logged hourly pay)
+- "Dead Cash" Opportunity Cost Scanner: identify non-interest bearing accounts and quantify annual opportunity cost
+- Savings streaks: badges and recognition for consistent monthly savings (continuation of 1.9.2 streaks)
+
+**Core Architecture & Data Portability**
+- Bulk CSV Import: drag-drop CSV import for accounts, balances, flows (supports common formats)
+- Tax Pack Export: self-assessment export to match HMRC formats (supplementary to manual entry)
+- Transaction History Search & Tag Filtering: full-text search on notes, filter by tag/type/date range
+- Undo/Redo history: deeper undo stack with breadcrumb trail of recent actions
+
+## 6.0: Debt & Borrowing + Financial Runway
+- Mortgage tracking: equity, interest rate, term, monthly payment, early repayment scenarios
 - Refinance what-ifs: explore rate changes and early repayment scenarios
-- Student loans, personal loans, credit card balances
+- Student loans, personal loans, credit card balances with repayment timelines
 - Debt payoff strategies: minimum payment vs accelerated repayment, consolidation recommendations
 - Debt reduction shown in "where your wealth came from" (like property equity)
 - Monthly debt paydown projections in the planner
+- **Financial Runway (Days of Pay)**: liquid net worth ÷ monthly spend = days of runway visualized with fuel-gauge gauge
+- Emergency fund adequacy checker (enter monthly outgoings, see months of runway)
 
-## 7.0: Retirement Readiness
+## 7.0: Retirement Readiness & Decumulation
 - Comprehensive retirement score: savings rate, pension growth trajectory, longevity assumptions
 - Retirement age flex scenarios: "retire at 60 vs 65 vs 70" showing income and longevity impact
 - Drawdown projections in today's money (accounting for inflation)
 - Years of savings left at current burn rate (emergency fund in months equivalent)
 - Retirement readiness gauge on Overview; detailed breakdown in Planner
+- **FIRE Crossover Point**: 4% safe withdrawal rate vs lifestyle spend, highlighted milestone when SWR exceeds spend
+- **Decumulation (Retirement) Mode**: invert the planner to show burn rate, portfolio longevity, and sequence-of-returns risk
+- **"Spending Smile" Drawdown Modeler**: 3-phase retirement (early active, middle lower, later care costs) with spending curves
+- **Sequence of Returns Risk Stress Tester**: historical market drops applied to your portfolio (show worst-case scenarios, safe spending levels)
 
-## 8.0: Partner & Family
+## 8.0: Partner & Family + Rebalancing & Inflation
 - Shared net worth view: merge profiles or show separate household net worth
 - Split tracking: joint accounts, separate accounts, split assets
+- Household / Multi-Owner Tracking: Me | Partner | Joint filter to segment net worth views
 - Kids' financial tracking: pocket money, savings goals, university/future cost tracking (JISA extension)
 - Beneficiary planning basics: simple will-style allocations
 - Family member profiles and their contribution to household wealth
 - Shared goals and milestones
+- **The "Next Pound" Router**: allocation drift detector and rebalancing guide (show where next £ should go)
+- **"Real Wealth" (UK Inflation) Lens**: deflate all historical values to current purchasing power, compare real returns
 
-## 9.0: Alerts & Automations
+## 9.0: Alerts & Automations + Multi-Currency
 - Milestone alerts: "You've reached £100k net worth", "Goal hit in 6 months"
 - Interest rate change alerts: "Your savings rate dropped from 3.5% to 3%"
 - Rebalance reminders: investment allocation drift, "Stocks now 45%, target 50%"
 - Optional bank sync read-only: savings rate nudges based on real transactions
 - Premium: auto-categorize spending from transactions (not enabled by default)
 - Recurring reminders configurable per alert type
+- **Multi-Currency (FX) Support**: track USD/EUR/other holdings, display exchange rates, convert to GBP in net worth
+- Transaction history enhancements: search, filtering, bulk export to CSV/QIF
 
-## 10.0: Benchmarking & Insights
+## 10.0: Benchmarking, Insights & Live Prices
 - Comparison view: "How do I compare?" (anonymized cohorts by age, income, region)
 - Percentile rank within your cohort for net worth, savings rate, allocation
 - Financial health score: emergency fund adequacy, debt-to-income ratio, savings rate vs peers
 - Peer insights: "People your age save 15% on average, you save 22%"
+- **Offline ONS Demographic Benchmarking**: wealth percentiles by age group (cached, no live data)
 - Content layer: guides on ISA optimization, pension allowances, tax year planning
 - Educational articles in-app (no external linking)
-
-## Live prices (version to decide)
-- Holdings with live prices: enter ticker + quantity, app fetches price on-device (only the ticker leaves the phone)
-  - Crypto first via CoinGecko (free, no key); read-only crypto wallet balances from public addresses (never private keys)
-  - Stocks/ETFs later once a price source is chosen (free tiers have limits; UK OEIC funds patchy)
-  - Not planned: broker/Open Banking linking (needs paid, FCA-regulated partner and servers)
+- **Live Holdings Prices**: enter ticker + quantity for stocks/ETFs/crypto (CoinGecko for crypto, stocks/ETFs sourced)
+- Holdings shown on Overview with totals and key metrics; detailed view per holding, performance tracking
+- Cost basis, current value, and gain/loss with return % and tax implications
+- Investment-specific insights: sector allocation, dividend yield, tax-loss harvesting opportunities
 
 ## Ideas to decide on (suggested, not yet chosen)
 - Small: "since last visit" strip on Overview; duplicate last entry;
