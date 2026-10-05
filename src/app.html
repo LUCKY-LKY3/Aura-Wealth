@@ -571,6 +571,7 @@ dialog.sheet.wide{width:min(620px,calc(100% - 32px))}
 @keyframes rip{from{transform:scale(.2);opacity:1}to{transform:scale(1.3);opacity:0}}
 .lock .btn.ghost{color:#D9B666}
 #lock-forgot{min-height:20px}#lock-forgot .hint{color:#A49D8F}
+.lock .btn.lock-demo{color:#A49D8F;margin-top:6px}
 .lock.out{opacity:0;pointer-events:none}
 @media (max-height:640px){.lock-coin{width:72px;height:72px}.keypad{grid-template-columns:repeat(3,62px);gap:10px 20px}.key{width:62px;height:62px}}
 .shake{animation:shake .4s}
@@ -1263,39 +1264,101 @@ function normProfile(p, done) {
 }
 const emptyState = () => ({ version: 2, example: false, profile: normProfile(null, false), accounts: [], logs: [], flows: [], income: [], goals: [], pay: [] });
 
+// Example data for demo mode: two years of every kind of entry (all account types, pay with payslips, interest,
+// dividends, prizes, employer payments, a withdrawal, a transfer, an ISA transfer, a closed account, notes, goals)
+// and a child with a Junior ISA. Built the same way every time (fixed random seed), so the demo always looks alike.
 function seedExample(profile) {
-  const today = new Date();
-  const accounts = [
-    { id: 'demo_sipp', name: 'SIPP', provider: 'Hargreaves Lansdown', type: 'SIPP', color: 'c1' },
-    { id: 'demo_isa', name: 'Stocks & Shares ISA', provider: 'Vanguard', type: 'ISA', color: 'c2' },
-    { id: 'demo_work', name: 'Workplace Pension', provider: 'Aegon', type: 'Pension', color: 'c3' },
-    { id: 'demo_bonds', name: 'Premium Bonds', provider: 'NS&I', type: 'Premium Bonds', color: 'c4' },
-    { id: 'demo_save', name: 'Easy Access Saver', provider: 'NatWest', type: 'Savings', color: 'c5' }
-  ].map(a => ({ ...a, owner: 'me', fee: a.type === 'SIPP' ? 0.45 : a.type === 'ISA' ? 0.15 : 0, regular: null, demo: true }));
-  const spec = { demo_sipp: [18400, 24950, 0], demo_isa: [9200, 15640, 500], demo_work: [31050, 35820, 300], demo_bonds: [20000, 20250, 0], demo_save: [6000, 7400, 100] };
+  const today = new Date(), M = 24, day = Math.min(today.getDate(), 28);
   let r = 11;
   const rnd = () => (r = (r * 16807) % 2147483647) / 2147483647;
-  const logs = [], flows = [];
-  for (let i = 11; i >= 0; i--) {
-    const d = i === 0 ? today : new Date(today.getFullYear(), today.getMonth() - i, Math.min(today.getDate(), 28));
-    const t = (11 - i) / 11;
-    for (const id of Object.keys(spec)) {
-      const [a, b, monthly] = spec[id];
-      const wobble = i === 0 || id === 'demo_bonds' ? 0 : (rnd() - 0.45) * (b - a) * 0.16;
-      logs.push({ id: uid(), accountId: id, date: isoLocal(d), value: Math.round(a + (b - a) * t + wobble), note: i === 11 ? 'Opening balance' : '' });
-      if (monthly && i < 11) flows.push({ id: uid(), accountId: id, date: isoLocal(d), amount: monthly, own: monthly, note: 'Monthly payment', auto: false });
+  const kid = { id: 'demo_kid', name: 'Maya' };
+  // [id, name, provider, type, colour, opening value, monthly own payment, monthly growth, wobble, extras]
+  const spec = [
+    ['demo_sipp', 'SIPP', 'Hargreaves Lansdown', 'SIPP', 'c1', 14200, 200, 0.006, 0.022, { relief: true, fee: 0.45, pinned: true }],
+    ['demo_work', 'Workplace Pension', 'Aegon', 'Pension', 'c3', 26400, 178, 0.0055, 0.018, { employer: 250, fee: 0.3 }],
+    ['demo_isa', 'Stocks & Shares ISA', 'Vanguard', 'ISA', 'c2', 6800, 400, 0.0065, 0.024, { fee: 0.15 }],
+    ['demo_lisa', 'Lifetime ISA', 'Moneybox', 'LISA', 'c5', 2100, 150, 0.005, 0.02, { relief: true }],
+    ['demo_cisa', 'Cash ISA', 'Trading 212', 'Cash ISA', 'c4', 5000, 100, 0.0036, 0, { rate: 4.4, interest: true }],
+    ['demo_gia', 'Share dealing', 'Freetrade', 'GIA', 'c6', 1500, 50, 0.006, 0.03, { dividends: true }],
+    ['demo_bonds', 'Premium Bonds', 'NS&I', 'Premium Bonds', 'c4', 15000, 0, 0, 0, { prizes: true }],
+    ['demo_save', 'Easy Access Saver', 'Chase', 'Savings', 'c5', 9000, 150, 0.0034, 0, { rate: 4.1, interest: true }],
+    ['demo_current', 'Current account', 'Monzo', 'Cash', 'c2', 1800, 0, 0, 0.12, {}],
+    ['demo_jisa', `${kid.name}'s Junior ISA`, 'Fidelity', 'JISA', 'c6', 3200, 100, 0.006, 0.022, { owner: kid.id }]
+  ];
+  const accounts = spec.map(([id, name, provider, type, color, , , , , x]) => ({ id, name, provider, type, color, owner: x.owner || 'me', fee: x.fee || 0, rate: x.rate || 0, pinned: !!x.pinned, regular: null, demo: true }));
+  // Extra accounts: a 1-year fix opened from savings 10 months ago, and an old Cash ISA moved into the Stocks & Shares ISA 14 months ago.
+  accounts.push({ id: 'demo_fixed', name: '1-year fixed saver', provider: 'Atom', type: 'Fixed', color: 'c3', owner: 'me', fee: 0, rate: 4.6, regular: null, demo: true });
+  accounts.push({ id: 'demo_oldisa', name: 'Old Cash ISA', provider: 'Nationwide', type: 'Cash ISA', color: 'c6', owner: 'me', fee: 0, rate: 1.5, archived: true, regular: null, demo: true });
+  const logs = [], flows = [], income = [];
+  const dateAt = (i, dd) => isoLocal(i === 0 && dd == null ? today : new Date(today.getFullYear(), today.getMonth() - i, dd || day));
+  const flow = (accountId, date, amount, own, note, more) => { const f = { id: uid(), accountId, date, amount, own, note, auto: false, ...more }; flows.push(f); return f; };
+  const notes = { demo_sipp: { 12: 'Annual statement', 3: 'Switched to a global tracker fund' }, demo_isa: { 9: 'Markets fell this month' }, demo_work: { 18: 'Pay rise: contributions up' } };
+  const val = {};
+  for (let i = M; i >= 0; i--) {
+    const d = dateAt(i), first = dateAt(i, 1);
+    for (const [id, , , , , open, monthly, g, wob, x] of spec) {
+      let v = val[id];
+      if (i === M) v = open;
+      else {
+        v = v * (1 + g + (wob ? (rnd() - 0.42) * wob : 0));
+        if (id === 'demo_current') v = 1800 + Math.round((rnd() - 0.5) * 900);
+        if (monthly) {
+          const amount = x.relief ? monthly * 1.25 : monthly;
+          flow(id, first, amount, monthly, id === 'demo_sipp' ? 'Regular payment' : 'Monthly payment', id === 'demo_sipp' ? { auto: true } : {});
+          v += amount;
+        }
+        if (x.employer) { flow(id, first, x.employer, 0, 'Employer contribution', { employer: true }); v += x.employer; }
+        if (x.interest) { const amt = Math.round(v * x.rate / 1200 * 100) / 100; income.push({ id: uid(), accountId: id, date: d, amount: amt, kind: 'interest', note: '', added: true }); }
+        if (x.dividends && i % 3 === 0) { const amt = Math.round(v * 0.008 * 100) / 100; income.push({ id: uid(), accountId: id, date: d, amount: amt, kind: 'dividend', note: 'Quarterly dividend', added: true }); v += amt; }
+        if (x.prizes && (i % 4 === 1 || i === 7)) { const amt = i === 7 ? 100 : i % 8 === 1 ? 50 : 25; income.push({ id: uid(), accountId: id, date: d, amount: amt, kind: 'prize', note: '', added: true }); v += amt; }
+        if (id === 'demo_bonds' && i === 16) { flow(id, first, 5000, 5000, 'Topped up to £20,000'); v += 5000; }
+        if (id === 'demo_save' && i === 8) { flow(id, d, -1200, -1200, 'Holiday'); v -= 1200; }
+        if (id === 'demo_save' && i === 10) { flow(id, d, -5000, -5000, 'Moved to the fixed saver', { transfer: true }); v -= 5000; }
+        if (id === 'demo_isa' && i === 14) { flow(id, d, 3000, 3000, 'Transferred from Old Cash ISA', { isaTransfer: true }); v += 3000; }
+      }
+      val[id] = v;
+      const note = i === M ? 'Opening balance' : (notes[id] && notes[id][i]) || '';
+      logs.push({ id: uid(), accountId: id, date: d, value: Math.round(v), note });
+    }
+    // The fixed saver from 10 months ago; the old Cash ISA until it was moved 14 months ago.
+    if (i <= 10) {
+      val.demo_fixed = i === 10 ? 5000 : val.demo_fixed * (1 + 0.046 / 12);
+      if (i === 10) flow('demo_fixed', d, 5000, 5000, 'Moved from Easy Access Saver', { transfer: true });
+      logs.push({ id: uid(), accountId: 'demo_fixed', date: d, value: Math.round(val.demo_fixed), note: i === 10 ? 'Opening balance' : '' });
+    }
+    if (i >= 14) {
+      val.demo_oldisa = i === M ? 2950 : val.demo_oldisa * (1 + 0.015 / 12);
+      if (i === 14) flow('demo_oldisa', d, -3000, -3000, 'Transferred to Stocks & Shares ISA', { isaTransfer: true });
+      logs.push({ id: uid(), accountId: 'demo_oldisa', date: d, value: i === 14 ? 0 : Math.round(val.demo_oldisa), note: i === M ? 'Opening balance' : i === 14 ? 'Closed' : '' });
     }
   }
-  const goals = [{ id: uid(), name: 'ISA to £50,000', target: 50000, date: `${today.getFullYear() + 5}-04-05`, scope: 'isa', demo: true }];
-  // Example pay: a monthly salary paid on the 25th, plus one bonus.
-  const sources = [{ id: 'demo_job', name: 'Employer Ltd', kind: 'salary', regular: { net: 2650, day: 25 }, demo: true }, { id: 'demo_bonus', name: 'Annual bonus', kind: 'bonus', regular: null, demo: true }];
+  // The SIPP's monthly payment is set up as a regular payment, already added up to this month.
+  const sippFlows = flows.filter(f => f.accountId === 'demo_sipp');
+  accounts[0].regular = { amount: 200, day: 1, relief: true, since: sippFlows[0].date, last: sippFlows[sippFlows.length - 1].date };
+  const goals = [
+    { id: uid(), name: 'ISA to £50,000', target: 50000, date: `${today.getFullYear() + 5}-04-05`, scope: 'isa', demo: true },
+    { id: uid(), name: 'House deposit', target: 25000, date: `${today.getFullYear() + 3}-09-01`, scope: 'demo_lisa', demo: true },
+    { id: uid(), name: 'Emergency fund', target: 10000, date: '', scope: 'cash', demo: true }
+  ];
+  // Pay: a monthly salary on the 25th (with a pay rise a year ago), a yearly bonus and some freelance work.
+  const sources = [
+    { id: 'demo_job', name: 'Employer Ltd', kind: 'salary', regular: { net: 2780, day: 25 }, demo: true },
+    { id: 'demo_bonus', name: 'Annual bonus', kind: 'bonus', regular: null, demo: true },
+    { id: 'demo_side', name: 'Freelance design', kind: 'side', regular: null, demo: true }
+  ];
   const pay = [];
-  for (let i = 11; i >= 1; i--) {
-    const d = new Date(today.getFullYear(), today.getMonth() - i, 25);
-    pay.push({ id: uid(), date: isoLocal(d), source: 'demo_job', net: i > 6 ? 2580 : 2650, gross: i > 6 ? 3550 : 3650, tax: i > 6 ? 501 : 521, ni: i > 6 ? 196 : 204, pension: 178, studentLoan: 95, other: 0, note: '', oneOff: false });
+  for (let i = M - 1; i >= 1; i--) {
+    const d = isoLocal(new Date(today.getFullYear(), today.getMonth() - i, 25)), raise = i <= 12;
+    pay.push({ id: uid(), date: d, source: 'demo_job', net: raise ? 2780 : 2640, gross: raise ? 3850 : 3650, tax: raise ? 561 : 521, ni: raise ? 220 : 204, pension: 178, studentLoan: raise ? 111 : 95, other: 0, note: i === 12 ? 'Pay rise' : '', oneOff: false });
+    if (i === 6 || i === 18) pay.push({ id: uid(), date: d, source: 'demo_bonus', net: i === 6 ? 1900 : 1700, gross: 0, tax: 0, ni: 0, pension: 0, studentLoan: 0, other: 0, note: '', oneOff: true });
+    if (i % 5 === 2) pay.push({ id: uid(), date: isoLocal(new Date(today.getFullYear(), today.getMonth() - i, 12)), source: 'demo_side', net: 350 + (i % 3) * 150, gross: 0, tax: 0, ni: 0, pension: 0, studentLoan: 0, other: 0, note: 'Logo project', oneOff: false });
   }
-  pay.push({ id: uid(), date: isoLocal(new Date(today.getFullYear(), today.getMonth() - 4, 25)), source: 'demo_bonus', net: 1800, gross: 0, tax: 0, ni: 0, pension: 0, studentLoan: 0, other: 0, note: '', oneOff: true });
-  return { version: 2, example: true, profile: normProfile({ ...profile, sources, setupDone: true }, true), accounts, logs, flows, income: [], goals, pay };
+  // A P60 for last tax year, from the salary payslips in it.
+  const tyEnd = taxYearStart(isoLocal(today)), ty = String(+tyEnd.slice(0, 4) - 1), tyStart = `${ty}-04-06`;
+  const inTy = pay.filter(x => x.source === 'demo_job' && x.date >= tyStart && x.date < tyEnd);
+  const p60 = inTy.length ? { [ty]: { pay: inTy.reduce((t, x) => t + x.gross, 0), tax: inTy.reduce((t, x) => t + x.tax, 0), code: '1257L' } } : {};
+  const prof = { ...profile, dob: profile.dob || '1990-05-14', retireAge: profile.retireAge || 60, monthlySpend: 2100, people: [kid], sources, p60, setupDone: true };
+  return { version: 2, example: true, profile: normProfile(prof, true), accounts, logs, flows, income, goals, pay };
 }
 
 const validLog = l => l && isIso(l.date) && isFinite(+l.value);
@@ -3916,9 +3979,10 @@ function renderSetup() {
           <div class="field"><label for="su-dob">Date of birth <span class="faint">Optional, for retirement planning</span></label><input id="su-dob" class="input" type="date" max="${TODAY}" value="${esc(state.profile.dob)}"></div>
           <div class="row-actions">
             <button class="btn primary" type="submit">Start with my accounts</button>
-            <button class="btn" type="button" data-action="setup-demo">Explore with example data</button>
+            <button class="btn" type="button" data-action="setup-demo">Try the demo</button>
           </div>
         </form>
+        <p class="hint">The demo fills Aurum with example data to play with. Nothing in it is saved, and Exit brings you back here.</p>
         <p class="hint">No sign-in and no servers. Everything stays on this device, so export a backup from Settings now and then.</p>
         <details>
           <summary>Restore a backup instead</summary>
@@ -4745,10 +4809,12 @@ async function setAutoBackup(on) {
 }
 
 /* ---------- demo mode ---------- */
-function startDemo() {
-  if (demo || !state.profile.setupDone) return;
+// Each start builds fresh example data, and exit throws it away, so the demo is the same every time.
+// From the first-run screen (`extra` = the name and date of birth typed there) exit goes back to that screen.
+function startDemo(extra) {
+  if (demo || (!state.profile.setupDone && !extra)) return;
   demo = { state, ui: JSON.stringify(ui) };
-  const d = seedExample({ ...state.profile, people: [] });
+  const d = seedExample({ ...state.profile, ...(extra || {}) });
   d.example = false;
   state = d; ui.person = 'me'; ui.account = null;
   document.body.classList.add('demo'); closeSheets();
@@ -4862,7 +4928,7 @@ function renderForgot() {
   const bio = Native && store.get(BIO_KEY) === '1';
   document.getElementById('lock-forgot').innerHTML = pendingForgot
     ? `<p class="hint" style="margin-bottom:10px">This erases all Aurum data on this device. You can then restore a backup.</p><div class="row-actions" style="justify-content:center"><button class="btn sm ghost" type="button" data-action="forgot-no">Cancel</button><button class="btn sm danger solid" type="button" data-action="forgot-yes">Erase data</button></div>`
-    : `${bio ? '<button class="btn ghost sm" type="button" data-action="bio-unlock">Use fingerprint</button>' : ''}${pinLen() ? '' : `${bio ? '<br>' : ''}<button class="btn ghost sm" type="button" data-action="forgot">Forgot PIN?</button>`}`;
+    : `${bio ? '<button class="btn ghost sm" type="button" data-action="bio-unlock">Use fingerprint</button>' : ''}${pinLen() ? '' : `${bio ? '<br>' : ''}<button class="btn ghost sm" type="button" data-action="forgot">Forgot PIN?</button>`}<br><button class="btn ghost sm lock-demo" type="button" data-action="lock-demo">${demo ? 'Back to the demo' : 'Try the demo'}</button>`;
 }
 document.getElementById('lock-form').addEventListener('submit', e => { e.preventDefault(); pressKey('ok'); });
 document.getElementById('keypad').addEventListener('pointerdown', e => {
@@ -5636,6 +5702,8 @@ document.addEventListener('click', async e => {
   switch (act) {
     case 'demo-start': startDemo(); break;
     case 'demo-exit': endDemo(); break;
+    // From the PIN screen: the demo opens without the PIN (your own data stays locked away); Exit asks for the PIN.
+    case 'lock-demo': onUnlock = null; pinEntry = ''; if (!demo) startDemo(); lockEl.hidden = true; break;
     case 'tab':
       // Tapping the tab you're on scrolls back to the top.
       if (t.dataset.tab === ui.tab && state.profile.setupDone) window.scrollTo({ top: 0, behavior: 'smooth' }); else goTab(t.dataset.tab);
@@ -5727,8 +5795,7 @@ document.addEventListener('click', async e => {
     case 'use-hist': state.profile.growth = clamp(Math.round(+id * 2) / 2, 0, 12); save(); render(); break;
     case 'setup-demo': {
       const name = document.getElementById('su-name').value.trim(), dob = document.getElementById('su-dob').value;
-      state = seedExample({ ...state.profile, name, dob });
-      ui.tab = 'overview'; saveUi(); save(); render(); break;
+      ui.tab = 'overview'; startDemo({ name, dob }); break;
     }
     case 'pin-off': [LOCK_KEY, BIO_KEY, LOCKN_KEY, FAIL_KEY].forEach(k => store.del(k)); render(); setStatus('PIN lock turned off.', false, 'pin-status'); break;
     case 'forgot': pendingForgot = true; renderForgot(); break;
