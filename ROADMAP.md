@@ -110,9 +110,9 @@ Always in today's money and marked "illustration, not advice".
 - Transaction History Search & Tag Filtering: full-text search on notes, filter by tag/type/date range
 - Undo/Redo history: deeper undo stack with breadcrumb trail of recent actions
 
-**Helper Bubbles (Optional Quick Tips)**
-- Toggleable setting in Settings: "Quick Tips" on/off
-- When enabled, click any form field to reveal a contextual helper speech bubble above/below it
+**Guidance Mode (Quick Tips)**
+- Toggleable setting in Settings > Guidance: "Quick Tips" on/off
+- When enabled, click any form field to reveal a contextual Guidance Mode speech bubble above/below it
 - One-liner tips help users understand what to enter (e.g., "Name it anything — e.g. 'Current Account', 'House Fund'")
 - Bubbles appear/disappear on click; click another field or outside to close
 - ? icons throughout app always link to real FAQ/help (separate from quick tips)
