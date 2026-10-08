@@ -210,6 +210,11 @@ not advice — keep that disclaimer.
   `month-review`; `reviewCard` and it share `reviewBody`), milestones as `.ms-chip`. Tax year = allowances, `yearsPanel` (fold `ins-years`),
   `reviewPanel`. Tax return = `taxPanel`. Bell `note-go` acts take `page`; `data-tab="insights" data-page=…` links open a page.
 
+- 2.0.7: `reviewPanel()` keeps its year buttons when the year has no balances (empty state; it used to return '' and the buttons
+  vanished). `monthReview(key)` takes 'YYYY-MM' (default last month = `reviewMonths(0)[0]`); `reviewMonths()` lists last month back to
+  the first balance's month; `reviewPicker(r)` (‹ › `review-month` + `#review-month` select) sits in the Insights fold only; the pick
+  is `reviewPick` (not saved). Older months: `streakOf(a, ym)` counts back from that month, goals left out.
+
 ## Status (latest)
 
 - 1.9.9 merged to main (PR #23); owner publishes the v1.9.9 release. Owner says when to merge.

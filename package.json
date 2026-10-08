@@ -1,6 +1,6 @@
 {
   "name": "aurum",
-  "version": "2.0.6",
+  "version": "2.0.7",
   "private": true,
   "description": "Aurum: a personal wealth ledger for UK pensions and ISAs. Website and Android app.",
   "type": "module",
