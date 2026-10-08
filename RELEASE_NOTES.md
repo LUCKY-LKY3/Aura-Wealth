@@ -1,5 +1,7 @@
-- Planner: SIPP vs ISA now keeps your inputs and the result in one box, with "Your inputs" and "Result" headings
-- The result starts with a line repeating what you entered, such as "£500 a month for 20 years at 5% growth"
-- New result bars show the ISA, the SIPP after tax and the SIPP pot side by side, with what you paid in marked on each
-- The year-by-year chart labels each line at its end and shades the gap between SIPP and ISA
-- Figures flash gold as you change a value, and the chart moves smoothly instead of redrawing from zero
+- Overview: the "Saved this month so far" strip now shows this month's savings rate next to last month's and the tax year's
+- Before your pay for the month is logged, the rate is worked out against your usual monthly pay, marked "vs usual pay"
+- Planner is now split into Retirement, Goals and SIPP vs ISA, picked at the top, so the page is much shorter
+- Retirement shows one figure for your pot, with a Today's money / Future pounds switch, and one chart of your wealth so far and where it's heading
+- The plan's settings sit under "Adjust your plan" below the result, and accounts left out of the plan are tucked away under "more accounts"
+- Goals: add a goal from a button that opens a form, and tap the accounts line under a goal to change which accounts count
+- Fixed: a goal's target had to end in 1 (such as £8,001) before it could be saved

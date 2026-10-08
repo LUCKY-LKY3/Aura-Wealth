@@ -117,10 +117,10 @@ tr.clickable:active,.set-row:active,.note:active,.pressing{opacity:.7}
 @media (min-width:760px){.review-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
 .review-grid .k{font-size:12px;color:var(--ink-3)}.review-grid .v{font-size:20px;font-weight:600;letter-spacing:-.02em}
 .v.gold{color:var(--gold)}
-.pay-strip{display:grid;grid-template-columns:1fr auto auto;gap:4px 22px;align-items:end;padding:14px 18px;cursor:pointer}
+.pay-strip{display:grid;grid-template-columns:1fr;grid-auto-flow:column;grid-auto-columns:auto;gap:4px 22px;align-items:end;padding:14px 18px;cursor:pointer}
 .pay-strip .k{font-size:12px;color:var(--ink-3)}.pay-strip .v{font-size:18px;font-weight:600;letter-spacing:-.02em}.pay-strip .v .faint{font-size:13px;font-weight:500}
 .pay-strip .r{text-align:right}
-@media (max-width:759px){.pay-strip{grid-template-columns:1fr auto}}
+@media (max-width:759px){.pay-strip{column-gap:16px}}
 .review-list{list-style:none;margin:0;padding:0;font-size:13px;color:var(--ink-2)}
 .review-list li{padding:7px 0;border-top:1px solid var(--line)}
 .review-list b{color:var(--ink);font-weight:600}
@@ -289,7 +289,16 @@ h2{font-size:15px;font-weight:600;letter-spacing:-.01em;margin:0}
 .scope-pick .sw{margin-right:0;flex:none}
 .check.scope-pick input{margin:0}
 .scope-tip{margin:8px 0 0}
-.goal-scope{margin:8px 0 0}
+.goal-scope summary{list-style:none;cursor:pointer}.goal-scope summary::-webkit-details-marker{display:none}
+.goal-acc{display:inline-flex;align-items:center;gap:2px;flex-wrap:wrap}.goal-chev{display:inline-flex;width:14px;height:14px;color:var(--gold);transition:transform .2s}.goal-chev svg{width:14px;height:14px}
+.goal-scope[open] .goal-chev{transform:rotate(180deg)}
+.page-seg{display:flex;width:100%;padding:4px}.page-seg button{flex:1;padding:8px 10px;font-size:13px}
+.plan-form{display:grid;gap:16px;grid-template-columns:minmax(0,1fr)}
+@media (min-width:760px){.plan-form{grid-template-columns:repeat(2,minmax(0,1fr));gap:16px 28px}}
+.chart-bar{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px}
+.chip-btn{border:1px solid color-mix(in srgb,var(--gold) 45%,transparent);background:color-mix(in srgb,var(--gold) 10%,transparent);color:var(--gold);border-radius:99px;padding:2px 10px;font:inherit;font-size:12px;font-weight:550;cursor:pointer;margin-left:4px}
+.plan-more{margin:10px 0 0}.plan-more .plan-accts{margin-top:8px}
+.plan-notes{margin:0}.plan-notes li:first-child{border-top:0;padding-top:0}
 .goal-list .scope-list li{flex-direction:row;gap:12px;text-align:left}
 .goal-picks{grid-column:1/-1}
 .link-btn{border:0;background:none;padding:0;font:inherit;color:inherit;text-decoration:underline;text-decoration-color:color-mix(in srgb,var(--gold) 50%,transparent);text-underline-offset:3px;cursor:pointer}
@@ -1152,6 +1161,23 @@ details.fold:not([open])>summary h2::after{content:' ▸'}
   </form>
 </dialog>
 
+<dialog class="sheet" id="goal-sheet" aria-labelledby="goal-title">
+  <div class="grab" aria-hidden="true"></div>
+  <form id="goal-form" method="dialog">
+    <div class="sheet-head">
+      <h2 id="goal-title">Add goal</h2>
+      <button type="button" class="icon-btn" data-action="close-sheet" aria-label="Close">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+    <div id="goal-fields" class="stack"></div>
+    <div class="sheet-actions">
+      <button type="button" class="btn" data-action="close-sheet">Cancel</button>
+      <button type="submit" class="btn primary">Add goal</button>
+    </div>
+  </form>
+</dialog>
+
 <dialog class="sheet" id="menu-sheet" aria-labelledby="menu-title">
   <div class="grab" aria-hidden="true"></div>
   <div style="padding:22px 18px calc(18px + var(--sa-bottom))">
@@ -1495,7 +1521,7 @@ function loadState() {
 
 let state = loadState();
 const DEFAULT_UI = {
-  tab: 'overview', folds: {}, range: '1Y', custom: { n: 6, unit: 'm' }, hist: { scope: 'this', kind: 'all', year: 'all', q: '' }, fit: true, barMonths: 12, paidLine: true, lastYear: false, pence: false, compactNums: false, showClosed: false, account: null, person: 'me', hidden: false, stackBy: 'total', insight: '1M', nwRange: '1M', pathSpan: 'all',
+  tab: 'overview', folds: {}, range: '1Y', custom: { n: 6, unit: 'm' }, hist: { scope: 'this', kind: 'all', year: 'all', q: '' }, fit: true, barMonths: 12, paidLine: true, lastYear: false, pence: false, compactNums: false, showClosed: false, account: null, person: 'me', hidden: false, stackBy: 'total', insight: '1M', nwRange: '1M', pathSpan: 'all', planPage: 'plan',
   calc: { monthly: 500, years: 20, rate: 6, draw: 20 },
   plan: { include: {}, monthly: {}, target: 0, years: 25, real: false },
   notes: { read: {}, gone: {}, on: {}, move: { pct: 5, dir: 'both', basis: 'prev' } }, noteFilter: 'all', chartOut: {}
@@ -2303,7 +2329,7 @@ function goalAccounts(g) {
   return state.accounts.filter(a => a.id === g.scope);
 }
 const goalScopeName = g => { if (!Array.isArray(g.accounts)) return scopeName(g.scope); const n = goalAccounts(g); return n.length === 1 ? n[0].name : `${n.length} accounts`; };
-const scopeName = s => s === 'all' ? 'All my accounts' : GROUPS[s] ? 'My ' + GROUPS[s].toLowerCase() : ((state.accounts.find(a => a.id === s) || {}).name || 'Removed account');
+const scopeName = s => s === 'all' ? 'All my accounts' : GROUPS[s] ? 'My ' + (s === 'isa' ? GROUPS[s] : GROUPS[s].toLowerCase()) : ((state.accounts.find(a => a.id === s) || {}).name || 'Removed account');
 // Future value of a pot growing at `annual`% with `monthly` added each month.
 function grow(pv, monthly, annual, months) {
   const r = Math.pow(1 + annual / 100, 1 / 12) - 1;
@@ -2354,8 +2380,7 @@ function goalList(goals, withDelete) {
     return `<li>
       <div class="goal-top"><b>${esc(g.name)}</b><span class="mono">${gbp(st.cur)} <span class="faint">of ${gbp(g.target)}</span>${withDelete ? ` <button class="icon-btn" data-action="goal-del" data-id="${esc(g.id)}" aria-label="Delete goal ${esc(g.name)}">${icons.trash}</button>` : ''}</span></div>
       <div class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(st.progress * 100)}"><i style="width:${(st.progress * 100).toFixed(1)}%"></i></div>
-      <div class="goal-meta"><span>${esc(goalScopeName(g))}${g.date ? ' · by ' + dateLabel(toMs(g.date)) : ''}</span><span class="${st.done || st.onTrack ? 'pos' : st.late ? 'neg' : ''}">${st.text}</span></div>
-      ${goalPicker(g)}
+      ${goalPicker(g, st)}
     </li>`;
   }).join('')}</ul>`;
 }
@@ -2363,11 +2388,13 @@ function goalList(goals, withDelete) {
 // 2.0.3: "Includes N accounts" on each goal in Planner, with tick boxes to change which accounts count.
 const goalPickList = () => state.accounts.filter(a => !a.archived);
 const acctLabel = a => esc(a.name) + (a.owner && a.owner !== 'me' ? ` <span class="faint">${esc(personName(a.owner))}</span>` : '');
-function goalPicker(g) {
-  const inc = goalAccounts(g), ids = new Set(inc.map(a => a.id));
+// 2.0.5: the goal's meta line is the toggle: which accounts count (tap to change), the date and its status.
+function goalPicker(g, st) {
+  const inc = goalAccounts(g), ids = new Set(inc.map(a => a.id)), n = inc.length;
   const list = [...goalPickList(), ...inc.filter(a => a.archived)];
-  return `<details class="scope goal-scope" data-fold="goal-${esc(g.id)}" ${ui.folds && ui.folds['goal-' + g.id] ? 'open' : ''}>
-    <summary>Includes <b>${inc.length} account${inc.length === 1 ? '' : 's'}</b><span class="scope-tg" aria-hidden="true"></span></summary>
+  const lbl = n === 1 ? inc[0].name : !n ? 'No accounts' : Array.isArray(g.accounts) ? `${n} accounts` : `${scopeName(g.scope)} · ${n} accounts`;
+  return `<details class="goal-scope" data-fold="goal-${esc(g.id)}" ${ui.folds && ui.folds['goal-' + g.id] ? 'open' : ''}>
+    <summary class="goal-meta" aria-label="Accounts this goal counts"><span class="goal-acc">${esc(lbl)}<span class="goal-chev" aria-hidden="true">${CHEVRON}</span>${g.date ? ' · by ' + dateLabel(toMs(g.date)) : ''}</span><span class="${st.done || st.onTrack ? 'pos' : st.late ? 'neg' : ''}">${st.text}</span></summary>
     <ul class="scope-list">${list.map(a => `<li><label class="check scope-pick"><input type="checkbox" data-goal-acct="${esc(g.id)}" value="${esc(a.id)}" ${ids.has(a.id) ? 'checked' : ''} ${ids.has(a.id) && ids.size === 1 ? 'disabled' : ''}><i class="sw" style="background:${colorOf(a)}"></i><span class="ws-name">${acctLabel(a)}</span></label><span class="mono">${gbp(accountStats(a.id).cur)}</span></li>`).join('')}</ul>
   </details>`;
 }
@@ -2582,7 +2609,7 @@ function renderOverview() {
 
   const goals = state.goals.length && ui.person === 'me' ? `
     <section class="panel">
-      <div class="panel-head"><h2>Goals</h2><button class="btn ghost sm" data-action="tab" data-tab="planner">Manage</button></div>
+      <div class="panel-head"><h2>Goals</h2><button class="btn ghost sm" data-action="tab" data-tab="planner" data-page="goals">Manage</button></div>
       ${goalList(state.goals.slice(0, 3), false)}
     </section>` : '';
 
@@ -3073,22 +3100,33 @@ function historicRate(accts) {
   const r = (Math.pow(1 + t.growth / t.base, 1 / yrs) - 1) * 100;
   return isFinite(r) ? Math.round(clamp(r, -20, 30) * 10) / 10 : null;
 }
+// 2.0.5: Planner has three sections (ui.planPage): the retirement plan, goals and the SIPP vs ISA calculator.
+// The plan shows its result first (one panel: pot, milestones, history + projection) with the settings folded below.
+const PLAN_PAGES = { plan: 'Retirement', goals: 'Goals', calc: 'SIPP vs ISA' };
+const planSummary = () => { const p = state.profile; return `${p.dob ? 'Retire at ' + p.retireAge : ui.plan.years + ' years to go'} · ${p.growth}% growth · ${p.inflation}% inflation`; };
 function renderPlanner() {
   const p = state.profile, accts = mine();
-  const hist = historicRate(accts.filter(planIncluded));
-  const age = p.dob ? ageOn(p.dob, TODAY) : null;
-  view.innerHTML = `
-    <div class="stack view">
-      ${exampleNotice()}
-      <section class="panel stack" id="path-panel"></section>
-      <div class="calc-grid">
-        <section class="panel stack">
-          <div class="panel-head" style="margin-bottom:0"><h2>Retirement plan</h2>${age != null ? `<span class="aside">You are ${age}</span>` : ''}</div>
-          ${p.dob ? '' : `<p class="warn">Add your date of birth in <button class="btn sm ghost" data-action="tab" data-tab="settings">Settings</button> to plan to a retirement age. Until then, set the number of years below.</p>`}
-          <div class="form-grid">
+  const pg = PLAN_PAGES[ui.planPage] ? ui.planPage : 'plan';
+  const tabs = `<div class="seg page-seg" role="group" aria-label="Planner section">${Object.entries(PLAN_PAGES).map(([k, l]) => `<button data-action="plan-page" data-id="${k}" aria-pressed="${pg === k}">${l}${k === 'goals' && state.goals.length ? ` <span class="faint">${state.goals.length}</span>` : ''}</button>`).join('')}</div>`;
+  let body = '';
+  if (pg === 'plan') {
+    const hist = historicRate(accts.filter(planIncluded));
+    const age = p.dob ? ageOn(p.dob, TODAY) : null;
+    const listed = accts.filter(a => !a.archived || planIncluded(a)), on = listed.filter(planIncluded), off = listed.filter(a => !planIncluded(a));
+    const row = a => `<li>
+              <input type="checkbox" data-plan-inc="${esc(a.id)}" ${planIncluded(a) ? 'checked' : ''} aria-label="Include ${esc(a.name)}" style="accent-color:var(--primary);width:16px;height:16px">
+              <div><div style="font-weight:550">${esc(a.name)}</div><div class="hint">${gbp(accountStats(a.id).cur)}${a.fee ? ` · ${a.fee}% fees` : ''}</div></div>
+              <div class="money"><span>£</span><input class="input" type="number" inputmode="decimal" min="0" step="10" data-plan-mon="${esc(a.id)}" value="${planMonthly(a)}" aria-label="Monthly into ${esc(a.name)}"></div>
+            </li>`;
+    body = `${p.dob ? '' : `<p class="warn">Add your date of birth in <button class="btn sm ghost" data-action="tab" data-tab="settings">Settings</button> to plan to a retirement age. Until then, set the number of years under Adjust your plan.</p>`}
+      <section class="panel stack" id="plan-results" aria-live="polite"></section>
+      <section class="panel" id="plan-set">${foldOpen('plan-set', 'Adjust your plan', `<span id="plan-sum">${esc(planSummary())}</span>`)}
+        <div class="stack" style="margin-top:16px">
+          <div class="plan-form">
             ${p.dob ? `<div class="field">
               <label for="plan-age">Retire at age <output id="out-age">${p.retireAge}</output></label>
               <input id="plan-age" type="range" min="${Math.max(40, (age || 40) + 1)}" max="80" step="1" value="${p.retireAge}">
+              ${age != null ? `<p class="hint">You are ${age}.</p>` : ''}
             </div>` : `<div class="field">
               <label for="plan-years">Years until retirement <output id="out-pyears">${ui.plan.years}</output></label>
               <input id="plan-years" type="range" min="1" max="50" step="1" value="${ui.plan.years}">
@@ -3096,7 +3134,7 @@ function renderPlanner() {
             <div class="field">
               <label for="plan-rate">Growth a year, before fees <output id="out-prate">${p.growth}%</output></label>
               <input id="plan-rate" type="range" min="0" max="12" step="0.5" value="${p.growth}">
-              ${hist != null ? `<p class="hint">Your accounts have grown about ${pct(hist)} a year so far. <button class="btn sm ghost" data-action="use-hist" data-id="${hist}">Use ${hist}%</button></p>` : ''}
+              ${hist != null ? `<p class="hint hist-hint">Your accounts have grown about ${pct(hist)} a year so far.${Math.round(hist * 2) / 2 !== p.growth ? ` <button class="chip-btn" data-action="use-hist" data-id="${hist}">Use ${clamp(Math.round(hist * 2) / 2, 0, 12)}%</button>` : ''}</p>` : ''}
             </div>
             <div class="field">
               <label for="plan-infl">Inflation <output id="out-infl">${p.inflation}%</output></label>
@@ -3110,91 +3148,57 @@ function renderPlanner() {
               <label for="plan-target">Target pot <span class="faint">Optional</span></label>
               <div class="money"><span>£</span><input id="plan-target" class="input" type="number" inputmode="decimal" min="0" step="1000" value="${ui.plan.target || ''}" placeholder="e.g. 750000"></div>
             </div>
-            <label class="check tgl mini"><input type="checkbox" role="switch" id="plan-real" ${ui.plan.real ? 'checked' : ''}><span>Show figures in today's money</span></label>
           </div>
           <div>
             <div class="eyebrow" style="margin-bottom:8px">Accounts and monthly payments</div>
-            ${accts.length ? `<ul class="plan-accts" id="plan-accts">${accts.filter(a => !a.archived || planIncluded(a)).map(a => `<li>
-              <input type="checkbox" data-plan-inc="${esc(a.id)}" ${planIncluded(a) ? 'checked' : ''} aria-label="Include ${esc(a.name)}" style="accent-color:var(--primary);width:16px;height:16px">
-              <div><div style="font-weight:550">${esc(a.name)}</div><div class="hint">${gbp(accountStats(a.id).cur)}${a.fee ? ` · ${a.fee}% fees` : ''}</div></div>
-              <div class="money"><span>£</span><input class="input" type="number" inputmode="decimal" min="0" step="10" data-plan-mon="${esc(a.id)}" value="${planMonthly(a)}" aria-label="Monthly into ${esc(a.name)}"></div>
-            </li>`).join('')}</ul><p class="hint" style="margin-top:8px">Monthly amounts start from your regular payments or last year's deposits. Include pension tax relief.</p>` : '<p class="hint">Add accounts to build a plan.</p>'}
+            ${listed.length ? `${on.length ? `<ul class="plan-accts" id="plan-accts">${on.map(row).join('')}</ul>` : '<p class="hint" id="plan-accts">No accounts ticked yet.</p>'}
+            ${off.length ? `<details class="scope plan-more" data-fold="plan-more" ${ui.folds['plan-more'] || !on.length ? 'open' : ''}><summary><b>${off.length} more account${off.length === 1 ? '' : 's'}</b> not in the plan<span class="scope-tg" aria-hidden="true"></span></summary><ul class="plan-accts">${off.map(row).join('')}</ul></details>` : ''}
+            <p class="hint" style="margin-top:8px">Monthly amounts start from your regular payments or last year's deposits. Include pension tax relief.</p>` : '<p class="hint">Add accounts to build a plan.</p>'}
           </div>
-        </section>
-        <section class="panel stack" id="plan-results" aria-live="polite"></section>
-      </div>
-      <section class="panel stack">
-        <div class="panel-head" style="margin-bottom:0"><h2>Goals</h2><span class="aside">Assumes ${p.growth}% growth a year</span></div>
-        ${goalList(state.goals, true) || '<p class="hint">Set a target, such as an emergency fund, a house deposit or an ISA milestone, and see if you are on track.</p>'}
-        <form id="goal-form" class="inline-form">
-          <input id="goal-name" class="input" placeholder="Goal, e.g. House deposit" maxlength="40" required aria-label="Goal name">
-          <div class="money"><span>£</span><input id="goal-target" class="input" type="number" inputmode="decimal" min="1" step="100" placeholder="Target" required aria-label="Target amount"></div>
-          <input id="goal-date" class="input" type="date" min="${TODAY}" aria-label="Target date (optional)">
-          <select id="goal-scope" class="input" aria-label="Which accounts count">
-            <option value="all">All my accounts</option>
-            ${Object.entries(GROUPS).map(([k, v]) => `<option value="${k}">My ${v.toLowerCase()}</option>`).join('')}
-            ${active(state.accounts).map(a => `<option value="${esc(a.id)}" ${ui.goalScope === a.id ? 'selected' : ''}>${esc(a.name)}${a.owner !== 'me' ? ' (' + esc(personName(a.owner)) + ')' : ''}</option>`).join('')}
-            <option value="pick">Choose accounts…</option>
-          </select>
-          <div id="goal-picks" class="goal-picks" hidden><p class="hint" style="margin:0 0 4px">Tick the accounts this goal counts.</p><ul class="scope-list">${goalPickList().map(a => `<li><label class="check scope-pick"><input type="checkbox" name="goal-acct" value="${esc(a.id)}"><i class="sw" style="background:${colorOf(a)}"></i><span class="ws-name">${acctLabel(a)}</span></label><span class="mono">${gbp(accountStats(a.id).cur)}</span></li>`).join('')}</ul></div>
-          <button class="btn" type="submit">${icons.plus}Add goal</button>
-        </form>
-      </section>
-      <div id="calc-host"></div>
-    </div>`;
-  updatePlan();
-  renderCalculator(document.getElementById('calc-host'));
+        </div>
+      ${foldClose}</section>`;
+  } else if (pg === 'goals') {
+    body = `<section class="panel stack">
+        <div class="panel-head" style="margin-bottom:0"><div><h2>Goals</h2><span class="aside">Assumes ${p.growth}% growth a year</span></div>${state.goals.length ? `<button class="btn sm" data-action="goal-add">${icons.plus}Add goal</button>` : ''}</div>
+        ${goalList(state.goals, true) || `<div class="chart-empty"><div class="empty-cta"><span>Set a target, such as an emergency fund, a house deposit or an ISA milestone, and see if you are on track.</span><button class="btn primary" data-action="goal-add">${icons.plus}Add goal</button></div></div>`}
+      </section>`;
+  } else body = '<div id="calc-host"></div>';
+  view.innerHTML = `<div class="stack view">${exampleNotice()}${tabs}${body}</div>`;
+  if (pg === 'plan') updatePlan();
+  else if (pg === 'calc') renderCalculator(document.getElementById('calc-host'));
 }
-// 2.0.1: actual vs projected. Your included accounts' history so far, then the planner's projection from today
-// (same growth, fees, monthly payments and retirement age), with the ±2% range shaded.
-function wealthPath() {
-  const host = document.getElementById('path-panel');
-  if (!host) return;
-  const p = state.profile, accts = mine().filter(planIncluded), toRetire = planMonths();
-  const tl = timeline(accts);
-  if (!accts.length || !tl.length || toRetire < 12) { host.hidden = true; return; }
-  const near = ui.pathSpan === '10' && toRetire > 120, months = near ? 120 : toRetire;
-  host.hidden = false;
-  const YR = 365.25 * 864e5, inf = p.inflation / 100;
-  const show = (v, y) => v / Math.pow(1 + inf, y); // always in today's money
-  const mid = project(accts, months, 0), low = project(accts, months, -2), high = project(accts, months, 2);
-  const step = Math.ceil(tl.length / 80);
-  const hist = tl.filter((x, i) => i % step === 0 || i === tl.length - 1).map(x => ({ t: x.t, v: x.total }));
-  if (hist[hist.length - 1].t < TODAY_MS) hist.push({ t: TODAY_MS, v: mid.tot[0] });
-  else hist[hist.length - 1].v = mid.tot[0];
-  const fut = mid.xs.slice(1), h = hist.length, nul = k => new Array(k).fill(null);
-  const xs = [...hist.map(x => x.t), ...fut.map(y => TODAY_MS + y * YR)];
-  const futOf = r => [r.tot[0], ...r.tot.slice(1).map((v, i) => show(v, r.xs[i + 1]))];
-  const age = y => p.dob ? ageOn(p.dob, msIso(TODAY_MS + y * YR)) : null;
-  const rd = retireDate();
-  const end = project(accts, toRetire, 0);
-  const stops = [['Today', mid.tot[0]], ...[5, 10, 20].filter(y => y * 12 < toRetire && y * 12 <= months).map(y => [`In ${y} years${p.dob ? ` · age ${age(y)}` : ''}`, show(mid.tot[mid.xs.indexOf(y)], y)]), [rd ? `At ${p.retireAge}` : `In ${ui.plan.years} years`, show(end.final, toRetire / 12)]];
+// Add goal sheet (opened from Goals, or "Set a goal" on an account with that account picked).
+function openGoal() {
+  const host = document.getElementById('goal-fields');
   host.innerHTML = `
-    <div class="panel-head" style="margin-bottom:0"><div><h2>Your wealth so far and where it's heading</h2><span class="aside"><button type="button" class="link-btn" data-action="plan-accts">Includes ${accts.length} of ${mine().filter(a => !a.archived || planIncluded(a)).length} accounts</button> · projection in today's money</span></div>${toRetire > 120 ? `<div class="seg" role="group" aria-label="How far ahead">${[['10', 'Next 10 years'], ['all', rd ? `To ${p.retireAge}` : 'To retirement']].map(([k, l]) => `<button data-action="path-span" data-id="${k}" aria-pressed="${(near ? '10' : 'all') === k}">${l}</button>`).join('')}</div>` : ''}</div>
-    <div class="path-stops">${stops.map(([k, v]) => `<div><span class="k">${esc(k)}</span><span class="v">${gbp(v)}</span></div>`).join('')}</div>
-    <div class="chart" id="path-chart"></div>
-    <div class="legend-inline"><span><i class="sw" style="background:var(--gold)"></i>So far</span><span><i class="sw" style="background:var(--c1);opacity:.6"></i>Projected at ${p.growth}%</span><span><i class="sw" style="background:var(--c1);opacity:.25"></i>Range ±2%</span></div>
-    <p class="hint" style="margin:0">Illustration, not advice. The projection uses the plan settings below and assumes your monthly payments carry on.</p>`;
-  chart(document.getElementById('path-chart'), {
-    xs, label: 'Your wealth so far and projected', tipAlways: true,
-    tick: ms => String(new Date(ms).getUTCFullYear()),
-    label2: ms => ms <= TODAY_MS ? dateLabel(ms) : `${new Date(ms).getUTCFullYear()}${p.dob ? ` · age ${ageOn(p.dob, msIso(ms))}` : ''}`,
-    divider: { t: TODAY_MS, label: 'Today' },
-    band: { label: 'Range ±2%', color: 'var(--c1)', lo: [...nul(h - 1), ...futOf(low)], hi: [...nul(h - 1), ...futOf(high)] },
-    series: [
-      { label: 'So far', color: 'var(--gold)', values: [...hist.map(x => x.v), ...nul(fut.length)] },
-      { label: 'Projected', color: 'var(--c1)', values: [...nul(h - 1), ...futOf(mid)], fill: false, dash: true }
-    ]
-  });
+    <div class="field"><label for="goal-name">Goal</label><input id="goal-name" class="input" placeholder="e.g. House deposit" maxlength="40" required></div>
+    <div class="two">
+      <div class="field"><label for="goal-target">Target</label><div class="money"><span>£</span><input id="goal-target" class="input" type="number" inputmode="decimal" min="1" step="any" required></div></div>
+      <div class="field"><label for="goal-date">By <span class="faint">Optional</span></label><input id="goal-date" class="input" type="date" min="${TODAY}"></div>
+    </div>
+    <div class="field"><label for="goal-scope">Which accounts count</label>
+      <select id="goal-scope" class="input">
+        <option value="all">All my accounts</option>
+        ${Object.keys(GROUPS).map(k => `<option value="${k}">${esc(scopeName(k))}</option>`).join('')}
+        ${active(state.accounts).map(a => `<option value="${esc(a.id)}" ${ui.goalScope === a.id ? 'selected' : ''}>${esc(a.name)}${a.owner !== 'me' ? ' (' + esc(personName(a.owner)) + ')' : ''}</option>`).join('')}
+        <option value="pick">Choose accounts…</option>
+      </select>
+    </div>
+    <div id="goal-picks" class="goal-picks" hidden><p class="hint" style="margin:0 0 4px">Tick the accounts this goal counts.</p><ul class="scope-list">${goalPickList().map(a => `<li><label class="check scope-pick"><input type="checkbox" name="goal-acct" value="${esc(a.id)}"><i class="sw" style="background:${colorOf(a)}"></i><span class="ws-name">${acctLabel(a)}</span></label><span class="mono">${gbp(accountStats(a.id).cur)}</span></li>`).join('')}</ul></div>`;
+  openSheet(document.getElementById('goal-sheet'));
+  setTimeout(() => { const f = document.getElementById('goal-name'); if (f) f.focus(); }, 60);
 }
 function updatePlan() {
-  wealthPath();
   const host = document.getElementById('plan-results');
   if (!host) return;
-  const p = state.profile, accts = mine().filter(planIncluded);
+  const sum = document.getElementById('plan-sum');
+  if (sum) sum.textContent = planSummary();
+  const p = state.profile, all = mine(), accts = all.filter(planIncluded);
   const months = planMonths(), rd = retireDate();
-  if (!accts.length) { host.innerHTML = '<div class="chart-empty">Tick at least one account to see a projection.</div>'; return; }
-  const inf = p.inflation / 100;
+  const nAll = all.filter(a => !a.archived || planIncluded(a)).length;
+  if (!accts.length) { host.innerHTML = `<div class="chart-empty"><div class="empty-cta"><span>Tick at least one account to see a projection.</span><button class="btn sm" data-action="plan-accts">Choose accounts</button></div></div>`; return; }
+  if (months < 1) { host.innerHTML = `<div class="chart-empty"><div class="empty-cta"><span>You are at or past the retirement age you picked.</span><button class="btn sm" data-action="plan-accts">Change it</button></div></div>`; return; }
+  const inf = p.inflation / 100, YR = 365.25 * 864e5;
   const real = (v, yrs) => v / Math.pow(1 + inf, yrs);
   const yrs = months / 12;
   const mid = project(accts, months, 0), low = project(accts, months, -2), high = project(accts, months, 2);
@@ -3207,32 +3211,55 @@ function updatePlan() {
   const needMonthly = target && mid.final < target ? neededMonthly(0, target - mid.final, p.growth, months) : 0;
   const pensionIncluded = accts.some(a => groupOf(a) === 'pension');
   const earliest = accessAge(p.dob);
-  const when = rd ? `at ${p.retireAge} (${monthYear(toMs(rd))})` : `in ${ui.plan.years} years`;
+  const lo = Math.max(0, p.growth - 2), hi = p.growth + 2;
+  const age = y => p.dob ? ageOn(p.dob, msIso(TODAY_MS + y * YR)) : null;
+  const stops = [['Today', mid.tot[0]], ...[5, 10, 20].filter(y => y * 12 < months).map(y => [`In ${y} years${p.dob ? ` · age ${age(y)}` : ''}`, show(mid.tot[mid.xs.indexOf(y)], y)])];
+  const near = ui.pathSpan === '10' && months > 120;
+  const pills = (label, act, opts) => `<div class="seg" role="group" aria-label="${label}">${opts.map(([k, l, on]) => `<button data-action="${act}" data-id="${k}" aria-pressed="${on}">${l}</button>`).join('')}</div>`;
   host.innerHTML = `
-    <div class="panel-head" style="margin-bottom:0"><h2>Projected pot ${esc(when)}</h2><span class="aside">${ui.plan.real ? "In today's money" : 'In future pounds'}</span></div>
-    <div class="big-figure num">${gbp(show(mid.final, yrs))}</div>
-    <p class="explain">${ui.plan.real ? `That is <b>${gbp(mid.final)}</b> in future pounds.` : `That is about <b>${gbp(real(mid.final, yrs))}</b> in today's money after ${p.inflation}% inflation.`} Range ${gbp(show(low.final, yrs))} to ${gbp(show(high.final, yrs))} at ${Math.max(0, p.growth - 2)}% to ${p.growth + 2}% growth.</p>
-    <div class="compare">
-      <div class="stat"><div class="k">Pensions</div><div class="v num">${gbp(show(mid.pension, yrs))}</div></div>
-      <div class="stat"><div class="k">ISAs and other</div><div class="v num">${gbp(show(mid.final - mid.pension, yrs))}</div></div>
-      <div class="stat"><div class="k">Tax-free cash</div><div class="v num">${gbp(show(taxFree, yrs))}</div></div>
-      <div class="stat"><div class="k">Income at ${p.drawRate}%</div><div class="v num">${gbp(show(income, yrs))}<span class="faint" style="font-size:12px">/yr</span></div></div>
+    <div class="panel-head" style="margin-bottom:0"><div><h2>${rd ? `Your pot at ${p.retireAge}` : `Your pot in ${ui.plan.years} years`}</h2><span class="aside">${rd ? esc(monthYear(toMs(rd))) + ' · ' : ''}<button type="button" class="link-btn" data-action="plan-accts">Includes ${accts.length} of ${nAll} accounts</button></span></div>
+      ${pills('Show figures in', 'plan-real', [['1', "Today's money", !!ui.plan.real], ['0', 'Future pounds', !ui.plan.real]])}</div>
+    <div>
+      <div class="big-figure num">${gbp(show(mid.final, yrs))}</div>
+      <p class="explain" style="margin:6px 0 0">${ui.plan.real ? `In today's money after ${p.inflation}% inflation a year. That is <b>${gbp(mid.final)}</b> in future pounds.` : `In future pounds. That is about <b>${gbp(real(mid.final, yrs))}</b> in today's money after ${p.inflation}% inflation.`} Likely range ${gbp(show(low.final, yrs))} to ${gbp(show(high.final, yrs))}.</p>
     </div>
-    ${rd && pensionIncluded && p.retireAge < earliest ? `<p class="warn">Pensions can normally be accessed from age ${earliest}. Retiring at ${p.retireAge} means relying on ISAs and savings until then.</p>` : ''}
-    ${target ? (mid.final >= target ? `<p class="explain">You are on course to reach your <b>${gbp(target)}</b> target.</p>` : `<p class="explain">To reach <b>${gbp(target)}</b>, pay in about <b>${gbp(needMonthly)}</b> a month more across these accounts.</p>`) : ''}
-    <div class="chart" id="plan-chart"></div>
-    <div class="legend-inline"><span><i class="sw" style="background:var(--c1)"></i>Expected ${p.growth}%</span><span><i class="sw" style="background:var(--c1);opacity:.35"></i>Likely range ±2%</span><span><i class="sw" style="background:var(--ink-3)"></i>Paid in</span></div>
-    <p class="explain">Working two years longer would add about <b>${gbp(show(later.final, yrs + 2) - show(mid.final, yrs))}</b>.${feeCost > 1 ? ` Fees cost about <b>${gbp(show(feeCost, yrs))}</b> by then.` : ''}</p>
-    <p class="hint">Illustration only, not financial advice. Assumes steady growth after each account's fees, monthly payments that stay the same, and 25% tax-free pension cash capped at the ${gbp(LSA)} Lump Sum Allowance. Pension income is taxable. The State Pension is not included.</p>`;
-  const lbl = y => p.dob ? 'Age ' + (ageOn(p.dob, TODAY) + Math.round(y)) : 'Yr ' + Math.round(y);
+    ${stops.length > 1 ? `<div class="path-stops">${stops.map(([k, v]) => `<div><span class="k">${esc(k)}</span><span class="v">${gbp(v)}</span></div>`).join('')}</div>` : ''}
+    <div>
+      <div class="chart-bar"><div class="legend-inline" style="margin:0"><span><i class="sw" style="background:var(--gold)"></i>So far</span><span><i class="sw" style="background:var(--c1);opacity:.6"></i>Projected at ${p.growth}%</span><span><i class="sw" style="background:var(--c1);opacity:.25"></i>Range ${lo}–${hi}%</span><span><i class="sw" style="background:var(--ink-3)"></i>Paid in</span></div>
+        ${months > 120 ? pills('How far ahead', 'path-span', [['10', 'Next 10 years', near], ['all', rd ? `To ${p.retireAge}` : 'To retirement', !near]]) : ''}</div>
+      <div class="chart" id="plan-chart"></div>
+    </div>
+    <div class="path-stops plan-split">
+      <div><span class="k">Pensions</span><span class="v">${gbp(show(mid.pension, yrs))}</span></div>
+      <div><span class="k">ISAs and other</span><span class="v">${gbp(show(mid.final - mid.pension, yrs))}</span></div>
+      <div><span class="k">Tax-free cash</span><span class="v">${gbp(show(taxFree, yrs))}</span></div>
+      <div><span class="k">Income at ${p.drawRate}%</span><span class="v">${gbp(show(income, yrs))}<span class="faint" style="font-size:12px;font-weight:500">/yr</span></span></div>
+    </div>
+    ${rd && pensionIncluded && p.retireAge < earliest ? `<p class="warn" style="margin:0">Pensions can normally be accessed from age ${earliest}. Retiring at ${p.retireAge} means relying on ISAs and savings until then.</p>` : ''}
+    <ul class="review-list plan-notes">
+      ${target ? `<li>${needMonthly ? `To reach your <b>${gbp(target)}</b> target, pay in about <b>${gbp(needMonthly)}</b> a month more across these accounts.` : `You are on course to reach your <b>${gbp(target)}</b> target.`}</li>` : ''}
+      <li>Working two years longer would add about <b>${gbp(show(later.final, yrs + 2) - show(mid.final, yrs))}</b>.</li>
+      ${feeCost > 1 ? `<li>Fees cost about <b>${gbp(show(feeCost, yrs))}</b> by then.</li>` : ''}
+    </ul>
+    <p class="hint" style="margin:0">Illustration only, not financial advice. Assumes steady growth after each account's fees, monthly payments that carry on unchanged, and 25% tax-free pension cash capped at the ${gbp(LSA)} Lump Sum Allowance. Pension income is taxable. The State Pension is not included.</p>`;
+  // History so far, then the projection from today (cut at 10 years when picked), in the chosen money basis.
+  const tl = timeline(accts), step = Math.max(1, Math.ceil(tl.length / 80));
+  const hist = tl.filter((x, i) => i % step === 0 || i === tl.length - 1).map(x => ({ t: x.t, v: x.total }));
+  if (!hist.length || hist[hist.length - 1].t < TODAY_MS) hist.push({ t: TODAY_MS, v: mid.tot[0] });
+  else hist[hist.length - 1].v = mid.tot[0];
+  const cut = near ? mid.xs.indexOf(10) : mid.xs.length - 1, h = hist.length, nul = k => new Array(k).fill(null);
+  const fut = mid.xs.slice(1, cut + 1);
+  const futOf = arr => [arr[0], ...arr.slice(1, cut + 1).map((v, i) => show(v, fut[i]))];
   chart(document.getElementById('plan-chart'), {
-    xs: mid.xs, tick: lbl, label2: y => (p.dob ? 'Age ' + (ageOn(p.dob, TODAY) + Math.round(y)) : 'Year ' + Math.round(y)), label: 'Projected pot',
-    empty: 'You are at or past your retirement age.',
-    tipAlways: true,
-    band: { label: `Range ${Math.max(0, p.growth - 2)}–${p.growth + 2}%`, color: 'var(--c1)', lo: low.tot.map((v, i) => show(v, low.xs[i])), hi: high.tot.map((v, i) => show(v, high.xs[i])) },
+    xs: [...hist.map(x => x.t), ...fut.map(y => TODAY_MS + y * YR)], label: 'Your wealth so far and projected', tipAlways: true,
+    tick: ms => String(new Date(ms).getUTCFullYear()),
+    label2: ms => ms <= TODAY_MS ? dateLabel(ms) : `${new Date(ms).getUTCFullYear()}${p.dob ? ` · age ${ageOn(p.dob, msIso(ms))}` : ''}`,
+    divider: { t: TODAY_MS, label: 'Today' },
+    band: { label: `Range ${lo}–${hi}%`, color: 'var(--c1)', lo: [...nul(h - 1), ...futOf(low.tot)], hi: [...nul(h - 1), ...futOf(high.tot)] },
     series: [
-      { label: `Expected ${p.growth}%`, color: 'var(--c1)', values: mid.tot.map((v, i) => show(v, mid.xs[i])), fill: false },
-      { label: 'Paid in', color: 'var(--ink-3)', values: mid.paidV.map((v, i) => show(v, mid.xs[i])), fill: false, dash: true }
+      { label: 'So far', color: 'var(--gold)', values: [...hist.map(x => x.v), ...nul(fut.length)] },
+      { label: `Projected at ${p.growth}%`, color: 'var(--c1)', values: [...nul(h - 1), ...futOf(mid.tot)], fill: false, dash: true },
+      { label: 'Paid in', color: 'var(--ink-3)', values: [...nul(h - 1), ...futOf(mid.paidV)], fill: false, dash: true }
     ]
   });
 }
@@ -3582,7 +3609,7 @@ function renderInsights() {
   if (fees > 0) add('%', `Platform and fund fees cost about <b>${gbp(fees)}</b> a year at current balances.`);
   if (ui.person === 'me' && state.goals.length) {
     const st = state.goals.map(goalStatus), ok = st.filter(s => s.done || s.onTrack).length;
-    add('◎', `<b>${ok} of ${st.length}</b> goals are reached or on track. <button class="btn sm ghost" data-action="tab" data-tab="planner">See goals</button>`);
+    add('◎', `<b>${ok} of ${st.length}</b> goals are reached or on track. <button class="btn sm ghost" data-action="tab" data-tab="planner" data-page="goals">See goals</button>`);
   }
 
   const table = pt.rows.length ? `<div class="table-wrap"><table>
@@ -3702,8 +3729,12 @@ function payStrip() {
   const now = payStats(...monthBounds(0)), [s, e] = monthBounds(1), m = payStats(s, e), ty = payStats(taxYearStart(TODAY), TODAY);
   const hasPay = state.pay.length > 0 && (m.net || ty.net), moved = now.paidIn || now.takenOut;
   if (!hasPay && !moved) return '';
+  // This month's rate so far: against pay logged this month, or the usual monthly pay before payday.
+  const usual = state.profile.sources.reduce((t, x) => t + (!x.archived && x.regular && x.regular.net || 0), 0);
+  const nowRate = now.net > 0 ? now.rate : hasPay && usual > 0 ? now.saved / usual : null;
   return `<section class="panel pay-strip clickable" data-action="tab" data-tab="income" tabindex="0" aria-label="Savings this month">
     <div><div class="k">Saved in ${esc(fmtMonthLong.format(new Date(toMs(monthBounds(0)[0]))))} so far</div><div class="v num">${gbp(now.saved)}${now.net ? ` <span class="faint">of ${gbp(now.net)}</span>` : ''}</div></div>
+    ${nowRate != null ? `<div class="r"><div class="v num">${rateText(nowRate)}</div><div class="k">${now.net ? 'rate so far' : 'vs usual pay'}</div></div>` : ''}
     ${hasPay ? `<div class="r"><div class="v num gold">${rateText(m.rate)}</div><div class="k">${esc(fmtMonthLong.format(new Date(toMs(s))))} rate</div></div>
     <div class="r hide-sm"><div class="v num">${rateText(ty.rate)}</div><div class="k">tax year so far</div></div>` : ''}
   </section>`;
@@ -3864,7 +3895,7 @@ const FAQ = [
   ['tab-overview', 'What is on Overview?', 'Your net worth card (total, change over 30 days and how much is growth versus money you paid in, with a trend you can drag along), what you have saved this month, each account at a glance under <b>Holdings</b>, performance, allocation by type, paid in versus growth by month, goals and recent activity.', 'Finding your way'],
   ['tab-accounts', 'What is on Accounts?', 'Pick an account at the top to see its chart, what you paid in and its growth, rate and allowance details, year by year figures at each 5 April, and its full history of balances, payments and income. You can edit or delete any entry there. <b>All</b> shows every account together.', 'Finding your way'],
   ['tab-income', 'What is on Income?', 'Where your money comes from (salary, rental, side income and so on) and how much of it you save. Log each payment as it arrives with <b>Log pay</b>; Aurum compares it with what you paid into your accounts to give your savings rate, month by month, where the money went and an optional payslip breakdown.', 'Finding your way'],
-  ['tab-planner', 'What is on Planner?', 'The <b>retirement plan</b> projects your pensions and ISAs to your retirement age, with the income they might give. <b>Goals</b> track targets such as an ISA total by a date. <b>SIPP vs ISA</b> compares where your next pound does more. All are illustrations, not advice.', 'Finding your way'],
+  ['tab-planner', 'What is on Planner?', 'Planner has three sections, picked at the top. <b>Retirement</b> projects your pensions and ISAs to your retirement age, with the income they might give; change the assumptions under <b>Adjust your plan</b>. <b>Goals</b> track targets such as an ISA total by a date. <b>SIPP vs ISA</b> compares where your next pound does more. All are illustrations, not advice.', 'Finding your way'],
   ['tab-insights', 'What is on Insights?', 'A plain-English summary of your money: last month\'s review, your ISA and pension allowances this tax year, what changed over the period you pick and by account, your year in review, paid in by tax year, the tax return helper and milestones you have reached.', 'Finding your way'],
   ['tab-settings', 'What is in Settings?', 'About you (name, date of birth, retirement age, tax band), this help, Family, your accounts and their order, privacy (demo mode, hide balances, PIN and fingerprint lock), backup and restore, appearance, notifications and reminders.', 'Finding your way'],
   // Accounts and balances
@@ -3874,7 +3905,7 @@ const FAQ = [
   ['sources', 'How is "Where your wealth came from" worked out?', 'For the range you pick (1M, 1Y or All, also on the net worth card), the change in your wealth is split into <b>paid in</b> (money in, less money taken out) and <b>growth</b> (everything else). For 1M and 1Y, an account first logged in that period counts its opening balance as paid in. <b>Return</b> is growth as a share of the money invested over the period. <b>Accounts that drove growth</b> lists the five that moved most, up or down; tap one to open it. <b>Includes N of M accounts</b> (also on the net worth card) shows which accounts are counted: those of the person picked at the top, closed ones too, and only accounts with a balance. Open it to see the list and what is left out, and untick an account to leave it out of your net worth, these charts and Performance (it stays in Holdings and ISA allowances, marked <b>not in totals</b>).', 'Accounts and balances'],
   ['move', 'How do I log money moved between my accounts?', 'Log it on both accounts: <b>Taken out</b> on the one it left and <b>Paid in</b> on the one it reached, ticking <b>Moved</b> on both. Your savings rate stays the same and each account\'s growth stays right. GIA to ISA uses your ISA allowance; a proper ISA to ISA transfer doesn\'t, so tick <b>ISA transfer</b>. Into a SIPP, also tick the tax relief box.', 'Accounts and balances'],
   ['april', 'I started tracking after 6 April. How do I fix this tax year?', 'Open the account and tap <b>Split it: 5 April balance and monthly payments</b>. Enter what was there on 5 April (0 if it opened later) and what you paid in each month. Only those payments then count as paid in this tax year.', 'Accounts and balances'],
-  ['pick', 'How do I choose which accounts count?', '<b>Net worth and Overview charts:</b> open <b>Includes N of M accounts</b> on the net worth card or under "Where your wealth came from" and untick an account to leave it out. <b>Planner:</b> tick accounts under <b>Accounts and monthly payments</b>; the chart\'s <b>Includes N of M accounts</b> link takes you there. <b>Goals:</b> pick <b>Choose accounts…</b> when adding a goal, or open <b>Includes N accounts</b> under a goal in Planner to change it.', 'Accounts and balances'],
+  ['pick', 'How do I choose which accounts count?', '<b>Net worth and Overview charts:</b> open <b>Includes N of M accounts</b> on the net worth card or under "Where your wealth came from" and untick an account to leave it out. <b>Planner:</b> tick accounts under <b>Adjust your plan</b>; the <b>Includes N of M accounts</b> link under your pot takes you there. <b>Goals:</b> pick <b>Choose accounts…</b> when adding a goal, or tap the accounts line under a goal in Planner → Goals to change it.', 'Accounts and balances'],
   // Saving and income
   ['saved', "Why isn't a payment counted as saved?", 'Saved only counts <b>payments into your own accounts</b>, in the month they are dated. It isn\'t counted if you only changed the balance (log it as <b>Paid in</b> instead), if it\'s dated in a different month from the pay, if you ticked <b>Moved</b>, or if the account belongs to someone else under Family.', 'Saving and income'],
   ['typical', 'What is the typical savings rate?', 'Your savings rate with one-offs like bonuses and gifts left out, assuming you saved those first. It shows what you save from your normal pay. Mark pay as <b>One-off</b> when you log it.', 'Saving and income'],
@@ -5885,7 +5916,9 @@ document.addEventListener('click', async e => {
     case 'lock-demo': onUnlock = null; pinEntry = ''; if (!demo) startDemo(); lockEl.hidden = true; break;
     case 'tab':
       // Tapping the tab you're on scrolls back to the top.
-      if (t.dataset.tab === ui.tab && state.profile.setupDone) window.scrollTo({ top: 0, behavior: 'smooth' }); else goTab(t.dataset.tab);
+      if (t.dataset.page) ui.planPage = t.dataset.page;
+      if (t.dataset.tab === ui.tab && t.dataset.page) { saveUi(); render(); window.scrollTo({ top: 0 }); }
+      else if (t.dataset.tab === ui.tab && state.profile.setupDone) window.scrollTo({ top: 0, behavior: 'smooth' }); else goTab(t.dataset.tab);
       break;
     case 'pk-scroll': { const strip = document.getElementById('acct-picker'); if (strip) strip.scrollBy({ left: +id * strip.clientWidth * 0.7 }); break; }
     case 'pick-type': {
@@ -5928,9 +5961,18 @@ document.addEventListener('click', async e => {
     case 'bar-months': ui.barMonths = +id; saveUi(); render(); break;
     case 'stack-by': ui.stackBy = id; saveUi(); render(); break;
     case 'nw-range': ui.nwRange = id; saveUi(); render(); break;
-    case 'plan-accts': { const el = document.getElementById('plan-accts'); if (el) el.scrollIntoView({ block: 'center', behavior: reduceMotion() ? 'auto' : 'smooth' }); break; }
+    case 'plan-accts': {
+      const d = document.querySelector('details[data-fold="plan-set"]');
+      if (d && !d.open) { d.open = true; ui.folds['plan-set'] = true; saveUi(); }
+      const el = document.getElementById('plan-accts') || document.getElementById('plan-set');
+      if (el) el.scrollIntoView({ block: 'center', behavior: reduceMotion() ? 'auto' : 'smooth' });
+      break;
+    }
     case 'scope-open': { const d = document.getElementById('ws-scope'); if (d) { d.open = true; d.scrollIntoView({ block: 'center', behavior: reduceMotion() ? 'auto' : 'smooth' }); } break; }
-    case 'path-span': ui.pathSpan = id; saveUi(); wealthPath(); break;
+    case 'path-span': ui.pathSpan = id; saveUi(); updatePlan(); break;
+    case 'plan-page': ui.planPage = id; saveUi(); render(); window.scrollTo({ top: 0 }); break;
+    case 'plan-real': ui.plan.real = id === '1'; saveUi(); updatePlan(); break;
+    case 'goal-add': ui.goalScope = null; openGoal(); break;
     case 'set-page': if (!id && setPage && history.state && history.state.aurumSet) history.back(); else openSetPage(id); break;
     case 'person': ui.person = id; saveUi(); render(); break;
     case 'goto-account': ui.account = id; goTab('accounts'); break;
@@ -6073,7 +6115,7 @@ document.addEventListener('click', async e => {
       if (other) { const i = state.accounts.indexOf(a), j = state.accounts.indexOf(other); state.accounts[i] = other; state.accounts[j] = a; save(); render(); }
       break;
     }
-    case 'goal-for': ui.goalScope = id; goTab('planner'); setTimeout(() => { const f = document.getElementById('goal-name'); if (f) { f.scrollIntoView({ block: 'center' }); f.focus(); } }, 50); break;
+    case 'goal-for': ui.goalScope = id; ui.planPage = 'goals'; goTab('planner'); openGoal(); break;
     case 'bulk-same': {
       bulkSheet.querySelectorAll('[data-bulk=paid]').forEach(inp => { const v = lastPaid(inp.dataset.id); if (v && !inp.value) inp.value = v; });
       break;
@@ -6213,7 +6255,6 @@ document.addEventListener('change', e => {
   if (t.id === 'custom-unit') { ui.custom.unit = t.value; saveUi(); render(); }
   if (t.id === 'custom-n') { ui.custom.n = clamp(Math.round(num(t.value, 1)), 1, 999); saveUi(); render(); }
   if (t.dataset.planInc) { ui.plan.include[t.dataset.planInc] = t.checked; saveUi(); updatePlan(); }
-  if (t.id === 'plan-real') { ui.plan.real = t.checked; saveUi(); updatePlan(); }
   if (t.id === 'plan-rate' || t.id === 'plan-age') render();
 });
 document.addEventListener('input', e => {
@@ -6269,7 +6310,7 @@ document.addEventListener('submit', async e => {
     const scope = document.getElementById('goal-scope').value || 'all';
     const picked = [...document.querySelectorAll('input[name="goal-acct"]:checked')].map(i => i.value);
     if (scope === 'pick' && !picked.length) { toast('Tick at least one account for this goal.'); return; }
-    ui.goalScope = null; saveUi();
+    ui.goalScope = null; ui.planPage = 'goals'; saveUi(); closeSheets();
     state.goals.push(Object.assign({ id: uid(), name: name.slice(0, 40), target, date: isIso(date) ? date : '', scope }, scope === 'pick' ? { accounts: picked } : {}));
     save(); render();
   } else if (f.id === 'bkpw-form') {
