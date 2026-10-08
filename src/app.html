@@ -599,6 +599,12 @@ dialog.sheet.wide{width:min(620px,calc(100% - 32px))}
 .insights li{display:grid;grid-template-columns:22px 1fr;gap:10px;padding:12px 0;border-top:1px solid var(--line);font-size:14px;color:var(--ink-2)}
 .insights li:first-child{border-top:0;padding-top:0}
 .insights li b{color:var(--ink);font-weight:600}
+.insights .ins-go{color:var(--gold);font-size:13px;white-space:nowrap;margin-left:2px}
+.ins-grid{margin:2px 0}
+.ms-row{display:flex;flex-wrap:wrap;gap:8px}
+.ms-chip{display:inline-flex;align-items:baseline;gap:8px;padding:6px 12px;border:1px solid color-mix(in srgb,var(--gold) 35%,var(--line));border-radius:999px;font-size:13px;color:var(--ink-3)}
+.ms-chip b{color:var(--gold);font-weight:600}
+.review details.fold2 .fold-body .review-grid{margin-top:14px}
 .insights .ic{width:22px;height:22px;border-radius:6px;display:grid;place-items:center;background:var(--surface-2);color:var(--gold);font-size:12px}
 .headline{font-size:18px;line-height:1.45;margin:0;max-width:62ch}
 .headline b{font-weight:650}
@@ -1521,7 +1527,7 @@ function loadState() {
 
 let state = loadState();
 const DEFAULT_UI = {
-  tab: 'overview', folds: {}, range: '1Y', custom: { n: 6, unit: 'm' }, hist: { scope: 'this', kind: 'all', year: 'all', q: '' }, fit: true, barMonths: 12, paidLine: true, lastYear: false, pence: false, compactNums: false, showClosed: false, account: null, person: 'me', hidden: false, stackBy: 'total', insight: '1M', nwRange: '1M', pathSpan: 'all', planPage: 'plan',
+  tab: 'overview', folds: {}, range: '1Y', custom: { n: 6, unit: 'm' }, hist: { scope: 'this', kind: 'all', year: 'all', q: '' }, fit: true, barMonths: 12, paidLine: true, lastYear: false, pence: false, compactNums: false, showClosed: false, account: null, person: 'me', hidden: false, stackBy: 'total', insight: '1M', nwRange: '1M', pathSpan: 'all', planPage: 'plan', insightPage: 'now',
   calc: { monthly: 500, years: 20, rate: 6, draw: 20 },
   plan: { include: {}, monthly: {}, target: 0, years: 25, real: false },
   notes: { read: {}, gone: {}, on: {}, move: { pct: 5, dir: 'both', basis: 'prev' } }, noteFilter: 'all', chartOut: {}
@@ -3463,12 +3469,13 @@ function yearsPanel() {
     <div class="panel-head" style="margin-bottom:0"><h2>Paid in by tax year</h2><span class="aside">Last 6 years</span></div>
     <div class="chart" id="years-chart"></div>
     <div class="bar-legend"><span><i class="sw" style="background:var(--c2)"></i>ISAs and other</span><span><i class="sw" style="background:var(--c1)"></i>Pensions</span></div>
-    <div class="table-wrap"><table>
+    ${pens.length && cf.length ? `<p class="explain">Pension carry-forward: about <b>${gbp(cfTotal)}</b> of unused allowance from ${cf.map(x => tyLabel(x.y)).join(', ')} could be added to this year's ${gbp(taxRules(cur).aa)}, if you were in a pension scheme in those years. Your earnings this year still cap tax relief.</p>` : ''}
+    ${foldOpen('ins-years', 'Year by year', `ISAs, pensions and other · ${tyLabel(rows[0].y)} to ${tyLabel(cur)}`, 'inner')}
+    <div class="table-wrap" style="margin-top:10px"><table>
       <thead><tr><th>Tax year</th><th class="r">ISAs</th><th class="r">Pensions</th><th class="r hide-sm">Other</th></tr></thead>
       <tbody>${[...rows].reverse().map(r => `<tr><td>${tyLabel(r.y)}</td><td class="r val">${gbp(r.isa)}<div class="hint">of ${gbp(ISA_ALLOWANCE)}</div></td><td class="r val">${gbp(r.pen)}<div class="hint">of ${gbp(taxRules(r.y).aa)}</div></td><td class="r val hide-sm">${gbp(r.other)}</td></tr>`).join('')}</tbody>
     </table></div>
-    ${pens.length && cf.length ? `<p class="explain">Pension carry-forward: about <b>${gbp(cfTotal)}</b> of unused allowance from ${cf.map(x => tyLabel(x.y)).join(', ')} could be added to this year's ${gbp(taxRules(cur).aa)}, if you were in a pension scheme in those years. Your earnings this year still cap tax relief.</p>` : ''}
-    <p class="hint">Add figures for earlier years on each account page ("Paid in each tax year"). They're for reference and don't change balances.</p>
+    <p class="hint">Add figures for earlier years on each account page ("Paid in each tax year"). They're for reference and don't change balances.</p>${foldClose}
   </section>`;
 }
 function drawYearsChart() {
@@ -3563,21 +3570,30 @@ function taxPanel() {
 }
 
 /* ---------- what's changed ---------- */
+// 2.0.6: Insights has three pages (ui.insightPage): the summary for a period you pick, this and past tax years, and the
+// tax return helper. Other people's views (a child, Everyone) only have the summary, so the switch is hidden there.
 const INSIGHT_RANGES = ['1M', '3M', '6M', '1Y', 'TY', 'All'];
+const INSIGHT_PAGES = { now: 'Summary', year: 'Tax year', tax: 'Tax return' };
 function renderInsights() {
   const accts = visibleAccounts();
   const key = INSIGHT_RANGES.includes(ui.insight) ? ui.insight : '1M';
   const start = rangeStart(key);
   const pt = periodTotals(accts, start);
-  const who = viewName();
   const items = [];
-  const add = (ic, html) => items.push(`<li><span class="ic">${ic}</span><span>${html}</span></li>`);
+  const add = (ic, html, go) => items.push(`<li><span class="ic">${ic}</span><span>${html}${go ? ` ${go}` : ''}</span></li>`);
+  const goLink = (label, attrs) => `<button class="link-btn ins-go" ${attrs}>${label}</button>`;
 
-  let headline = '<p class="headline faint">Log a few values to see what has changed.</p>';
+  let figures = '<p class="headline faint">Log a few values to see what has changed.</p>';
   if (pt.rows.length) {
-    const up = pt.change >= 0;
-    headline = `<p class="headline">Over ${esc(rangeName(key))}, ${who ? esc(who) + "'s" : 'your'} net worth ${up ? 'rose' : 'fell'} by <b class="${cls(pt.change)}">${gbp(Math.abs(pt.change))}</b>${pt.v0 > 0 ? ` (${pct(pt.change / pt.v0 * 100)})` : ''} to <b>${gbp(pt.cur)}</b>.
-      ${pt.paid ? `<b>${gbp(pt.paid)}</b> was money paid in and <b class="${cls(pt.growth)}">${signed(pt.growth)}</b> came from growth${pt.ret != null ? `, a return of <b>${pct(pt.ret)}</b>` : ''}.` : `No deposits were recorded, so this was all growth${pt.ret != null ? ` (<b>${pct(pt.ret)}</b>)` : ''}. Record deposits when you log values for a truer split.`}</p>`;
+    const tile = (k, v, c) => `<div><div class="k">${k}</div><div class="v num ${c || ''}">${v}</div></div>`;
+    const small = t => ` <span style="font-size:13px">(${t})</span>`;
+    figures = `<div class="review-grid ins-grid">
+        ${tile('Net worth now', gbp(pt.cur))}
+        ${tile('Change', signed(pt.change) + (pt.v0 > 0 ? small(pct(pt.change / pt.v0 * 100)) : ''), cls(pt.change))}
+        ${tile('Paid in', gbp(pt.paid))}
+        ${tile('Growth', signed(pt.growth) + (pt.ret != null ? small(pct(pt.ret)) : ''), cls(pt.growth))}
+      </div>
+      ${pt.paid ? '' : `<p class="hint" style="margin:0">No deposits were recorded over ${esc(rangeName(key))}, so this was all growth. Record deposits when you log values for a truer split.</p>`}`;
     const ranked = pt.rows.filter(r => r.p.ret != null && r.p.base > 100).sort((a, b) => b.p.ret - a.p.ret);
     if (ranked.length > 1) {
       const best = ranked[0], worst = ranked[ranked.length - 1];
@@ -3591,11 +3607,11 @@ function renderInsights() {
   }
   if (ui.person === 'me' && state.pay.length) {
     const ps = payStats(isFinite(start) ? msIso(start + 864e5) : '0000-01-01', TODAY);
-    if (ps.net > 0) add('£', `You saved <b>${rateText(ps.rate)}</b> of your take-home pay over ${esc(rangeName(key))}: <b>${gbp(ps.saved)}</b> of ${gbp(ps.net)}. <button class="btn sm ghost" data-action="tab" data-tab="income">Income</button>`);
+    if (ps.net > 0) add('£', `You saved <b>${rateText(ps.rate)}</b> of your take-home pay: <b>${gbp(ps.saved)}</b> of ${gbp(ps.net)}.`, goLink('Income', 'data-action="tab" data-tab="income"'));
   }
   const stale = staleAccounts(accts);
-  if (stale.length) add('!', `${stale.map(a => `<b>${esc(a.name)}</b>`).join(', ')} ${stale.length === 1 ? 'needs' : 'need'} an up-to-date balance (over 30 days old). <button class="btn sm" data-action="open-bulk">Update all</button>`);
-  // Your own allowances are in the panel above; a child's Junior ISA shows here when viewing them.
+  if (stale.length) add('!', `${stale.map(a => `<b>${esc(a.name)}</b>`).join(', ')} ${stale.length === 1 ? 'needs' : 'need'} an up-to-date balance (over 30 days old).`, goLink('Update all', 'data-action="open-bulk"'));
+  // Your own allowances are on the Tax year page; a child's Junior ISA shows here when viewing them.
   for (const person of state.profile.people) {
     if (ui.person !== person.id) continue;
     const j = state.accounts.filter(a => a.owner === person.id && a.type === 'JISA');
@@ -3609,36 +3625,46 @@ function renderInsights() {
   if (fees > 0) add('%', `Platform and fund fees cost about <b>${gbp(fees)}</b> a year at current balances.`);
   if (ui.person === 'me' && state.goals.length) {
     const st = state.goals.map(goalStatus), ok = st.filter(s => s.done || s.onTrack).length;
-    add('◎', `<b>${ok} of ${st.length}</b> goals are reached or on track. <button class="btn sm ghost" data-action="tab" data-tab="planner" data-page="goals">See goals</button>`);
+    add('◎', `<b>${ok} of ${st.length}</b> goals are reached or on track.`, goLink('See goals', 'data-action="tab" data-tab="planner" data-page="goals"'));
   }
 
-  const table = pt.rows.length ? `<div class="table-wrap"><table>
+  const byGrowth = [...pt.rows].sort((a, b) => b.p.growth - a.p.growth);
+  const table = pt.rows.length ? `${foldOpen('ins-acct', 'By account', `${pt.rows.length} account${pt.rows.length === 1 ? '' : 's'} · most growth ${esc(byGrowth[0].a.name)} ${signed(byGrowth[0].p.growth)}`, 'inner')}
+    <div class="table-wrap" style="margin-top:10px"><table>
     <thead><tr><th>Account</th><th class="r hide-sm">Start</th><th class="r">Now</th><th class="r hide-sm">Paid in</th><th class="r">Growth</th><th class="r hide-sm">Return</th></tr></thead>
-    <tbody>${[...pt.rows].sort((a, b) => b.p.growth - a.p.growth).map(r => `<tr class="clickable" data-action="goto-account" data-id="${esc(r.a.id)}" tabindex="0">
+    <tbody>${byGrowth.map(r => `<tr class="clickable" data-action="goto-account" data-id="${esc(r.a.id)}" tabindex="0">
       <td><div class="acct-cell" style="min-width:120px"><i class="sw" style="background:${colorOf(r.a)}"></i><span class="n">${esc(r.a.name)}</span></div></td>
       <td class="r val hide-sm">${gbp(r.p.v0)}</td><td class="r val">${gbp(r.p.cur)}</td><td class="r val hide-sm">${gbp(r.p.paid)}</td>
       <td class="r">${deltaChip(r.p.growth, signed(r.p.growth))}</td><td class="r hide-sm mono">${r.p.ret != null ? pct(r.p.ret) : '—'}</td></tr>`).join('')}
-    </tbody></table></div>` : '';
+    </tbody></table></div>${foldClose}` : '';
   const ms = milestones(timeline(accts));
+
+  const own = ui.person === 'me';
+  const pg = own && INSIGHT_PAGES[ui.insightPage] ? ui.insightPage : 'now';
+  const tabs = own ? `<div class="seg page-seg" role="group" aria-label="Insights section">${Object.entries(INSIGHT_PAGES).map(([k, l]) => `<button data-action="insight-page" data-id="${k}" aria-pressed="${pg === k}">${l}</button>`).join('')}</div>` : '';
+  let body;
+  if (pg === 'year') body = `${allowancesPanel()}${yearsPanel()}${reviewPanel()}`;
+  else if (pg === 'tax') body = taxPanel();
+  else body = `
+      <section class="panel stack">
+        <div class="panel-head" style="margin-bottom:0"><h2>What changed</h2>
+          <div class="seg scroll" role="group" aria-label="Period">${INSIGHT_RANGES.map(k => `<button data-action="insight-range" data-range="${k}" aria-pressed="${key === k}">${RANGE_BTN[k] || k}</button>`).join('')}</div>
+        </div>
+        ${pt.rows.length ? `<p class="hint" style="margin:0">${esc(rangeName(key)[0].toUpperCase() + rangeName(key).slice(1))}${viewName() ? ` · ${esc(viewName())}` : ''}</p>` : ''}
+        ${figures}
+        ${items.length ? `<ul class="insights">${items.join('')}</ul>` : ''}
+        ${table}
+      </section>
+      ${!state.example && own ? reviewFold(monthReview()) : ''}
+      ${ui.person === 'all' ? allowancesPanel() : ''}
+      ${ms.length ? `<section class="panel"><div class="panel-head"><h2>Milestones</h2><span class="aside">${ms.length} reached</span></div><div class="ms-row">${ms.map(m => `<span class="ms-chip"><b>${compact(m.v)}</b><span>${dateLabel(m.t)}</span></span>`).join('')}</div></section>` : ''}`;
 
   view.innerHTML = `
     <div class="stack view">
       ${exampleNotice()}
       ${personFilter()}
-      ${!state.example && ui.person === 'me' ? reviewCard(monthReview(), false) : ''}
-      ${allowancesPanel()}
-      <section class="panel stack">
-        <div class="panel-head" style="margin-bottom:0"><h2>Summary</h2>
-          <div class="seg scroll" role="group" aria-label="Period">${INSIGHT_RANGES.map(k => `<button data-action="insight-range" data-range="${k}" aria-pressed="${key === k}">${RANGE_BTN[k] || k}</button>`).join('')}</div>
-        </div>
-        ${headline}
-        ${items.length ? `<ul class="insights">${items.join('')}</ul>` : ''}
-      </section>
-      ${table ? `<section class="panel"><div class="panel-head"><h2>By account</h2><span class="aside">${esc(rangeName(key))}</span></div>${table}</section>` : ''}
-      ${reviewPanel()}
-      ${yearsPanel()}
-      ${taxPanel()}
-      ${ms.length ? `<section class="panel"><div class="panel-head"><h2>Milestones</h2></div><ul class="activity">${ms.map(m => `<li><span class="sw" style="background:var(--gold)"></span><div>${compact(m.v)} reached</div><div class="when">${dateLabel(m.t)}</div></li>`).join('')}</ul></section>` : ''}
+      ${tabs}
+      ${body}
       <p class="hint">Worked out on this device from your own entries. Nothing is sent anywhere.</p>
     </div>`;
   drawYearsChart();
@@ -3896,7 +3922,7 @@ const FAQ = [
   ['tab-accounts', 'What is on Accounts?', 'Pick an account at the top to see its chart, what you paid in and its growth, rate and allowance details, year by year figures at each 5 April, and its full history of balances, payments and income. You can edit or delete any entry there. <b>All</b> shows every account together.', 'Finding your way'],
   ['tab-income', 'What is on Income?', 'Where your money comes from (salary, rental, side income and so on) and how much of it you save. Log each payment as it arrives with <b>Log pay</b>; Aurum compares it with what you paid into your accounts to give your savings rate, month by month, where the money went and an optional payslip breakdown.', 'Finding your way'],
   ['tab-planner', 'What is on Planner?', 'Planner has three sections, picked at the top. <b>Retirement</b> projects your pensions and ISAs to your retirement age, with the income they might give; change the assumptions under <b>Adjust your plan</b>. <b>Goals</b> track targets such as an ISA total by a date. <b>SIPP vs ISA</b> compares where your next pound does more. All are illustrations, not advice.', 'Finding your way'],
-  ['tab-insights', 'What is on Insights?', 'A plain-English summary of your money: last month\'s review, your ISA and pension allowances this tax year, what changed over the period you pick and by account, your year in review, paid in by tax year, the tax return helper and milestones you have reached.', 'Finding your way'],
+  ['tab-insights', 'What is on Insights?', 'A plain-English summary of your money, on three pages. <b>Summary</b>: what changed over the period you pick (net worth, paid in, growth), tips, each account\'s growth, last month\'s review and milestones you have reached. <b>Tax year</b>: your ISA and pension allowances this tax year, paid in by tax year with pension carry-forward, and your year in review. <b>Tax return</b>: the tax return helper and P60 refund check.', 'Finding your way'],
   ['tab-settings', 'What is in Settings?', 'About you (name, date of birth, retirement age, tax band), this help, Family, your accounts and their order, privacy (demo mode, hide balances, PIN and fingerprint lock), backup and restore, appearance, notifications and reminders.', 'Finding your way'],
   // Accounts and balances
   ['accounts', 'How do I track several accounts, or accounts for someone else?', 'Add each one with <b>Add account</b>: pensions, ISAs, savings, Premium Bonds and investments each get their own history and are grouped by type. Use <b>Update all</b> to log every balance in one go, pin or drag to reorder them in Settings, and tick <b>Closed account</b> in Edit when one is closed (its history stays in your totals). For accounts you hold for someone else, such as a child\'s Junior ISA, add them under <b>Settings → Family</b> and pick them as the owner. Their accounts are kept out of your own net worth; switch between you, each person or Everyone at the top of Overview and Accounts.', 'Accounts and balances'],
@@ -5307,15 +5333,15 @@ function computeNotes() {
       const pens = mine().filter(a => groupOf(a) === 'pension'), y = cur - 3;
       const had = pens.some(a => (a.since && +a.since <= y) || (a.yearly && a.yearly[y] != null) || logsOf(a.id).some(l => l.date <= `${y + 1}-04-05`));
       const left = had ? Math.max(0, taxRules(y).aa - pens.reduce((t, a) => t + yearPaid(a, y), 0)) : 0;
-      if (left > 0) out.push({ id: `cf-${y}`, cat: 'tax', icon: 'clock', date: TODAY, title: 'Pension carry-forward ends 5 April', body: `About ${gbp(left)} of unused pension allowance from ${tyLabel(y)} can't be used after 5 April.`, act: { action: 'note-go', id: 'insights', label: 'Paid in by tax year' } });
+      if (left > 0) out.push({ id: `cf-${y}`, cat: 'tax', icon: 'clock', date: TODAY, title: 'Pension carry-forward ends 5 April', body: `About ${gbp(left)} of unused pension allowance from ${tyLabel(y)} can't be used after 5 April.`, act: { action: 'note-go', id: 'insights', page: 'year', fold: 'ins-years', label: 'Paid in by tax year' } });
     }
     if (noteOn('tax')) {
       if (md >= '04-06' && md <= '04-30') out.push({ id: `ty-${cur}`, cat: 'tax', icon: 'calendar', date: `${cur}-04-06`, title: `New tax year ${tyLabel(cur)}`, body: 'Allowances have reset. Add your balances at 5 April to close off last year.', act: { action: 'open-bulk', label: 'Update all' } });
-      if (md >= '06-01' && md <= '07-31' && !state.profile.p60[cur - 1]) out.push({ id: `p60-${cur - 1}`, cat: 'tax', icon: 'doc', date: `${cur}-06-01`, title: 'Your P60 should be ready', body: `Add your ${tyLabel(cur - 1)} P60 for a tax refund estimate.`, act: { action: 'note-go', id: 'insights', fold: 'p60', label: 'Tax helper' } });
+      if (md >= '06-01' && md <= '07-31' && !state.profile.p60[cur - 1]) out.push({ id: `p60-${cur - 1}`, cat: 'tax', icon: 'doc', date: `${cur}-06-01`, title: 'Your P60 should be ready', body: `Add your ${tyLabel(cur - 1)} P60 for a tax refund estimate.`, act: { action: 'note-go', id: 'insights', page: 'tax', fold: 'p60', label: 'Tax helper' } });
       if (md >= '10-01' || md <= '01-31') {
         const y = cur - 1, e = taxReport(y).est;
         const why = e && e.net >= 50 ? `Your figures show about ${gbp(e.net)} to claim back.` : e && e.net <= -50 ? `Your figures show about ${gbp(-e.net)} to pay.` : 'If you need to file, the deadline for paying and filing online is 31 January.';
-        out.push({ id: `sa-${y}`, cat: 'tax', icon: 'doc', date: md >= '10-01' ? `${cur}-10-01` : `${cur + 1}-01-01`, title: `Self Assessment for ${tyLabel(y)}: 31 January`, body: why, act: { action: 'note-go', id: 'insights', label: 'Tax helper' } });
+        out.push({ id: `sa-${y}`, cat: 'tax', icon: 'doc', date: md >= '10-01' ? `${cur}-10-01` : `${cur + 1}-01-01`, title: `Self Assessment for ${tyLabel(y)}: 31 January`, body: why, act: { action: 'note-go', id: 'insights', page: 'tax', label: 'Tax helper' } });
       }
     }
     if (noteOn('goals')) {
@@ -5325,7 +5351,7 @@ function computeNotes() {
         else if (st.progress >= 0.5) out.push({ id: `goal-${g.id}-half`, cat: 'goals', icon: 'target', date: TODAY, title: `${g.name}: halfway`, body: `${gbp(st.cur)} of ${gbp(g.target)}.`, bar: st.progress });
       }
       const rv = monthReview();
-      if (rv && +TODAY.slice(8) <= 10) out.push({ id: `review-${rv.key}`, cat: 'goals', icon: 'calendar', date: TODAY.slice(0, 8) + '01', title: `Your ${rv.name} review is ready`, body: `${signed(rv.change)} change, ${gbp(rv.paid)} paid in, ${signed(rv.growth)} growth.`, act: { action: 'note-go', id: 'insights', scroll: 'month-review', label: 'See the review' } });
+      if (rv && +TODAY.slice(8) <= 10) out.push({ id: `review-${rv.key}`, cat: 'goals', icon: 'calendar', date: TODAY.slice(0, 8) + '01', title: `Your ${rv.name} review is ready`, body: `${signed(rv.change)} change, ${gbp(rv.paid)} paid in, ${signed(rv.growth)} growth.`, act: { action: 'note-go', id: 'insights', page: 'now', fold: 'month-review', label: 'See the review' } });
       for (const a of my) {
         const n = streakOf(a), th = [120, 60, 48, 36, 24, 18, 12, 6, 3].find(v => n >= v);
         if (th) out.push({ id: `streak-${a.id}-${th}`, cat: 'goals', icon: 'flame', date: TODAY, title: `${a.name}: ${th}-month streak`, body: `You've paid in ${n} months in a row. Keep it going.` });
@@ -5442,7 +5468,7 @@ function noteAct(id) {
   if (!n || !n.act) return;
   noteRead(id); closeSheets();
   const a = n.act;
-  if (a.action === 'note-go') { if (a.fold) ui.folds[a.fold] = true; goTab(a.id); if (a.scroll) requestAnimationFrame(() => { const el = document.getElementById(a.scroll); if (el) el.scrollIntoView({ block: 'start' }); }); if (a.fold) requestAnimationFrame(() => { const el = document.querySelector(`[data-fold="${a.fold}"]`); if (el) el.scrollIntoView({ block: 'start' }); }); }
+  if (a.action === 'note-go') { if (a.fold) ui.folds[a.fold] = true; if (a.page) ui.insightPage = a.page; goTab(a.id); if (a.scroll) requestAnimationFrame(() => { const el = document.getElementById(a.scroll); if (el) el.scrollIntoView({ block: 'start' }); }); if (a.fold) requestAnimationFrame(() => { const el = document.querySelector(`[data-fold="${a.fold}"]`); if (el) el.scrollIntoView({ block: 'start' }); }); }
   else if (a.action === 'goto-account') { ui.account = a.id; goTab('accounts'); }
   else if (a.action === 'open-log') openLog(a.id);
   else if (a.action === 'open-pay') openPay(a.id);
@@ -5603,7 +5629,16 @@ function reviewCard(r, dismissable) {
   if (!r) return '';
   return `<section class="panel review" id="month-review">
     <div class="panel-head" style="margin-bottom:0"><h2>Your ${esc(r.name)} in money</h2>${dismissable ? '<button class="btn sm ghost" data-action="review-hide">Dismiss</button>' : `<span class="aside">${r.year}</span>`}</div>
-    <div class="review-grid">
+    ${reviewBody(r)}
+  </section>`;
+}
+// 2.0.6: on Insights the review folds away under the summary, with its headline figures on the closed line.
+function reviewFold(r) {
+  if (!r) return '';
+  return `<section class="panel review" id="month-review">${foldOpen('month-review', `Your ${esc(r.name)} in money`, `${signed(r.change)} change · ${gbp(r.paid)} paid in · ${signed(r.growth)} growth`)}${reviewBody(r)}${foldClose}</section>`;
+}
+function reviewBody(r) {
+  return `<div class="review-grid">
       <div><div class="k">Net worth at month end</div><div class="v num">${gbp(r.end)}</div></div>
       <div><div class="k">Change</div><div class="v num ${cls(r.change)}">${signed(r.change)}</div></div>
       <div><div class="k">Paid in</div><div class="v num">${gbp(r.paid)}</div></div>
@@ -5614,8 +5649,7 @@ function reviewCard(r, dismissable) {
       ${r.best ? `<li><span>Best performer:</span> <b>${esc(r.best.a.name)}</b> <span class="pos">${signed(r.best.p.growth)}</span></li>` : ''}
       ${r.streak ? `<li><span>Longest streak:</span> <b>${esc(r.streak.a.name)}</b>, ${r.streak.n} months in a row paid in</li>` : ''}
       ${r.goals.map(x => `<li><span>${esc(x.g.name)}:</span> <b>${Math.round(x.st.progress * 100)}%</b> <span class="faint">${esc(x.st.text)}</span></li>`).join('')}
-    </ul>
-  </section>`;
+    </ul>`;
 }
 const showReviewCard = r => r && +TODAY.slice(8) <= 10 && ui.reviewSeen !== r.key;
 
@@ -5916,7 +5950,7 @@ document.addEventListener('click', async e => {
     case 'lock-demo': onUnlock = null; pinEntry = ''; if (!demo) startDemo(); lockEl.hidden = true; break;
     case 'tab':
       // Tapping the tab you're on scrolls back to the top.
-      if (t.dataset.page) ui.planPage = t.dataset.page;
+      if (t.dataset.page) ui[t.dataset.tab === 'insights' ? 'insightPage' : 'planPage'] = t.dataset.page;
       if (t.dataset.tab === ui.tab && t.dataset.page) { saveUi(); render(); window.scrollTo({ top: 0 }); }
       else if (t.dataset.tab === ui.tab && state.profile.setupDone) window.scrollTo({ top: 0, behavior: 'smooth' }); else goTab(t.dataset.tab);
       break;
@@ -5958,6 +5992,7 @@ document.addEventListener('click', async e => {
     case 'toggle-hide': ui.hidden = !ui.hidden; saveUi(); render(); break;
     case 'range': ui.range = t.dataset.range; saveUi(); render(); break;
     case 'insight-range': ui.insight = t.dataset.range; saveUi(); render(); break;
+    case 'insight-page': ui.insightPage = id; saveUi(); render(); window.scrollTo({ top: 0 }); break;
     case 'bar-months': ui.barMonths = +id; saveUi(); render(); break;
     case 'stack-by': ui.stackBy = id; saveUi(); render(); break;
     case 'nw-range': ui.nwRange = id; saveUi(); render(); break;

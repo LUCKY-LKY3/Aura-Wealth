@@ -205,6 +205,11 @@ not advice — keep that disclaimer.
   `details.plan-more`. `wealthPath()`/`#path-panel` are gone. Goals: `#goal-sheet` (`openGoal()`, fields built on open, `goal-add`/`goal-for`);
   `goalPicker(g, st)`'s summary is the goal's meta line (accounts, date, status).
 
+- 2.0.6 Insights: `INSIGHT_PAGES` ('now'|'year'|'tax', `ui.insightPage`, `insight-page` action, `.page-seg`; hidden unless `ui.person==='me'`).
+  Summary = "What changed" panel (`.ins-grid` tiles, tips with `.ins-go` link buttons, fold `ins-acct` table), `reviewFold()` (fold
+  `month-review`; `reviewCard` and it share `reviewBody`), milestones as `.ms-chip`. Tax year = allowances, `yearsPanel` (fold `ins-years`),
+  `reviewPanel`. Tax return = `taxPanel`. Bell `note-go` acts take `page`; `data-tab="insights" data-page=…` links open a page.
+
 ## Status (latest)
 
 - 1.9.9 merged to main (PR #23); owner publishes the v1.9.9 release. Owner says when to merge.
