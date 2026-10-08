@@ -1,3 +1,5 @@
 - Planner: SIPP vs ISA now keeps your inputs and the result in one box, with "Your inputs" and "Result" headings
 - The result starts with a line repeating what you entered, such as "£500 a month for 20 years at 5% growth"
+- New result bars show the ISA, the SIPP after tax and the SIPP pot side by side, with what you paid in marked on each
+- The year-by-year chart labels each line at its end and shades the gap between SIPP and ISA
 - Figures flash gold as you change a value, and the chart moves smoothly instead of redrawing from zero
