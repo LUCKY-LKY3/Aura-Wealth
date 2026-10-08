@@ -275,6 +275,17 @@ h2{font-size:15px;font-weight:600;letter-spacing:-.01em;margin:0}
 .ws-bar{display:block;height:8px;border-radius:99px;background:var(--surface-2);overflow:hidden}
 .ws-bar i{display:block;height:100%;border-radius:99px}
 .ws-why{margin:12px 0 0}
+.scope{margin:-4px 0 16px;font-size:13px;color:var(--ink-2)}
+.scope summary{display:inline-flex;align-items:center;gap:6px;cursor:pointer;list-style:none;padding:2px 0}
+.scope summary::-webkit-details-marker{display:none}
+.scope summary b{color:var(--ink);font-weight:600}
+.scope-tg::after{content:'Show';color:var(--gold);text-decoration:underline;text-underline-offset:3px;margin-left:4px}
+.scope[open] .scope-tg::after{content:'Hide'}
+.scope-list{list-style:none;margin:8px 0 0;padding:0;display:grid;gap:0 24px;grid-template-columns:minmax(0,1fr)}
+@media (min-width:700px){.scope-list{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.scope-list li{display:flex;justify-content:space-between;gap:12px;padding:7px 0;border-top:1px solid var(--line);cursor:pointer;font-size:14px}
+.scope-list.out li{color:var(--ink-3)}
+.scope-h{margin:12px 0 0;font-size:12px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.06em}
 .ws-table{margin-top:14px}
 .ws-table td.r{white-space:nowrap}
 .ws-type{display:inline-flex;align-items:center;gap:8px}
@@ -2302,8 +2313,26 @@ function goalList(goals, withDelete) {
 /* ---------- 2.0: where your wealth came from ---------- */
 const NW_RANGES = { '1M': 'past month', '1Y': 'past year', 'All': 'all time' };
 const nwChips = (r, extra) => `<div class="seg ${extra || ''}" role="group" aria-label="Time range">${Object.keys(NW_RANGES).map(k => `<button data-action="nw-range" data-id="${k}" aria-pressed="${r === k}">${k}</button>`).join('')}</div>`;
+// 2.0.2: which accounts feed the net worth card and "Where your wealth came from": the person picked at the top,
+// closed accounts too, but only accounts with a balance.
+function chartScope(accts) {
+  const inc = accts.filter(a => logsOf(a.id).length), ids = new Set(inc.map(a => a.id)), shown = new Set(accts.map(a => a.id));
+  const out = state.accounts.filter(a => !ids.has(a.id)).map(a => ({ a, why: shown.has(a.id) ? 'No balance yet' : (a.owner || 'me') === 'me' ? 'Yours' : `Belongs to ${personName(a.owner)}` }));
+  return { inc, out, total: state.accounts.length };
+}
+const scopeLabel = sc => sc.out.length ? `${sc.inc.length} of ${sc.total} accounts` : `all ${sc.total} account${sc.total === 1 ? '' : 's'}`;
+function scopeList(sc) {
+  const order = Object.keys(GROUPS);
+  const inc = sc.inc.map(a => ({ a, cur: accountStats(a.id).cur })).sort((x, y) => order.indexOf(groupOf(x.a)) - order.indexOf(groupOf(y.a)) || y.cur - x.cur);
+  const li = (a, right) => `<li data-action="goto-account" data-id="${esc(a.id)}"><span class="ws-name"><i class="sw" style="background:${colorOf(a)}"></i>${esc(a.name)}${a.archived ? '<span class="owner">closed</span>' : ''}</span>${right}</li>`;
+  return `<details class="scope" id="ws-scope" data-fold="ws-scope" ${ui.folds && ui.folds['ws-scope'] ? 'open' : ''}>
+    <summary>Includes <b>${scopeLabel(sc)}</b><span class="scope-tg" aria-hidden="true"></span></summary>
+    <ul class="scope-list">${inc.map(({ a, cur }) => li(a, `<span class="mono">${gbp(cur)}</span>`)).join('')}</ul>
+    ${sc.out.length ? `<p class="scope-h">Not included</p><ul class="scope-list out">${sc.out.map(({ a, why }) => li(a, `<span class="faint">${esc(why)}</span>`)).join('')}</ul>` : ''}
+  </details>`;
+}
 // `t` is periodTotals for the range; `sinceMs` is set when tracking started inside the range.
-function wealthSources(t, r, sinceMs) {
+function wealthSources(t, r, sinceMs, sc) {
   if (!t.rows.length) return '';
   const when = r === 'All' ? 'Since you started' : sinceMs != null ? `Since you started on ${dateLabel(sinceMs)}` : `Over the ${NW_RANGES[r]}`;
   const ret = (g, b) => b > 0 ? pct(g / b * 100) : '—';
@@ -2342,6 +2371,7 @@ function wealthSources(t, r, sinceMs) {
     </div>` : '';
   return `<section class="panel" aria-label="Where your wealth came from">
     <div class="panel-head"><div><h2>Where your wealth came from ${why('sources', 'How is this worked out?')}</h2><span class="aside">What you paid in and what your money earned</span></div>${nwChips(r)}</div>
+    ${sc ? scopeList(sc) : ''}
     <div class="ws-grid"><div>
       <p class="ws-head">${when}, your wealth ${t.change >= 0 ? 'grew' : 'fell'} by <b class="num">${gbp(Math.abs(t.change))}</b>.</p>
       <div class="ws-split">
@@ -2372,6 +2402,8 @@ function renderOverview() {
   const pension = stats.filter(x => groupOf(x.a) === 'pension').reduce((s, x) => s + x.cur, 0);
   const access = total - pension;
   const who = viewName();
+  const scope = chartScope(accts);
+  const showWs = tl.length > 1 && nw;
 
   const statement = `
     <section class="statement${shineFor(tl, total) ? ' shine' : ''}" aria-label="Net worth">
@@ -2383,6 +2415,7 @@ function renderOverview() {
           : `<span><b class="${nw.change >= 0 ? 'up' : 'down'}">${signed(nw.change)}</b>${nwFrom == null ? 'since ' + dateLabel(tl[0].t) : NW_RANGES[nwr]}, <b class="${nw.growth >= 0 ? 'up' : 'down'}">${signed(nw.growth)}</b>growth</span><span><b class="plain">${gbp(nw.paid)}</b>paid in</span>`) : ''}
         ${!tl.length ? '<span>Log your first value to start tracking.</span>' : ''}
       </div>
+      ${showWs ? `<button type="button" class="stmt-stale" data-action="scope-open">Includes ${scopeLabel(scope)}</button>` : ''}
       ${staleN ? `<button type="button" class="stmt-stale" data-action="open-bulk">${staleN} balance${staleN > 1 ? 's' : ''} over a month old · Update all</button>` : ''}
       ${totalTrend(nwr === 'All' ? rangePoints(tl, -Infinity) : rangePoints(tl, nwStart))}
       ${total > 0 && groups.length > 1 ? `
@@ -2494,7 +2527,7 @@ function renderOverview() {
       }).join('')}</ul>` : '<div class="chart-empty">No activity yet.</div>'}
     </section>`;
 
-  view.innerHTML = `<div class="stack view">${updateBanner()}${exampleNotice()}${visitStrip(total)}${!state.example && ui.person === 'me' && showReviewCard(monthReview()) ? reviewCard(monthReview(), true) : ''}${personFilter()}<div class="summary">${statement}${kpis}</div>${payStrip()}${holdings}${tl.length > 1 && nw ? wealthSources(nw, nwr, nwFrom == null && isFinite(nwStart) ? tl[0].t : null) : ''}<div class="grid-2">${growth}${allocation}</div>${monthly}${goals ? `<div class="grid-2">${activity}${goals}</div>` : activity}</div>`;
+  view.innerHTML = `<div class="stack view">${updateBanner()}${exampleNotice()}${visitStrip(total)}${!state.example && ui.person === 'me' && showReviewCard(monthReview()) ? reviewCard(monthReview(), true) : ''}${personFilter()}<div class="summary">${statement}${kpis}</div>${payStrip()}${holdings}${showWs ? wealthSources(nw, nwr, nwFrom == null && isFinite(nwStart) ? tl[0].t : null, scope) : ''}<div class="grid-2">${growth}${allocation}</div>${monthly}${goals ? `<div class="grid-2">${activity}${goals}</div>` : activity}</div>`;
   bindTrend();
   barChart(document.getElementById('monthly-chart'), {
     labels: months.map(x => x.short), titles: months.map(x => x.title), paid: months.map(x => x.paid), growth: months.map(x => x.growth),
@@ -3748,7 +3781,7 @@ const FAQ = [
   ['accounts', 'How do I track several accounts, or accounts for someone else?', 'Add each one with <b>Add account</b>: pensions, ISAs, savings, Premium Bonds and investments each get their own history and are grouped by type. Use <b>Update all</b> to log every balance in one go, pin or drag to reorder them in Settings, and tick <b>Closed account</b> in Edit when one is closed (its history stays in your totals). For accounts you hold for someone else, such as a child\'s Junior ISA, add them under <b>Settings → Family</b> and pick them as the owner. Their accounts are kept out of your own net worth; switch between you, each person or Everyone at the top of Overview and Accounts.', 'Accounts and balances'],
   ['est', 'Why do some balances say "est."?', '<b>est.</b> means estimated. When you log a payment, interest or a regular payment without a new balance, Aurum adds it to your last balance so your totals stay up to date. It isn\'t your provider\'s real figure: growth and price changes since then are missing. Log the real balance from your provider\'s app or statement when you can (<b>Update all</b> does every account at once) and it takes over from that date. Deleting the payment takes the estimate back out.', 'Accounts and balances'],
   ['growth', "What's the difference between paid in, growth and interest?", '<b>Paid in</b> is money you (or your employer, or tax relief) put in. <b>Growth</b> is everything else: the change in balance less what was paid in, so it includes interest, dividends and price changes. Interest, dividends and prizes you log are growth too: if they were paid into the account (the default), Aurum adds them to its balance as an estimate until you next log a real balance. They also feed the tax helper.', 'Accounts and balances'],
-  ['sources', 'How is "Where your wealth came from" worked out?', 'For the range you pick (1M, 1Y or All, also on the net worth card), the change in your wealth is split into <b>paid in</b> (money in, less money taken out) and <b>growth</b> (everything else). For 1M and 1Y, an account first logged in that period counts its opening balance as paid in. <b>Return</b> is growth as a share of the money invested over the period. <b>Accounts that drove growth</b> lists the five that moved most, up or down; tap one to open it.', 'Accounts and balances'],
+  ['sources', 'How is "Where your wealth came from" worked out?', 'For the range you pick (1M, 1Y or All, also on the net worth card), the change in your wealth is split into <b>paid in</b> (money in, less money taken out) and <b>growth</b> (everything else). For 1M and 1Y, an account first logged in that period counts its opening balance as paid in. <b>Return</b> is growth as a share of the money invested over the period. <b>Accounts that drove growth</b> lists the five that moved most, up or down; tap one to open it. <b>Includes N of M accounts</b> (also on the net worth card) shows which accounts are counted: those of the person picked at the top, closed ones too, and only accounts with a balance. Open it to see the list and what is left out.', 'Accounts and balances'],
   ['move', 'How do I log money moved between my accounts?', 'Log it on both accounts: <b>Taken out</b> on the one it left and <b>Paid in</b> on the one it reached, ticking <b>Moved</b> on both. Your savings rate stays the same and each account\'s growth stays right. GIA to ISA uses your ISA allowance; a proper ISA to ISA transfer doesn\'t, so tick <b>ISA transfer</b>. Into a SIPP, also tick the tax relief box.', 'Accounts and balances'],
   ['april', 'I started tracking after 6 April. How do I fix this tax year?', 'Open the account and tap <b>Split it: 5 April balance and monthly payments</b>. Enter what was there on 5 April (0 if it opened later) and what you paid in each month. Only those payments then count as paid in this tax year.', 'Accounts and balances'],
   // Saving and income
@@ -5804,6 +5837,7 @@ document.addEventListener('click', async e => {
     case 'bar-months': ui.barMonths = +id; saveUi(); render(); break;
     case 'stack-by': ui.stackBy = id; saveUi(); render(); break;
     case 'nw-range': ui.nwRange = id; saveUi(); render(); break;
+    case 'scope-open': { const d = document.getElementById('ws-scope'); if (d) { d.open = true; d.scrollIntoView({ block: 'center', behavior: reduceMotion() ? 'auto' : 'smooth' }); } break; }
     case 'path-span': ui.pathSpan = id; saveUi(); wealthPath(); break;
     case 'set-page': if (!id && setPage && history.state && history.state.aurumSet) history.back(); else openSetPage(id); break;
     case 'person': ui.person = id; saveUi(); render(); break;
