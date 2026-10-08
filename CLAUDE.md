@@ -187,6 +187,12 @@ not advice — keep that disclaimer.
   (from setup with `{name,dob}`; exit returns to setup); from the PIN screen your data stays locked and Exit asks for the PIN.
   New first runs no longer save example data (`example: true` only remains for old saves; `clearExample` still handles it).
 
+- 2.0.2: `chartScope(accts)` = accounts feeding the net worth card / `wealthSources` (selected person's accounts with a balance, closed
+  included) and `out` (other people's, no balance yet, with reason). `scopeList()` renders `details#ws-scope` (fold `ws-scope`) under the
+  panel head; the card's "Includes N of M accounts" link (`scope-open`) opens and scrolls to it.
+  Tick boxes (`data-scope`) set device-only `ui.chartOut` {id:true} (`chartOff(a)`): renderOverview splits `all` (Holdings, ISA allowance,
+  activity) from `accts` (card, KPIs, wealth sources, Performance, Allocation, monthly bars). The last included account can't be unticked.
+
 ## Status (latest)
 
 - 1.9.9 merged to main (PR #23); owner publishes the v1.9.9 release. Owner says when to merge.
