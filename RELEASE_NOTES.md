@@ -1,3 +1,3 @@
-- Overview: "Where your wealth came from" and the net worth card now say which accounts they include, for example "Includes 7 of 8 accounts"
-- Tap Show to see every account counted, with its colour and balance, and which ones are left out and why (another person's account, or no balance yet)
-- Untick an account to leave it out of your net worth, its charts and Performance. It stays in Holdings, marked "not in totals", and tick it again any time
+- Goals: count any mix of accounts. Pick "Choose accounts…" when adding a goal, or open "Includes N accounts" under a goal in Planner to change which accounts it counts
+- Planner: the wealth chart says how many accounts it includes, and tapping that takes you to the tick boxes
+- Help: a new answer explains how to choose which accounts count in each place
