@@ -1,7 +1,7 @@
-- Overview: the "Saved this month so far" strip now shows this month's savings rate next to last month's and the tax year's
-- Before your pay for the month is logged, the rate is worked out against your usual monthly pay, marked "vs usual pay"
-- Planner is now split into Retirement, Goals and SIPP vs ISA, picked at the top, so the page is much shorter
-- Retirement shows one figure for your pot, with a Today's money / Future pounds switch, and one chart of your wealth so far and where it's heading
-- The plan's settings sit under "Adjust your plan" below the result, and accounts left out of the plan are tucked away under "more accounts"
-- Goals: add a goal from a button that opens a form, and tap the accounts line under a goal to change which accounts count
-- Fixed: a goal's target had to end in 1 (such as £8,001) before it could be saved
+- Insights is now split into Summary, Tax year and Tax return, picked at the top, so each page is much shorter
+- Summary shows the period's net worth, change, paid in and growth as four figures, with the tips underneath
+- Links in the tips (Income, See goals, Update all) now sit at the end of their line
+- The by-account table and last month's review fold away, with their key figures on the closed line
+- Milestones you've reached show as a row of small badges
+- Tax year has your allowances, paid in by tax year (carry-forward now right under the chart, the table folded) and your year in review
+- Tax return has the tax return helper and P60 refund check on their own page; bell reminders open the right page

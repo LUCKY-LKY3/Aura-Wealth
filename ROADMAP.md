@@ -29,6 +29,8 @@ Order: 2.0 polish and charts → 2.x Future Me → 3.0 pensions, property and de
   property and debt reduction join in 3.0); accounts that drove growth; Settings as a menu of pages
 - Done in 2.0.1: actual vs projected wealth chart (Planner); chart polish (round axis steps, thinned markers); full demo
   data (every type, pay, income, child's JISA) starting fresh each time; demo from the PIN and first-run screens
+- Done in 2.0.6: Insights split into Summary, Tax year and Tax return pages; figure tiles for the period; by-account
+  table, last month's review and the year-by-year table folded; milestones as chips
 - Native SVG Tooltips: hover/touch interaction on all charts showing exact data values at each point
 - Cash drag warning: lots of cash in a low-interest account (user enters rate)
 - Interest checker: savings rate vs a benchmark rate the user sets
