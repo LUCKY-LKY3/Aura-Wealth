@@ -196,7 +196,14 @@ not advice — keep that disclaimer.
 
 - 2.0.3: goals may carry `accounts: [ids]` (scope `'pick'`), which `goalAccounts()` prefers; `goalScopeName(g)`; `goalPicker(g)` in
   Planner's goal list (`data-goal-acct` boxes, fold `goal-<id>`) and `#goal-picks` in the goal form. Removing an account drops it from
-  goals (and goals left empty). Planner `#path-panel` aside links "Includes N of M accounts" to `#plan-accts`. FAQ `pick`.
+  goals (and goals left empty). FAQ `pick`.
+
+- 2.0.5 Planner: `PLAN_PAGES` sections ('plan'|'goals'|'calc', `ui.planPage`, `.page-seg`; `data-tab="planner" data-page="goals"` links open one).
+  Retirement = `#plan-results` (filled by `updatePlan`: headline pot, `plan-real` Today's money/Future pounds pills, `path-stops` milestones,
+  one chart of history + projection + range + paid in, `ui.pathSpan`, split tiles, notes, one disclaimer) then fold `plan-set`
+  ("Adjust your plan", `#plan-sum` = `planSummary()`): sliders in `.plan-form`, ticked accounts in `#plan-accts`, unticked under
+  `details.plan-more`. `wealthPath()`/`#path-panel` are gone. Goals: `#goal-sheet` (`openGoal()`, fields built on open, `goal-add`/`goal-for`);
+  `goalPicker(g, st)`'s summary is the goal's meta line (accounts, date, status).
 
 ## Status (latest)
 
