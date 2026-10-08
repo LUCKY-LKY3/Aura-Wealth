@@ -117,10 +117,10 @@ tr.clickable:active,.set-row:active,.note:active,.pressing{opacity:.7}
 @media (min-width:760px){.review-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
 .review-grid .k{font-size:12px;color:var(--ink-3)}.review-grid .v{font-size:20px;font-weight:600;letter-spacing:-.02em}
 .v.gold{color:var(--gold)}
-.pay-strip{display:grid;grid-template-columns:1fr auto auto;gap:4px 22px;align-items:end;padding:14px 18px;cursor:pointer}
+.pay-strip{display:grid;grid-template-columns:1fr;grid-auto-flow:column;grid-auto-columns:auto;gap:4px 22px;align-items:end;padding:14px 18px;cursor:pointer}
 .pay-strip .k{font-size:12px;color:var(--ink-3)}.pay-strip .v{font-size:18px;font-weight:600;letter-spacing:-.02em}.pay-strip .v .faint{font-size:13px;font-weight:500}
 .pay-strip .r{text-align:right}
-@media (max-width:759px){.pay-strip{grid-template-columns:1fr auto}}
+@media (max-width:759px){.pay-strip{column-gap:16px}}
 .review-list{list-style:none;margin:0;padding:0;font-size:13px;color:var(--ink-2)}
 .review-list li{padding:7px 0;border-top:1px solid var(--line)}
 .review-list b{color:var(--ink);font-weight:600}
@@ -3702,8 +3702,12 @@ function payStrip() {
   const now = payStats(...monthBounds(0)), [s, e] = monthBounds(1), m = payStats(s, e), ty = payStats(taxYearStart(TODAY), TODAY);
   const hasPay = state.pay.length > 0 && (m.net || ty.net), moved = now.paidIn || now.takenOut;
   if (!hasPay && !moved) return '';
+  // This month's rate so far: against pay logged this month, or the usual monthly pay before payday.
+  const usual = state.profile.sources.reduce((t, x) => t + (!x.archived && x.regular && x.regular.net || 0), 0);
+  const nowRate = now.net > 0 ? now.rate : hasPay && usual > 0 ? now.saved / usual : null;
   return `<section class="panel pay-strip clickable" data-action="tab" data-tab="income" tabindex="0" aria-label="Savings this month">
     <div><div class="k">Saved in ${esc(fmtMonthLong.format(new Date(toMs(monthBounds(0)[0]))))} so far</div><div class="v num">${gbp(now.saved)}${now.net ? ` <span class="faint">of ${gbp(now.net)}</span>` : ''}</div></div>
+    ${nowRate != null ? `<div class="r"><div class="v num">${rateText(nowRate)}</div><div class="k">${now.net ? 'rate so far' : 'vs usual pay'}</div></div>` : ''}
     ${hasPay ? `<div class="r"><div class="v num gold">${rateText(m.rate)}</div><div class="k">${esc(fmtMonthLong.format(new Date(toMs(s))))} rate</div></div>
     <div class="r hide-sm"><div class="v num">${rateText(ty.rate)}</div><div class="k">tax year so far</div></div>` : ''}
   </section>`;

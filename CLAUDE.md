@@ -166,6 +166,7 @@ not advice — keep that disclaimer.
   Net worth card: 30-day change + growth (`periodTotals`), all-time paid in/growth, `.stmt-stale` (balances >30 days → open-bulk);
   `bindTrend()` makes `totalTrend()` scrubbable (`trendPts`, figure shows the date's total, restores on release).
   `payStrip()` on Overview shows saved so far this month (also without pay logged), plus last month's and the tax year's rate when pay exists.
+  2.0.5: it also shows this month's rate so far (vs pay logged this month, else vs the sum of non-archived sources' `regular.net`, labelled "vs usual pay").
 
 - 1.9.9: income entries can carry `note` and `added` (paid into the account; default on). `added` interest/dividends/prizes logged without a
   balance go through `addEstimate`/`dropEstimate` like flows (their id in `flowIds`), so the balance rises as growth. History table has no
