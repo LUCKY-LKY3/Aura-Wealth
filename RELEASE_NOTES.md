@@ -1,3 +1,3 @@
-- Goals: count any mix of accounts. Pick "Choose accounts…" when adding a goal, or open "Includes N accounts" under a goal in Planner to change which accounts it counts
-- Planner: the wealth chart says how many accounts it includes, and tapping that takes you to the tick boxes
-- Help: a new answer explains how to choose which accounts count in each place
+- Planner: SIPP vs ISA now keeps your inputs and the result in one box, with "Your inputs" and "Result" headings
+- The result starts with a line repeating what you entered, such as "£500 a month for 20 years at 5% growth"
+- Figures flash gold as you change a value, and the chart moves smoothly instead of redrawing from zero

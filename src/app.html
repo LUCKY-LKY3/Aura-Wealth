@@ -465,6 +465,15 @@ dialog.sheet::backdrop{background:rgba(8,12,22,.55)}
 @media (min-width:1000px){.calc-grid{grid-template-columns:minmax(0,.85fr) minmax(0,1.5fr)}}
 .compare{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:0;border:1px solid var(--line);border-radius:10px;overflow:hidden}
 .compare .stat .v{font-size:20px}
+.calc-in{gap:20px}
+.calc-step{display:flex;align-items:center;gap:8px;margin-bottom:12px;color:var(--gold)}
+.calc-step span{display:grid;place-items:center;width:20px;height:20px;border-radius:50%;border:1px solid var(--gold);font-size:11px;letter-spacing:0}
+.calc-out .calc-step{margin-bottom:0}
+@media (max-width:999px){.calc-out{border-top:1px solid var(--line);padding-top:16px}}
+@media (min-width:1000px){.calc-out{border-left:1px solid var(--line);padding-left:20px}}
+.calc-echo{margin:0;padding:10px 12px;border-radius:10px;background:var(--surface-2);border:1px solid var(--line);font-size:14px;color:var(--ink-2)}
+.calc-echo b{color:var(--gold);font-weight:600}
+.calc-out h3{font-size:16px;margin:0}
 .explain{font-size:14px;color:var(--ink-2);margin:0;max-width:66ch}
 .explain b{color:var(--ink);font-weight:600}
 .settings-grid{display:grid;gap:16px;grid-template-columns:minmax(0,1fr);align-items:start}
@@ -3103,7 +3112,7 @@ function renderPlanner() {
           <button class="btn" type="submit">${icons.plus}Add goal</button>
         </form>
       </section>
-      <div class="calc-grid" id="calc-host"></div>
+      <div id="calc-host"></div>
     </div>`;
   updatePlan();
   renderCalculator(document.getElementById('calc-host'));
@@ -3204,8 +3213,11 @@ function updatePlan() {
 function renderCalculator(host) {
   const c = ui.calc, band = state.profile.band;
   host.innerHTML = `
-      <section class="panel">
-        <div class="panel-head"><h2>SIPP vs ISA</h2></div>
+      <section class="panel" id="calc-panel">
+        <div class="panel-head"><h2>SIPP vs ISA</h2><span class="aside">Change the inputs to update the result</span></div>
+        <div class="calc-grid calc-in">
+        <div class="calc-inputs">
+        <div class="eyebrow calc-step"><span>1</span>Your inputs</div>
         <div class="form-grid">
           <div class="field">
             <label for="calc-monthly">You pay in each month</label>
@@ -3235,11 +3247,14 @@ function renderCalculator(host) {
             </select>
           </div>
         </div>
-      </section>
-      <section class="panel stack" id="calc-results" aria-live="polite"></section>`;
+        </div>
+        <div class="stack calc-out"><div class="eyebrow calc-step"><span>2</span>Result</div><div class="stack" id="calc-results" aria-live="polite"></div></div>
+        </div>
+      </section>`;
   updateCalc();
 }
-function updateCalc() {
+// changed: called from an input, so the figures flash and the chart moves without redrawing from zero.
+function updateCalc(changed) {
   const c = ui.calc, band = state.profile.band;
   const net = Math.max(0, +c.monthly || 0), gross = net / 0.8, reclaim = gross * BANDS[band].extra, rate = (+c.rate || 0) / 100;
   let isa = 0, sipp = 0, paid = 0;
@@ -3254,10 +3269,12 @@ function updateCalc() {
   }
   const taxFree = Math.min(sipp * 0.25, LSA);
   const sippAfterTax = taxFree + (sipp - taxFree) * (1 - c.draw / 100);
-  const lead = sippAfterTax - isa;
+  const lead = sippAfterTax - isa, g = changed ? ' glow' : '';
+  const yrs = `${c.years} year${c.years == 1 ? '' : 's'}`;
   document.getElementById('calc-results').innerHTML = `
-    <div class="panel-head" style="margin-bottom:0"><h2>After ${c.years} year${c.years == 1 ? '' : 's'}</h2><span class="aside">You pay in ${gbp(paid)}</span></div>
-    <div class="compare">
+    <p class="calc-echo${g}">Paying <b>${gbp(net)} a month</b> for <b>${yrs}</b> at <b>${c.rate}% growth</b>, as a <b>${BANDS[band].word}-rate</b> taxpayer paying <b>${c.draw}% tax</b> when you draw the pension.</p>
+    <div class="panel-head" style="margin-bottom:0"><h3>After ${yrs}</h3><span class="aside">You pay in ${gbp(paid)}</span></div>
+    <div class="compare${g}">
       <div class="stat"><div class="k"><i class="sw" style="background:var(--c2)"></i>ISA, tax-free</div><div class="v num">${gbp(isa)}</div></div>
       <div class="stat"><div class="k"><i class="sw" style="background:var(--c1)"></i>SIPP pot</div><div class="v num">${gbp(sipp)}</div></div>
       <div class="stat"><div class="k">SIPP after tax</div><div class="v num">${gbp(sippAfterTax)}</div></div>
@@ -3270,7 +3287,7 @@ function updateCalc() {
     <div class="legend-inline"><span><i class="sw" style="background:var(--c1)"></i>SIPP pot</span><span><i class="sw" style="background:var(--c2)"></i>ISA</span><span><i class="sw" style="background:var(--ink-3)"></i>Paid in</span></div>
     <p class="hint">Illustration only, not financial advice. Assumes a steady return, relief at source, and 25% taken tax-free up to the ${gbp(LSA)} Lump Sum Allowance. A SIPP can normally be accessed from age 57 from April 2028; an ISA can be withdrawn at any time.</p>`;
   chart(document.getElementById('calc-chart'), {
-    xs: years, tick: y => 'Yr ' + y, label2: y => 'Year ' + y, label: 'SIPP versus ISA growth',
+    xs: years, tick: y => 'Yr ' + y, label2: y => 'Year ' + y, label: `SIPP versus ISA: ${gbp(net)} a month for ${yrs} at ${c.rate}%`, _drawn: !!changed,
     series: [
       { label: 'SIPP pot', color: 'var(--c1)', values: sippV },
       { label: 'ISA', color: 'var(--c2)', values: isaV },
@@ -6157,8 +6174,8 @@ document.addEventListener('change', e => {
       else { t.value = ''; store.del(REMINDER_KEY); setStatus('Notifications are turned off for Aurum. Allow them in Android settings.', true, 'reminder-status'); }
     }).catch(() => setStatus('Could not set the reminder.', true, 'reminder-status'));
   }
-  if (t.name === 'band') { state.profile.band = t.value; save(); updateCalc(); }
-  if (t.id === 'calc-draw') { ui.calc.draw = +t.value; saveUi(); updateCalc(); }
+  if (t.name === 'band') { state.profile.band = t.value; save(); updateCalc(true); }
+  if (t.id === 'calc-draw') { ui.calc.draw = +t.value; saveUi(); updateCalc(true); }
   if (t.id === 'custom-unit') { ui.custom.unit = t.value; saveUi(); render(); }
   if (t.id === 'custom-n') { ui.custom.n = clamp(Math.round(num(t.value, 1)), 1, 999); saveUi(); render(); }
   if (t.dataset.planInc) { ui.plan.include[t.dataset.planInc] = t.checked; saveUi(); updatePlan(); }
@@ -6183,7 +6200,7 @@ document.addEventListener('input', e => {
   else if (t.id === 'calc-years') { c.years = +t.value; out('out-years', c.years); }
   else if (t.id === 'calc-rate') { c.rate = +t.value; out('out-rate', c.rate + '%'); }
   else return;
-  saveUi(); updateCalc();
+  saveUi(); updateCalc(true);
 });
 document.addEventListener('submit', async e => {
   const f = e.target;
