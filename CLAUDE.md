@@ -193,6 +193,10 @@ not advice — keep that disclaimer.
   Tick boxes (`data-scope`) set device-only `ui.chartOut` {id:true} (`chartOff(a)`): renderOverview splits `all` (Holdings, ISA allowance,
   activity) from `accts` (card, KPIs, wealth sources, Performance, Allocation, monthly bars). The last included account can't be unticked.
 
+- 2.0.3: goals may carry `accounts: [ids]` (scope `'pick'`), which `goalAccounts()` prefers; `goalScopeName(g)`; `goalPicker(g)` in
+  Planner's goal list (`data-goal-acct` boxes, fold `goal-<id>`) and `#goal-picks` in the goal form. Removing an account drops it from
+  goals (and goals left empty). Planner `#path-panel` aside links "Includes N of M accounts" to `#plan-accts`. FAQ `pick`.
+
 ## Status (latest)
 
 - 1.9.9 merged to main (PR #23); owner publishes the v1.9.9 release. Owner says when to merge.
