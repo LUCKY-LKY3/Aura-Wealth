@@ -197,6 +197,12 @@ Always in today's money and marked "illustration, not advice".
 - Avoid: adverts (tracking, off-brand), selling data (we never have it), affiliate links to platforms
   (FCA financial promotion risk; conflicts with "no advice")
 
+## Launch: promo video (owner idea, 8 Oct 2026; make when the app is ready for launch)
+- Short promo (about 30–60s, plus a 15s cut for Play Store / socials) showing net worth, wealth sources, Planner,
+  SIPP vs ISA and the lock screen, recorded from demo mode so no real data appears
+- Claude: script, storyboard, shot list, scripted demo walkthroughs (Playwright capture at phone width), captions,
+  animated title/feature slides. Owner: voiceover, music, final edit (e.g. CapCut, DaVinci Resolve)
+
 ## Later (not scheduled)
 - Helper mode: a Settings switch that adds small "?" bubbles next to sections and figures (net worth, paid in vs
   growth, savings rate, allowances, planner, tax helper…); tapping one pops up a short plain-English explanation of what
