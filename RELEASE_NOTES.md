@@ -1,2 +1,3 @@
 - Overview: "Where your wealth came from" and the net worth card now say which accounts they include, for example "Includes 7 of 8 accounts"
 - Tap Show to see every account counted, with its colour and balance, and which ones are left out and why (another person's account, or no balance yet)
+- Untick an account to leave it out of your net worth, its charts and Performance. It stays in Holdings, marked "not in totals", and tick it again any time

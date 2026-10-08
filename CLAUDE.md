@@ -190,6 +190,8 @@ not advice — keep that disclaimer.
 - 2.0.2: `chartScope(accts)` = accounts feeding the net worth card / `wealthSources` (selected person's accounts with a balance, closed
   included) and `out` (other people's, no balance yet, with reason). `scopeList()` renders `details#ws-scope` (fold `ws-scope`) under the
   panel head; the card's "Includes N of M accounts" link (`scope-open`) opens and scrolls to it.
+  Tick boxes (`data-scope`) set device-only `ui.chartOut` {id:true} (`chartOff(a)`): renderOverview splits `all` (Holdings, ISA allowance,
+  activity) from `accts` (card, KPIs, wealth sources, Performance, Allocation, monthly bars). The last included account can't be unticked.
 
 ## Status (latest)
 
