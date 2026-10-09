@@ -261,6 +261,7 @@ not advice — keep that disclaimer.
 
 - 2.0.19: Payslip's strip marks any pay (`periodPick('slip', () => true)`); a period with pay but no gross shows `takeHome()` (net tiles,
   plus tax year so far in Month view) and the details prompt instead of an empty state.
+  FAQ `log-pay`, `rate`, `periods`, `slip` (Saving and income); `why()` on the Savings rate and Payslip breakdown titles.
 
 ## Status (latest)
 

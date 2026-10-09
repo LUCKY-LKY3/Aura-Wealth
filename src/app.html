@@ -4057,7 +4057,7 @@ function renderIncome() {
     ...cmp
   ].join('');
   const summary = `<section class="panel">
-    <div class="panel-head" style="margin-bottom:0"><h2 class="tt">${ti('pct')}Savings rate</h2>
+    <div class="panel-head" style="margin-bottom:0"><h2 class="tt">${ti('pct')}Savings rate ${why('rate', 'How is my savings rate worked out?')}</h2>
       ${pp.seg}
     </div>${pp.strip.replace('<div style="height:14px"></div>', '')}
     ${st.net > 0 ? `<div class="review-grid">
@@ -4199,7 +4199,7 @@ function payslipPanel() {
   const { mode, cur, seg, strip } = periodPick('slip', () => true);
   let { from, to } = cur, name = cur.name, tyFrom = null, tyHead = '';
   if (mode === 'm') { tyFrom = taxYearStart(to); tyHead = to >= monthBounds(0)[0] ? 'Tax year so far' : `Tax year to ${cur.short}`; }
-  const head = `<div class="panel-head"><h2 class="tt">${ti('doc')}Payslip breakdown</h2>${seg}</div>${strip}`;
+  const head = `<div class="panel-head"><h2 class="tt">${ti('doc')}Payslip breakdown ${why('slip', 'What does Payslip show?')}</h2>${seg}</div>${strip}`;
   // 2.0.18: log pay from here. A month with pay but no details edits that pay; otherwise it opens Log pay dated in the month.
   const inP = state.pay.filter(p => p.date >= from && p.date <= to), bare = inP.filter(p => !(p.gross > 0));
   const logBtn = (label, cls = 'btn sm') => mode === 'm' && bare.length === 1 && inP.length === 1
@@ -4257,6 +4257,10 @@ const FAQ = [
   ['pick', 'How do I choose which accounts count?', '<b>Net worth and Overview charts:</b> open <b>Includes N of M accounts</b> on the net worth card or under "Where your wealth came from" and untick an account to leave it out. <b>Planner:</b> tick accounts under <b>Accounts and monthly payments</b> in Retirement\'s inputs; the <b>Includes N of M accounts</b> link under your pot takes you there. <b>Goals:</b> pick <b>Choose accounts…</b> when adding a goal, or open <b>Accounts that count</b> on a goal in Planner → Goals to change it.', 'Accounts and balances'],
   // Saving and income
   ['saved', "Why isn't a payment counted as saved?", 'Saved only counts <b>payments into your own accounts</b>, in the month they are dated. It isn\'t counted if you only changed the balance (log it as <b>Paid in</b> instead), if it\'s dated in a different month from the pay, if you ticked <b>Moved</b>, or if the account belongs to someone else under Family.', 'Saving and income'],
+  ['log-pay', 'How do I log my pay?', 'Add where your pay comes from under <b>Income › Sources</b> (salary, rental, side income and so on), with your usual take-home and payday if it is regular. Then each payday tap <b>Log pay</b> on Income (or on <b>Payslip</b> for a picked month) and enter what reached your bank. If you miss a month, the bell offers to fill in your usual amount, which you can change later.', 'Saving and income'],
+  ['rate', 'How is my savings rate worked out?', 'Your savings rate is what you saved divided by your take-home pay for the period. <b>Saved</b> is your own money paid into your accounts, less anything taken out; tax relief, bonuses from the government and employer payments aren\'t counted, and money moved between your own accounts doesn\'t count either. Interest and dividends are shown on Income but are not part of the rate.', 'Saving and income'],
+  ['periods', 'How do I see an earlier month, tax year or year?', 'On <b>Income › Savings</b> and <b>Payslip</b>, pick <b>Month</b>, <b>Tax year</b> or <b>Year</b>, then tap any tile on the strip below (swipe it sideways to go further back). A gold mark means something is logged in it. <b>Latest</b> takes you back to the newest one.', 'Saving and income'],
+  ['slip', 'What does Payslip show, and why only my take-home pay?', 'Payslip splits your gross pay into take-home, tax, National Insurance, pension and any other deductions, so you can see how much of each £1 you keep. That needs your payslip details. If you only logged what reached your bank, it shows your take-home pay (and, for a month, the tax year so far); tap <b>Add payslip details</b> to fill in the rest. Details are optional: your savings rate only needs take-home pay.', 'Saving and income'],
   ['payslip', 'What are taxable pay, pensionable pay and the Defined benefit tick?', 'All optional, under <b>Add payslip details</b> when you log pay. <b>Taxable pay</b> is the pay your tax is worked out on; it is lower than gross when your pension or salary sacrifice comes off before tax. Fill it in and <b>Use these</b> on the P60 check adds up taxable pay, so it matches your P60. <b>Pensionable pay</b> is the pay your pension is worked out on; it is kept for the defined benefit tools coming later. Tick <b>Defined benefit pension</b> on a salary source (edit it on Income › Sources) if your workplace pension is a final salary or career average scheme: the pension on your payslips then counts in your savings rate including pension from work, and taxable pay defaults to gross less pension.', 'Saving and income'],
   ['typical', 'What is the typical savings rate?', 'Your savings rate with one-offs like bonuses and gifts left out, assuming you saved those first. It shows what you save from your normal pay. Mark pay as <b>One-off</b> when you log it.', 'Saving and income'],
   // Pensions and tax

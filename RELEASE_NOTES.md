@@ -1,1 +1,2 @@
 - Payslip now shows your take-home pay for the month (and the tax year so far) even when you've only logged what reached your bank, without gross pay or deductions
+- New Help questions: how to log pay, how your savings rate is worked out, how to see an earlier month or year, and what Payslip shows. Savings rate and Payslip breakdown have a "?" button that opens them

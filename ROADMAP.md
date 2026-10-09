@@ -44,7 +44,7 @@ Order: 2.0 polish and charts → 2.x Future Me → 3.0 pensions, property and de
   Taxable pay (blank = gross, or gross − pension for a DB source) feeds the P60 "Use these"; Pensionable pay stored for
   3.0 DB accrual; "Defined benefit pension" tick on a salary source counts its payslip pension in the work-pension
   savings rate. Not added: NI-able pay (clutter), tax period (worked out from the pay date)
-- Done in 2.0.19: Payslip shows take-home (month + tax year so far) for pay logged without payslip details (owner, 9 Oct 2026)
+- Done in 2.0.19: Payslip shows take-home (month + tax year so far) for pay logged without payslip details (owner, 9 Oct 2026); FAQ log-pay, rate, periods, slip with "?" buttons on Savings rate and Payslip breakdown
 - Next tidy-up (audit 9 Oct 2026): Accounts › All accounts
   (merge "Your money vs growth" with "Every account", fold the donut)
 - Native SVG Tooltips: hover/touch interaction on all charts showing exact data values at each point
