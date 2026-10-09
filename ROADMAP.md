@@ -40,7 +40,10 @@ Order: 2.0 polish and charts → 2.x Future Me → 3.0 pensions, property and de
 - Done in 2.0.15: bolder card titles with a small gold icon tile
 - Done in 2.0.16: sliding the Insights month strip no longer changes page; Income split into Savings / Payslip / Sources pages (2,750px to 1,815px on a phone)
 - Done in 2.0.17: Income › Savings and Payslip pick Month / Tax year / Year, each with a strip to see past ones
-- Done in 2.0.18: Log pay from Income › Payslip; more payslip detail (taxable pay, pensionable pay, Defined benefit tick on a salary source)
+- Done in 2.0.18: Log pay from Income › Payslip; more payslip detail (owner, 9 Oct 2026):
+  Taxable pay (blank = gross, or gross − pension for a DB source) feeds the P60 "Use these"; Pensionable pay stored for
+  3.0 DB accrual; "Defined benefit pension" tick on a salary source counts its payslip pension in the work-pension
+  savings rate. Not added: NI-able pay (clutter), tax period (worked out from the pay date)
 - Next tidy-up (audit 9 Oct 2026): Accounts › All accounts
   (merge "Your money vs growth" with "Every account", fold the donut)
 - Native SVG Tooltips: hover/touch interaction on all charts showing exact data values at each point
@@ -80,6 +83,8 @@ Always in today's money and marked "illustration, not advice".
     explaining CETV and that the real value depends on the scheme's benefits
   - Suggested with it: planner adds DB income from the scheme pension age alongside the pot's drawdown income; optional
     automatic lump sum (e.g. NHS 1995 section) added to the value; shares the "yearly income from an age" model with State Pension
+  - Accrual from payslips: pensionable pay × the scheme's accrual rate (e.g. 1/54) shows "this year added about £X a year"
+    and keeps the DB income estimate up to date
 - State Pension: yearly amount (from the user's forecast) from State Pension age, same "yearly income from an age" model
   as DB; in the planner, and optionally in pension wealth; NI Qualifying Years tracker (path to state pension eligibility)
 - Property and debts: home/property values and liabilities (mortgage, loans, cards), so net worth = assets − liabilities
@@ -97,6 +102,10 @@ Always in today's money and marked "illustration, not advice".
   use logged interest where there is some, otherwise balance growth in the tax year, marked "estimated from balances" with a
   "Log as interest" button; Personal Savings Allowance meter by band (£1,000 / £500 / £0); flag growth far above the account's
   advertised rate as a probably unlogged payment rather than interest
+- Capital gains panel (Insights › Tax year, first CGT piece, feeds the engine): log sales from a GIA (date, proceeds,
+  allowable cost, copied from the provider's CGT report; new `disposals` list), optional losses carried forward;
+  £3,000 annual exempt amount meter and estimated CGT at 18%/24% by band (2026-27 rates, GOV.UK); rough unrealised gain
+  per GIA = balance − net paid in, labelled as an estimate; replaces the current "Sold from investment accounts" line
 - Personal allowance taper (£100k–£125,140) shown clearly
 - HENRY Tax Trap Navigator: guide users through £50k and £100k Personal Allowance cliffs with clear impact visualization
 - "Bed & ISA" Capital Gains Harvester: scan holdings for unrealized gains/losses before 5 April, identify best candidates
@@ -210,6 +219,12 @@ Always in today's money and marked "illustration, not advice".
   copying only. Decide repo privacy before charging. Play Billing is Android-only, so the website stays free or is a demo
 - Avoid: adverts (tracking, off-brand), selling data (we never have it), affiliate links to platforms
   (FCA financial promotion risk; conflicts with "no advice")
+
+## Launch: promo video (owner idea, 8 Oct 2026; make when the app is ready for launch)
+- Short promo (about 30–60s, plus a 15s cut for Play Store / socials) showing net worth, wealth sources, Planner,
+  SIPP vs ISA and the lock screen, recorded from demo mode so no real data appears
+- Claude: script, storyboard, shot list, scripted demo walkthroughs (Playwright capture at phone width), captions,
+  animated title/feature slides. Owner: voiceover, music, final edit (e.g. CapCut, DaVinci Resolve)
 
 ## Later (not scheduled)
 - Helper mode: a Settings switch that adds small "?" bubbles next to sections and figures (net worth, paid in vs
