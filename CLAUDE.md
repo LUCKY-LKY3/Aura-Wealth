@@ -243,6 +243,11 @@ not advice — keep that disclaimer.
 - 2.0.15 card titles: `h2.tt` = bold 16px title with a gold icon tile `ti(key)` (`.t-ic`, paths in `TITLE_ICONS`, falls back to `SET_ICONS`).
   `foldOpen` picks its icon from `FOLD_ICONS[key]`. Give every new card title `class="tt"` and `${ti('…')}`. `.kpi .k` labels are gold.
 
+- 2.0.16: tab swipe skips `.month-strip` and anything that scrolls sideways (`inSideScroll`). Income pages `INCOME_PAGES`
+  ('save'|'slip'|'src', `ui.incomePage`, `income-page` action, `pageTabs`): Savings = rate + monthly chart + Where it went; Payslip =
+  `payslipPanel` with its own `incomeSeg` period picker (empty state when no payslip details); Sources = sources + pay history.
+  `data-tab="income" data-page=…` links and bell `note-go` `page` open one.
+
 ## Status (latest)
 
 - 1.9.9 merged to main (PR #23); owner publishes the v1.9.9 release. Owner says when to merge.

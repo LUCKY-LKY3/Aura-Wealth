@@ -38,8 +38,8 @@ Order: 2.0 polish and charts → 2.x Future Me → 3.0 pensions, property and de
   3 recent entries, goals one line each
 - Done in 2.0.13: colour choice in Settings › Appearance (Gold, Green, Navy, Copper; dark theme only)
 - Done in 2.0.15: bolder card titles with a small gold icon tile
-- Done in 2.0.16: sliding the Insights month strip no longer changes page
-- Next tidy-ups (audit 9 Oct 2026): Income as pages (This month, Payslip, Sources and history); Accounts › All accounts
+- Done in 2.0.16: sliding the Insights month strip no longer changes page; Income split into Savings / Payslip / Sources pages (2,750px to 1,815px on a phone)
+- Next tidy-up (audit 9 Oct 2026): Accounts › All accounts
   (merge "Your money vs growth" with "Every account", fold the donut)
 - Native SVG Tooltips: hover/touch interaction on all charts showing exact data values at each point
 - Cash drag warning: lots of cash in a low-interest account (user enters rate)
