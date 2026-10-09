@@ -1,1 +1,1 @@
-- Payslip has Month, Tax year and Year buttons, each with a strip: slide back to any month (such as June), last tax year or last year to see that payslip breakdown. Latest takes you back
+- Savings rate and Payslip both have Month, Tax year and Year buttons, each with a strip: slide back to any month (such as June), last tax year or last year. Latest takes you back
