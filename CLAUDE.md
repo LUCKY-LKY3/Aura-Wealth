@@ -219,6 +219,13 @@ not advice — keep that disclaimer.
   page `aria-current="page"`): boxed icon tiles, sticky under the phone header (`--ptabs-top` set by `placePageTabs()` on render/scroll/resize);
   2.0.9: icon beside label (one row, 40px); `.ptabs.stuck` only trims padding and `body.tabs-stuck` drops the header shadow. Use it for any new page with sections.
 
+- 2.0.10 Planner inputs + result: Retirement is `#plan-panel` (`.calc-grid` like SIPP vs ISA): "1 Your inputs" (sliders, then
+  `details#plan-acct-fold` fold `plan-accts`, closed line `planAcctLine()`), "2 Result" = `#plan-results` (`updatePlan(changed)`: `.calc-echo`
+  of the assumptions, then pot, pills, stops, chart, tiles, notes). `plan-set`/`planSummary` are gone. Goals use `goalCards()` (Planner only;
+  `goalList()` is Overview's compact list): inputs `data-goal-target`/`data-goal-date` save to the goal, `data-goal-mon` is a device-only
+  what-if in `ui.goalMon` (`goalMon(g)`, reset `goal-mon-reset`); `goalStatus(g, mon)` also returns `usual`, `eta` (`monthsToReach`);
+  `goalResult()` = echo + bars with a dashed `.cb-target` marker + verdict; `refreshGoal(id)` updates in place.
+
 ## Status (latest)
 
 - 1.9.9 merged to main (PR #23); owner publishes the v1.9.9 release. Owner says when to merge.

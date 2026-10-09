@@ -312,9 +312,24 @@ body.tabs-stuck .top{box-shadow:none}
 .chart-bar{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px}
 .chip-btn{border:1px solid color-mix(in srgb,var(--gold) 45%,transparent);background:color-mix(in srgb,var(--gold) 10%,transparent);color:var(--gold);border-radius:99px;padding:2px 10px;font:inherit;font-size:12px;font-weight:550;cursor:pointer;margin-left:4px}
 .plan-more{margin:10px 0 0}.plan-more .plan-accts{margin-top:8px}
+.plan-acct-fold{margin:18px 0 0;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:var(--surface-2)}
+.plan-acct-fold>summary{display:flex;justify-content:space-between;align-items:center;gap:10px;width:100%}
+.pa-sum{display:flex;flex-direction:column;gap:2px;min-width:0}.pa-sum span{color:var(--ink-3);font-size:12px}
+.plan-acct-fold .plan-accts{margin-top:10px;border:0;border-top:1px solid var(--line);border-radius:0}.plan-acct-fold .plan-accts li{padding-inline:0}.plan-acct-fold .plan-accts li:first-child{border-top:0}
+@media (min-width:1000px){.calc-inputs .plan-form{grid-template-columns:minmax(0,1fr)}}
 .plan-notes{margin:0}.plan-notes li:first-child{border-top:0;padding-top:0}
 .goal-list .scope-list li{flex-direction:row;gap:12px;text-align:left}
 .goal-picks{grid-column:1/-1}
+.goal-cards{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:14px}
+.goal-card{border:1px solid var(--line);border-radius:12px;padding:14px 16px 16px;display:flex;flex-direction:column;gap:12px}
+.goal-head{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.goal-head h3{font-size:16px;margin:0}
+.goal-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px 12px}
+.goal-fields .gf-wide{grid-column:1/-1}
+.goal-card .plan-acct-fold{margin-top:14px}
+.goal-card .scope-list li{flex-direction:row}
+.cb-track .cb-target{width:0;border-left:2px dashed var(--ink);border-radius:0;opacity:.75;transform:translateX(-1px)}
+.cb-key .cb-tk{width:0;height:12px;border-radius:0;background:none;border-left:2px dashed var(--ink);opacity:.75}
 .link-btn{border:0;background:none;padding:0;font:inherit;color:inherit;text-decoration:underline;text-decoration-color:color-mix(in srgb,var(--gold) 50%,transparent);text-underline-offset:3px;cursor:pointer}
 .scope-h{margin:12px 0 0;font-size:12px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.06em}
 .ws-table{margin-top:14px}
@@ -512,6 +527,7 @@ dialog.sheet::backdrop{background:rgba(8,12,22,.55)}
 .cb-key i{width:10px;height:10px;border-radius:3px}
 .explain{font-size:14px;color:var(--ink-2);margin:0;max-width:66ch}
 .explain b{color:var(--ink);font-weight:600}
+.explain b.pos{color:var(--pos)}.explain b.neg{color:var(--neg)}
 .settings-grid{display:grid;gap:16px;grid-template-columns:minmax(0,1fr);align-items:start}
 @media (min-width:1000px){.settings-grid{grid-template-columns:minmax(260px,340px) minmax(0,1fr)}.set-menu{position:sticky;top:calc(var(--sa-top) + 84px)}}
 .set-menu{display:flex;flex-direction:column;gap:14px}
@@ -2370,55 +2386,111 @@ function neededMonthly(pv, target, annual, months) {
   return (target - fvPv) / factor;
 }
 const monthsUntil = iso => { const [y, m, d] = iso.split('-').map(Number), [ty, tm, td] = TODAY.split('-').map(Number); return (y - ty) * 12 + (m - tm) - (d < td ? 1 : 0); };
-function goalStatus(g) {
+// Months until a pot reaches target at `annual`% with `monthly` added (null if not within 50 years).
+function monthsToReach(pv, monthly, target, annual) {
+  const r = Math.pow(1 + annual / 100, 1 / 12) - 1;
+  let v = pv;
+  for (let i = 1; i <= 600; i++) { v = (v + monthly) * (1 + r); if (v >= target) return i; }
+  return null;
+}
+// mon: a monthly amount to try instead of what the goal's accounts usually get (Planner's goal inputs).
+function goalStatus(g, mon) {
   const accts = goalAccounts(g);
   const cur = accts.reduce((t, a) => t + accountStats(a.id).cur, 0);
-  const monthly = accts.reduce((t, a) => t + monthlyIn(a), 0);
+  const usual = accts.reduce((t, a) => t + monthlyIn(a), 0), monthly = mon != null ? mon : usual;
   const progress = clamp(cur / g.target, 0, 1);
-  if (cur >= g.target) return { cur, progress, done: true, text: 'Reached' };
-  if (!g.date) return { cur, progress, text: `${gbp(g.target - cur)} to go` };
+  if (cur >= g.target) return { cur, progress, monthly, usual, done: true, text: 'Reached' };
+  const eta = monthsToReach(cur, monthly, g.target, state.profile.growth);
+  if (!g.date) return { cur, progress, monthly, usual, eta, text: `${gbp(g.target - cur)} to go` };
   const months = monthsUntil(g.date);
-  if (months <= 0) return { cur, progress, late: true, text: 'Target date passed' };
+  if (months <= 0) return { cur, progress, monthly, usual, eta, late: true, text: 'Target date passed' };
   const rate = state.profile.growth;
   const projected = grow(cur, monthly, rate, months);
   const need = neededMonthly(cur, g.target, rate, months);
   const onTrack = projected >= g.target;
-  return { cur, progress, onTrack, projected, need, monthly, text: onTrack ? `On track · about ${gbp(projected)} by then` : `Pay in ${gbp(need)}/month to get there (now ${gbp(monthly)})` };
+  return { cur, progress, onTrack, projected, need, monthly, usual, eta, months, text: onTrack ? `On track · about ${gbp(projected)} by then` : `Pay in ${gbp(need)}/month to get there (now ${gbp(monthly)})` };
 }
 function goalRing(p, ok) {
   const C = 2 * Math.PI * 18, len = clamp(p, 0, 1) * C;
   return `<span class="ring" aria-hidden="true"><svg viewBox="0 0 44 44"><circle cx="22" cy="22" r="18" fill="none" style="stroke:var(--surface-2)" stroke-width="5"/><circle cx="22" cy="22" r="18" fill="none" style="stroke:${ok ? 'var(--gold)' : 'var(--c3)'}" stroke-width="5" stroke-linecap="round" stroke-dasharray="${Math.max(0.01, len).toFixed(2)} ${C.toFixed(2)}"/></svg><span>${Math.round(clamp(p, 0, 1) * 100)}%</span></span>`;
 }
-function goalList(goals, withDelete) {
+function goalList(goals) {
   if (!goals.length) return '';
-  if (!withDelete) return `<ul class="goal-list">${goals.map(g => {
+  return `<ul class="goal-list">${goals.map(g => {
     const st = goalStatus(g);
     return `<li class="goal-row">${goalRing(st.progress, st.done || st.onTrack || (!g.date && !st.late))}<div>
       <div class="goal-top"><b>${esc(g.name)}</b><span class="mono">${gbp(st.cur)} <span class="faint">of ${gbp(g.target)}</span></span></div>
       <div class="goal-meta"><span>${g.date ? 'By ' + dateLabel(toMs(g.date)) : esc(goalScopeName(g))}</span><span class="${st.done || st.onTrack ? 'pos' : st.late ? 'neg' : ''}">${st.text}</span></div>
     </div></li>`;
   }).join('')}</ul>`;
-  return `<ul class="goal-list">${goals.map(g => {
-    const st = goalStatus(g);
-    if (withDelete && pendingGoal === g.id) return `<li style="background:var(--neg-soft);padding:10px;border-radius:8px"><span>Delete the goal <b>${esc(g.name)}</b>?</span><span class="row-actions"><button class="btn sm ghost" data-action="goal-del-no">Keep</button><button class="btn sm danger solid" data-action="goal-del-yes" data-id="${esc(g.id)}">Delete</button></span></li>`;
-    return `<li>
-      <div class="goal-top"><b>${esc(g.name)}</b><span class="mono">${gbp(st.cur)} <span class="faint">of ${gbp(g.target)}</span>${withDelete ? ` <button class="icon-btn" data-action="goal-del" data-id="${esc(g.id)}" aria-label="Delete goal ${esc(g.name)}">${icons.trash}</button>` : ''}</span></div>
-      <div class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(st.progress * 100)}"><i style="width:${(st.progress * 100).toFixed(1)}%"></i></div>
-      ${goalPicker(g, st)}
+}
+
+// 2.1.0: Planner goals as inputs + result, like SIPP vs ISA. Target and date save to the goal; the monthly
+// amount is a what-if kept on this device (ui.goalMon), starting from what the accounts usually get.
+const goalMon = g => { const v = (ui.goalMon || {})[g.id]; return v != null && v !== '' ? Math.max(0, num(v, 0)) : null; };
+const etaLabel = n => monthYear(Date.UTC(+TODAY.slice(0, 4), +TODAY.slice(5, 7) - 1 + n, 15));
+function goalCards(goals) {
+  return `<ul class="goal-cards">${goals.map(g => {
+    const st = goalStatus(g, goalMon(g)), id = esc(g.id);
+    return `<li class="goal-card" id="goal-${id}">
+      <div class="goal-head"><h3>${esc(g.name)}</h3><button class="icon-btn" data-action="goal-del" data-id="${id}" aria-label="Delete goal ${esc(g.name)}">${icons.trash}</button></div>
+      <div class="calc-grid calc-in">
+        <div class="calc-inputs">
+          <div class="eyebrow calc-step"><span>1</span>Your inputs</div>
+          <div class="goal-fields">
+            <div class="field"><label for="gt-${id}">Target</label><div class="money"><span>£</span><input id="gt-${id}" class="input" type="number" inputmode="decimal" min="1" step="any" data-goal-target="${id}" value="${g.target}"></div></div>
+            <div class="field"><label for="gd-${id}">By <span class="faint">Optional</span></label><input id="gd-${id}" class="input" type="date" data-goal-date="${id}" value="${esc(g.date || '')}"></div>
+            <div class="field gf-wide"><label for="gm-${id}">Paying in each month</label><div class="money"><span>£</span><input id="gm-${id}" class="input" type="number" inputmode="decimal" min="0" step="10" data-goal-mon="${id}" value="${Math.round(st.monthly)}"></div>
+              <p class="hint" id="gmh-${id}">${goalMonHint(g, st)}</p></div>
+          </div>
+          ${goalPicker(g)}
+        </div>
+        <div class="stack calc-out"><div class="eyebrow calc-step"><span>2</span>Result</div><div class="stack" id="goal-out-${id}" aria-live="polite">${goalResult(g, st)}</div></div>
+      </div>
     </li>`;
   }).join('')}</ul>`;
+}
+const goalMonHint = (g, st) => goalMon(g) != null && Math.round(st.monthly) !== Math.round(st.usual)
+  ? `Trying a new amount. Usually ${gbp(st.usual)}. <button class="chip-btn" data-action="goal-mon-reset" data-id="${esc(g.id)}">Use ${gbp(st.usual)}</button>`
+  : 'What these accounts usually get. Change it to try another amount.';
+function goalResult(g, st, changed) {
+  const n = goalAccounts(g), where = n.length === 1 ? esc(n[0].name) : `${n.length} accounts`, gl = changed ? ' glow' : '';
+  const by = g.date ? dateLabel(toMs(g.date)) : '';
+  const barMax = Math.max(1, g.target, st.cur, st.projected || 0);
+  const bar = (name, sub, v, op) => `<div class="cb-row"><div class="cb-top"><span class="cb-n">${name} <span>${sub}</span></span><b class="num">${gbp(v)}</b></div>
+      <div class="cb-track"><i style="width:${(Math.min(v, barMax) / barMax * 100).toFixed(1)}%;background:var(--gold);opacity:${op}"></i><i class="cb-target" style="left:${(g.target / barMax * 100).toFixed(1)}%"></i></div></div>`;
+  const eta = st.eta != null ? etaLabel(st.eta) : '';
+  const verdict = st.done ? `<b class="pos">Reached.</b> You have <b>${gbp(st.cur)}</b>${st.cur > g.target ? `, ${gbp(st.cur - g.target)} more than the target` : ''}.`
+    : st.late ? `<b class="neg">The date has passed.</b> ${gbp(g.target - st.cur)} to go.${eta ? ` At this rate you would get there around <b>${eta}</b>.` : ''} Pick a new date to see what to pay in.`
+    : !g.date ? `<b>${gbp(g.target - st.cur)} to go.</b> ${eta ? `At this rate you would get there around <b>${eta}</b>.` : 'Add a monthly amount to see when you would get there.'}`
+    : st.onTrack ? `<b class="pos">On track.</b> About <b>${gbp(st.projected)}</b> by ${by}${eta ? `, reaching the target around <b>${eta}</b>` : ''}.`
+    : `<b class="neg">${gbp(g.target - st.projected)} short</b> by ${by}. Pay in about <b>${gbp(st.need)}</b> a month to get there, ${gbp(st.need - st.monthly)} more than now.`;
+  return `<p class="calc-echo${gl}">Paying <b>${gbp(st.monthly)} a month</b> into <b>${where}</b> at <b>${state.profile.growth}% growth</b>, aiming for <b>${gbp(g.target)}</b>${by ? ` by <b>${by}</b>` : ''}.</p>
+    <div class="calc-bars${gl}">
+      ${bar('Now', `${Math.round(st.progress * 100)}% of the target`, st.cur, 1)}
+      ${g.date && !st.done && !st.late ? bar(`By ${by}`, 'projected', st.projected, .45) : ''}
+      <div class="cb-key"><i class="cb-tk"></i>Target ${gbp(g.target)}</div>
+    </div>
+    <p class="explain">${verdict}</p>`;
+}
+function refreshGoal(id) {
+  const g = state.goals.find(x => x.id === id), host = document.getElementById('goal-out-' + id);
+  if (!g || !host) return;
+  const st = goalStatus(g, goalMon(g));
+  host.innerHTML = goalResult(g, st, true);
+  const h = document.getElementById('gmh-' + id); if (h) h.innerHTML = goalMonHint(g, st);
 }
 
 // 2.0.3: "Includes N accounts" on each goal in Planner, with tick boxes to change which accounts count.
 const goalPickList = () => state.accounts.filter(a => !a.archived);
 const acctLabel = a => esc(a.name) + (a.owner && a.owner !== 'me' ? ` <span class="faint">${esc(personName(a.owner))}</span>` : '');
-// 2.0.5: the goal's meta line is the toggle: which accounts count (tap to change), the date and its status.
-function goalPicker(g, st) {
+// 2.1.0: under a goal's inputs, which accounts count (tap to change).
+function goalPicker(g) {
   const inc = goalAccounts(g), ids = new Set(inc.map(a => a.id)), n = inc.length;
   const list = [...goalPickList(), ...inc.filter(a => a.archived)];
   const lbl = n === 1 ? inc[0].name : !n ? 'No accounts' : Array.isArray(g.accounts) ? `${n} accounts` : `${scopeName(g.scope)} · ${n} accounts`;
-  return `<details class="goal-scope" data-fold="goal-${esc(g.id)}" ${ui.folds && ui.folds['goal-' + g.id] ? 'open' : ''}>
-    <summary class="goal-meta" aria-label="Accounts this goal counts"><span class="goal-acc">${esc(lbl)}<span class="goal-chev" aria-hidden="true">${CHEVRON}</span>${g.date ? ' · by ' + dateLabel(toMs(g.date)) : ''}</span><span class="${st.done || st.onTrack ? 'pos' : st.late ? 'neg' : ''}">${st.text}</span></summary>
+  return `<details class="scope goal-scope plan-acct-fold" data-fold="goal-${esc(g.id)}" ${ui.folds && ui.folds['goal-' + g.id] ? 'open' : ''}>
+    <summary aria-label="Accounts this goal counts"><span class="pa-sum"><b>Accounts that count</b><span>${esc(lbl)} · ${gbp(inc.reduce((t, a) => t + accountStats(a.id).cur, 0))} now</span></span><span class="scope-tg" aria-hidden="true"></span></summary>
     <ul class="scope-list">${list.map(a => `<li><label class="check scope-pick"><input type="checkbox" data-goal-acct="${esc(g.id)}" value="${esc(a.id)}" ${ids.has(a.id) ? 'checked' : ''} ${ids.has(a.id) && ids.size === 1 ? 'disabled' : ''}><i class="sw" style="background:${colorOf(a)}"></i><span class="ws-name">${acctLabel(a)}</span></label><span class="mono">${gbp(accountStats(a.id).cur)}</span></li>`).join('')}</ul>
   </details>`;
 }
@@ -2634,7 +2706,7 @@ function renderOverview() {
   const goals = state.goals.length && ui.person === 'me' ? `
     <section class="panel">
       <div class="panel-head"><h2>Goals</h2><button class="btn ghost sm" data-action="tab" data-tab="planner" data-page="goals">Manage</button></div>
-      ${goalList(state.goals.slice(0, 3), false)}
+      ${goalList(state.goals.slice(0, 3))}
     </section>` : '';
 
   const ids = new Set(all.map(a => a.id));
@@ -3147,7 +3219,8 @@ function placePageTabs() {
   t.classList.toggle('stuck', stuck); document.body.classList.toggle('tabs-stuck', stuck);
 }
 const PLAN_PAGES = { plan: 'Retirement', goals: 'Goals', calc: 'SIPP vs ISA' };
-const planSummary = () => { const p = state.profile; return `${p.dob ? 'Retire at ' + p.retireAge : ui.plan.years + ' years to go'} · ${p.growth}% growth · ${p.inflation}% inflation`; };
+// 2.1.0: the closed line of the accounts list under Your inputs.
+const planAcctLine = (on, n) => `${on.length} of ${n} account${n === 1 ? '' : 's'} · ${gbp(on.reduce((t, a) => t + planMonthly(a), 0))} a month`;
 function renderPlanner() {
   const p = state.profile, accts = mine();
   const pg = PLAN_PAGES[ui.planPage] ? ui.planPage : 'plan';
@@ -3162,11 +3235,14 @@ function renderPlanner() {
               <div><div style="font-weight:550">${esc(a.name)}</div><div class="hint">${gbp(accountStats(a.id).cur)}${a.fee ? ` · ${a.fee}% fees` : ''}</div></div>
               <div class="money"><span>£</span><input class="input" type="number" inputmode="decimal" min="0" step="10" data-plan-mon="${esc(a.id)}" value="${planMonthly(a)}" aria-label="Monthly into ${esc(a.name)}"></div>
             </li>`;
-    body = `${p.dob ? '' : `<p class="warn">Add your date of birth in <button class="btn sm ghost" data-action="tab" data-tab="settings">Settings</button> to plan to a retirement age. Until then, set the number of years under Adjust your plan.</p>`}
-      <section class="panel stack" id="plan-results" aria-live="polite"></section>
-      <section class="panel" id="plan-set">${foldOpen('plan-set', 'Adjust your plan', `<span id="plan-sum">${esc(planSummary())}</span>`)}
-        <div class="stack" style="margin-top:16px">
-          <div class="plan-form">
+    const accSum = planAcctLine(on, listed.length);
+    body = `${p.dob ? '' : `<p class="warn">Add your date of birth in <button class="btn sm ghost" data-action="tab" data-tab="settings">Settings</button> to plan to a retirement age. Until then, set the number of years below.</p>`}
+      <section class="panel" id="plan-panel">
+        <div class="panel-head"><h2>Retirement</h2><span class="aside">Change the inputs to update the result</span></div>
+        <div class="calc-grid calc-in">
+        <div class="calc-inputs">
+          <div class="eyebrow calc-step"><span>1</span>Your inputs</div>
+          <div class="form-grid plan-form">
             ${p.dob ? `<div class="field">
               <label for="plan-age">Retire at age <output id="out-age">${p.retireAge}</output></label>
               <input id="plan-age" type="range" min="${Math.max(40, (age || 40) + 1)}" max="80" step="1" value="${p.retireAge}">
@@ -3193,18 +3269,20 @@ function renderPlanner() {
               <div class="money"><span>£</span><input id="plan-target" class="input" type="number" inputmode="decimal" min="0" step="1000" value="${ui.plan.target || ''}" placeholder="e.g. 750000"></div>
             </div>
           </div>
-          <div>
-            <div class="eyebrow" style="margin-bottom:8px">Accounts and monthly payments</div>
-            ${listed.length ? `${on.length ? `<ul class="plan-accts" id="plan-accts">${on.map(row).join('')}</ul>` : '<p class="hint" id="plan-accts">No accounts ticked yet.</p>'}
+          ${listed.length ? `<details class="scope plan-acct-fold" id="plan-acct-fold" data-fold="plan-accts" ${ui.folds['plan-accts'] || !on.length ? 'open' : ''}>
+            <summary><span class="pa-sum"><b>Accounts and monthly payments</b><span id="plan-acct-sum">${accSum}</span></span><span class="scope-tg" aria-hidden="true"></span></summary>
+            ${on.length ? `<ul class="plan-accts" id="plan-accts">${on.map(row).join('')}</ul>` : '<p class="hint" id="plan-accts">No accounts ticked yet.</p>'}
             ${off.length ? `<details class="scope plan-more" data-fold="plan-more" ${ui.folds['plan-more'] || !on.length ? 'open' : ''}><summary><b>${off.length} more account${off.length === 1 ? '' : 's'}</b> not in the plan<span class="scope-tg" aria-hidden="true"></span></summary><ul class="plan-accts">${off.map(row).join('')}</ul></details>` : ''}
-            <p class="hint" style="margin-top:8px">Monthly amounts start from your regular payments or last year's deposits. Include pension tax relief.</p>` : '<p class="hint">Add accounts to build a plan.</p>'}
-          </div>
+            <p class="hint" style="margin-top:8px">Monthly amounts start from your regular payments or last year's deposits. Include pension tax relief.</p>
+          </details>` : '<p class="hint" style="margin-top:16px">Add accounts to build a plan.</p>'}
         </div>
-      ${foldClose}</section>`;
+        <div class="stack calc-out"><div class="eyebrow calc-step"><span>2</span>Result</div><div class="stack" id="plan-results" aria-live="polite"></div></div>
+        </div>
+      </section>`;
   } else if (pg === 'goals') {
     body = `<section class="panel stack">
-        <div class="panel-head" style="margin-bottom:0"><div><h2>Goals</h2><span class="aside">Assumes ${p.growth}% growth a year</span></div>${state.goals.length ? `<button class="btn sm" data-action="goal-add">${icons.plus}Add goal</button>` : ''}</div>
-        ${goalList(state.goals, true) || `<div class="chart-empty"><div class="empty-cta"><span>Set a target, such as an emergency fund, a house deposit or an ISA milestone, and see if you are on track.</span><button class="btn primary" data-action="goal-add">${icons.plus}Add goal</button></div></div>`}
+        <div class="panel-head" style="margin-bottom:0"><div><h2>Goals</h2><span class="aside">Change a goal's inputs to update its result</span></div>${state.goals.length ? `<button class="btn sm" data-action="goal-add">${icons.plus}Add goal</button>` : ''}</div>
+        ${state.goals.length ? goalCards(state.goals) : `<div class="chart-empty"><div class="empty-cta"><span>Set a target, such as an emergency fund, a house deposit or an ISA milestone, and see if you are on track.</span><button class="btn primary" data-action="goal-add">${icons.plus}Add goal</button></div></div>`}
       </section>`;
   } else body = '<div id="calc-host"></div>';
   view.innerHTML = `<div class="stack view">${exampleNotice()}${tabs}${body}</div>`;
@@ -3232,16 +3310,17 @@ function openGoal() {
   openSheet(document.getElementById('goal-sheet'));
   setTimeout(() => { const f = document.getElementById('goal-name'); if (f) f.focus(); }, 60);
 }
-function updatePlan() {
+// changed: called from an input, so the echo and figures flash and the chart moves without redrawing from zero.
+function updatePlan(changed) {
   const host = document.getElementById('plan-results');
   if (!host) return;
-  const sum = document.getElementById('plan-sum');
-  if (sum) sum.textContent = planSummary();
   const p = state.profile, all = mine(), accts = all.filter(planIncluded);
   const months = planMonths(), rd = retireDate();
   const nAll = all.filter(a => !a.archived || planIncluded(a)).length;
+  const sum = document.getElementById('plan-acct-sum');
+  if (sum) sum.textContent = planAcctLine(accts, nAll);
   if (!accts.length) { host.innerHTML = `<div class="chart-empty"><div class="empty-cta"><span>Tick at least one account to see a projection.</span><button class="btn sm" data-action="plan-accts">Choose accounts</button></div></div>`; return; }
-  if (months < 1) { host.innerHTML = `<div class="chart-empty"><div class="empty-cta"><span>You are at or past the retirement age you picked.</span><button class="btn sm" data-action="plan-accts">Change it</button></div></div>`; return; }
+  if (months < 1) { host.innerHTML = `<div class="chart-empty"><div class="empty-cta"><span>You are at or past the retirement age you picked.</span><button class="btn sm" data-action="plan-accts" data-id="age">Change it</button></div></div>`; return; }
   const inf = p.inflation / 100, YR = 365.25 * 864e5;
   const real = (v, yrs) => v / Math.pow(1 + inf, yrs);
   const yrs = months / 12;
@@ -3252,6 +3331,7 @@ function updatePlan() {
   const income = mid.final * p.drawRate / 100;
   const feeCost = noFees.final - mid.final;
   const target = +ui.plan.target || 0;
+  const monthly = accts.reduce((t, a) => t + planMonthly(a), 0), g = changed ? ' glow' : '';
   const needMonthly = target && mid.final < target ? neededMonthly(0, target - mid.final, p.growth, months) : 0;
   const pensionIncluded = accts.some(a => groupOf(a) === 'pension');
   const earliest = accessAge(p.dob);
@@ -3261,7 +3341,8 @@ function updatePlan() {
   const near = ui.pathSpan === '10' && months > 120;
   const pills = (label, act, opts) => `<div class="seg" role="group" aria-label="${label}">${opts.map(([k, l, on]) => `<button data-action="${act}" data-id="${k}" aria-pressed="${on}">${l}</button>`).join('')}</div>`;
   host.innerHTML = `
-    <div class="panel-head" style="margin-bottom:0"><div><h2>${rd ? `Your pot at ${p.retireAge}` : `Your pot in ${ui.plan.years} years`}</h2><span class="aside">${rd ? esc(monthYear(toMs(rd))) + ' · ' : ''}<button type="button" class="link-btn" data-action="plan-accts">Includes ${accts.length} of ${nAll} accounts</button></span></div>
+    <p class="calc-echo${g}">${rd ? `Retiring at <b>${p.retireAge}</b> in <b>${esc(monthYear(toMs(rd)))}</b>` : `Retiring in <b>${ui.plan.years} year${ui.plan.years == 1 ? '' : 's'}</b>`}, paying <b>${gbp(monthly)} a month</b> into <b>${accts.length} account${accts.length === 1 ? '' : 's'}</b>, with <b>${p.growth}% growth</b> before fees and <b>${p.inflation}% inflation</b>, then drawing <b>${p.drawRate}%</b> a year${target ? `. Target <b>${gbp(target)}</b>` : ''}.</p>
+    <div class="panel-head" style="margin-bottom:0"><div><h3>${rd ? `Your pot at ${p.retireAge}` : `Your pot in ${ui.plan.years} years`}</h3><span class="aside"><button type="button" class="link-btn" data-action="plan-accts">Includes ${accts.length} of ${nAll} accounts</button></span></div>
       ${pills('Show figures in', 'plan-real', [['1', "Today's money", !!ui.plan.real], ['0', 'Future pounds', !ui.plan.real]])}</div>
     <div>
       <div class="big-figure num">${gbp(show(mid.final, yrs))}</div>
@@ -3295,7 +3376,7 @@ function updatePlan() {
   const fut = mid.xs.slice(1, cut + 1);
   const futOf = arr => [arr[0], ...arr.slice(1, cut + 1).map((v, i) => show(v, fut[i]))];
   chart(document.getElementById('plan-chart'), {
-    xs: [...hist.map(x => x.t), ...fut.map(y => TODAY_MS + y * YR)], label: 'Your wealth so far and projected', tipAlways: true,
+    xs: [...hist.map(x => x.t), ...fut.map(y => TODAY_MS + y * YR)], label: 'Your wealth so far and projected', tipAlways: true, _drawn: !!changed,
     tick: ms => String(new Date(ms).getUTCFullYear()),
     label2: ms => ms <= TODAY_MS ? dateLabel(ms) : `${new Date(ms).getUTCFullYear()}${p.dob ? ` · age ${ageOn(p.dob, msIso(ms))}` : ''}`,
     divider: { t: TODAY_MS, label: 'Today' },
@@ -3966,7 +4047,7 @@ const FAQ = [
   ['tab-overview', 'What is on Overview?', 'Your net worth card (total, change over 30 days and how much is growth versus money you paid in, with a trend you can drag along), what you have saved this month, each account at a glance under <b>Holdings</b>, performance, allocation by type, paid in versus growth by month, goals and recent activity.', 'Finding your way'],
   ['tab-accounts', 'What is on Accounts?', 'Pick an account at the top to see its chart, what you paid in and its growth, rate and allowance details, year by year figures at each 5 April, and its full history of balances, payments and income. You can edit or delete any entry there. <b>All</b> shows every account together.', 'Finding your way'],
   ['tab-income', 'What is on Income?', 'Where your money comes from (salary, rental, side income and so on) and how much of it you save. Log each payment as it arrives with <b>Log pay</b>; Aurum compares it with what you paid into your accounts to give your savings rate, month by month, where the money went and an optional payslip breakdown.', 'Finding your way'],
-  ['tab-planner', 'What is on Planner?', 'Planner has three sections, picked at the top. <b>Retirement</b> projects your pensions and ISAs to your retirement age, with the income they might give; change the assumptions under <b>Adjust your plan</b>. <b>Goals</b> track targets such as an ISA total by a date. <b>SIPP vs ISA</b> compares where your next pound does more. All are illustrations, not advice.', 'Finding your way'],
+  ['tab-planner', 'What is on Planner?', 'Planner has three sections, picked at the top. <b>Retirement</b> projects your pensions and ISAs to your retirement age, with the income they might give; change the assumptions under <b>Your inputs</b> and the result updates below. <b>Goals</b> track targets such as an ISA total by a date; change a goal\'s target, date or monthly amount on the goal itself. <b>SIPP vs ISA</b> compares where your next pound does more. All are illustrations, not advice.', 'Finding your way'],
   ['tab-insights', 'What is on Insights?', 'A plain-English summary of your money, on three pages. <b>Summary</b>: what changed over the period you pick (net worth, paid in, growth), tips, each account\'s growth, last month\'s review and milestones you have reached. <b>Tax year</b>: your ISA and pension allowances this tax year, paid in by tax year with pension carry-forward, and your year in review. <b>Tax return</b>: the tax return helper and P60 refund check.', 'Finding your way'],
   ['tab-settings', 'What is in Settings?', 'About you (name, date of birth, retirement age, tax band), this help, Family, your accounts and their order, privacy (demo mode, hide balances, PIN and fingerprint lock), backup and restore, appearance, notifications and reminders.', 'Finding your way'],
   // Accounts and balances
@@ -3976,7 +4057,7 @@ const FAQ = [
   ['sources', 'How is "Where your wealth came from" worked out?', 'For the range you pick (1M, 1Y or All, also on the net worth card), the change in your wealth is split into <b>paid in</b> (money in, less money taken out) and <b>growth</b> (everything else). For 1M and 1Y, an account first logged in that period counts its opening balance as paid in. <b>Return</b> is growth as a share of the money invested over the period. <b>Accounts that drove growth</b> lists the five that moved most, up or down; tap one to open it. <b>Includes N of M accounts</b> (also on the net worth card) shows which accounts are counted: those of the person picked at the top, closed ones too, and only accounts with a balance. Open it to see the list and what is left out, and untick an account to leave it out of your net worth, these charts and Performance (it stays in Holdings and ISA allowances, marked <b>not in totals</b>).', 'Accounts and balances'],
   ['move', 'How do I log money moved between my accounts?', 'Log it on both accounts: <b>Taken out</b> on the one it left and <b>Paid in</b> on the one it reached, ticking <b>Moved</b> on both. Your savings rate stays the same and each account\'s growth stays right. GIA to ISA uses your ISA allowance; a proper ISA to ISA transfer doesn\'t, so tick <b>ISA transfer</b>. Into a SIPP, also tick the tax relief box.', 'Accounts and balances'],
   ['april', 'I started tracking after 6 April. How do I fix this tax year?', 'Open the account and tap <b>Split it: 5 April balance and monthly payments</b>. Enter what was there on 5 April (0 if it opened later) and what you paid in each month. Only those payments then count as paid in this tax year.', 'Accounts and balances'],
-  ['pick', 'How do I choose which accounts count?', '<b>Net worth and Overview charts:</b> open <b>Includes N of M accounts</b> on the net worth card or under "Where your wealth came from" and untick an account to leave it out. <b>Planner:</b> tick accounts under <b>Adjust your plan</b>; the <b>Includes N of M accounts</b> link under your pot takes you there. <b>Goals:</b> pick <b>Choose accounts…</b> when adding a goal, or tap the accounts line under a goal in Planner → Goals to change it.', 'Accounts and balances'],
+  ['pick', 'How do I choose which accounts count?', '<b>Net worth and Overview charts:</b> open <b>Includes N of M accounts</b> on the net worth card or under "Where your wealth came from" and untick an account to leave it out. <b>Planner:</b> tick accounts under <b>Accounts and monthly payments</b> in Retirement\'s inputs; the <b>Includes N of M accounts</b> link under your pot takes you there. <b>Goals:</b> pick <b>Choose accounts…</b> when adding a goal, or open <b>Accounts that count</b> on a goal in Planner → Goals to change it.', 'Accounts and balances'],
   // Saving and income
   ['saved', "Why isn't a payment counted as saved?", 'Saved only counts <b>payments into your own accounts</b>, in the month they are dated. It isn\'t counted if you only changed the balance (log it as <b>Paid in</b> instead), if it\'s dated in a different month from the pay, if you ticked <b>Moved</b>, or if the account belongs to someone else under Family.', 'Saving and income'],
   ['typical', 'What is the typical savings rate?', 'Your savings rate with one-offs like bonuses and gifts left out, assuming you saved those first. It shows what you save from your normal pay. Mark pay as <b>One-off</b> when you log it.', 'Saving and income'],
@@ -6078,9 +6159,9 @@ document.addEventListener('click', async e => {
     case 'stack-by': ui.stackBy = id; saveUi(); render(); break;
     case 'nw-range': ui.nwRange = id; saveUi(); render(); break;
     case 'plan-accts': {
-      const d = document.querySelector('details[data-fold="plan-set"]');
-      if (d && !d.open) { d.open = true; ui.folds['plan-set'] = true; saveUi(); }
-      const el = document.getElementById('plan-accts') || document.getElementById('plan-set');
+      const d = document.getElementById('plan-acct-fold');
+      if (id !== 'age' && d && !d.open) { d.open = true; ui.folds['plan-accts'] = true; saveUi(); }
+      const el = id === 'age' ? document.getElementById('plan-age') || document.getElementById('plan-years') : document.getElementById('plan-accts') || d || document.getElementById('plan-panel');
       if (el) el.scrollIntoView({ block: 'center', behavior: reduceMotion() ? 'auto' : 'smooth' });
       break;
     }
@@ -6089,6 +6170,7 @@ document.addEventListener('click', async e => {
     case 'plan-page': ui.planPage = id; saveUi(); render(); window.scrollTo({ top: 0 }); break;
     case 'plan-real': ui.plan.real = id === '1'; saveUi(); updatePlan(); break;
     case 'goal-add': ui.goalScope = null; openGoal(); break;
+    case 'goal-mon-reset': { if (ui.goalMon) delete ui.goalMon[id]; saveUi(); const g = state.goals.find(x => x.id === id), f = document.getElementById('gm-' + id); if (g && f) f.value = Math.round(goalStatus(g).usual); refreshGoal(id); break; }
     case 'set-page': if (!id && setPage && history.state && history.state.aurumSet) history.back(); else openSetPage(id); break;
     case 'person': ui.person = id; saveUi(); render(); break;
     case 'goto-account': ui.account = id; goTab('accounts'); break;
@@ -6124,7 +6206,7 @@ document.addEventListener('click', async e => {
       state.goals = state.goals.filter(g => g.scope !== id).map(g => Array.isArray(g.accounts) ? Object.assign(g, { accounts: g.accounts.filter(x => x !== id) }) : g).filter(g => !Array.isArray(g.accounts) || g.accounts.length);
       pendingRemoveAcct = null; save(); render(); break;
     case 'goal-del-no': pendingGoal = null; render(); break;
-    case 'goal-del': case 'goal-del-yes': snapshot('Goal deleted'); state.goals = state.goals.filter(g => g.id !== id); pendingGoal = null; save(); render(); break;
+    case 'goal-del': case 'goal-del-yes': snapshot('Goal deleted'); state.goals = state.goals.filter(g => g.id !== id); if (ui.goalMon) delete ui.goalMon[id]; pendingGoal = null; save(); render(); break;
     case 'person-del-no': pendingPerson = null; render(); break;
     case 'person-del': case 'person-del-yes':
       snapshot('Person removed');
@@ -6332,6 +6414,10 @@ document.addEventListener('change', e => {
     if (!ids.size) { t.checked = true; return; }
     g.scope = 'pick'; g.accounts = [...ids]; save(); render(); return;
   }
+  if (t.dataset && t.dataset.goalDate) {
+    const g = state.goals.find(x => x.id === t.dataset.goalDate); if (!g) return;
+    g.date = isIso(t.value) ? t.value : ''; save(); refreshGoal(g.id); return;
+  }
   if (t.dataset && t.dataset.scope) { ui.chartOut = Object.assign({}, ui.chartOut); if (t.checked) delete ui.chartOut[t.dataset.scope]; else ui.chartOut[t.dataset.scope] = true; saveUi(); render(); return; }
   if (t.id === 'import-file' && t.files && t.files[0]) readFile(t, importText);
   if (t.id === 'csv-file' && t.files && t.files[0]) readFile(t, importCsv);
@@ -6372,7 +6458,7 @@ document.addEventListener('change', e => {
   if (t.id === 'calc-draw') { ui.calc.draw = +t.value; saveUi(); updateCalc(true); }
   if (t.id === 'custom-unit') { ui.custom.unit = t.value; saveUi(); render(); }
   if (t.id === 'custom-n') { ui.custom.n = clamp(Math.round(num(t.value, 1)), 1, 999); saveUi(); render(); }
-  if (t.dataset.planInc) { ui.plan.include[t.dataset.planInc] = t.checked; saveUi(); updatePlan(); }
+  if (t.dataset.planInc) { ui.plan.include[t.dataset.planInc] = t.checked; saveUi(); updatePlan(true); }
   if (t.id === 'plan-rate' || t.id === 'plan-age') render();
 });
 document.addEventListener('input', e => {
@@ -6381,13 +6467,15 @@ document.addEventListener('input', e => {
   const out = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
   if (t.id === 'hist-q') { ui.hist.q = t.value; saveUi(); renderHistory(); return; }
   if (t.id === 'faq-q') { faqSearch(t.value); return; }
-  if (t.id === 'plan-age') { p.retireAge = +t.value; out('out-age', t.value); save(); updatePlan(); return; }
-  if (t.id === 'plan-years') { ui.plan.years = +t.value; out('out-pyears', t.value); saveUi(); updatePlan(); return; }
-  if (t.id === 'plan-rate') { p.growth = +t.value; out('out-prate', t.value + '%'); save(); updatePlan(); return; }
-  if (t.id === 'plan-infl') { p.inflation = +t.value; out('out-infl', t.value + '%'); save(); updatePlan(); return; }
-  if (t.id === 'plan-draw') { p.drawRate = +t.value; out('out-draw', t.value + '%'); save(); updatePlan(); return; }
-  if (t.id === 'plan-target') { ui.plan.target = Math.max(0, num(t.value, 0)); saveUi(); updatePlan(); return; }
-  if (t.dataset.planMon) { ui.plan.monthly[t.dataset.planMon] = t.value === '' ? null : Math.max(0, num(t.value, 0)); saveUi(); updatePlan(); return; }
+  if (t.id === 'plan-age') { p.retireAge = +t.value; out('out-age', t.value); save(); updatePlan(true); return; }
+  if (t.id === 'plan-years') { ui.plan.years = +t.value; out('out-pyears', t.value); saveUi(); updatePlan(true); return; }
+  if (t.id === 'plan-rate') { p.growth = +t.value; out('out-prate', t.value + '%'); save(); updatePlan(true); return; }
+  if (t.id === 'plan-infl') { p.inflation = +t.value; out('out-infl', t.value + '%'); save(); updatePlan(true); return; }
+  if (t.id === 'plan-draw') { p.drawRate = +t.value; out('out-draw', t.value + '%'); save(); updatePlan(true); return; }
+  if (t.id === 'plan-target') { ui.plan.target = Math.max(0, num(t.value, 0)); saveUi(); updatePlan(true); return; }
+  if (t.dataset.goalTarget) { const g = state.goals.find(x => x.id === t.dataset.goalTarget), v = num(t.value, 0); if (g && v > 0) { g.target = v; save(); refreshGoal(g.id); } return; }
+  if (t.dataset.goalMon) { ui.goalMon = Object.assign({}, ui.goalMon, { [t.dataset.goalMon]: t.value === '' ? null : Math.max(0, num(t.value, 0)) }); saveUi(); refreshGoal(t.dataset.goalMon); return; }
+  if (t.dataset.planMon) { ui.plan.monthly[t.dataset.planMon] = t.value === '' ? null : Math.max(0, num(t.value, 0)); saveUi(); updatePlan(true); return; }
   if (t.id === 'calc-monthly') { c.monthly = Math.max(0, +t.value || 0); document.getElementById('calc-monthly-range').value = Math.min(2000, c.monthly); }
   else if (t.id === 'calc-monthly-range') { c.monthly = +t.value; document.getElementById('calc-monthly').value = c.monthly; }
   else if (t.id === 'calc-years') { c.years = +t.value; out('out-years', c.years); }
