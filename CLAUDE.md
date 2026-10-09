@@ -215,6 +215,10 @@ not advice — keep that disclaimer.
   the first balance's month; `reviewPicker(r)` (‹ › `review-month` + `#review-month` select) sits in the Insights fold only; the pick
   is `reviewPick` (not saved). Older months: `streakOf(a, ym)` counts back from that month, goals left out.
 
+- 2.0.8: Insights/Planner section switches are `pageTabs(label, action, pages, cur, extra)` (`nav.ptabs`, icons in `PAGE_ICONS`, open
+  page `aria-current="page"`): boxed icon tiles, sticky under the phone header (`--ptabs-top` set by `placePageTabs()` on render/scroll/resize);
+  `.ptabs.stuck` puts icons beside labels and `body.tabs-stuck` drops the header shadow. Use it for any new page with sections.
+
 ## Status (latest)
 
 - 1.9.9 merged to main (PR #23); owner publishes the v1.9.9 release. Owner says when to merge.
