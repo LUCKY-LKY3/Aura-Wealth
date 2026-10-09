@@ -1,2 +1,1 @@
-- Card titles stand out more: each card's name is bolder, with a small gold icon beside it
-- The small labels on the Overview tiles (Pensions, ISA allowance) are now gold too
+- Sliding the month strip in Insights now only scrolls the months; it no longer jumps to the next page
