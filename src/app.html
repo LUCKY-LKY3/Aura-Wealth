@@ -605,6 +605,10 @@ dialog.sheet.wide{width:min(620px,calc(100% - 32px))}
 .ms-chip{display:inline-flex;align-items:baseline;gap:8px;padding:6px 12px;border:1px solid color-mix(in srgb,var(--gold) 35%,var(--line));border-radius:999px;font-size:13px;color:var(--ink-3)}
 .ms-chip b{color:var(--gold);font-weight:600}
 .review details.fold2 .fold-body .review-grid{margin-top:14px}
+.month-pick{display:flex;align-items:center;gap:8px;margin-top:14px}
+.month-pick select{flex:0 1 220px;min-width:0}
+.month-pick .btn{padding-inline:10px}.month-pick .btn:disabled{opacity:.35}
+.mp-arrow{display:inline-grid;width:16px;height:16px}.mp-arrow svg{width:16px;height:16px}
 .insights .ic{width:22px;height:22px;border-radius:6px;display:grid;place-items:center;background:var(--surface-2);color:var(--gold);font-size:12px}
 .headline{font-size:18px;line-height:1.45;margin:0;max-width:62ch}
 .headline b{font-weight:650}
@@ -3520,12 +3524,19 @@ function reviewPanel() {
   if (ui.person !== 'me') return '';
   const { years, y } = yearOptions();
   const r = yearReview(y);
-  if (!r.pt.rows.length) return '';
   const stat = (k, v, c) => `<div class="stat"><div class="k">${k}</div><div class="v ${c || ''}">${v}</div></div>`;
-  return `<section class="panel stack">
-    <div class="panel-head" style="margin-bottom:0"><h2>Year in review</h2>
+  const head = `<div class="panel-head" style="margin-bottom:0"><h2>Year in review</h2>
       <div class="seg scroll" role="group" aria-label="Tax year">${years.map(v => `<button data-action="tax-year" data-id="${v}" aria-pressed="${v === y}">${tyLabel(v)}</button>`).join('')}</div>
-    </div>
+    </div>`;
+  // 2.0.7: a year before your first balance used to hide the whole panel, year buttons included, so you couldn't pick another.
+  if (!r.pt.rows.length) {
+    const first = Math.min(...mine().map(a => { const s = logsOf(a.id); return s.length ? toMs(s[0].date) : Infinity; }));
+    return `<section class="panel stack">${head}
+    <p class="explain">No balances for ${tyLabel(y)}.${isFinite(first) ? ` Your records start on ${dateLabel(first)}, so pick a later year.` : ' Log a value to see your year in review.'}</p>
+  </section>`;
+  }
+  return `<section class="panel stack">
+    ${head}
     <div class="compare">
       ${stat('Net worth', gbp(r.pt.cur))}
       ${stat('Change', signed(r.pt.change), cls(r.pt.change))}
@@ -3655,7 +3666,7 @@ function renderInsights() {
         ${items.length ? `<ul class="insights">${items.join('')}</ul>` : ''}
         ${table}
       </section>
-      ${!state.example && own ? reviewFold(monthReview()) : ''}
+      ${!state.example && own ? reviewFold(monthReview(reviewMonths().includes(reviewPick) ? reviewPick : null)) : ''}
       ${ui.person === 'all' ? allowancesPanel() : ''}
       ${ms.length ? `<section class="panel"><div class="panel-head"><h2>Milestones</h2><span class="aside">${ms.length} reached</span></div><div class="ms-row">${ms.map(m => `<span class="ms-chip"><b>${compact(m.v)}</b><span>${dateLabel(m.t)}</span></span>`).join('')}</div></section>` : ''}`;
 
@@ -5598,9 +5609,10 @@ const EMPTY_ART = {
 };
 const emptyArt = k => `<div class="empty-art" aria-hidden="true"><svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${EMPTY_ART[k]}</svg></div>`;
 // Months in a row with money paid in (this month counts once something is paid).
-function streakOf(a) {
+// ym ('YYYY-MM') counts back from that month instead, for a past month's review.
+function streakOf(a, ym) {
   const months = new Set(state.flows.filter(f => f.accountId === a.id && f.amount > 0 && !f.ytd && f.date <= TODAY).map(f => f.date.slice(0, 7)));
-  let y = +TODAY.slice(0, 4), m = +TODAY.slice(5, 7);
+  let y = +(ym || TODAY).slice(0, 4), m = +(ym || TODAY).slice(5, 7);
   const key = () => `${y}-${pad(m)}`, back = () => { if (--m === 0) { m = 12; y--; } };
   if (!months.has(key())) back();
   let n = 0;
@@ -5610,20 +5622,51 @@ function streakOf(a) {
 const FLAME = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c1 4 5 6 5 11a5 5 0 0 1-10 0c0-3 2-4 2-7 2 1 3 3 3 5"/></svg>';
 const streakLine = a => { const n = streakOf(a); return n >= 2 ? `<div class="streak">${FLAME}${n} months in a row paid in</div>` : ''; };
 const fmtMonthLong = new Intl.DateTimeFormat('en-GB', { month: 'long', timeZone: 'UTC' });
-// Last calendar month in numbers, for the Overview card, the Insights tab and the bell.
-function monthReview() {
+// A calendar month in numbers ('YYYY-MM', default last month), for the Overview card, the Insights tab and the bell.
+// Goal progress is only known for today, so a month before last leaves goals out; streaks count back from that month.
+function monthReview(key) {
+  const latest = reviewMonths(0)[0];
+  key = key || latest;
   const y = +TODAY.slice(0, 4), m = +TODAY.slice(5, 7);
-  const start = Date.UTC(y, m - 2, 0), end = Date.UTC(y, m - 1, 0);
+  const ky = key ? +key.slice(0, 4) : y, km = key ? +key.slice(5, 7) : m - 1;
+  const start = Date.UTC(ky, km - 1, 0), end = Date.UTC(ky, km, 0);
   const accts = mine();
   const first = Math.min(...accts.map(a => { const s = logsOf(a.id); return s.length ? toMs(s[0].date) : Infinity; }));
   if (!isFinite(first) || first > end) return null;
   const t = periodTotals(accts, start, end);
   if (!t.rows.length) return null;
+  const isLatest = key === latest;
   const best = t.rows.filter(r => r.p.growth > 0).sort((a, b) => b.p.growth - a.p.growth)[0];
-  const streaks = active(accts).map(a => ({ a, n: streakOf(a) })).filter(x => x.n >= 2).sort((a, b) => b.n - a.n);
-  const goals = state.goals.map(g => ({ g, st: goalStatus(g) }));
-  const mid = Date.UTC(y, m - 2, 15), ps = payStats(msIso(start + 864e5), msIso(end));
+  const streaks = active(accts).map(a => ({ a, n: streakOf(a, isLatest ? undefined : key) })).filter(x => x.n >= 2).sort((a, b) => b.n - a.n);
+  const goals = isLatest ? state.goals.map(g => ({ g, st: goalStatus(g) })) : [];
+  const mid = Date.UTC(ky, km - 1, 15), ps = payStats(msIso(start + 864e5), msIso(end));
   return { pay: ps.net > 0 ? ps : null, key: msIso(mid).slice(0, 7), name: fmtMonthLong.format(new Date(mid)), year: new Date(mid).getUTCFullYear(), end: t.cur, change: t.change, paid: t.paid - t.opening, growth: t.growth, ret: t.ret, best, streak: streaks[0], goals };
+}
+// Months that can be reviewed, newest first: last month back to the month of your first balance.
+// With limit 0 only last month is checked (it is empty until you have a balance by its end).
+function reviewMonths(limit = Infinity) {
+  const first = Math.min(...mine().map(a => { const s = logsOf(a.id); return s.length ? toMs(s[0].date) : Infinity; }));
+  let y = +TODAY.slice(0, 4), m = +TODAY.slice(5, 7) - 1;
+  if (m === 0) { m = 12; y--; }
+  const out = [];
+  if (!isFinite(first)) return out;
+  const f = msIso(first).slice(0, 7);
+  while (`${y}-${pad(m)}` >= f) { out.push(`${y}-${pad(m)}`); if (out.length > limit) break; if (--m === 0) { m = 12; y--; } }
+  return out;
+}
+// Month picked on Insights (not saved: it opens on last month each time).
+let reviewPick = null;
+const reviewTitle = r => `Your ${esc(r.name)}${r.year !== +TODAY.slice(0, 4) ? ` ${r.year}` : ''} in money`;
+function reviewPicker(r) {
+  const months = reviewMonths();
+  if (months.length < 2) return '';
+  const i = months.indexOf(r.key), older = months[i + 1], newer = months[i - 1];
+  const arrow = (id, label, rot) => `<button class="btn sm ghost" data-action="review-month" data-id="${id || ''}" aria-label="${label}"${id ? '' : ' disabled'}><span class="mp-arrow" style="transform:rotate(${rot}deg)">${CHEVRON}</span></button>`;
+  return `<div class="month-pick" role="group" aria-label="Month to review">
+      ${arrow(older, 'Previous month', 90)}
+      <select id="review-month" class="input" aria-label="Month">${months.map(k => { const d = Date.UTC(+k.slice(0, 4), +k.slice(5, 7) - 1, 15); return `<option value="${k}" ${k === r.key ? 'selected' : ''}>${monthYear(d)}</option>`; }).join('')}</select>
+      ${arrow(newer, 'Next month', -90)}
+    </div>`;
 }
 function reviewCard(r, dismissable) {
   if (!r) return '';
@@ -5635,7 +5678,7 @@ function reviewCard(r, dismissable) {
 // 2.0.6: on Insights the review folds away under the summary, with its headline figures on the closed line.
 function reviewFold(r) {
   if (!r) return '';
-  return `<section class="panel review" id="month-review">${foldOpen('month-review', `Your ${esc(r.name)} in money`, `${signed(r.change)} change · ${gbp(r.paid)} paid in · ${signed(r.growth)} growth`)}${reviewBody(r)}${foldClose}</section>`;
+  return `<section class="panel review" id="month-review">${foldOpen('month-review', reviewTitle(r), `${signed(r.change)} change · ${gbp(r.paid)} paid in · ${signed(r.growth)} growth`)}${reviewPicker(r)}${reviewBody(r)}${foldClose}</section>`;
 }
 function reviewBody(r) {
   return `<div class="review-grid">
@@ -6188,6 +6231,7 @@ document.addEventListener('click', async e => {
     case 'menu-log': closeSheets(); openLog(id); break;
     case 'menu-pay': closeSheets(); openLog(id); setTimeout(() => { const f = document.getElementById('log-flow'); if (f) { f.scrollIntoView({ block: 'center' }); f.focus(); } }, 120); break;
     case 'menu-edit': closeSheets(); openAcctSheet(id); break;
+    case 'review-month': if (id) { reviewPick = id; render(); } break;
     case 'review-hide': { const r = monthReview(); if (r) ui.reviewSeen = r.key; saveUi(); render(); break; }
     case 'pin-acct': { const a = state.accounts.find(x => x.id === id); if (a) { a.pinned = !a.pinned; buzz(); save(); render(); } break; }
     case 'bkpw-off': { const cur = document.getElementById('bkpw-cur'); if (!cur || cur.value !== store.get(BKPASS_KEY)) { if (cur && cur.value) { setStatus('', false, 'bkpw-status'); pwWrong(cur); } else { setStatus('Type your current password to turn protection off.', true, 'bkpw-status'); if (cur) cur.focus(); } break; } } store.del(BKPASS_KEY); render(); setStatus('Password protection off. New backups are plain files.', false, 'bkpw-status'); break;
@@ -6257,6 +6301,7 @@ document.addEventListener('change', e => {
     if (t.value === 'light') store.set(THEME_KEY, 'light'); else store.del(THEME_KEY);
     applyTheme(t.value);
   }
+  if (t.id === 'review-month') { reviewPick = t.value; render(); return; }
   if (t.id === 'opt-fit') { ui.fit = t.checked; saveUi(); render(); }
   if (t.id === 'opt-paid') { ui.paidLine = t.checked; saveUi(); render(); }
   if (t.id === 'opt-lastyear') { ui.lastYear = t.checked; saveUi(); render(); }

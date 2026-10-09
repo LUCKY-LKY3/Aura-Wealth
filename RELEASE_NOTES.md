@@ -1,7 +1,3 @@
-- Insights is now split into Summary, Tax year and Tax return, picked at the top, so each page is much shorter
-- Summary shows the period's net worth, change, paid in and growth as four figures, with the tips underneath
-- Links in the tips (Income, See goals, Update all) now sit at the end of their line
-- The by-account table and last month's review fold away, with their key figures on the closed line
-- Milestones you've reached show as a row of small badges
-- Tax year has your allowances, paid in by tax year (carry-forward now right under the chart, the table folded) and your year in review
-- Tax return has the tax return helper and P60 refund check on their own page; bell reminders open the right page
+- Fixed: picking an older tax year in Year in review (such as 2023/24) made the whole section disappear, year buttons and all. It now stays, and says when your records start if that year has no balances
+- Last month's review on Insights now has arrows and a month list, so you can look back at any month since your first balance
+- For an older month, the "months in a row" streak is counted as it was at that month, and goal progress (only known for today) is left out
