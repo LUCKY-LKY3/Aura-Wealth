@@ -240,7 +240,7 @@ not advice — keep that disclaimer.
   theme-color meta and the account swatch labels; device-only `aurum_palette`; picker `.pal-pick` (`name="palette"`) in Settings
   Appearance. Gold tints use `rgba(var(--gold-rgb),a)`; new colours must come from tokens so every palette follows. Lock screen stays fixed dark gold.
 
-- 2.0.14 card titles: `h2.tt` = bold 16px title with a gold icon tile `ti(key)` (`.t-ic`, paths in `TITLE_ICONS`, falls back to `SET_ICONS`).
+- 2.0.15 card titles: `h2.tt` = bold 16px title with a gold icon tile `ti(key)` (`.t-ic`, paths in `TITLE_ICONS`, falls back to `SET_ICONS`).
   `foldOpen` picks its icon from `FOLD_ICONS[key]`. Give every new card title `class="tt"` and `${ti('…')}`. `.kpi .k` labels are gold.
 
 ## Status (latest)
