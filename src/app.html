@@ -1221,6 +1221,11 @@ details.fold:not([open])>summary h2::after{content:' ▸'}
           <div class="field"><label for="pay-sl">Student loan</label><div class="money"><span>£</span><input id="pay-sl" class="input" type="number" inputmode="decimal" step="0.01" min="0" placeholder="0.00"></div></div>
           <div class="field"><label for="pay-other">Other deductions</label><div class="money"><span>£</span><input id="pay-other" class="input" type="number" inputmode="decimal" step="0.01" min="0" placeholder="0.00"></div></div>
         </div>
+        <div class="two">
+          <div class="field"><label for="pay-taxable">Taxable pay</label><div class="money"><span>£</span><input id="pay-taxable" class="input" type="number" inputmode="decimal" step="0.01" min="0" placeholder="Same as gross"></div></div>
+          <div class="field"><label for="pay-pensionable">Pensionable pay</label><div class="money"><span>£</span><input id="pay-pensionable" class="input" type="number" inputmode="decimal" step="0.01" min="0" placeholder="Same as gross"></div></div>
+        </div>
+        <p class="hint" style="margin:0">Taxable and pensionable pay are on most payslips. Leave them blank if they match your gross pay. Taxable pay makes the P60 check match when pension or salary sacrifice comes off before tax.</p>
         <button type="button" class="btn sm" id="pay-copy" data-action="pay-copy" hidden style="align-self:flex-start"></button>
         <p class="hint" id="pay-check"></p>
         <div class="stack" id="pay-link-wrap" style="gap:8px" hidden>
@@ -1267,6 +1272,7 @@ details.fold:not([open])>summary h2::after{content:' ▸'}
       </div>
       <p class="hint">Fills in the amount when you log pay, and reminds you if payday passes without an entry.</p>
     </fieldset>
+    <label class="check" id="src-db-wrap"><input type="checkbox" id="src-db"><span><b style="color:var(--ink);font-weight:550">Defined benefit pension</b><br>The pension on your payslip goes into a final salary or career average scheme. It counts in your savings rate including pension from work.</span></label>
     <label class="check" id="src-archived-wrap"><input type="checkbox" id="src-archived"><span><b style="color:var(--ink);font-weight:550">Ended</b><br>Hides it when logging pay. Its history stays in your totals.</span></label>
     <div class="sheet-actions">
       <button type="button" class="btn ghost" id="src-del" data-action="src-del" hidden>Delete</button>
@@ -1441,6 +1447,7 @@ function normProfile(p, done) {
       const src = { id: String(x.id), name: String(x.name).slice(0, 40), kind: SOURCE_KINDS[x.kind] ? x.kind : 'other', archived: !!x.archived,
         regular: x.regular && isFinite(+x.regular.net) && +x.regular.net > 0 ? { net: +x.regular.net, day: x.regular.day ? clamp(Math.round(num(x.regular.day, 0)), 1, 31) : 0 } : null };
       if (x.demo) src.demo = true;
+      if (x.db) src.db = true;
       return src;
     }) : [],
     p60: Object.fromEntries(Object.entries(p.p60 && typeof p.p60 === 'object' ? p.p60 : {}).filter(([y, v]) => /^\d{4}$/.test(y) && v && typeof v === 'object').map(([y, v]) => [y, {
@@ -1601,7 +1608,7 @@ function normalize(o) {
     const pay = (Array.isArray(o.pay) ? o.pay : []).filter(x => x && isIso(x.date) && isFinite(+x.net) && +x.net >= 0 && srcIds.has(String(x.source))).map(x => {
       const src = profile.sources.find(q => q.id === String(x.source));
       const e = { id: String(x.id || uid()), date: x.date, source: String(x.source), net: +x.net, gross: money0(x.gross), tax: money0(x.tax), ni: money0(x.ni),
-        pension: money0(x.pension), studentLoan: money0(x.studentLoan), other: money0(x.other), note: String(x.note || '').slice(0, 80),
+        pension: money0(x.pension), studentLoan: money0(x.studentLoan), other: money0(x.other), taxable: money0(x.taxable), pensionable: money0(x.pensionable), note: String(x.note || '').slice(0, 80),
         oneOff: x.oneOff != null ? !!x.oneOff : ONE_OFF.includes(src.kind) };
       if (x.flowId && flows.some(f => f.id === String(x.flowId))) e.flowId = String(x.flowId);
       return e;
@@ -3612,7 +3619,7 @@ function p60Form(y) {
   const v = state.profile.p60[y] || {};
   const money = (id, val, ph, label) => `<div class="field"><label for="${id}">${label}</label><div class="money"><span>£</span><input id="${id}" class="input" type="number" inputmode="decimal" min="0" step="1" placeholder="${ph}" value="${val || ''}"></div></div>`;
   const slips = state.pay.filter(p => p.date >= `${y}-04-06` && p.date <= `${y + 1}-04-05` && p.gross > 0 && ['salary', 'bonus'].includes((sourceOf(p.source) || {}).kind));
-  const fromPay = slips.length ? `<p class="hint">From your pay records: ${gbp(slips.reduce((t, p) => t + p.gross, 0))} gross pay and ${gbp(slips.reduce((t, p) => t + p.tax, 0))} tax (${slips.length} payslip${slips.length === 1 ? '' : 's'}). Check against your P60. <button class="btn sm" data-action="p60-from-pay" data-id="${y}">Use these</button></p>` : '';
+  const fromPay = slips.length ? `<p class="hint">From your pay records: ${gbp(slips.reduce((t, p) => t + taxableOf(p), 0))} taxable pay and ${gbp(slips.reduce((t, p) => t + p.tax, 0))} tax (${slips.length} payslip${slips.length === 1 ? '' : 's'}). Check against your P60. <button class="btn sm" data-action="p60-from-pay" data-id="${y}">Use these</button></p>` : '';
   return `${fromPay}<div class="two">${money('p60-pay', v.pay, '0', 'Pay (main job)')}${money('p60-tax', v.tax, '0', 'Tax deducted')}</div>
     <details ${v.pay2 || v.other || v.giftAid || v.expenses || v.cb || v.kids || (v.marriage && v.marriage !== 'none') || v.code ? 'open' : ''}><summary>Second job, other income, Gift Aid, work expenses, Child Benefit, Marriage Allowance, tax code</summary>
       <div class="form-grid" style="margin-top:12px">
@@ -3946,6 +3953,8 @@ function payStats(from, to) {
     if (f.own >= 0) paidIn += f.own; else takenOut -= f.own;
     byAcct[f.accountId] = (byAcct[f.accountId] || 0) + f.own;
   }
+  // A DB scheme has no pension account to log into, so its payslip deduction counts here (unless already logged as a flow).
+  for (const p of pay) if (!p.flowId && p.pension > 0 && (sourceOf(p.source) || {}).db) employer += p.pension;
   const saved = paidIn - takenOut, core = net - oneOff;
   const invest = state.income.filter(x => ids.has(x.accountId) && inR(x)).reduce((t, x) => t + x.amount, 0);
   return {
@@ -4191,9 +4200,15 @@ function payslipPanel() {
   let { from, to } = cur, name = cur.name, tyFrom = null, tyHead = '';
   if (mode === 'm') { tyFrom = taxYearStart(to); tyHead = to >= monthBounds(0)[0] ? 'Tax year so far' : `Tax year to ${cur.short}`; }
   const head = `<div class="panel-head"><h2 class="tt">${ti('doc')}Payslip breakdown</h2>${seg}</div>${strip}`;
-  if (!state.pay.some(p => p.gross > 0)) return `<section class="panel">${head}<div class="chart-empty"><div class="empty-cta"><b>See where your gross pay goes</b><span>When you log pay, open "Payslip details" and add your gross pay, tax, National Insurance and pension. Aurum then shows how much of each £1 you keep.</span><button class="btn sm" data-action="open-pay">Log pay</button></div></div></section>`;
+  // 2.0.18: log pay from here. A month with pay but no details edits that pay; otherwise it opens Log pay dated in the month.
+  const inP = state.pay.filter(p => p.date >= from && p.date <= to), bare = inP.filter(p => !(p.gross > 0));
+  const logBtn = (label, cls = 'btn sm') => mode === 'm' && bare.length === 1 && inP.length === 1
+    ? `<button class="${cls}" data-action="edit-pay-slip" data-id="${esc(bare[0].id)}">${icons.edit}Add payslip details</button>`
+    : `<button class="${cls}" data-action="open-pay-slip" data-id="${mode === 'm' ? cur.id : ''}">${icons.plus}${label}</button>`;
+  const monthName = mode === 'm' ? fmtMonthLong.format(new Date(toMs(from))) : '';
+  if (!state.pay.some(p => p.gross > 0)) return `<section class="panel">${head}<div class="chart-empty"><div class="empty-cta"><b>See where your gross pay goes</b><span>When you log pay, open "Payslip details" and add your gross pay, tax, National Insurance and pension. Aurum then shows how much of each £1 you keep.</span>${logBtn('Log pay')}</div></div></section>`;
   const st = slipSum(from, to), both = mode === 'm', ty = both ? slipSum(tyFrom, to) : st;
-  if (!st.n) return `<section class="panel">${head}<p class="hint" style="margin:0">Gross pay and deductions aren't logged for ${esc(name)}. Add them under "Payslip details" when you log pay.</p></section>`;
+  if (!st.n) return `<section class="panel">${head}<div class="chart-empty"><div class="empty-cta"><span>Gross pay and deductions aren't logged for ${esc(name)}. Add them under "Payslip details" when you log pay.</span>${logBtn(monthName ? `Log ${monthName} pay` : 'Log pay')}</div></div></section>`;
   const pc = v => st.gross > 0 ? (v / st.gross * 100).toFixed(1) + '%' : '—';
   const parts = [['net', 'Take-home', 'var(--c1)'], ...SLIP_ROWS].filter(([k]) => st[k] > 0.005);
   let x = 0;
@@ -4209,6 +4224,7 @@ function payslipPanel() {
       <tbody>${row('gross', 'Gross pay', true)}${SLIP_ROWS.map(([k, l]) => row(k, l)).join('')}${row('net', 'Take-home', true)}</tbody></table></div>
     <p class="explain" style="margin-bottom:0">Deductions took ${pc(ded)} of your gross pay: you kept <b>${kept}p</b> of every £1 you earned.${withPen}</p>
     ${st.n < st.of ? `<p class="hint" style="margin-bottom:0">Based on ${st.n} of ${st.of} payments; the others don't have payslip details.</p>` : ''}
+    <div class="acct-actions" style="margin-top:12px"><button class="btn sm" data-action="open-pay-slip" data-id="">${icons.plus}Log pay</button></div>
   </section>`;
 }
 
@@ -4232,6 +4248,7 @@ const FAQ = [
   ['pick', 'How do I choose which accounts count?', '<b>Net worth and Overview charts:</b> open <b>Includes N of M accounts</b> on the net worth card or under "Where your wealth came from" and untick an account to leave it out. <b>Planner:</b> tick accounts under <b>Accounts and monthly payments</b> in Retirement\'s inputs; the <b>Includes N of M accounts</b> link under your pot takes you there. <b>Goals:</b> pick <b>Choose accounts…</b> when adding a goal, or open <b>Accounts that count</b> on a goal in Planner → Goals to change it.', 'Accounts and balances'],
   // Saving and income
   ['saved', "Why isn't a payment counted as saved?", 'Saved only counts <b>payments into your own accounts</b>, in the month they are dated. It isn\'t counted if you only changed the balance (log it as <b>Paid in</b> instead), if it\'s dated in a different month from the pay, if you ticked <b>Moved</b>, or if the account belongs to someone else under Family.', 'Saving and income'],
+  ['payslip', 'What are taxable pay, pensionable pay and the Defined benefit tick?', 'All optional, under <b>Add payslip details</b> when you log pay. <b>Taxable pay</b> is the pay your tax is worked out on; it is lower than gross when your pension or salary sacrifice comes off before tax. Fill it in and <b>Use these</b> on the P60 check adds up taxable pay, so it matches your P60. <b>Pensionable pay</b> is the pay your pension is worked out on; it is kept for the defined benefit tools coming later. Tick <b>Defined benefit pension</b> on a salary source (edit it on Income › Sources) if your workplace pension is a final salary or career average scheme: the pension on your payslips then counts in your savings rate including pension from work, and taxable pay defaults to gross less pension.', 'Saving and income'],
   ['typical', 'What is the typical savings rate?', 'Your savings rate with one-offs like bonuses and gifts left out, assuming you saved those first. It shows what you save from your normal pay. Mark pay as <b>One-off</b> when you log it.', 'Saving and income'],
   // Pensions and tax
   ['relief', 'Why does my pension get 25% more than I paid?', 'With relief at source, you pay 80% and the pension provider claims 20% basic-rate tax back, so £80 becomes £100. Tick the tax relief box and Aurum adds it. Higher-rate taxpayers can claim more through a tax return; see the tax helper.', 'Pensions and tax'],
@@ -4850,6 +4867,10 @@ function jumpAnswer(k) {
 const paySheet = document.getElementById('pay-sheet'), srcSheet = document.getElementById('src-sheet'), paySource = document.getElementById('pay-source');
 let editingPay = null, editingSrc = null, srcThenPay = false;
 const PAY_FIELDS = [['gross', 'pay-gross'], ['tax', 'pay-tax'], ['ni', 'pay-ni'], ['pension', 'pay-pension'], ['studentLoan', 'pay-sl'], ['other', 'pay-other']];
+// 2.0.18: optional payslip totals (not deductions). 0 = not given: taxable defaults to gross (gross − pension for a DB
+// source, net pay arrangement), pensionable to gross; kept now so 3.0 can work out DB accrual.
+const PAY_EXTRA = [['taxable', 'pay-taxable'], ['pensionable', 'pay-pensionable']];
+const taxableOf = p => p.taxable || Math.max(0, p.gross - ((sourceOf(p.source) || {}).db ? p.pension || 0 : 0));
 const pensionAccts = () => state.example ? [] : active(mine()).filter(a => groupOf(a) === 'pension');
 const fieldAmount = id => { const v = evalAmount(document.getElementById(id).value); return v != null && v > 0 ? v : 0; };
 function removePay(id) {
@@ -4863,14 +4884,15 @@ function updatePayCheck() {
   document.getElementById('pay-check').textContent = !gross ? '' : Math.abs(gap) <= 1 ? 'Gross less deductions matches your take-home ✓'
     : `Gross less deductions is ${fmtGBP2.format(gross - ded)}, ${fmtGBP2.format(Math.abs(gap))} ${gap > 0 ? 'more' : 'less'} than your take-home. That's fine if your payslip has other items.`;
   const pen = fieldAmount('pay-pension');
-  document.getElementById('pay-link-wrap').hidden = !(pen > 0 && pensionAccts().length);
+  // A DB scheme has no account here; its deduction already counts via the source's Defined benefit tick.
+  document.getElementById('pay-link-wrap').hidden = !(pen > 0 && pensionAccts().length && !(sourceOf(paySource.value) || {}).db);
   document.getElementById('pay-link-label').textContent = `Also log ${fmtGBP2.format(pen)} as a payment into this pension`;
 }
 const lastSlip = () => state.pay.filter(p => p.source === paySource.value && p.gross > 0 && p.id !== editingPay).sort(byDate).pop();
 function copySlip() {
   const slip = lastSlip();
   if (!slip) return;
-  PAY_FIELDS.forEach(([k, id]) => { document.getElementById(id).value = slip[k] || ''; });
+  [...PAY_FIELDS, ...PAY_EXTRA].forEach(([k, id]) => { document.getElementById(id).value = slip[k] || ''; });
   const net = document.getElementById('pay-net');
   if (!net.value) net.value = slip.net;
   updatePayCheck();
@@ -4882,11 +4904,12 @@ function updatePayHints() {
   const btn = document.getElementById('pay-same');
   btn.hidden = !same || !!editingPay; btn.dataset.v = same; btn.textContent = `${last ? 'Same as last time' : 'Usual amount'}: ${fmtGBP2.format(same)}`;
   if (!editingPay) document.getElementById('pay-oneoff').checked = !!(src && ONE_OFF.includes(src.kind));
+  document.getElementById('pay-taxable').placeholder = src && src.db ? 'Gross − pension' : 'Same as gross';
   const slip = lastSlip(), cp = document.getElementById('pay-copy');
   cp.hidden = !slip; if (slip) cp.textContent = `Copy last payslip (${dateLabel(toMs(slip.date))})`;
   updatePayCheck();
 }
-function openPay(srcId, entryId) {
+function openPay(srcId, entryId, opt = {}) {
   const e = entryId ? state.pay.find(p => p.id === entryId) : null;
   const srcs = state.profile.sources.filter(x => !x.archived || (e && x.id === e.source));
   if (!srcs.length) { openSrc(null, true); return; }
@@ -4894,11 +4917,11 @@ function openPay(srcId, entryId) {
   paySource.innerHTML = srcs.map(x => `<option value="${esc(x.id)}">${esc(x.name)} · ${esc(SOURCE_KINDS[x.kind])}</option>`).join('');
   paySource.value = e ? e.source : srcs.some(x => x.id === srcId) ? srcId : srcs.some(x => x.id === ui.lastPaySrc) ? ui.lastPaySrc : srcs[0].id;
   const dateEl = document.getElementById('pay-date');
-  dateEl.value = e ? e.date : TODAY; dateEl.max = TODAY;
+  dateEl.value = e ? e.date : opt.date || TODAY; dateEl.max = TODAY;
   dateChips(dateEl.value, 'pay-date-chips', 'pay-date');
   document.getElementById('pay-net').value = e ? e.net : '';
-  PAY_FIELDS.forEach(([k, id]) => { document.getElementById(id).value = e && e[k] ? e[k] : ''; });
-  document.getElementById('pay-more').open = !!(e && PAY_FIELDS.some(([k]) => e[k]));
+  [...PAY_FIELDS, ...PAY_EXTRA].forEach(([k, id]) => { document.getElementById(id).value = e && e[k] ? e[k] : ''; });
+  document.getElementById('pay-more').open = !!opt.details || !!(e && PAY_FIELDS.some(([k]) => e[k]));
   document.getElementById('pay-note').value = e ? e.note : '';
   document.getElementById('pay-err').textContent = '';
   document.getElementById('pay-example-note').hidden = !state.example || !!e;
@@ -4921,7 +4944,7 @@ document.getElementById('pay-form').addEventListener('submit', e => {
   const linkAcct = document.getElementById('pay-link-acct').value, link = !document.getElementById('pay-link-wrap').hidden && document.getElementById('pay-link').checked;
   if (old) removePay(old.id); else clearExample([source]);
   const entry = { id, date, source, net, note: document.getElementById('pay-note').value.trim().slice(0, 80), oneOff: document.getElementById('pay-oneoff').checked };
-  PAY_FIELDS.forEach(([k, fid]) => { entry[k] = fieldAmount(fid); });
+  [...PAY_FIELDS, ...PAY_EXTRA].forEach(([k, fid]) => { entry[k] = fieldAmount(fid); });
   // A pension deduction can also go in as a payment into the pension; it isn't the user's take-home, so own = 0.
   if (link && entry.pension > 0 && state.accounts.some(a => a.id === linkAcct)) {
     const f = { id: uid(), accountId: linkAcct, date, amount: entry.pension, own: 0, note: 'Pension from pay', auto: false, employer: true };
@@ -4945,6 +4968,8 @@ function openSrc(id, thenPay) {
   document.getElementById('src-amount').value = x && x.regular ? x.regular.net : '';
   document.getElementById('src-day').value = x && x.regular && x.regular.day ? String(x.regular.day) : '';
   document.getElementById('src-archived').checked = !!(x && x.archived);
+  document.getElementById('src-db').checked = !!(x && x.db);
+  document.getElementById('src-db-wrap').hidden = (x ? x.kind : 'salary') !== 'salary';
   document.getElementById('src-archived-wrap').hidden = !x;
   document.getElementById('src-del').hidden = !x;
   document.getElementById('src-title').textContent = x ? 'Edit income source' : 'Add income source';
@@ -4952,12 +4977,13 @@ function openSrc(id, thenPay) {
   openSheet(srcSheet);
   setTimeout(() => document.getElementById('src-name').focus(), 50);
 }
+document.getElementById('src-kind').addEventListener('change', e => { document.getElementById('src-db-wrap').hidden = e.target.value !== 'salary'; });
 document.getElementById('src-form').addEventListener('submit', e => {
   e.preventDefault();
   const name = document.getElementById('src-name').value.trim().slice(0, 40);
   if (!name) return;
   const amount = fieldAmount('src-amount'), day = +document.getElementById('src-day').value || 0;
-  const vals = { name, kind: document.getElementById('src-kind').value, regular: amount > 0 ? { net: amount, day } : null, archived: !!editingSrc && document.getElementById('src-archived').checked };
+  const vals = { name, kind: document.getElementById('src-kind').value, regular: amount > 0 ? { net: amount, day } : null, archived: !!editingSrc && document.getElementById('src-archived').checked, db: document.getElementById('src-kind').value === 'salary' && document.getElementById('src-db').checked };
   let id = editingSrc;
   if (id) Object.assign(sourceOf(id), vals);
   else { clearExample([]); id = uid(); state.profile.sources.push({ id, ...vals }); }
@@ -6330,6 +6356,18 @@ document.addEventListener('click', async e => {
     }
     case 'open-log': if (ui.tab === 'income' && !id && t.closest('.fab, .top-actions')) openPay(); else openLog(id); break;
     case 'open-pay': openPay(id); break;
+    // From Payslip: details open; a picked month dates it on the usual payday that month (or its last day, never after today).
+    case 'open-pay-slip': {
+      let date;
+      if (id) {
+        const [y, m] = id.split('-').map(Number), last = new Date(Date.UTC(y, m, 0)).getUTCDate();
+        const src = sourceOf(ui.lastPaySrc) || state.profile.sources.find(x => !x.archived && x.regular);
+        const d = Math.min(last, (src && src.regular && src.regular.day) || last);
+        date = `${id}-${String(d).padStart(2, '0')}`; if (date > TODAY) date = TODAY;
+      }
+      openPay(null, null, { date, details: true }); break;
+    }
+    case 'edit-pay-slip': { const e = state.pay.find(p => p.id === id); if (e) openPay(e.source, e.id, { details: true }); break; }
     case 'add-src': openSrc(null); break;
     case 'edit-src': openSrc(id); break;
     case 'edit-pay': openPay(null, id); break;
@@ -6350,7 +6388,7 @@ document.addEventListener('click', async e => {
     case 'pay-months': ui.payMonths = +id; saveUi(); render(); break;
     case 'p60-from-pay': {
       const yy = +id, slips = state.pay.filter(p => p.date >= `${yy}-04-06` && p.date <= `${yy + 1}-04-05` && p.gross > 0 && ['salary', 'bonus'].includes((sourceOf(p.source) || {}).kind));
-      document.getElementById('p60-pay').value = Math.round(slips.reduce((s, p) => s + p.gross, 0));
+      document.getElementById('p60-pay').value = Math.round(slips.reduce((s, p) => s + taxableOf(p), 0));
       document.getElementById('p60-tax').value = Math.round(slips.reduce((s, p) => s + p.tax, 0));
       break;
     }

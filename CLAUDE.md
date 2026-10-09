@@ -253,6 +253,12 @@ not advice — keep that disclaimer.
   now; gold mark = data in it); `periodPicks[act]` (not saved, `period-pick`, empty id = Latest) else the latest period with data.
   Payslip's Month view adds "Tax year to Jun". `INCOME_RANGES`/`ui.incomeRange` are gone.
 
+- 2.0.18: Payslip logs pay: `open-pay-slip` (id = picked 'YYYY-MM' dates it on the usual payday, capped to month end/today) and
+  `edit-pay-slip` (a month's only pay without details); `openPay(srcId, entryId, {date, details})` opens "Payslip details".
+  Pay entries also carry `taxable`/`pensionable` (`PAY_EXTRA`, 0 = not given, not deductions); `taxableOf(p)` = taxable, else gross
+  (− pension for a `db` source) feeds the P60 "Use these". Sources may carry `db: true` (salary only, `#src-db`): their payslip pension
+  counts as employer money in `payStats` (unless linked as a flow) and the "also log into a pension" offer is hidden.
+
 ## Status (latest)
 
 - 1.9.9 merged to main (PR #23); owner publishes the v1.9.9 release. Owner says when to merge.
