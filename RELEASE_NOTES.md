@@ -1,2 +1,6 @@
+- Retirement in Planner is now one panel like SIPP vs ISA: your inputs first, then the result, with a line that repeats your assumptions
+- Your accounts and monthly payments fold into one line under the inputs (e.g. "5 of 10 accounts · £1,366 a month")
+- Each goal folds to one line with its progress and status; open it to change the target, the date or the monthly amount and see the result
+- Goals show bars for now and for the target date against the target, and the month you're likely to get there
 - Month in review on Insights: pick a month from a row of month tiles instead of the dropdown. Each tile has a green or red mark for whether your net worth went up or down that month
 - On an older month, a Latest button takes you straight back to last month
