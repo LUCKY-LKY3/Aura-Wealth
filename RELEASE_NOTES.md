@@ -1,2 +1,1 @@
-- Sliding the month strip in Insights now only scrolls the months; it no longer jumps to the next page
-- Income now has three pages at the top, like Insights: Savings, Payslip and Sources. Nothing has been removed, it's just shorter to scroll
+- Payslip has a month strip: slide to any month, such as June, and tap it to see that month's breakdown next to the tax year up to then. Latest takes you back

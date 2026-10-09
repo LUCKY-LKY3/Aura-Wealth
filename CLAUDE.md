@@ -248,6 +248,10 @@ not advice — keep that disclaimer.
   `payslipPanel` with its own `incomeSeg` period picker (empty state when no payslip details); Sources = sources + pay history.
   `data-tab="income" data-page=…` links and bell `note-go` `page` open one.
 
+- 2.0.17: Payslip month strip `slipStrip(cur)` (first pay month to this month; gold mark = payslip details logged), pick in `slipPick`
+  (not saved; this/last month map back to the `month`/`last` buttons), `slip-month` action (empty id = Latest); the second column is the
+  tax year up to that month (`Tax year to Jun`).
+
 ## Status (latest)
 
 - 1.9.9 merged to main (PR #23); owner publishes the v1.9.9 release. Owner says when to merge.
