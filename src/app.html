@@ -274,6 +274,10 @@ a.btn{text-decoration:none}
 @media (min-width:760px){.panel{padding:20px 22px}}
 .panel-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:16px}
 h2{font-size:15px;font-weight:600;letter-spacing:-.01em;margin:0}
+/* 2.0.14: card titles: bold, with a small gold icon tile so they stand out from the text below */
+h2.tt{display:flex;align-items:center;gap:10px;font-size:16px;font-weight:650;letter-spacing:-.015em;line-height:1.25}
+.t-ic{display:grid;place-items:center;flex:none;width:30px;height:30px;border-radius:9px;background:rgba(var(--gold-rgb),.12);border:1px solid rgba(var(--gold-rgb),.28);color:var(--gold)}
+.t-ic svg{width:16px;height:16px}
 .panel-head .aside{font-size:12px;color:var(--ink-3)}
 .eyebrow{font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
 .muted{color:var(--ink-2)} .faint{color:var(--ink-3)}
@@ -403,7 +407,7 @@ body.tabs-stuck .top{box-shadow:none}
 @media (min-width:600px) and (max-width:999px){.kpis{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media (min-width:1000px){.kpis{grid-template-columns:1fr}}
 .kpi{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px;display:grid;grid-template-columns:1fr auto;gap:2px 10px;align-items:end}
-.kpi .k{font-size:12px;color:var(--ink-2);grid-column:1/-1}
+.kpi .k{font-size:12.5px;font-weight:620;color:var(--gold);grid-column:1/-1}
 .kpi .v{font-size:24px;font-weight:600;letter-spacing:-.025em}
 .kpi .s{font-size:12px;color:var(--ink-3);grid-column:1/-1}
 @media (max-width:599px){.kpis>.kpi:nth-child(3):last-child{grid-column:1/-1}.kpi .v{font-size:21px}}
@@ -2140,7 +2144,31 @@ function smoothPath(p, join) {
 }
 // Collapsible section: title, a one-line summary, and a round chevron button; open state is remembered.
 const CHEVRON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>';
-const foldOpen = (key, title, sub, extraCls) => `<details class="fold2${extraCls ? ' ' + extraCls : ''}" data-fold="${key}" ${ui.folds && ui.folds[key] ? 'open' : ''}><summary><span class="fold-titles"><h2>${title}</h2>${sub ? `<span class="fold-sub">${sub}</span>` : ''}</span><span class="fold-btn" aria-hidden="true">${CHEVRON}</span></summary><div class="fold-body">`;
+// 2.0.14: every card title has a small gold icon tile (ti); folds pick theirs by key.
+const TITLE_ICONS = {
+  growth: '<path d="M4 17l5-5 4 4 7-8"/><path d="M15 8h5v5"/>',
+  wallet: '<rect x="3" y="6" width="18" height="13" rx="2.5"/><path d="M3 10h18M16 14.5h2"/>',
+  goal: '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r=".6" fill="currentColor"/>',
+  clock: '<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>',
+  pie: '<path d="M12 3.5a8.5 8.5 0 108.5 8.5H12z"/><path d="M15 3.8A8.5 8.5 0 0120.2 9H15z"/>',
+  bars: '<path d="M4 20V11M10 20V5M16 20v-7M21 20H3"/>',
+  month: '<rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/>',
+  sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"/>',
+  scales: '<path d="M12 4v16M6 20h12M5 8h14"/><path d="M5 8l-2.5 6h5zM19 8l-2.5 6h5z"/>',
+  shield: '<path d="M12 3l7.5 3v5.5c0 4.5-3.2 8.2-7.5 9.5-4.3-1.3-7.5-5-7.5-9.5V6z"/><path d="M9 12l2 2 4-4"/>',
+  doc: '<path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5M10 13h6M10 17h4"/>',
+  pulse: '<path d="M3 12h4l3-7 4 14 3-7h4"/>',
+  flag: '<path d="M5 21V4M5 4h11l-2 4 2 4H5"/>',
+  pct: '<path d="M19 5L5 19"/><circle cx="7" cy="7" r="2.5"/><circle cx="17" cy="17" r="2.5"/>',
+  case: '<rect x="3" y="7" width="18" height="12" rx="2.5"/><path d="M9 7V5h6v2M3 12h18"/>',
+  family: '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"/><circle cx="17" cy="9.5" r="2.5"/><path d="M17 14.5c2.6 0 4.5 1.9 4.5 4.5"/>',
+  remind: '<circle cx="12" cy="13" r="7.5"/><path d="M12 9.5V13l2.5 1.5M5 3.5L2.5 6M19 3.5L21.5 6"/>',
+  reset: '<path d="M4 12a8 8 0 1 0 2.4-5.7"/><path d="M4 4v4h4"/>'
+};
+const FOLD_ICONS = { 'ws-more': 'pie', 'ov-alloc': 'pie', 'ov-monthly': 'bars', hist: 'clock', 'hist-all': 'clock', years: 'month', 'ins-years': 'month',
+  p60: 'doc', 'ins-acct': 'wallet', payhist: 'clock', 'month-review': 'month' };
+const ti = k => { const d = TITLE_ICONS[k] || SET_ICONS[k]; return d ? `<i class="t-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">${d}</svg></i>` : ''; };
+const foldOpen = (key, title, sub, extraCls) => `<details class="fold2${extraCls ? ' ' + extraCls : ''}" data-fold="${key}" ${ui.folds && ui.folds[key] ? 'open' : ''}><summary><span class="fold-titles"><h2 class="tt">${ti(FOLD_ICONS[key])}${title}</h2>${sub ? `<span class="fold-sub">${sub}</span>` : ''}</span><span class="fold-btn" aria-hidden="true">${CHEVRON}</span></summary><div class="fold-body">`;
 const foldClose = '</div></details>';
 let gradId = 0;
 // An empty chart explains what's missing and offers the button that fixes it.
@@ -2658,7 +2686,7 @@ function wealthSources(t, r, sinceMs, sc) {
       ${movers.length > top.length ? `<p class="hint" style="margin:8px 0 0">${movers.length - top.length} more account${movers.length - top.length === 1 ? '' : 's'} moved less.</p>` : ''}
     </div>` : '';
   return `<section class="panel" aria-label="Where your wealth came from">
-    <div class="panel-head"><div><h2>Where your wealth came from ${why('sources', 'How is this worked out?')}</h2><span class="aside">What you paid in and what your money earned</span></div>${nwChips(r)}</div>
+    <div class="panel-head"><div><h2 class="tt">${ti('growth')}Where your wealth came from ${why('sources', 'How is this worked out?')}</h2><span class="aside">What you paid in and what your money earned</span></div>${nwChips(r)}</div>
     ${sc ? scopeList(sc) : ''}
     <div class="ws-grid"><div>
       <p class="ws-head">${when}, your wealth ${t.change >= 0 ? 'grew' : 'fell'} by <b class="num">${gbp(Math.abs(t.change))}</b>.</p>
@@ -2736,7 +2764,7 @@ function renderOverview() {
   const byGroup = Object.keys(GROUPS).map(g => ({ g, rows: pinFirst(hStats.filter(x => groupOf(x.a) === g && !x.a.archived).map(x => Object.assign(x, { pinned: x.a.pinned }))) })).filter(x => x.rows.length);
   const holdings = `
     <section class="panel">
-      <div class="panel-head"><h2>Holdings</h2><div class="acct-actions"><button class="btn sm" data-action="open-bulk">Update all</button><button class="btn sm" data-action="add-acct">${icons.plus}Add account</button></div></div>
+      <div class="panel-head"><h2 class="tt">${ti('wallet')}Holdings</h2><div class="acct-actions"><button class="btn sm" data-action="open-bulk">Update all</button><button class="btn sm" data-action="add-acct">${icons.plus}Add account</button></div></div>
       ${hStats.length ? `<div class="table-wrap"><table>
         <thead><tr><th>Account</th><th class="r">Value</th><th class="r hide-sm">30 days</th><th class="r hide-sm">Since start</th><th class="r hide-sm">Weight</th><th class="r hide-sm">Trend</th></tr></thead>
         ${byGroup.map(({ g, rows }) => {
@@ -2782,7 +2810,7 @@ function renderOverview() {
 
   const goals = state.goals.length && ui.person === 'me' ? `
     <section class="panel">
-      <div class="panel-head"><h2>Goals</h2><button class="btn ghost sm" data-action="tab" data-tab="planner" data-page="goals">Manage</button></div>
+      <div class="panel-head"><h2 class="tt">${ti('goal')}Goals</h2><button class="btn ghost sm" data-action="tab" data-tab="planner" data-page="goals">Manage</button></div>
       ${goalList(state.goals.slice(0, 3))}
     </section>` : '';
 
@@ -2792,7 +2820,7 @@ function renderOverview() {
     .sort((a, b) => byDate(b, a) || (b.id > a.id ? 1 : -1)).slice(0, 3);
   const activity = `
     <section class="panel">
-      <div class="panel-head"><h2>Recent activity</h2><button class="btn ghost sm" data-action="hist-all">View all</button></div>
+      <div class="panel-head"><h2 class="tt">${ti('clock')}Recent activity</h2><button class="btn ghost sm" data-action="hist-all">View all</button></div>
       ${recent.length ? `<ul class="activity">${recent.map(l => {
         const a = accById[l.accountId];
         if (l.kind === 'flow') return `<li><i class="sw" style="background:${colorOf(a)}"></i><div><div>${esc(a.name)}</div><div class="when">${dateLabel(toMs(l.date))} · ${l.employer ? 'Employer paid in' : l.isaTransfer ? 'ISA transfer' : l.transfer ? (l.amount < 0 ? 'Moved out' : 'Moved in') : l.amount >= 0 ? 'Paid in' : 'Taken out'}${l.note ? ' · ' + esc(l.note) : ''}</div></div><div><div class="amt ${cls(l.amount)}">${signed(l.amount)}</div></div></li>`;
@@ -3073,7 +3101,7 @@ function renderAllAccounts(accts) {
       ${splitPanel(accts, stats, all.cur)}
       ${paidGrowthPanel(order)}
       <section class="panel">
-        <div class="panel-head"><h2>Every account</h2><span class="aside">${ui.allType && GROUPS[ui.allType] ? `${esc(GROUPS[ui.allType])} · <button class="btn sm ghost" data-action="all-type" data-id="">Show all</button>` : 'All time'}</span></div>
+        <div class="panel-head"><h2 class="tt">${ti('wallet')}Every account</h2><span class="aside">${ui.allType && GROUPS[ui.allType] ? `${esc(GROUPS[ui.allType])} · <button class="btn sm ghost" data-action="all-type" data-id="">Show all</button>` : 'All time'}</span></div>
         <div class="table-wrap"><table>
           <thead><tr><th>Account</th><th class="r">Value</th><th class="r hide-sm">Paid in</th><th class="r">Growth</th><th class="r hide-sm">Return</th></tr></thead>
           <tbody>${order.filter(x => !ui.allType || groupOf(x.a) === ui.allType).map(x => `<tr class="clickable" data-action="pick-account" data-id="${esc(x.a.id)}" tabindex="0">
@@ -3117,7 +3145,7 @@ function splitPanel(accts, stats, total) {
   const free = total - locked, dob = state.profile.dob, age = accessAge(dob);
   const unlock = dob ? `${+dob.slice(0, 4) + age}${dob.slice(4)}` : '';
   return `<section class="panel">
-    <div class="panel-head"><h2>Where it is</h2><span class="aside">Tap a type to filter</span></div>
+    <div class="panel-head"><h2 class="tt">${ti('pie')}Where it is</h2><span class="aside">Tap a type to filter</span></div>
     <div class="donut-wrap">
       <div class="donut-box">${donut(groups.map(g => ({ value: g.value, color: g.color })), total)}
         <div class="donut-center"><b class="mono">${compact(total)}</b><span>${groups.length} type${groups.length === 1 ? '' : 's'}</span></div>
@@ -3138,7 +3166,7 @@ function paidGrowthPanel(order) {
   const max = Math.max(1, ...rows.map(x => Math.max(x.p.paid, x.st.cur)));
   const w = v => (Math.max(0, v) / max * 100).toFixed(2) + '%';
   return `<section class="panel">
-    <div class="panel-head"><h2>Your money vs growth</h2><span class="aside">All time</span></div>
+    <div class="panel-head"><h2 class="tt">${ti('bars')}Your money vs growth</h2><span class="aside">All time</span></div>
     <ul class="pg-list">${[...rows].sort((a, b) => b.st.cur - a.st.cur).map(x => {
       const paid = x.p.paid, g = x.st.cur - paid;
       return `<li data-action="pick-account" data-id="${esc(x.a.id)}" tabindex="0">
@@ -3175,7 +3203,7 @@ function heatmapPanel(accts) {
     return `<button class="hm-cell" data-action="heat" data-id="${esc(label)}" title="${esc(label)}" aria-label="${esc(label)}" style="background:var(${c.g >= 0 ? '--pos' : '--neg'});opacity:${Math.abs(c.g) < 0.5 ? 0.12 : a.toFixed(2)}"></button>`;
   };
   return `<section class="panel">
-    <div class="panel-head"><h2>Month by month</h2><span class="aside">Growth, not money paid in</span></div>
+    <div class="panel-head"><h2 class="tt">${ti('month')}Month by month</h2><span class="aside">Growth, not money paid in</span></div>
     <div class="heatmap">
       <span></span>${M.map(x => `<span class="hm-h">${x}</span>`).join('')}
       ${years.map(y => `<span class="hm-y">${String(y).slice(2)}</span>${Array.from({ length: 12 }, (_, i) => cell(y, i + 1)).join('')}`).join('')}
@@ -3333,7 +3361,7 @@ function renderPlanner() {
     const accSum = planAcctLine(on, listed.length);
     body = `${p.dob ? '' : `<p class="warn">Add your date of birth in <button class="btn sm ghost" data-action="tab" data-tab="settings">Settings</button> to plan to a retirement age. Until then, set the number of years below.</p>`}
       <section class="panel" id="plan-panel">
-        <div class="panel-head"><h2>Retirement</h2><span class="aside">Change the inputs to update the result</span></div>
+        <div class="panel-head"><h2 class="tt">${ti('sun')}Retirement</h2><span class="aside">Change the inputs to update the result</span></div>
         <div class="calc-grid calc-in">
         <div class="calc-inputs">
           <div class="eyebrow calc-step"><span>1</span>Your inputs</div>
@@ -3376,7 +3404,7 @@ function renderPlanner() {
       </section>`;
   } else if (pg === 'goals') {
     body = `<section class="panel stack">
-        <div class="panel-head" style="margin-bottom:0"><div><h2>Goals</h2><span class="aside">Change a goal's inputs to update its result</span></div>${state.goals.length ? `<button class="btn sm" data-action="goal-add">${icons.plus}Add goal</button>` : ''}</div>
+        <div class="panel-head" style="margin-bottom:0"><div><h2 class="tt">${ti('goal')}Goals</h2><span class="aside">Change a goal's inputs to update its result</span></div>${state.goals.length ? `<button class="btn sm" data-action="goal-add">${icons.plus}Add goal</button>` : ''}</div>
         ${state.goals.length ? goalCards(state.goals) : `<div class="chart-empty"><div class="empty-cta"><span>Set a target, such as an emergency fund, a house deposit or an ISA milestone, and see if you are on track.</span><button class="btn primary" data-action="goal-add">${icons.plus}Add goal</button></div></div>`}
       </section>`;
   } else body = '<div id="calc-host"></div>';
@@ -3489,7 +3517,7 @@ function renderCalculator(host) {
   const c = ui.calc, band = state.profile.band;
   host.innerHTML = `
       <section class="panel" id="calc-panel">
-        <div class="panel-head"><h2>SIPP vs ISA</h2><span class="aside">Change the inputs to update the result</span></div>
+        <div class="panel-head"><h2 class="tt">${ti('scales')}SIPP vs ISA</h2><span class="aside">Change the inputs to update the result</span></div>
         <div class="calc-grid calc-in">
         <div class="calc-inputs">
         <div class="eyebrow calc-step"><span>1</span>Your inputs</div>
@@ -3659,7 +3687,7 @@ function allowancesPanel() {
   if (!parts.length) return '';
   const missing = [...isas, ...pens].filter(a => { const s = logsOf(a.id); return s.length && s[0].date >= start && !ytdFlow(a) && !state.flows.some(f => f.accountId === a.id && inTY(f)); });
   return `<section class="panel stack">
-    <div class="panel-head" style="margin-bottom:0"><h2>Allowances ${taxYear(TODAY)}</h2><span class="aside">${daysLeft} days until 5 April</span></div>
+    <div class="panel-head" style="margin-bottom:0"><h2 class="tt">${ti('shield')}Allowances ${taxYear(TODAY)}</h2><span class="aside">${daysLeft} days until 5 April</span></div>
     ${missing.length ? `<p class="warn">${missing.map(a => `<b>${esc(a.name)}</b>`).join(', ')}: add what you paid in since 6 April (Edit account → "Paid in this tax year") so these totals are complete.</p>` : ''}
     ${parts.join('<hr style="border:0;border-top:1px solid var(--line);margin:4px 0">')}
     <p class="hint">Counts payments dated since 6 April ${y}. Withdrawals don't give allowance back (unless your ISA is flexible). Pension allowance can be lower if your income is very high.</p>
@@ -3680,7 +3708,7 @@ function yearsPanel() {
   const cf = [cur - 3, cur - 2, cur - 1].filter(hadPension).map(y => ({ y, left: Math.max(0, taxRules(y).aa - sumY(pens, y)) }));
   const cfTotal = cf.reduce((t, x) => t + x.left, 0);
   return `<section class="panel stack">
-    <div class="panel-head" style="margin-bottom:0"><h2>Paid in by tax year</h2><span class="aside">Last 6 years</span></div>
+    <div class="panel-head" style="margin-bottom:0"><h2 class="tt">${ti('bars')}Paid in by tax year</h2><span class="aside">Last 6 years</span></div>
     <div class="chart" id="years-chart"></div>
     <div class="bar-legend"><span><i class="sw" style="background:var(--c2)"></i>ISAs and other</span><span><i class="sw" style="background:var(--c1)"></i>Pensions</span></div>
     ${pens.length && cf.length ? `<p class="explain">Pension carry-forward: about <b>${gbp(cfTotal)}</b> of unused allowance from ${cf.map(x => tyLabel(x.y)).join(', ')} could be added to this year's ${gbp(taxRules(cur).aa)}, if you were in a pension scheme in those years. Your earnings this year still cap tax relief.</p>` : ''}
@@ -3735,7 +3763,7 @@ function reviewPanel() {
   const { years, y } = yearOptions();
   const r = yearReview(y);
   const stat = (k, v, c) => `<div class="stat"><div class="k">${k}</div><div class="v ${c || ''}">${v}</div></div>`;
-  const head = `<div class="panel-head" style="margin-bottom:0"><h2>Year in review</h2>
+  const head = `<div class="panel-head" style="margin-bottom:0"><h2 class="tt">${ti('month')}Year in review</h2>
       <div class="seg scroll" role="group" aria-label="Tax year">${years.map(v => `<button data-action="tax-year" data-id="${v}" aria-pressed="${v === y}">${tyLabel(v)}</button>`).join('')}</div>
     </div>`;
   // 2.0.7: a year before your first balance used to hide the whole panel, year buttons included, so you couldn't pick another.
@@ -3767,7 +3795,7 @@ function taxPanel() {
   const row = (label, value, note) => `<tr><td>${label}${note ? `<div class="hint">${note}</div>` : ''}</td><td class="r val">${value}</td></tr>`;
   const over = (v, lim) => v > lim ? ` <span class="delta neg">over by ${gbp(v - lim)}</span>` : '';
   return `<section class="panel stack">
-    <div class="panel-head" style="margin-bottom:0"><h2>Tax return helper</h2>
+    <div class="panel-head" style="margin-bottom:0"><h2 class="tt">${ti('doc')}Tax return helper</h2>
       <div class="seg scroll" role="group" aria-label="Tax year">${years.map(v => `<button data-action="tax-year" data-id="${v}" aria-pressed="${v === y}">${v}/${String(v + 1).slice(2)}</button>`).join('')}</div>
     </div>
     <p class="explain">Figures from your entries for 6 April ${y} to 5 April ${y + 1}${r.partial ? ' (tax year still running)' : ''}, to help with a Self Assessment return.</p>
@@ -3868,7 +3896,7 @@ function renderInsights() {
   else if (pg === 'tax') body = taxPanel();
   else body = `
       <section class="panel stack">
-        <div class="panel-head" style="margin-bottom:0"><h2>What changed</h2>
+        <div class="panel-head" style="margin-bottom:0"><h2 class="tt">${ti('pulse')}What changed</h2>
           <div class="seg scroll" role="group" aria-label="Period">${INSIGHT_RANGES.map(k => `<button data-action="insight-range" data-range="${k}" aria-pressed="${key === k}">${RANGE_BTN[k] || k}</button>`).join('')}</div>
         </div>
         ${pt.rows.length ? `<p class="hint" style="margin:0">${esc(rangeName(key)[0].toUpperCase() + rangeName(key).slice(1))}${viewName() ? ` · ${esc(viewName())}` : ''}</p>` : ''}
@@ -3878,7 +3906,7 @@ function renderInsights() {
       </section>
       ${!state.example && own ? reviewFold(monthReview(reviewMonths().includes(reviewPick) ? reviewPick : null)) : ''}
       ${ui.person === 'all' ? allowancesPanel() : ''}
-      ${ms.length ? `<section class="panel"><div class="panel-head"><h2>Milestones</h2><span class="aside">${ms.length} reached</span></div><div class="ms-row">${ms.map(m => `<span class="ms-chip"><b>${compact(m.v)}</b><span>${dateLabel(m.t)}</span></span>`).join('')}</div></section>` : ''}`;
+      ${ms.length ? `<section class="panel"><div class="panel-head"><h2 class="tt">${ti('flag')}Milestones</h2><span class="aside">${ms.length} reached</span></div><div class="ms-row">${ms.map(m => `<span class="ms-chip"><b>${compact(m.v)}</b><span>${dateLabel(m.t)}</span></span>`).join('')}</div></section>` : ''}`;
 
   view.innerHTML = `
     <div class="stack view">
@@ -4024,7 +4052,7 @@ function renderIncome() {
     ...cmp
   ].join('');
   const summary = `<section class="panel">
-    <div class="panel-head" style="margin-bottom:0"><h2>Savings rate</h2>
+    <div class="panel-head" style="margin-bottom:0"><h2 class="tt">${ti('pct')}Savings rate</h2>
       <div class="seg scroll" role="group" aria-label="Period">${Object.entries(INCOME_RANGES).map(([kk, l]) => `<button data-action="income-range" data-id="${kk}" aria-pressed="${key === kk}">${l}</button>`).join('')}</div>
     </div>
     ${st.net > 0 ? `<div class="review-grid">
@@ -4042,7 +4070,7 @@ function renderIncome() {
   const missPanel = misses.map(([x, m]) => `<p class="hint" style="margin:0">No ${esc(x.name)} pay logged for ${esc(monthList(m))}. <button class="btn sm ghost" data-action="fill-pay" data-id="${esc(x.id)}">Fill in usual ${gbp(x.regular.net)}</button></p>`).join('');
   const n = [12, 24].includes(ui.payMonths) ? ui.payMonths : 12, months = payMonths(n);
   const chartPanel = `<section class="panel">
-    <div class="panel-head"><h2>Income and saving by month</h2>
+    <div class="panel-head"><h2 class="tt">${ti('bars')}Income and saving by month</h2>
       <div class="seg" role="group" aria-label="Months">${[12, 24].map(x => `<button data-action="pay-months" data-id="${x}" aria-pressed="${n === x}">${x}M</button>`).join('')}</div>
     </div>
     ${months.length ? (() => { const rs = months.filter(x => x.st.rate != null).map(x => x.st.rate); return rs.length ? `<div class="period-sum"><span><b>${rateText(rs.reduce((t, r) => t + r, 0) / rs.length)}</b>average monthly rate</span><span><b>${rateText(Math.max(...rs))}</b>best month</span></div>` : ''; })() : ''}
@@ -4053,7 +4081,7 @@ function renderIncome() {
   const accById = Object.fromEntries(state.accounts.map(a => [a.id, a]));
   const where = Object.entries(st.byAcct).filter(([id, v]) => accById[id] && Math.abs(v) >= 0.5).sort((a, b) => b[1] - a[1]);
   const wherePanel = st.net > 0 ? `<section class="panel">
-    <div class="panel-head"><h2>Where it went</h2><span class="aside">${esc(incomeRangeName(key))}</span></div>
+    <div class="panel-head"><h2 class="tt">${ti('pie')}Where it went</h2><span class="aside">${esc(incomeRangeName(key))}</span></div>
     <div class="table-wrap"><table>
       <thead><tr><th>Account</th><th class="r">Amount</th><th class="r">Of income</th></tr></thead>
       <tbody>${where.map(([id, v]) => `<tr class="clickable" data-action="goto-account" data-id="${esc(id)}" tabindex="0">
@@ -4071,7 +4099,7 @@ function renderIncome() {
   const top = multi ? [...srcs].sort((a, b) => tyNet(b.id, y) - tyNet(a.id, y))[0] : null, topShare = top ? tyNet(top.id, y) / tyTot : 0;
   const oneOffs = state.pay.filter(p => p.oneOff && p.date >= `${y}-04-06` && p.date <= TODAY), oneOffSum = oneOffs.reduce((t, p) => t + p.net, 0);
   const sourcesPanel = `<section class="panel">
-    <div class="panel-head"><h2>Income sources</h2><div class="acct-actions"><button class="btn sm" data-action="open-pay">Log pay</button><button class="btn sm" data-action="add-src">${icons.plus}Add source</button></div></div>
+    <div class="panel-head"><h2 class="tt">${ti('case')}Income sources</h2><div class="acct-actions"><button class="btn sm" data-action="open-pay">Log pay</button><button class="btn sm" data-action="add-src">${icons.plus}Add source</button></div></div>
     <div class="table-wrap"><table>
       <thead><tr><th>Source</th><th class="r">${tyLabel(y)}</th>${multi ? '<th class="r">Of income</th>' : ''}<th class="r hide-sm">${tyLabel(y - 1)}</th><th class="r hide-sm">12 months</th></tr></thead>
       <tbody>${shown.map(x => `<tr class="clickable" data-action="edit-src" data-id="${esc(x.id)}" tabindex="0">
@@ -4115,7 +4143,7 @@ function slipSum(from, to) {
 function payslipPanel(key, from, to) {
   if (!state.pay.some(p => p.gross > 0)) return '';
   const st = slipSum(from, to), ty = slipSum(taxYearStart(TODAY), TODAY), both = key !== 'TY';
-  const head = `<div class="panel-head"><h2>Payslip breakdown</h2><span class="aside">${esc(incomeRangeName(key))}</span></div>`;
+  const head = `<div class="panel-head"><h2 class="tt">${ti('doc')}Payslip breakdown</h2><span class="aside">${esc(incomeRangeName(key))}</span></div>`;
   if (!st.n) return `<section class="panel">${head}<p class="hint" style="margin:0">Gross pay and deductions aren't logged for ${esc(incomeRangeName(key))}. Add them under "Payslip details" when you log pay.</p></section>`;
   const pc = v => st.gross > 0 ? (v / st.gross * 100).toFixed(1) + '%' : '—';
   const parts = [['net', 'Take-home', 'var(--c1)'], ...SLIP_ROWS].filter(([k]) => st[k] > 0.005);
@@ -4257,7 +4285,7 @@ function renderSettings() {
   const secs = [
     ['you', `
       <section class="panel stack">
-        <h2>About you</h2>
+        <h2 class="tt">${ti('you')}About you</h2>
         <form id="profile-form" class="form-grid">
           <div class="two">
             <div class="field"><label for="pf-name">First name</label><input id="pf-name" class="input" maxlength="40" value="${esc(p.name)}" autocomplete="given-name"></div>
@@ -4274,14 +4302,14 @@ function renderSettings() {
       </section>`],
     ['help', `
       <section class="panel stack" id="faq">
-        <h2>Help and FAQ</h2>
+        <h2 class="tt">${ti('help')}Help and FAQ</h2>
         <input id="faq-q" class="input" type="search" placeholder="Search help, e.g. backup or ISA" aria-label="Search help" autocomplete="off">
         <p class="hint" id="faq-none" hidden style="margin:0">No answers match. Try another word.</p>
         <div id="faq-list">${FAQ_SECS.map(sec => `<div class="set-grp faq-sec">${esc(sec)}</div>${FAQ.filter(f => f[3] === sec).map(([id, q, a]) => `<details class="faq" id="faq-${id}"><summary>${q}</summary><div>${a}</div></details>`).join('')}`).join('')}</div>
       </section>`],
     ['you', `
       <section class="panel stack">
-        <h2>Family</h2>
+        <h2 class="tt">${ti('family')}Family</h2>
         <p class="explain">Track accounts you hold for others, such as a child's Junior ISA. Their accounts are kept out of your own net worth, and you can view each person or everyone together.</p>
         ${p.people.length ? `<ul class="acct-list">${p.people.map(x => pendingPerson === x.id ? `
           <li style="background:var(--neg-soft)"><span class="grow">Remove <b>${esc(x.name)}</b>? Their accounts will move to you.</span><button class="btn sm ghost" data-action="person-del-no">Keep</button><button class="btn sm danger solid" data-action="person-del-yes" data-id="${esc(x.id)}">Remove</button></li>` : `
@@ -4293,7 +4321,7 @@ function renderSettings() {
       </section>`],
     ['accounts', `
       <section class="panel stack">
-        <div class="panel-head" style="margin-bottom:0"><h2>Accounts</h2><button class="btn sm" data-action="add-acct">${icons.plus}Add account</button></div>
+        <div class="panel-head" style="margin-bottom:0"><h2 class="tt">${ti('wallet')}Accounts</h2><button class="btn sm" data-action="add-acct">${icons.plus}Add account</button></div>
         <p class="hint">Drag ⋮⋮ to reorder. Accounts stay in their group: to move one to another group, change its type in Edit. Pinned accounts come first in lists and the account strip.</p>
         ${state.accounts.length ? Object.keys(GROUPS).filter(g => state.accounts.some(a => groupOf(a) === g)).map(g => `<div class="reorder-grp" data-group="${g}"><div class="set-grp">${esc(GROUPS[g])}</div><ul class="acct-list">
           ${pinFirst(state.accounts.filter(a => groupOf(a) === g)).map(a => pendingRemoveAcct === a.id ? `
@@ -4303,7 +4331,7 @@ function renderSettings() {
       </section>`],
     ['privacy', `
       <section class="panel stack">
-        <h2>Privacy</h2>
+        <h2 class="tt">${ti('privacy')}Privacy</h2>
         <label class="check tgl"><input type="checkbox" role="switch" id="set-demo" ${demo ? 'checked' : ''}><span><b style="color:var(--ink);font-weight:550">Demo mode</b><br>Shows example data, to try things out or show someone Aurum. Your own data is untouched and nothing is saved. Backups, reminders and notifications pause until you exit${store.get(LOCK_KEY) ? ', which asks for your PIN' : ''}.</span></label>
         <label class="check tgl"><input type="checkbox" role="switch" id="set-hidden" ${ui.hidden ? 'checked' : ''}><span><b style="color:var(--ink);font-weight:550">Hide balances</b><br>Shows £•••• instead of amounts. Also on the eye button at the top.</span></label>
         <div class="stack" style="gap:10px">
@@ -4322,7 +4350,7 @@ function renderSettings() {
       </section>`],
     ['backup', `
       <section class="panel stack">
-        <h2>Backup and restore</h2>
+        <h2 class="tt">${ti('backup')}Backup and restore</h2>
         <p class="explain">Your data is saved on this device only. Export a backup regularly and before you change phone.</p>
         ${backupHealth()}
         <div class="row-actions">
@@ -4362,7 +4390,7 @@ function renderSettings() {
       </section>`],
     ['look', `
       <section class="panel stack">
-        <h2>Appearance</h2>
+        <h2 class="tt">${ti('look')}Appearance</h2>
         <label class="check tgl"><input type="checkbox" role="switch" id="set-pence" ${ui.pence ? 'checked' : ''}><span>Show pence (£1,234.56)</span></label>
         <label class="check tgl"><input type="checkbox" role="switch" id="set-compact" ${ui.compactNums ? 'checked' : ''}><span>Short figures for large amounts (£104.1k)</span></label>
         <div class="seg" role="radiogroup" aria-label="Theme" style="width:max-content">
@@ -4376,13 +4404,13 @@ function renderSettings() {
       </section>`],
     ['notify', `
       <section class="panel stack">
-        <h2>Notifications</h2>
+        <h2 class="tt">${ti('notify')}Notifications</h2>
         <p class="explain">Shown under the bell at the top. Worked out on this device from your entries.</p>
         ${[['To do', ['due', 'backup', 'regular', 'stale']], ['Tax year', ['allow', 'tax']], ['Progress', ['goals', 'moves', 'pay', 'app']]].map(([g, keys]) => `<div class="set-grp">${g}</div><div class="set-card">${keys.map(k => { const [, label, sub] = NOTE_KINDS.find(x => x[0] === k); return `<label class="set-row"><span class="note-ic gold"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${NOTE_ICONS[NOTE_KIND_ICON[k]]}</svg></span><span class="set-txt"><b>${label}</b><small>${k === 'moves' && noteOn(k) ? `${ui.notes.move.pct}% · ${{ both: 'up and down', up: 'up only', down: 'down only' }[ui.notes.move.dir]} · ${ui.notes.move.basis === 'month' ? 'this month' : 'since previous balance'}` : sub}</small></span><input type="checkbox" role="switch" class="switch" data-note-kind="${k}" ${noteOn(k) ? 'checked' : ''}></label>${k === 'moves' ? moveOpts : ''}`; }).join('')}</div>`).join('')}
       </section>`],
     ['notify', `
       <section class="panel stack">
-        <h2>Reminders</h2>
+        <h2 class="tt">${ti('remind')}Reminders</h2>
         ${Native ? `<div class="field" style="max-width:260px"><label for="set-reminder">Monthly reminder to update balances</label>
           <select id="set-reminder" class="input"><option value="">Off</option>${Array.from({ length: 28 }, (_, i) => `<option value="${i + 1}" ${store.get(REMINDER_KEY) === String(i + 1) ? 'selected' : ''}>On day ${i + 1}, 9am</option>`).join('')}</select></div>
           <p class="status" id="reminder-status" role="status"></p>
@@ -4390,7 +4418,7 @@ function renderSettings() {
       </section>`],
     ['about', `
       <section class="panel stack">
-        <h2>About Aurum</h2>
+        <h2 class="tt">${ti('about')}About Aurum</h2>
         <div class="about">
           <svg class="mark" width="44" height="44" aria-hidden="true"><use href="#aurum-mark"/></svg>
           <div><p><b>Aurum</b> <span class="mono faint" style="font-size:12px">v${esc(APP_VERSION)}</span>${IS_DEV ? ' <span class="owner">Development build</span>' : ''}</p><p class="faint" style="font-size:13px">Personal wealth ledger. No sign-in, no servers: your data never leaves this device.</p></div>
@@ -4408,7 +4436,7 @@ function renderSettings() {
       </section>`],
     ['backup', `
       <section class="panel stack">
-        <h2>Reset</h2>
+        <h2 class="tt">${ti('reset')}Reset</h2>
         <p class="explain">Deletes all ${count} valuations, your accounts and goals on this device. Export a backup first if you may want them back.</p>
         <div class="row-actions">
           ${pendingReset
@@ -5907,7 +5935,7 @@ function placeMonthStrip() {
 function reviewCard(r, dismissable) {
   if (!r) return '';
   return `<section class="panel review" id="month-review">
-    <div class="panel-head" style="margin-bottom:0"><h2>Your ${esc(r.name)} in money</h2>${dismissable ? '<button class="btn sm ghost" data-action="review-hide">Dismiss</button>' : `<span class="aside">${r.year}</span>`}</div>
+    <div class="panel-head" style="margin-bottom:0"><h2 class="tt">${ti('month')}Your ${esc(r.name)} in money</h2>${dismissable ? '<button class="btn sm ghost" data-action="review-hide">Dismiss</button>' : `<span class="aside">${r.year}</span>`}</div>
     ${reviewBody(r)}
   </section>`;
 }
