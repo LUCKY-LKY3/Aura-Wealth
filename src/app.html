@@ -4196,7 +4196,7 @@ function periodPick(act, test) {
   return { mode, list, cur, seg, strip };
 }
 function payslipPanel() {
-  const { mode, cur, seg, strip } = periodPick('slip');
+  const { mode, cur, seg, strip } = periodPick('slip', () => true);
   let { from, to } = cur, name = cur.name, tyFrom = null, tyHead = '';
   if (mode === 'm') { tyFrom = taxYearStart(to); tyHead = to >= monthBounds(0)[0] ? 'Tax year so far' : `Tax year to ${cur.short}`; }
   const head = `<div class="panel-head"><h2 class="tt">${ti('doc')}Payslip breakdown</h2>${seg}</div>${strip}`;
@@ -4206,9 +4206,18 @@ function payslipPanel() {
     ? `<button class="${cls}" data-action="edit-pay-slip" data-id="${esc(bare[0].id)}">${icons.edit}Add payslip details</button>`
     : `<button class="${cls}" data-action="open-pay-slip" data-id="${mode === 'm' ? cur.id : ''}">${icons.plus}${label}</button>`;
   const monthName = mode === 'm' ? fmtMonthLong.format(new Date(toMs(from))) : '';
+  // 2.0.19: pay logged without payslip details still shows its take-home (and the tax year's, for a month).
+  const takeHome = () => {
+    const inT = inP.filter(p => p.date <= TODAY), net = inT.reduce((t, p) => t + (p.net || 0), 0);
+    const tyNet = mode === 'm' ? state.pay.filter(p => p.date >= tyFrom && p.date <= to && p.date <= TODAY).reduce((t, p) => t + (p.net || 0), 0) : 0;
+    return `<div class="kpis" style="margin-top:4px"><div class="kpi"><div class="k">${esc(cur.col)}</div><div class="v num">${gbp(net)}</div><div class="s">Take-home, ${inT.length} payment${inT.length === 1 ? '' : 's'}</div></div>${mode === 'm' ? `<div class="kpi"><div class="k">${esc(tyHead)}</div><div class="v num">${gbp(tyNet)}</div><div class="s">Take-home since ${fmtDate.format(new Date(toMs(tyFrom)))}</div></div>` : ''}</div>
+      <div class="chart-empty" style="min-height:0;padding:14px 0 4px"><div class="empty-cta"><span>Add gross pay, tax, National Insurance and pension under "Payslip details" to see where the rest of your pay goes.</span>${logBtn('Log pay')}</div></div>`;
+  };
+  if (!state.pay.some(p => p.gross > 0) && inP.some(p => p.date <= TODAY)) return `<section class="panel">${head}${takeHome()}</section>`;
   if (!state.pay.some(p => p.gross > 0)) return `<section class="panel">${head}<div class="chart-empty"><div class="empty-cta"><b>See where your gross pay goes</b><span>When you log pay, open "Payslip details" and add your gross pay, tax, National Insurance and pension. Aurum then shows how much of each £1 you keep.</span>${logBtn('Log pay')}</div></div></section>`;
   const st = slipSum(from, to), both = mode === 'm', ty = both ? slipSum(tyFrom, to) : st;
-  if (!st.n) return `<section class="panel">${head}<div class="chart-empty"><div class="empty-cta"><span>Gross pay and deductions aren't logged for ${esc(name)}. Add them under "Payslip details" when you log pay.</span>${logBtn(monthName ? `Log ${monthName} pay` : 'Log pay')}</div></div></section>`;
+  if (!st.n && inP.some(p => p.date <= TODAY)) return `<section class="panel">${head}${takeHome()}</section>`;
+  if (!st.n) return `<section class="panel">${head}<div class="chart-empty"><div class="empty-cta"><span>No pay logged for ${esc(name)}.</span>${logBtn(monthName ? `Log ${monthName} pay` : 'Log pay')}</div></div></section>`;
   const pc = v => st.gross > 0 ? (v / st.gross * 100).toFixed(1) + '%' : '—';
   const parts = [['net', 'Take-home', 'var(--c1)'], ...SLIP_ROWS].filter(([k]) => st[k] > 0.005);
   let x = 0;

@@ -259,6 +259,9 @@ not advice — keep that disclaimer.
   (− pension for a `db` source) feeds the P60 "Use these". Sources may carry `db: true` (salary only, `#src-db`): their payslip pension
   counts as employer money in `payStats` (unless linked as a flow) and the "also log into a pension" offer is hidden.
 
+- 2.0.19: Payslip's strip marks any pay (`periodPick('slip', () => true)`); a period with pay but no gross shows `takeHome()` (net tiles,
+  plus tax year so far in Month view) and the details prompt instead of an empty state.
+
 ## Status (latest)
 
 - 1.9.9 merged to main (PR #23); owner publishes the v1.9.9 release. Owner says when to merge.
