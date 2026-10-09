@@ -5705,7 +5705,7 @@ function reviewMonths(limit = Infinity) {
 // Month picked on Insights (not saved: it opens on last month each time).
 let reviewPick = null;
 const reviewTitle = r => `Your ${esc(r.name)}${r.year !== +TODAY.slice(0, 4) ? ` ${r.year}` : ''} in money`;
-// 2.0.10: a strip of month tiles (oldest left, this month greyed at the end) with a mark for up or down,
+// 2.0.11: a strip of month tiles (oldest left, this month greyed at the end) with a mark for up or down,
 // and a Latest button back to last month whenever an older month is open.
 function reviewPicker(r) {
   const months = reviewMonths();
