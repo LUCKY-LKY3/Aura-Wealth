@@ -1,1 +1,2 @@
-- The section tabs on Insights and Planner are now shorter: each icon sits beside its label on one row, so the page content starts higher up
+- Month in review on Insights: pick a month from a row of month tiles instead of the dropdown. Each tile has a green or red mark for whether your net worth went up or down that month
+- On an older month, a Latest button takes you straight back to last month
