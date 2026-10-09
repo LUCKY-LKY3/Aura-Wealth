@@ -1,2 +1,2 @@
-- New colour choice in Settings › Appearance: Gold (as before), midnight Green, Navy with champagne, or Graphite with copper
-- Colours apply to the Dark theme and are saved on this phone only; gains stay green and losses red in every option
+- Card titles stand out more: each card's name is bolder, with a small gold icon beside it
+- The small labels on the Overview tiles (Pensions, ISA allowance) are now gold too
