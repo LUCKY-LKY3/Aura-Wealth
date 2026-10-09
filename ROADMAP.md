@@ -37,6 +37,13 @@ Order: 2.0 polish and charts → 2.x Future Me → 3.0 pensions, property and de
 - Cash drag warning: lots of cash in a low-interest account (user enters rate)
 - Interest checker: savings rate vs a benchmark rate the user sets
 - Income follow-ups: household / partner income (owner per source), goal dates from current savings rate
+- More payslip detail (owner, 9 Oct 2026), optional boxes in the payslip fold, filled by "Copy last payslip":
+  - Taxable pay (default gross − pension): "Use these" on the P60 page sums taxable pay instead of gross, so the refund
+    check matches the P60 when pension comes off before tax (DB / net pay arrangement, salary sacrifice)
+  - Pensionable pay (default gross): stored now so DB accrual history exists for 3.0
+  - "Defined benefit" tick on an income source: the payslip pension deduction counts in the "including work pension"
+    savings rate even though there is no pension account to link it to
+  - Not added: NI-able pay (clutter), tax period (worked out from the pay date)
 
 ## 2.x: Future Me and "what your saving means" (owner idea)
 Turns the planner into a simulator from the user's own data (planner growth, inflation, retirement age, goals, pay).
@@ -70,6 +77,8 @@ Always in today's money and marked "illustration, not advice".
     explaining CETV and that the real value depends on the scheme's benefits
   - Suggested with it: planner adds DB income from the scheme pension age alongside the pot's drawdown income; optional
     automatic lump sum (e.g. NHS 1995 section) added to the value; shares the "yearly income from an age" model with State Pension
+  - Accrual from payslips: pensionable pay × the scheme's accrual rate (e.g. 1/54) shows "this year added about £X a year"
+    and keeps the DB income estimate up to date
 - State Pension: yearly amount (from the user's forecast) from State Pension age, same "yearly income from an age" model
   as DB; in the planner, and optionally in pension wealth; NI Qualifying Years tracker (path to state pension eligibility)
 - Property and debts: home/property values and liabilities (mortgage, loans, cards), so net worth = assets − liabilities
