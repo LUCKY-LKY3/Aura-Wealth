@@ -248,6 +248,11 @@ not advice — keep that disclaimer.
   `payslipPanel` with its own `incomeSeg` period picker (empty state when no payslip details); Sources = sources + pay history.
   `data-tab="income" data-page=…` links and bell `note-go` `page` open one.
 
+- 2.0.17: Income › Savings and Payslip pick their own period with `periodPick(act, test)` (act 'save'|'slip'): `SLIP_MODES`
+  ('m'|'ty'|'y', `ui.saveMode`/`ui.slipMode`, `period-mode`) and a `.month-strip[data-act]` of `slipPeriods(mode, test)` (first pay to
+  now; gold mark = data in it); `periodPicks[act]` (not saved, `period-pick`, empty id = Latest) else the latest period with data.
+  Payslip's Month view adds "Tax year to Jun". `INCOME_RANGES`/`ui.incomeRange` are gone.
+
 ## Status (latest)
 
 - 1.9.9 merged to main (PR #23); owner publishes the v1.9.9 release. Owner says when to merge.
