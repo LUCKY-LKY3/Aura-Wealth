@@ -4191,9 +4191,15 @@ function payslipPanel() {
   let { from, to } = cur, name = cur.name, tyFrom = null, tyHead = '';
   if (mode === 'm') { tyFrom = taxYearStart(to); tyHead = to >= monthBounds(0)[0] ? 'Tax year so far' : `Tax year to ${cur.short}`; }
   const head = `<div class="panel-head"><h2 class="tt">${ti('doc')}Payslip breakdown</h2>${seg}</div>${strip}`;
-  if (!state.pay.some(p => p.gross > 0)) return `<section class="panel">${head}<div class="chart-empty"><div class="empty-cta"><b>See where your gross pay goes</b><span>When you log pay, open "Payslip details" and add your gross pay, tax, National Insurance and pension. Aurum then shows how much of each £1 you keep.</span><button class="btn sm" data-action="open-pay">Log pay</button></div></div></section>`;
+  // 2.0.18: log pay from here. A month with pay but no details edits that pay; otherwise it opens Log pay dated in the month.
+  const inP = state.pay.filter(p => p.date >= from && p.date <= to), bare = inP.filter(p => !(p.gross > 0));
+  const logBtn = (label, cls = 'btn sm') => mode === 'm' && bare.length === 1 && inP.length === 1
+    ? `<button class="${cls}" data-action="edit-pay-slip" data-id="${esc(bare[0].id)}">${icons.edit}Add payslip details</button>`
+    : `<button class="${cls}" data-action="open-pay-slip" data-id="${mode === 'm' ? cur.id : ''}">${icons.plus}${label}</button>`;
+  const monthName = mode === 'm' ? fmtMonthLong.format(new Date(toMs(from))) : '';
+  if (!state.pay.some(p => p.gross > 0)) return `<section class="panel">${head}<div class="chart-empty"><div class="empty-cta"><b>See where your gross pay goes</b><span>When you log pay, open "Payslip details" and add your gross pay, tax, National Insurance and pension. Aurum then shows how much of each £1 you keep.</span>${logBtn('Log pay')}</div></div></section>`;
   const st = slipSum(from, to), both = mode === 'm', ty = both ? slipSum(tyFrom, to) : st;
-  if (!st.n) return `<section class="panel">${head}<p class="hint" style="margin:0">Gross pay and deductions aren't logged for ${esc(name)}. Add them under "Payslip details" when you log pay.</p></section>`;
+  if (!st.n) return `<section class="panel">${head}<div class="chart-empty"><div class="empty-cta"><span>Gross pay and deductions aren't logged for ${esc(name)}. Add them under "Payslip details" when you log pay.</span>${logBtn(monthName ? `Log ${monthName} pay` : 'Log pay')}</div></div></section>`;
   const pc = v => st.gross > 0 ? (v / st.gross * 100).toFixed(1) + '%' : '—';
   const parts = [['net', 'Take-home', 'var(--c1)'], ...SLIP_ROWS].filter(([k]) => st[k] > 0.005);
   let x = 0;
@@ -4209,6 +4215,7 @@ function payslipPanel() {
       <tbody>${row('gross', 'Gross pay', true)}${SLIP_ROWS.map(([k, l]) => row(k, l)).join('')}${row('net', 'Take-home', true)}</tbody></table></div>
     <p class="explain" style="margin-bottom:0">Deductions took ${pc(ded)} of your gross pay: you kept <b>${kept}p</b> of every £1 you earned.${withPen}</p>
     ${st.n < st.of ? `<p class="hint" style="margin-bottom:0">Based on ${st.n} of ${st.of} payments; the others don't have payslip details.</p>` : ''}
+    <div class="acct-actions" style="margin-top:12px"><button class="btn sm" data-action="open-pay-slip" data-id="">${icons.plus}Log pay</button></div>
   </section>`;
 }
 
@@ -4886,7 +4893,7 @@ function updatePayHints() {
   cp.hidden = !slip; if (slip) cp.textContent = `Copy last payslip (${dateLabel(toMs(slip.date))})`;
   updatePayCheck();
 }
-function openPay(srcId, entryId) {
+function openPay(srcId, entryId, opt = {}) {
   const e = entryId ? state.pay.find(p => p.id === entryId) : null;
   const srcs = state.profile.sources.filter(x => !x.archived || (e && x.id === e.source));
   if (!srcs.length) { openSrc(null, true); return; }
@@ -4894,11 +4901,11 @@ function openPay(srcId, entryId) {
   paySource.innerHTML = srcs.map(x => `<option value="${esc(x.id)}">${esc(x.name)} · ${esc(SOURCE_KINDS[x.kind])}</option>`).join('');
   paySource.value = e ? e.source : srcs.some(x => x.id === srcId) ? srcId : srcs.some(x => x.id === ui.lastPaySrc) ? ui.lastPaySrc : srcs[0].id;
   const dateEl = document.getElementById('pay-date');
-  dateEl.value = e ? e.date : TODAY; dateEl.max = TODAY;
+  dateEl.value = e ? e.date : opt.date || TODAY; dateEl.max = TODAY;
   dateChips(dateEl.value, 'pay-date-chips', 'pay-date');
   document.getElementById('pay-net').value = e ? e.net : '';
   PAY_FIELDS.forEach(([k, id]) => { document.getElementById(id).value = e && e[k] ? e[k] : ''; });
-  document.getElementById('pay-more').open = !!(e && PAY_FIELDS.some(([k]) => e[k]));
+  document.getElementById('pay-more').open = !!opt.details || !!(e && PAY_FIELDS.some(([k]) => e[k]));
   document.getElementById('pay-note').value = e ? e.note : '';
   document.getElementById('pay-err').textContent = '';
   document.getElementById('pay-example-note').hidden = !state.example || !!e;
@@ -6330,6 +6337,18 @@ document.addEventListener('click', async e => {
     }
     case 'open-log': if (ui.tab === 'income' && !id && t.closest('.fab, .top-actions')) openPay(); else openLog(id); break;
     case 'open-pay': openPay(id); break;
+    // From Payslip: details open; a picked month dates it on the usual payday that month (or its last day, never after today).
+    case 'open-pay-slip': {
+      let date;
+      if (id) {
+        const [y, m] = id.split('-').map(Number), last = new Date(Date.UTC(y, m, 0)).getUTCDate();
+        const src = sourceOf(ui.lastPaySrc) || state.profile.sources.find(x => !x.archived && x.regular);
+        const d = Math.min(last, (src && src.regular && src.regular.day) || last);
+        date = `${id}-${String(d).padStart(2, '0')}`; if (date > TODAY) date = TODAY;
+      }
+      openPay(null, null, { date, details: true }); break;
+    }
+    case 'edit-pay-slip': { const e = state.pay.find(p => p.id === id); if (e) openPay(e.source, e.id, { details: true }); break; }
     case 'add-src': openSrc(null); break;
     case 'edit-src': openSrc(id); break;
     case 'edit-pay': openPay(null, id); break;

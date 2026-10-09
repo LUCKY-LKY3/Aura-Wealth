@@ -40,6 +40,7 @@ Order: 2.0 polish and charts → 2.x Future Me → 3.0 pensions, property and de
 - Done in 2.0.15: bolder card titles with a small gold icon tile
 - Done in 2.0.16: sliding the Insights month strip no longer changes page; Income split into Savings / Payslip / Sources pages (2,750px to 1,815px on a phone)
 - Done in 2.0.17: Income › Savings and Payslip pick Month / Tax year / Year, each with a strip to see past ones
+- Done in 2.0.18: Log pay from Income › Payslip
 - Next tidy-up (audit 9 Oct 2026): Accounts › All accounts
   (merge "Your money vs growth" with "Every account", fold the donut)
 - Native SVG Tooltips: hover/touch interaction on all charts showing exact data values at each point
