@@ -292,19 +292,18 @@ h2{font-size:15px;font-weight:600;letter-spacing:-.01em;margin:0}
 .goal-scope summary{list-style:none;cursor:pointer}.goal-scope summary::-webkit-details-marker{display:none}
 .goal-acc{display:inline-flex;align-items:center;gap:2px;flex-wrap:wrap}.goal-chev{display:inline-flex;width:14px;height:14px;color:var(--gold);transition:transform .2s}.goal-chev svg{width:14px;height:14px}
 .goal-scope[open] .goal-chev{transform:rotate(180deg)}
-/* 2.0.8: page tabs (Insights, Planner): boxed icon tiles, open page gold-edged on a soft gold tile; pinned under the header, compact once stuck. */
+/* 2.0.8: page tabs (Insights, Planner): boxed icon tiles (2.0.9: icon beside the label, one row), open page gold-edged on a soft gold tile; pinned under the header, compact once stuck. */
 .ptabs{position:sticky;top:var(--ptabs-top,0px);z-index:24;background:var(--bg);margin-inline:-16px;padding:2px 16px 8px;transition:box-shadow .2s ease}
 .ptabs-in{display:flex;gap:6px;max-width:560px}
-.ptabs button{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:5px;border:1px solid var(--line);background:var(--surface);color:var(--ink-2);padding:10px 4px 9px;border-radius:12px;font:inherit;font-size:13px;font-weight:560;cursor:pointer;transition:color .18s,background .2s,border-color .2s,transform .12s ease}
+.ptabs button{flex:1;min-width:0;display:flex;flex-direction:row;align-items:center;justify-content:center;gap:6px;border:1px solid var(--line);background:var(--surface);color:var(--ink-2);min-height:40px;padding:8px 6px;border-radius:12px;font:inherit;font-size:13px;font-weight:560;cursor:pointer;transition:color .18s,background .2s,border-color .2s,transform .12s ease}
 .ptabs button:active{transform:scale(.96)}
 .ptabs button>span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
-.ptabs svg{width:20px;height:20px;flex:none;color:var(--ink-3);transition:width .2s ease,height .2s ease,color .18s}
+.ptabs svg{width:16px;height:16px;flex:none;color:var(--ink-3);transition:width .2s ease,height .2s ease,color .18s}
 .ptabs button[aria-current="page"]{background:var(--gold-soft);border-color:color-mix(in srgb,var(--gold) 45%,transparent);color:var(--gold)}
 .ptabs button[aria-current="page"] svg{color:var(--gold)}
 .ptabs button[aria-current="page"] .faint{color:inherit;opacity:.7}
 .ptabs.stuck{box-shadow:0 1px 0 var(--line),0 10px 24px -18px rgba(0,0,0,.8)}
-.ptabs.stuck button{flex-direction:row;justify-content:center;gap:6px;padding:7px 4px}
-.ptabs.stuck svg{width:15px;height:15px}
+.ptabs.stuck button{min-height:36px;padding:6px}
 body.tabs-stuck .top{box-shadow:none}
 @media (min-width:960px){.ptabs{margin-inline:0;padding-inline:0}}
 @media (prefers-reduced-motion:reduce){.ptabs button,.ptabs svg{transition:none}.ptabs button:active{transform:none}}
