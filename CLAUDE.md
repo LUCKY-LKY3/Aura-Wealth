@@ -214,6 +214,8 @@ not advice — keep that disclaimer.
   vanished). `monthReview(key)` takes 'YYYY-MM' (default last month = `reviewMonths(0)[0]`); `reviewMonths()` lists last month back to
   the first balance's month; `reviewPicker(r)` (‹ › `review-month` + `#review-month` select) sits in the Insights fold only; the pick
   is `reviewPick` (not saved). Older months: `streakOf(a, ym)` counts back from that month, goals left out.
+  2.0.11: the picker is a `.month-strip` of month tiles (first balance's month to this month, which is disabled; green/red mark = that
+  month's change) plus `.month-row` with a Latest button off the latest month; `placeMonthStrip()` (after render) glides from `stripFrom`.
 
 - 2.0.8: Insights/Planner section switches are `pageTabs(label, action, pages, cur, extra)` (`nav.ptabs`, icons in `PAGE_ICONS`, open
   page `aria-current="page"`): boxed icon tiles, sticky under the phone header (`--ptabs-top` set by `placePageTabs()` on render/scroll/resize);

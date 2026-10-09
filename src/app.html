@@ -639,10 +639,19 @@ dialog.sheet.wide{width:min(620px,calc(100% - 32px))}
 .ms-chip{display:inline-flex;align-items:baseline;gap:8px;padding:6px 12px;border:1px solid color-mix(in srgb,var(--gold) 35%,var(--line));border-radius:999px;font-size:13px;color:var(--ink-3)}
 .ms-chip b{color:var(--gold);font-weight:600}
 .review details.fold2 .fold-body .review-grid{margin-top:14px}
-.month-pick{display:flex;align-items:center;gap:8px;margin-top:14px}
-.month-pick select{flex:0 1 220px;min-width:0}
-.month-pick .btn{padding-inline:10px}.month-pick .btn:disabled{opacity:.35}
-.mp-arrow{display:inline-grid;width:16px;height:16px}.mp-arrow svg{width:16px;height:16px}
+.month-strip{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin:14px -18px 0;padding:2px 18px 4px;scroll-snap-type:x proximity;mask-image:linear-gradient(90deg,transparent,#000 16px,#000 calc(100% - 16px),transparent)}
+.month-strip::-webkit-scrollbar{display:none}
+@media (min-width:760px){.month-strip{margin-inline:-22px;padding-inline:22px}}
+.month-strip .ms-yr{flex:none;align-self:center;font-family:var(--mono);font-size:11px;color:var(--ink-3);writing-mode:vertical-rl;transform:rotate(180deg);letter-spacing:.06em}
+.month-strip button{flex:none;scroll-snap-align:center;width:52px;height:52px;border-radius:12px;border:1px solid var(--line);background:var(--surface-2);color:var(--ink-2);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;font:inherit;font-size:13px;font-weight:600;cursor:pointer}
+.month-strip button i{width:18px;height:3px;border-radius:2px;background:var(--line-strong)}
+.month-strip button i.up{background:color-mix(in srgb,var(--pos) 75%,transparent)}.month-strip button i.down{background:color-mix(in srgb,var(--neg) 75%,transparent)}
+.month-strip button[aria-pressed=true]{border-color:color-mix(in srgb,var(--gold) 55%,transparent);background:var(--gold-soft);color:var(--gold)}
+.month-strip button:disabled{opacity:.4;border-style:dashed;background:none;cursor:default}
+.month-row{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:10px;min-height:32px;font-size:12px;color:var(--ink-3)}
+.month-row b{color:var(--ink-2);font-weight:600}
+.month-row .btn{min-height:32px;padding:0 10px 0 12px;border-radius:999px;border-color:color-mix(in srgb,var(--gold) 45%,transparent);background:var(--gold-soft);color:var(--gold);font-weight:600}
+.month-row .btn svg{width:12px;height:12px;transform:rotate(-90deg)}
 .insights .ic{width:22px;height:22px;border-radius:6px;display:grid;place-items:center;background:var(--surface-2);color:var(--gold);font-size:12px}
 .headline{font-size:18px;line-height:1.45;margin:0;max-width:62ch}
 .headline b{font-weight:650}
@@ -4412,6 +4421,7 @@ function render() {
   refreshBell();
   placeTabPill();
   placePageTabs();
+  placeMonthStrip();
   countUp();
   tabJustOpened = false;
   if (glowIds.length) requestAnimationFrame(glowChanged);
@@ -5790,16 +5800,32 @@ function reviewMonths(limit = Infinity) {
 // Month picked on Insights (not saved: it opens on last month each time).
 let reviewPick = null;
 const reviewTitle = r => `Your ${esc(r.name)}${r.year !== +TODAY.slice(0, 4) ? ` ${r.year}` : ''} in money`;
+// 2.0.11: a strip of month tiles (oldest left, this month greyed at the end) with a mark for up or down,
+// and a Latest button back to last month whenever an older month is open.
 function reviewPicker(r) {
   const months = reviewMonths();
   if (months.length < 2) return '';
-  const i = months.indexOf(r.key), older = months[i + 1], newer = months[i - 1];
-  const arrow = (id, label, rot) => `<button class="btn sm ghost" data-action="review-month" data-id="${id || ''}" aria-label="${label}"${id ? '' : ' disabled'}><span class="mp-arrow" style="transform:rotate(${rot}deg)">${CHEVRON}</span></button>`;
-  return `<div class="month-pick" role="group" aria-label="Month to review">
-      ${arrow(older, 'Previous month', 90)}
-      <select id="review-month" class="input" aria-label="Month">${months.map(k => { const d = Date.UTC(+k.slice(0, 4), +k.slice(5, 7) - 1, 15); return `<option value="${k}" ${k === r.key ? 'selected' : ''}>${monthYear(d)}</option>`; }).join('')}</select>
-      ${arrow(newer, 'Next month', -90)}
-    </div>`;
+  const accts = mine(), latest = months[0], tiles = [];
+  let lastY = null;
+  [...months].reverse().concat(TODAY.slice(0, 7)).forEach(k => {
+    const y = +k.slice(0, 4), m = +k.slice(5, 7), mid = Date.UTC(y, m - 1, 15), ok = k !== TODAY.slice(0, 7);
+    if (y !== lastY) { tiles.push(`<span class="ms-yr" aria-hidden="true">${y}</span>`); lastY = y; }
+    const ch = ok ? periodTotals(accts, Date.UTC(y, m - 1, 0), Date.UTC(y, m, 0)).change : 0;
+    tiles.push(`<button type="button" data-action="review-month" data-id="${k}" aria-pressed="${k === r.key}" aria-label="${monthYear(mid)}${ok ? `, ${signed(ch)}` : ', not finished yet'}"${ok ? '' : ' disabled'}>${fmtMonth.format(new Date(mid)).slice(0, 3)}<i class="${ok ? (ch < 0 ? 'down' : 'up') : ''}"></i></button>`);
+  });
+  const ago = months.indexOf(r.key);
+  return `<div class="month-strip" role="group" aria-label="Month to review">${tiles.join('')}</div>
+    <div class="month-row"><span><b>${esc(r.name)} ${r.year}</b> · ${ago ? `${ago} month${ago > 1 ? 's' : ''} ago` : 'latest month'}</span>${ago ? `<button type="button" class="btn sm" data-action="review-month" data-id="${latest}">Latest ${CHEVRON}</button>` : ''}</div>`;
+}
+// Keeps the strip where it was before a re-render, then glides the open month to the middle.
+let stripFrom = null;
+function placeMonthStrip() {
+  const s = document.querySelector('.month-strip'), on = s && s.querySelector('[aria-pressed=true]');
+  if (!on) return;
+  const to = on.offsetLeft - s.clientWidth / 2 + on.offsetWidth / 2;
+  if (stripFrom == null || reduceMotion()) { s.scrollLeft = to; stripFrom = null; return; }
+  s.scrollLeft = stripFrom; stripFrom = null;
+  requestAnimationFrame(() => s.scrollTo({ left: to, behavior: 'smooth' }));
 }
 function reviewCard(r, dismissable) {
   if (!r) return '';
@@ -6365,7 +6391,7 @@ document.addEventListener('click', async e => {
     case 'menu-log': closeSheets(); openLog(id); break;
     case 'menu-pay': closeSheets(); openLog(id); setTimeout(() => { const f = document.getElementById('log-flow'); if (f) { f.scrollIntoView({ block: 'center' }); f.focus(); } }, 120); break;
     case 'menu-edit': closeSheets(); openAcctSheet(id); break;
-    case 'review-month': if (id) { reviewPick = id; render(); } break;
+    case 'review-month': if (id) { const st = document.querySelector('.month-strip'); stripFrom = st ? st.scrollLeft : null; reviewPick = id; render(); } break;
     case 'review-hide': { const r = monthReview(); if (r) ui.reviewSeen = r.key; saveUi(); render(); break; }
     case 'pin-acct': { const a = state.accounts.find(x => x.id === id); if (a) { a.pinned = !a.pinned; buzz(); save(); render(); } break; }
     case 'bkpw-off': { const cur = document.getElementById('bkpw-cur'); if (!cur || cur.value !== store.get(BKPASS_KEY)) { if (cur && cur.value) { setStatus('', false, 'bkpw-status'); pwWrong(cur); } else { setStatus('Type your current password to turn protection off.', true, 'bkpw-status'); if (cur) cur.focus(); } break; } } store.del(BKPASS_KEY); render(); setStatus('Password protection off. New backups are plain files.', false, 'bkpw-status'); break;
@@ -6439,7 +6465,6 @@ document.addEventListener('change', e => {
     if (t.value === 'light') store.set(THEME_KEY, 'light'); else store.del(THEME_KEY);
     applyTheme(t.value);
   }
-  if (t.id === 'review-month') { reviewPick = t.value; render(); return; }
   if (t.id === 'opt-fit') { ui.fit = t.checked; saveUi(); render(); }
   if (t.id === 'opt-paid') { ui.paidLine = t.checked; saveUi(); render(); }
   if (t.id === 'opt-lastyear') { ui.lastYear = t.checked; saveUi(); render(); }
