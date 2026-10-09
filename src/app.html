@@ -321,9 +321,13 @@ body.tabs-stuck .top{box-shadow:none}
 .goal-list .scope-list li{flex-direction:row;gap:12px;text-align:left}
 .goal-picks{grid-column:1/-1}
 .goal-cards{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:14px}
-.goal-card{border:1px solid var(--line);border-radius:12px;padding:14px 16px 16px;display:flex;flex-direction:column;gap:12px}
-.goal-head{display:flex;justify-content:space-between;align-items:center;gap:10px}
-.goal-head h3{font-size:16px;margin:0}
+.goal-card{border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.goal-card:has(>details[open]){box-shadow:inset 3px 0 0 var(--gold)}
+.goal-sum{flex:1;min-width:0;display:grid;grid-template-columns:44px minmax(0,1fr);gap:12px;align-items:center}
+.gs-main{display:flex;flex-direction:column;gap:2px;min-width:0}.gs-main b{font-weight:600}
+.gs-line{font-size:13px;color:var(--ink-3)}.gs-line .num{color:var(--ink-2);font-weight:550}.gs-line.pos{color:var(--pos)}.gs-line.neg{color:var(--neg)}
+.goal-body{display:flex;flex-direction:column;gap:12px;margin-top:14px;padding-top:14px;border-top:1px solid var(--line)}
+.goal-del{display:flex;justify-content:flex-end}
 .goal-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px 12px}
 .goal-fields .gf-wide{grid-column:1/-1}
 .goal-card .plan-acct-fold{margin-top:14px}
@@ -2432,8 +2436,10 @@ const etaLabel = n => monthYear(Date.UTC(+TODAY.slice(0, 4), +TODAY.slice(5, 7) 
 function goalCards(goals) {
   return `<ul class="goal-cards">${goals.map(g => {
     const st = goalStatus(g, goalMon(g)), id = esc(g.id);
-    return `<li class="goal-card" id="goal-${id}">
-      <div class="goal-head"><h3>${esc(g.name)}</h3><button class="icon-btn" data-action="goal-del" data-id="${id}" aria-label="Delete goal ${esc(g.name)}">${icons.trash}</button></div>
+    const k = 'goal-c' + g.id, open = ui.folds && ui.folds[k] != null ? ui.folds[k] : goals.length === 1;
+    return `<li class="goal-card" id="goal-${id}"><details class="fold2 goal-fold" data-fold="${esc(k)}" ${open ? 'open' : ''}>
+      <summary><span class="goal-sum" id="gsum-${id}">${goalSum(g, st)}</span><span class="fold-btn" aria-hidden="true">${CHEVRON}</span></summary>
+      <div class="goal-body">
       <div class="calc-grid calc-in">
         <div class="calc-inputs">
           <div class="eyebrow calc-step"><span>1</span>Your inputs</div>
@@ -2447,9 +2453,16 @@ function goalCards(goals) {
         </div>
         <div class="stack calc-out"><div class="eyebrow calc-step"><span>2</span>Result</div><div class="stack" id="goal-out-${id}" aria-live="polite">${goalResult(g, st)}</div></div>
       </div>
-    </li>`;
+      <div class="goal-del"><button class="btn sm ghost" data-action="goal-del" data-id="${id}">${icons.trash}Delete goal</button></div>
+      </div>
+    </details></li>`;
   }).join('')}</ul>`;
 }
+// The closed line of a goal: ring, name, how far along, the date and its status.
+const goalSum = (g, st) => `${goalRing(st.progress, st.done || st.onTrack || (!g.date && !st.late))}<span class="gs-main">
+    <b>${esc(g.name)}</b>
+    <span class="gs-line"><span class="num">${gbp(st.cur)}</span> of ${gbp(g.target)}${g.date ? ' · by ' + dateLabel(toMs(g.date)) : ''}</span>
+    <span class="gs-line ${st.done || st.onTrack ? 'pos' : st.late ? 'neg' : ''}">${st.text}</span></span>`;
 const goalMonHint = (g, st) => goalMon(g) != null && Math.round(st.monthly) !== Math.round(st.usual)
   ? `Trying a new amount. Usually ${gbp(st.usual)}. <button class="chip-btn" data-action="goal-mon-reset" data-id="${esc(g.id)}">Use ${gbp(st.usual)}</button>`
   : 'What these accounts usually get. Change it to try another amount.';
@@ -2478,6 +2491,7 @@ function refreshGoal(id) {
   if (!g || !host) return;
   const st = goalStatus(g, goalMon(g));
   host.innerHTML = goalResult(g, st, true);
+  const sm = document.getElementById('gsum-' + id); if (sm) sm.innerHTML = goalSum(g, st);
   const h = document.getElementById('gmh-' + id); if (h) h.innerHTML = goalMonHint(g, st);
 }
 

@@ -224,7 +224,8 @@ not advice — keep that disclaimer.
   of the assumptions, then pot, pills, stops, chart, tiles, notes). `plan-set`/`planSummary` are gone. Goals use `goalCards()` (Planner only;
   `goalList()` is Overview's compact list): inputs `data-goal-target`/`data-goal-date` save to the goal, `data-goal-mon` is a device-only
   what-if in `ui.goalMon` (`goalMon(g)`, reset `goal-mon-reset`); `goalStatus(g, mon)` also returns `usual`, `eta` (`monthsToReach`);
-  `goalResult()` = echo + bars with a dashed `.cb-target` marker + verdict; `refreshGoal(id)` updates in place.
+  `goalResult()` = echo + bars with a dashed `.cb-target` marker + verdict; `refreshGoal(id)` updates in place. Each card is
+  `details.fold2.goal-fold` (fold `goal-c<id>`, open by default only when there is one goal) with `goalSum()` (ring, amounts, status) as its closed line.
 
 ## Status (latest)
 
