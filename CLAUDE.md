@@ -229,6 +229,11 @@ not advice — keep that disclaimer.
   `goalResult()` = echo + bars with a dashed `.cb-target` marker + verdict; `refreshGoal(id)` updates in place. Each card is
   `details.fold2.goal-fold` (fold `goal-c<id>`, open by default only when there is one goal) with `goalSum()` (ring, amounts, status) as its closed line.
 
+- 2.0.12 Overview tidy: `reviewLine(r)` (slim `.visit.review-line`, `review-open` opens Insights with fold `month-review`) replaces the card;
+  `.kpis` two across on phones; Holdings groups are `tbody.hg` (`hold-grp` toggles `.open`, saved as fold `hold-<group>`, `holdOpen(g)`
+  defaults open only ≥1000px); `wealthSources` folds its table and movers (fold `ws-more`); Performance is `perfPanel(accts)`/`drawPerf(accts, tl)`
+  inside the All accounts card (no longer on Overview); activity 3 rows (`hist-all` opens All accounts history); `goalList()` = `goalSum` rows.
+
 ## Status (latest)
 
 - 1.9.9 merged to main (PR #23); owner publishes the v1.9.9 release. Owner says when to merge.

@@ -154,6 +154,10 @@ tr.clickable:active,.set-row:active,.note:active,.pressing{opacity:.7}
 .visit b{color:var(--ink);font-weight:600}.visit .v-dot{width:8px;height:8px;border-radius:50%;background:var(--gold);flex:none}
 .visit p{margin:0;flex:1;min-width:0}
 .visit.out{opacity:0;transform:translateY(-6px)}
+.review-line{animation:none}.review-line .nw{white-space:nowrap}.review-line .rl-go{color:var(--gold);font-weight:550;white-space:nowrap}
+.review-line .rl-x{background:none;border:0;color:var(--ink-3);font-size:13px;padding:4px;margin:-4px -4px -4px 0;cursor:pointer}
+.ws-more{margin-top:10px}
+.perf-head{margin-top:18px;align-items:center}
 @keyframes visitIn{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:none}}
 @media (prefers-reduced-motion:reduce){.visit{animation:none}}
 
@@ -358,13 +362,14 @@ body.tabs-stuck .top{box-shadow:none}
 .alloc-legend b{color:var(--on-navy);font-weight:600}
 .sw{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:6px;vertical-align:1px}
 
-.kpis{display:grid;gap:12px;grid-template-columns:minmax(0,1fr);align-content:start}
+.kpis{display:grid;gap:12px;grid-template-columns:repeat(2,minmax(0,1fr));align-content:start}
 @media (min-width:600px) and (max-width:999px){.kpis{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media (min-width:1000px){.kpis{grid-template-columns:1fr}}
 .kpi{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px;display:grid;grid-template-columns:1fr auto;gap:2px 10px;align-items:end}
 .kpi .k{font-size:12px;color:var(--ink-2);grid-column:1/-1}
 .kpi .v{font-size:24px;font-weight:600;letter-spacing:-.025em}
 .kpi .s{font-size:12px;color:var(--ink-3);grid-column:1/-1}
+@media (max-width:599px){.kpis>.kpi:nth-child(3):last-child{grid-column:1/-1}.kpi .v{font-size:21px}}
 
 .grid-2{display:grid;gap:16px;grid-template-columns:minmax(0,1fr)}
 @media (min-width:1000px){.grid-2{grid-template-columns:minmax(0,1.55fr) minmax(0,1fr)}}
@@ -402,7 +407,10 @@ body.tabs-stuck .top{box-shadow:none}
 .al-sub{list-style:none;margin:10px 0 0;padding:0 0 0 16px;border-left:1px solid var(--line);display:flex;flex-direction:column;gap:8px;font-size:12px;color:var(--ink-2)}
 .al-sub li{display:flex;gap:8px}.al-sub li span:first-child{flex:1}
 .al-sub .mono{color:var(--ink)}
-.goal-row{display:grid;grid-template-columns:44px 1fr;gap:12px;align-items:center}
+.ov-goals{list-style:none;margin:0;padding:0}
+.ov-goals li+li{border-top:1px solid var(--line)}
+.ov-goals .goal-sum{width:100%;background:none;border:0;padding:10px 0;color:inherit;font:inherit;text-align:left;cursor:pointer}
+.ov-goals li:first-child .goal-sum{padding-top:0}
 .ring{width:44px;height:44px;position:relative}
 .ring svg{width:44px;height:44px;transform:rotate(-90deg)}
 .ring span{position:absolute;inset:0;display:grid;place-items:center;font-size:12px;font-weight:600;font-family:var(--mono)}
@@ -573,6 +581,19 @@ details summary{cursor:pointer;color:var(--ink-2);font-size:13px;font-weight:550
 .period-sum b{font-family:var(--mono);font-weight:600;margin-right:4px}
 tr.grp td{background:var(--surface-2);font-size:12px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-2);font-weight:600;padding-block:8px}
 tr.grp td.val{font-size:12px;letter-spacing:0;text-transform:none;color:var(--ink)}
+/* 2.0.12: Holdings groups fold to one line */
+.hg:not(.open) tr:not(.hg-head){display:none}
+tr.hg-head{cursor:pointer}
+tr.hg-head td{padding-block:11px}
+tr.hg-head td.val{font-size:14px;font-family:var(--mono)}
+.hg-t{display:flex;align-items:center;gap:8px}
+.hg-chev{display:inline-flex;width:16px;height:16px;color:var(--gold);transition:transform .2s;transform:rotate(-90deg)}.hg-chev svg{width:16px;height:16px}
+.hg.open .hg-chev{transform:none}
+.hg-n{font-size:11px;letter-spacing:0;color:var(--ink-3);font-weight:500}
+.hg-bar{display:block;height:3px;margin:7px 0 0 24px;border-radius:2px;background:var(--line);overflow:hidden;max-width:180px}.hg-bar i{display:block;height:100%;border-radius:2px}
+.hg-pc{display:block;font-size:11px;color:var(--ink-3);font-weight:500}
+@media (min-width:760px){.hg-pc{display:none}}
+@media (prefers-reduced-motion:reduce){.hg-chev{transition:none}}
 .why{background:none;border:0;padding:8px;margin:-8px -4px;display:inline-flex;align-items:center;gap:6px;color:var(--gold);font:inherit;font-size:12px;cursor:pointer;vertical-align:middle}
 .why i{width:16px;height:16px;flex:none;border:1.4px solid currentColor;border-radius:50%;display:grid;place-items:center;font-style:normal;font-size:12px;font-weight:650;line-height:1}
 .why:hover i,.why:focus-visible i{background:var(--gold);color:var(--bg)}
@@ -2427,15 +2448,10 @@ function goalRing(p, ok) {
   const C = 2 * Math.PI * 18, len = clamp(p, 0, 1) * C;
   return `<span class="ring" aria-hidden="true"><svg viewBox="0 0 44 44"><circle cx="22" cy="22" r="18" fill="none" style="stroke:var(--surface-2)" stroke-width="5"/><circle cx="22" cy="22" r="18" fill="none" style="stroke:${ok ? 'var(--gold)' : 'var(--c3)'}" stroke-width="5" stroke-linecap="round" stroke-dasharray="${Math.max(0.01, len).toFixed(2)} ${C.toFixed(2)}"/></svg><span>${Math.round(clamp(p, 0, 1) * 100)}%</span></span>`;
 }
+// Overview's goals: one line each (the same summary as Planner's goal cards); tap opens Planner › Goals.
 function goalList(goals) {
   if (!goals.length) return '';
-  return `<ul class="goal-list">${goals.map(g => {
-    const st = goalStatus(g);
-    return `<li class="goal-row">${goalRing(st.progress, st.done || st.onTrack || (!g.date && !st.late))}<div>
-      <div class="goal-top"><b>${esc(g.name)}</b><span class="mono">${gbp(st.cur)} <span class="faint">of ${gbp(g.target)}</span></span></div>
-      <div class="goal-meta"><span>${g.date ? 'By ' + dateLabel(toMs(g.date)) : esc(goalScopeName(g))}</span><span class="${st.done || st.onTrack ? 'pos' : st.late ? 'neg' : ''}">${st.text}</span></div>
-    </div></li>`;
-  }).join('')}</ul>`;
+  return `<ul class="ov-goals">${goals.map(g => `<li><button type="button" class="goal-sum" data-action="tab" data-tab="planner" data-page="goals">${goalSum(g, goalStatus(g))}</button></li>`).join('')}</ul>`;
 }
 
 // 2.1.0: Planner goals as inputs + result, like SIPP vs ISA. Target and date save to the goal; the monthly
@@ -2543,7 +2559,7 @@ function scopeList(sc) {
   const li = (a, right, box) => `<li>${box ? `<label class="check scope-pick"><input type="checkbox" data-scope="${esc(a.id)}" ${box !== 'off' ? 'checked' : ''} ${box === 'last' ? 'disabled' : ''}>` : '<span class="scope-pick">'}<i class="sw" style="background:${colorOf(a)}"></i><span class="ws-name">${esc(a.name)}${a.archived ? '<span class="owner">closed</span>' : ''}</span>${box ? '</label>' : '</span>'}${right}</li>`;
   return `<details class="scope" id="ws-scope" data-fold="ws-scope" ${ui.folds && ui.folds['ws-scope'] ? 'open' : ''}>
     <summary>Includes <b>${scopeLabel(sc)}</b><span class="scope-tg" aria-hidden="true"></span></summary>
-    <p class="hint scope-tip">Untick an account to leave it out of your net worth, these charts and Performance.</p>
+    <p class="hint scope-tip">Untick an account to leave it out of your net worth and these charts.</p>
     <ul class="scope-list">${inc.map(({ a, cur }) => li(a, `<span class="mono">${gbp(cur)}</span>`, inc.length > 1 ? 'on' : 'last')).join('')}</ul>
     ${sc.out.length ? `<p class="scope-h">Not included</p><ul class="scope-list out">${sc.out.map(({ a, why, pick }) => li(a, `<span class="faint">${esc(why)}</span>`, pick && 'off')).join('')}</ul>` : ''}
   </details>`;
@@ -2597,12 +2613,14 @@ function wealthSources(t, r, sinceMs, sc) {
       </div>
       ${reason ? `<p class="hint ws-why">${reason}</p>` : ''}
       ${r !== 'All' && t.opening >= 1 ? `<p class="hint">Paid in includes ${gbp(t.opening)} of opening balances for accounts first logged in this period.</p>` : ''}
-      ${table}
-    </div>${drivers}</div>
+    </div></div>
+    ${table || drivers ? `${foldOpen('ws-more', 'By type and account', lead ? `Most growth: ${esc(lead.a.name)} ${signed(lead.p.growth)}` : `${groups.length} type${groups.length === 1 ? '' : 's'}`, 'inner')}<div class="ws-grid ws-more">${table ? `<div>${table}</div>` : ''}${drivers}</div>${foldClose}` : ''}
   </section>`;
 }
 
 /* ---------- overview ---------- */
+// 2.0.12: Holdings groups fold to one line (total and share); closed on phones, open on wide screens until toggled.
+const holdOpen = g => ui.folds && ui.folds['hold-' + g] != null ? ui.folds['hold-' + g] : !!(window.matchMedia && matchMedia('(min-width:1000px)').matches);
 function renderOverview() {
   // 2.0.2: accounts unticked in "Includes N of M accounts" leave the card, charts and totals; Holdings and allowances keep them.
   const all = visibleAccounts();
@@ -2653,7 +2671,7 @@ function renderOverview() {
   const kpis = `
     <div class="kpis">
       <div class="kpi"><div class="k">Pensions</div><div class="v num">${gbp(pension)}</div><div class="s">Usually locked until ${accessAge(state.profile.dob)}</div></div>
-      <div class="kpi"><div class="k">Accessible now</div><div class="v num">${gbp(access)}</div><div class="s">ISAs, savings and investments</div></div>
+      <div class="kpi"><div class="k">Accessible now</div><div class="v num">${gbp(access)}</div><div class="s">ISAs, cash and investments</div></div>
       ${allowKpi}
     </div>`;
 
@@ -2666,9 +2684,11 @@ function renderOverview() {
       <div class="panel-head"><h2>Holdings</h2><div class="acct-actions"><button class="btn sm" data-action="open-bulk">Update all</button><button class="btn sm" data-action="add-acct">${icons.plus}Add account</button></div></div>
       ${hStats.length ? `<div class="table-wrap"><table>
         <thead><tr><th>Account</th><th class="r">Value</th><th class="r hide-sm">30 days</th><th class="r hide-sm">Since start</th><th class="r hide-sm">Weight</th><th class="r hide-sm">Trend</th></tr></thead>
-        <tbody>${byGroup.map(({ g, rows }) => {
-          const sub = rows.reduce((t, x) => t + x.cur, 0);
-          return `<tr class="grp"><td>${esc(GROUPS[g])}</td><td class="r val">${gbp(sub)}</td><td class="hide-sm"></td><td class="hide-sm"></td><td class="r hide-sm mono">${hTotal ? (sub / hTotal * 100).toFixed(1) : '0.0'}%</td><td class="hide-sm"></td></tr>` + rows.map(x => `
+        ${byGroup.map(({ g, rows }) => {
+          const sub = rows.reduce((t, x) => t + x.cur, 0), share = hTotal ? sub / hTotal * 100 : 0, open = holdOpen(g);
+          return `<tbody class="hg${open ? ' open' : ''}"><tr class="grp hg-head clickable" data-action="hold-grp" data-id="${g}" tabindex="0" aria-expanded="${open}">
+            <td><span class="hg-t"><span class="hg-chev" aria-hidden="true">${CHEVRON}</span>${esc(GROUPS[g])}<span class="hg-n">${rows.length}</span></span><span class="hg-bar" aria-hidden="true"><i style="width:${share.toFixed(1)}%;background:var(--${GROUP_COLOR[g]})"></i></span></td>
+            <td class="r val">${gbp(sub)}<span class="hg-pc">${share.toFixed(0)}%</span></td><td class="hide-sm"></td><td class="hide-sm"></td><td class="r hide-sm mono">${share.toFixed(1)}%</td><td class="hide-sm"></td></tr>` + rows.map(x => `
           <tr class="clickable" data-action="goto-account" data-id="${esc(x.a.id)}" tabindex="0">
             <td><div class="acct-cell">${badge(x.a)}<div><div class="n">${esc(x.a.name)}${ownerChip(x.a)}${chartOff(x.a) ? '<span class="owner" title="Left out of your net worth and charts">not in totals</span>' : ''}</div><div class="p">${esc(x.a.provider || typeOf(x.a).label)} · ${x.last ? 'Updated ' + ago(x.last.date).toLowerCase() : 'No values yet'}</div></div></div></td>
             <td class="r val" data-count="row-${esc(x.a.id)}" data-value="${x.cur}">${gbp(x.cur)}</td>
@@ -2676,31 +2696,10 @@ function renderOverview() {
             <td class="r hide-sm">${x.s.length > 1 ? deltaChip(x.change, pct(x.pct)) : '<span class="faint">—</span>'}</td>
             <td class="r hide-sm"><div class="weight"><span class="mono">${hTotal ? (x.cur / hTotal * 100).toFixed(1) : '0.0'}%</span><span class="bar"><i style="width:${hTotal ? x.cur / hTotal * 100 : 0}%;background:${colorOf(x.a)}"></i></span></div></td>
             <td class="r hide-sm">${sparkline(x.s.slice(-12).map(l => l.value), x.m30 > 0 ? 'var(--pos)' : x.m30 < 0 ? 'var(--neg)' : 'var(--ink-3)')}</td>
-          </tr>`).join('');
+          </tr>`).join('') + '</tbody>';
         }).join('')}
-        ${closedStats.length ? `<tr class="grp"><td>${closedStats.length} closed account${closedStats.length === 1 ? '' : 's'}</td><td class="r val">${gbp(closedStats.reduce((t, x) => t + x.cur, 0))}</td><td class="hide-sm" colspan="4"></td></tr>` : ''}
-        </tbody>
+        ${closedStats.length ? `<tbody><tr class="grp"><td>${closedStats.length} closed account${closedStats.length === 1 ? '' : 's'}</td><td class="r val">${gbp(closedStats.reduce((t, x) => t + x.cur, 0))}</td><td class="hide-sm" colspan="4"></td></tr></tbody>` : ''}
       </table></div>` : `<div class="chart-empty"><div><p style="margin:0 0 12px">No accounts yet.</p><button class="btn primary" data-action="add-acct">${icons.plus}Add your first account</button></div></div>`}
-    </section>`;
-
-  const start = rangeStart(ui.range);
-  const pt = periodTotals(accts, start);
-  const growth = `
-    <section class="panel">
-      <div class="panel-head">
-        <div><h2>Performance</h2><span class="aside">Your total balance over time</span></div>
-        <div class="seg" role="group" aria-label="Chart breakdown">${[['total', 'Total'], ['group', 'By type'], ['account', 'By account']].map(([k, l]) => `<button data-action="stack-by" data-id="${k}" aria-pressed="${ui.stackBy === k}">${l}</button>`).join('')}</div>
-      </div>
-      <div style="margin-bottom:12px">${rangeBar('range')}</div>
-      ${pt.rows.length ? `<div class="period-sum"><span><b class="${cls(pt.change)}">${signed(pt.change)}</b>change over ${esc(rangeName(ui.range))}</span><span><b>${gbp(pt.paid)}</b>paid in</span><span><b class="${cls(pt.growth)}">${signed(pt.growth)}</b>growth${pt.ret != null ? ` (${pct(pt.ret)})` : ''}</span></div>` : ''}
-      ${ui.stackBy === 'total' ? '<div class="readout" id="growth-readout" aria-live="polite"></div>' : ''}
-      <div class="chart" id="growth-chart"></div>
-      <div class="legend-inline" id="growth-legend"></div>
-      <div class="row-actions" style="margin-top:12px;gap:16px">
-        ${ui.stackBy === 'total' ? `<label class="check tgl mini"><input type="checkbox" role="switch" id="opt-fit" ${ui.fit ? 'checked' : ''}><span>Zoom to fit</span></label>` : ''}
-        <label class="check tgl mini"><input type="checkbox" role="switch" id="opt-paid" ${ui.paidLine ? 'checked' : ''}><span>Show money paid in</span></label>
-        <label class="check tgl mini"><input type="checkbox" role="switch" id="opt-lastyear" ${ui.lastYear ? 'checked' : ''}><span>Compare with a year earlier</span></label>
-      </div>
     </section>`;
 
   const allocation = `
@@ -2735,10 +2734,10 @@ function renderOverview() {
   const ids = new Set(all.map(a => a.id));
   const accById = Object.fromEntries(state.accounts.map(a => [a.id, a]));
   const recent = [...state.logs.filter(l => ids.has(l.accountId)).map(l => ({ ...l, kind: 'log' })), ...state.flows.filter(f => ids.has(f.accountId) && f.date <= TODAY).map(f => ({ ...f, kind: 'flow' }))]
-    .sort((a, b) => byDate(b, a) || (b.id > a.id ? 1 : -1)).slice(0, 6);
+    .sort((a, b) => byDate(b, a) || (b.id > a.id ? 1 : -1)).slice(0, 3);
   const activity = `
     <section class="panel">
-      <div class="panel-head"><h2>Recent activity</h2><button class="btn ghost sm" data-action="tab" data-tab="accounts">View all</button></div>
+      <div class="panel-head"><h2>Recent activity</h2><button class="btn ghost sm" data-action="hist-all">View all</button></div>
       ${recent.length ? `<ul class="activity">${recent.map(l => {
         const a = accById[l.accountId];
         if (l.kind === 'flow') return `<li><i class="sw" style="background:${colorOf(a)}"></i><div><div>${esc(a.name)}</div><div class="when">${dateLabel(toMs(l.date))} · ${l.employer ? 'Employer paid in' : l.isaTransfer ? 'ISA transfer' : l.transfer ? (l.amount < 0 ? 'Moved out' : 'Moved in') : l.amount >= 0 ? 'Paid in' : 'Taken out'}${l.note ? ' · ' + esc(l.note) : ''}</div></div><div><div class="amt ${cls(l.amount)}">${signed(l.amount)}</div></div></li>`;
@@ -2747,32 +2746,13 @@ function renderOverview() {
       }).join('')}</ul>` : '<div class="chart-empty">No activity yet.</div>'}
     </section>`;
 
-  view.innerHTML = `<div class="stack view">${updateBanner()}${exampleNotice()}${visitStrip(total)}${!state.example && ui.person === 'me' && showReviewCard(monthReview()) ? reviewCard(monthReview(), true) : ''}${personFilter()}<div class="summary">${statement}${kpis}</div>${payStrip()}${holdings}${showWs ? wealthSources(nw, nwr, nwFrom == null && isFinite(nwStart) ? tl[0].t : null, scope) : scope.hidden ? `<section class="panel">${scopeList(scope)}</section>` : ''}<div class="grid-2">${growth}${allocation}</div>${monthly}${goals ? `<div class="grid-2">${activity}${goals}</div>` : activity}</div>`;
+  view.innerHTML = `<div class="stack view">${updateBanner()}${exampleNotice()}${visitStrip(total)}${!state.example && ui.person === 'me' && showReviewCard(monthReview()) ? reviewLine(monthReview()) : ''}${personFilter()}<div class="summary">${statement}${kpis}</div>${payStrip()}${holdings}${showWs ? wealthSources(nw, nwr, nwFrom == null && isFinite(nwStart) ? tl[0].t : null, scope) : scope.hidden ? `<section class="panel">${scopeList(scope)}</section>` : ''}<div class="grid-2">${allocation}${monthly}</div>${goals ? `<div class="grid-2">${activity}${goals}</div>` : activity}</div>`;
   bindTrend();
   barChart(document.getElementById('monthly-chart'), {
     labels: months.map(x => x.short), titles: months.map(x => x.title), paid: months.map(x => x.paid), growth: months.map(x => x.growth),
     label: 'Money paid in and growth each month', empty: 'Update your balances each month to see what you paid in and what grew.', emptyAction: ['Update all', 'open-bulk']
   });
 
-  const pts = rangePoints(tl, start);
-  const totalMode = ui.stackBy === 'total';
-  const series = totalMode
-    ? [{ label: 'Net worth', color: 'var(--c1)', values: pts.map(p => p.total) }]
-    : ui.stackBy === 'account'
-    ? accts.map(a => ({ label: a.name, color: colorOf(a), values: pts.map(p => p.vals[a.id]) }))
-    : groupSummary(accts).map(g => ({ label: g.label, color: g.color, values: pts.map(p => accts.filter(a => groupOf(a) === g.g).reduce((t, a) => t + (p.vals[a.id] || 0), 0)) }));
-  if (ui.paidLine) series.push({ label: 'Paid in', color: 'var(--ink-2)', values: pts.map(p => paidAt(accts, p.t)), overlay: true, dash: true, fill: false });
-  if (ui.lastYear) series.push({ label: 'A year earlier', color: 'var(--c3)', values: pts.map(p => valueAt(tl, p.t - 365 * 864e5) || 0), overlay: true, dash: true, fill: false });
-  document.getElementById('growth-legend').innerHTML = series.map(s => `<span><i class="sw" style="background:${s.color}"></i>${esc(s.label)}</span>`).join('');
-  const v0 = pts.length ? pts[0].total : 0;
-  chart(document.getElementById('growth-chart'), {
-    xs: pts.map(p => p.t), stacked: !totalMode, fit: totalMode && ui.fit, label: 'Net worth over time', empty: tl.length > 1 ? 'Not enough values in this period yet. Try a longer range.' : 'Log balances again later to see your trend here.', emptyAction: tl.length > 1 ? ['Show all time', 'range-all'] : ['Update all', 'open-bulk'], series,
-    tipAlways: ui.paidLine || ui.lastYear,
-    readout: totalMode ? { id: 'growth-readout', html: i => {
-      const v = pts[i].total, d = v - v0;
-      return `<span class="rv">${gbp(v)}</span><span class="delta ${cls(d)}">${signed(d)}${v0 > 0 ? ' · ' + pct(d / v0 * 100) : ''}</span><span class="rd">${i === pts.length - 1 ? 'Today' : dateLabel(pts[i].t)} · since ${dateLabel(pts[0].t)}</span>`;
-    } } : null
-  });
 }
 
 /* ---------- accounts ---------- */
@@ -2967,6 +2947,49 @@ function initials(a) {
   return (caps && caps.length > 1 ? caps.slice(0, 2).join('') : src.slice(0, 2)).toUpperCase();
 }
 const badge = (a, big) => `<span class="badge${big ? ' big' : ''}" style="border-color:${colorOf(a)}" aria-hidden="true">${esc(initials(a))}</span>`;
+// 2.0.12: the Performance chart (total, by type or by account, any range) lives on Accounts › All accounts;
+// Overview keeps only the net worth card's trend.
+function perfPanel(accts) {
+  const pt = periodTotals(accts, rangeStart(ui.range));
+  return `
+      <div class="panel-head perf-head">
+        <span class="aside">Over time</span>
+        <div class="seg" role="group" aria-label="Chart breakdown">${[['total', 'Total'], ['group', 'By type'], ['account', 'By account']].map(([k, l]) => `<button data-action="stack-by" data-id="${k}" aria-pressed="${ui.stackBy === k}">${l}</button>`).join('')}</div>
+      </div>
+      <div style="margin-bottom:12px">${rangeBar('range')}</div>
+      ${pt.rows.length ? `<div class="period-sum"><span><b class="${cls(pt.change)}">${signed(pt.change)}</b>change over ${esc(rangeName(ui.range))}</span><span><b>${gbp(pt.paid)}</b>paid in</span><span><b class="${cls(pt.growth)}">${signed(pt.growth)}</b>growth${pt.ret != null ? ` (${pct(pt.ret)})` : ''}</span></div>` : ''}
+      ${ui.stackBy === 'total' ? '<div class="readout" id="growth-readout" aria-live="polite"></div>' : ''}
+      <div class="chart" id="growth-chart"></div>
+      <div class="legend-inline" id="growth-legend"></div>
+      <div class="row-actions" style="margin-top:12px;gap:16px">
+        ${ui.stackBy === 'total' ? `<label class="check tgl mini"><input type="checkbox" role="switch" id="opt-fit" ${ui.fit ? 'checked' : ''}><span>Zoom to fit</span></label>` : ''}
+        <label class="check tgl mini"><input type="checkbox" role="switch" id="opt-paid" ${ui.paidLine ? 'checked' : ''}><span>Show money paid in</span></label>
+        <label class="check tgl mini"><input type="checkbox" role="switch" id="opt-lastyear" ${ui.lastYear ? 'checked' : ''}><span>Compare with a year earlier</span></label>
+      </div>`;
+}
+
+function drawPerf(accts, tl) {
+  const start = rangeStart(ui.range);
+  const pts = rangePoints(tl, start);
+  const totalMode = ui.stackBy === 'total';
+  const series = totalMode
+    ? [{ label: 'Net worth', color: 'var(--c1)', values: pts.map(p => p.total) }]
+    : ui.stackBy === 'account'
+    ? accts.map(a => ({ label: a.name, color: colorOf(a), values: pts.map(p => p.vals[a.id]) }))
+    : groupSummary(accts).map(g => ({ label: g.label, color: g.color, values: pts.map(p => accts.filter(a => groupOf(a) === g.g).reduce((t, a) => t + (p.vals[a.id] || 0), 0)) }));
+  if (ui.paidLine) series.push({ label: 'Paid in', color: 'var(--ink-2)', values: pts.map(p => paidAt(accts, p.t)), overlay: true, dash: true, fill: false });
+  if (ui.lastYear) series.push({ label: 'A year earlier', color: 'var(--c3)', values: pts.map(p => valueAt(tl, p.t - 365 * 864e5) || 0), overlay: true, dash: true, fill: false });
+  document.getElementById('growth-legend').innerHTML = series.map(s => `<span><i class="sw" style="background:${s.color}"></i>${esc(s.label)}</span>`).join('');
+  const v0 = pts.length ? pts[0].total : 0;
+  chart(document.getElementById('growth-chart'), {
+    xs: pts.map(p => p.t), stacked: !totalMode, fit: totalMode && ui.fit, label: 'Net worth over time', empty: tl.length > 1 ? 'Not enough values in this period yet. Try a longer range.' : 'Log balances again later to see your trend here.', emptyAction: tl.length > 1 ? ['Show all time', 'range-all'] : ['Update all', 'open-bulk'], series,
+    tipAlways: ui.paidLine || ui.lastYear,
+    readout: totalMode ? { id: 'growth-readout', html: i => {
+      const v = pts[i].total, d = v - v0;
+      return `<span class="rv">${gbp(v)}</span><span class="delta ${cls(d)}">${signed(d)}${v0 > 0 ? ' · ' + pct(d / v0 * 100) : ''}</span><span class="rd">${i === pts.length - 1 ? 'Today' : dateLabel(pts[i].t)} · since ${dateLabel(pts[0].t)}</span>`;
+    } } : null
+  });
+}
 function renderAllAccounts(accts) {
   const all = periodTotals(accts, -Infinity);
   const tl = timeline(accts);
@@ -2990,8 +3013,7 @@ function renderAllAccounts(accts) {
           <div class="stat"><div class="k">Return</div><div class="v ${cls(all.ret || 0)}">${hasRet ? pct(all.ret) : '—'}</div></div>
           <div class="stat"><div class="k">Fees a year</div><div class="v">${gbp(accts.reduce((t, a) => t + accountStats(a.id).cur * (a.fee || 0) / 100, 0))}</div></div>
         </div>
-        <div class="readout" id="all-readout" style="margin-top:18px" aria-live="polite"></div>
-        <div class="chart" id="all-chart"></div>
+        ${perfPanel(accts)}
       </section>
       ${splitPanel(accts, stats, all.cur)}
       ${paidGrowthPanel(order)}
@@ -3021,12 +3043,7 @@ function renderAllAccounts(accts) {
       </section>
     </div>`;
   renderHistory();
-  const pts = rangePoints(tl, -Infinity);
-  chart(document.getElementById('all-chart'), {
-    xs: pts.map(p => p.t), label: 'All accounts over time', fit: ui.fit, tipAlways: ui.paidLine, empty: 'Update your balances again later to see your trend.', emptyAction: ['Update all', 'open-bulk'],
-    series: [{ label: 'All accounts', color: 'var(--c1)', values: pts.map(p => p.total) }, ...(ui.paidLine ? [{ label: 'Paid in', color: 'var(--ink-2)', values: pts.map(p => paidAt(accts, p.t)), overlay: true, dash: true, fill: false }] : [])],
-    readout: pts.length ? { id: 'all-readout', html: i => { const d = pts[i].total - pts[0].total; return `<span class="rv">${gbp(pts[i].total)}</span>${i ? `<span class="delta ${cls(d)}">${signed(d)}</span>` : ''}<span class="rd">${i === pts.length - 1 ? 'Now' : dateLabel(pts[i].t)}</span>`; } } : null
-  });
+  drawPerf(accts, tl);
 }
 // Your money vs growth for one account, as a small donut with the split in words.
 function miniSplit(paid, cur) {
@@ -4067,7 +4084,7 @@ function payslipPanel(key, from, to) {
 // [id, question, answer, section]. Sections show in this order; add a question to the section it belongs to.
 const FAQ = [
   // Finding your way
-  ['tab-overview', 'What is on Overview?', 'Your net worth card (total, change over 30 days and how much is growth versus money you paid in, with a trend you can drag along), what you have saved this month, each account at a glance under <b>Holdings</b>, performance, allocation by type, paid in versus growth by month, goals and recent activity.', 'Finding your way'],
+  ['tab-overview', 'What is on Overview?', 'Your net worth card (total, change over 30 days and how much is growth versus money you paid in, with a trend you can drag along), what you have saved this month, each type at a glance under <b>Holdings</b> (tap a type to see its accounts), where your wealth came from, allocation by type, paid in versus growth by month, recent activity and goals. The full performance chart (by type or account, any range) is on <b>Accounts › All accounts</b>. From the 1st to the 10th, a gold line at the top opens last month\'s review.', 'Finding your way'],
   ['tab-accounts', 'What is on Accounts?', 'Pick an account at the top to see its chart, what you paid in and its growth, rate and allowance details, year by year figures at each 5 April, and its full history of balances, payments and income. You can edit or delete any entry there. <b>All</b> shows every account together.', 'Finding your way'],
   ['tab-income', 'What is on Income?', 'Where your money comes from (salary, rental, side income and so on) and how much of it you save. Log each payment as it arrives with <b>Log pay</b>; Aurum compares it with what you paid into your accounts to give your savings rate, month by month, where the money went and an optional payslip breakdown.', 'Finding your way'],
   ['tab-planner', 'What is on Planner?', 'Planner has three sections, picked at the top. <b>Retirement</b> projects your pensions and ISAs to your retirement age, with the income they might give; change the assumptions under <b>Your inputs</b> and the result updates below. <b>Goals</b> track targets such as an ISA total by a date; change a goal\'s target, date or monthly amount on the goal itself. <b>SIPP vs ISA</b> compares where your next pound does more. All are illustrations, not advice.', 'Finding your way'],
@@ -5834,6 +5851,10 @@ function reviewCard(r, dismissable) {
     ${reviewBody(r)}
   </section>`;
 }
+// 2.0.12: on Overview (days 1 to 10) the month review is one slim line that opens it on Insights.
+function reviewLine(r) {
+  return `<div class="visit review-line" role="button" tabindex="0" data-action="review-open"><i class="v-dot" aria-hidden="true"></i><p><b>Your ${esc(r.name)}:</b> <b class="nw ${cls(r.change)}">${signed(r.change)}</b> · <span class="nw">${signed(r.growth)} growth</span></p><span class="rl-go">See review</span><button type="button" class="rl-x" data-action="review-hide" aria-label="Dismiss">✕</button></div>`;
+}
 // 2.0.6: on Insights the review folds away under the summary, with its headline figures on the closed line.
 function reviewFold(r) {
   if (!r) return '';
@@ -6392,6 +6413,9 @@ document.addEventListener('click', async e => {
     case 'menu-pay': closeSheets(); openLog(id); setTimeout(() => { const f = document.getElementById('log-flow'); if (f) { f.scrollIntoView({ block: 'center' }); f.focus(); } }, 120); break;
     case 'menu-edit': closeSheets(); openAcctSheet(id); break;
     case 'review-month': if (id) { const st = document.querySelector('.month-strip'); stripFrom = st ? st.scrollLeft : null; reviewPick = id; render(); } break;
+    case 'review-open': ui.folds['month-review'] = true; reviewPick = null; ui.insightPage = 'now'; goTab('insights'); requestAnimationFrame(() => { const el = document.getElementById('month-review'); if (el) el.scrollIntoView({ block: 'start', behavior: reduceMotion() ? 'auto' : 'smooth' }); }); break;
+    case 'hold-grp': { const tb = t.closest('tbody'), open = !tb.classList.contains('open'); tb.classList.toggle('open', open); t.setAttribute('aria-expanded', open); ui.folds['hold-' + id] = open; saveUi(); break; }
+    case 'hist-all': ui.account = 'all'; ui.folds['hist-all'] = true; goTab('accounts'); break;
     case 'review-hide': { const r = monthReview(); if (r) ui.reviewSeen = r.key; saveUi(); render(); break; }
     case 'pin-acct': { const a = state.accounts.find(x => x.id === id); if (a) { a.pinned = !a.pinned; buzz(); save(); render(); } break; }
     case 'bkpw-off': { const cur = document.getElementById('bkpw-cur'); if (!cur || cur.value !== store.get(BKPASS_KEY)) { if (cur && cur.value) { setStatus('', false, 'bkpw-status'); pwWrong(cur); } else { setStatus('Type your current password to turn protection off.', true, 'bkpw-status'); if (cur) cur.focus(); } break; } } store.del(BKPASS_KEY); render(); setStatus('Password protection off. New backups are plain files.', false, 'bkpw-status'); break;
@@ -6435,7 +6459,7 @@ document.addEventListener('click', async e => {
   }
 });
 document.addEventListener('keydown', e => {
-  if ((e.key === 'Enter' || e.key === ' ') && e.target.matches('tr[data-action], .hn')) { e.preventDefault(); e.target.click(); }
+  if ((e.key === 'Enter' || e.key === ' ') && e.target.matches('tr[data-action], .hn, .review-line')) { e.preventDefault(); e.target.click(); }
 });
 function readFile(input, fn) {
   const reader = new FileReader();
