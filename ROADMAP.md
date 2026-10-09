@@ -31,6 +31,8 @@ Order: 2.0 polish and charts → 2.x Future Me → 3.0 pensions, property and de
   data (every type, pay, income, child's JISA) starting fresh each time; demo from the PIN and first-run screens
 - Done in 2.0.6: Insights split into Summary, Tax year and Tax return pages; figure tiles for the period; by-account
   table, last month's review and the year-by-year table folded; milestones as chips
+- Done in 2.0.10: Retirement and each goal laid out as "Your inputs" and "Result" like SIPP vs ISA; goal target,
+  date and a what-if monthly amount editable on the goal, with projected and expected finish month
 - Native SVG Tooltips: hover/touch interaction on all charts showing exact data values at each point
 - Cash drag warning: lots of cash in a low-interest account (user enters rate)
 - Interest checker: savings rate vs a benchmark rate the user sets
