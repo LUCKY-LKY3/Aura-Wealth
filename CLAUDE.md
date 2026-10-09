@@ -255,6 +255,9 @@ not advice — keep that disclaimer.
 
 - 2.0.18: Payslip logs pay: `open-pay-slip` (id = picked 'YYYY-MM' dates it on the usual payday, capped to month end/today) and
   `edit-pay-slip` (a month's only pay without details); `openPay(srcId, entryId, {date, details})` opens "Payslip details".
+  Pay entries also carry `taxable`/`pensionable` (`PAY_EXTRA`, 0 = not given, not deductions); `taxableOf(p)` = taxable, else gross
+  (− pension for a `db` source) feeds the P60 "Use these". Sources may carry `db: true` (salary only, `#src-db`): their payslip pension
+  counts as employer money in `payStats` (unless linked as a flow) and the "also log into a pension" offer is hidden.
 
 ## Status (latest)
 

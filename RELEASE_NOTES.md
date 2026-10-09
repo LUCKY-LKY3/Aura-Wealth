@@ -1,1 +1,3 @@
 - You can log pay straight from Payslip: a Log pay button opens with Payslip details ready, and a month with nothing logged offers to log that month's pay
+- More payslip detail: optional Taxable pay and Pensionable pay boxes. With taxable pay filled in, the P60 check adds that up instead of gross, so it matches your P60 when pension or salary sacrifice comes off before tax
+- Tick "Defined benefit pension" on a salary source and the pension on your payslips counts in your savings rate including pension from work
