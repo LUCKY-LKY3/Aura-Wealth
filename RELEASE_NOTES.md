@@ -1,6 +1,7 @@
-- Retirement in Planner is now one panel like SIPP vs ISA: your inputs first, then the result, with a line that repeats your assumptions
-- Your accounts and monthly payments fold into one line under the inputs (e.g. "5 of 10 accounts · £1,366 a month")
-- Each goal folds to one line with its progress and status; open it to change the target, the date or the monthly amount and see the result
-- Goals show bars for now and for the target date against the target, and the month you're likely to get there
-- Month in review on Insights: pick a month from a row of month tiles instead of the dropdown. Each tile has a green or red mark for whether your net worth went up or down that month
-- On an older month, a Latest button takes you straight back to last month
+- Overview is about half as long: the same figures, with the details a tap away
+- From the 1st to the 10th, last month's review is one gold line at the top; tap it to open the review on Insights
+- Pensions, Accessible now and ISA allowance sit two across on a phone
+- Holdings shows one line per type with its total and share; tap a type to see its accounts
+- "Where your wealth came from" keeps the headline and bars; the table by type and the top movers fold away
+- The Performance chart (by type or by account, any range) has moved to Accounts › All accounts
+- Recent activity shows the last 3 entries (View all opens the full history) and each goal is one line, like on Planner

@@ -33,6 +33,11 @@ Order: 2.0 polish and charts → 2.x Future Me → 3.0 pensions, property and de
   table, last month's review and the year-by-year table folded; milestones as chips
 - Done in 2.0.10: Retirement and each goal laid out as "Your inputs" and "Result" like SIPP vs ISA; goal target,
   date and a what-if monthly amount editable on the goal, with projected and expected finish month
+- Done in 2.0.12: Overview tidy (5,330px to about 2,800px on a phone): month review as one line, tiles two across,
+  Holdings groups fold to one line, wealth breakdown folded, Performance moved to Accounts › All accounts,
+  3 recent entries, goals one line each
+- Next tidy-ups (audit 9 Oct 2026): Income as pages (This month, Payslip, Sources and history); Accounts › All accounts
+  (merge "Your money vs growth" with "Every account", fold the donut)
 - Native SVG Tooltips: hover/touch interaction on all charts showing exact data values at each point
 - Cash drag warning: lots of cash in a low-interest account (user enters rate)
 - Interest checker: savings rate vs a benchmark rate the user sets
