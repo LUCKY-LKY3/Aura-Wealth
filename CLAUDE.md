@@ -217,7 +217,7 @@ not advice — keep that disclaimer.
 
 - 2.0.8: Insights/Planner section switches are `pageTabs(label, action, pages, cur, extra)` (`nav.ptabs`, icons in `PAGE_ICONS`, open
   page `aria-current="page"`): boxed icon tiles, sticky under the phone header (`--ptabs-top` set by `placePageTabs()` on render/scroll/resize);
-  `.ptabs.stuck` puts icons beside labels and `body.tabs-stuck` drops the header shadow. Use it for any new page with sections.
+  2.0.9: icon beside label (one row, 40px); `.ptabs.stuck` only trims padding and `body.tabs-stuck` drops the header shadow. Use it for any new page with sections.
 
 ## Status (latest)
 

@@ -1,2 +1,1 @@
-- New page tabs on Insights and Planner: each section (Summary, Tax year, Tax return / Retirement, Goals, SIPP vs ISA) now has its own icon tile, with the open one in gold
-- The tabs stay pinned under the header as you scroll, shrinking to a slim row, so you can switch section without scrolling back up
+- The section tabs on Insights and Planner are now shorter: each icon sits beside its label on one row, so the page content starts higher up
