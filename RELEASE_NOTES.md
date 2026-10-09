@@ -1,1 +1,1 @@
-- Payslip has a month strip: slide to any month, such as June, and tap it to see that month's breakdown next to the tax year up to then. Latest takes you back
+- Payslip has Month, Tax year and Year buttons, each with a strip: slide back to any month (such as June), last tax year or last year to see that payslip breakdown. Latest takes you back

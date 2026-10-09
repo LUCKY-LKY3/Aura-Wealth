@@ -1637,7 +1637,7 @@ function loadState() {
 
 let state = loadState();
 const DEFAULT_UI = {
-  tab: 'overview', folds: {}, range: '1Y', custom: { n: 6, unit: 'm' }, hist: { scope: 'this', kind: 'all', year: 'all', q: '' }, fit: true, barMonths: 12, paidLine: true, lastYear: false, pence: false, compactNums: false, showClosed: false, account: null, person: 'me', hidden: false, stackBy: 'total', insight: '1M', nwRange: '1M', pathSpan: 'all', planPage: 'plan', insightPage: 'now', incomePage: 'save',
+  tab: 'overview', folds: {}, range: '1Y', custom: { n: 6, unit: 'm' }, hist: { scope: 'this', kind: 'all', year: 'all', q: '' }, fit: true, barMonths: 12, paidLine: true, lastYear: false, pence: false, compactNums: false, showClosed: false, account: null, person: 'me', hidden: false, stackBy: 'total', insight: '1M', nwRange: '1M', pathSpan: 'all', planPage: 'plan', insightPage: 'now', incomePage: 'save', slipMode: 'm',
   calc: { monthly: 500, years: 20, rate: 6, draw: 20 },
   plan: { include: {}, monthly: {}, target: 0, years: 25, real: false },
   notes: { read: {}, gone: {}, on: {}, move: { pct: 5, dir: 'both', basis: 'prev' } }, noteFilter: 'all', chartOut: {}
@@ -4127,7 +4127,7 @@ function renderIncome() {
     ${foldClose}</section>` : '';
 
   const pg = INCOME_PAGES[ui.incomePage] ? ui.incomePage : 'save';
-  const body = pg === 'slip' ? payslipPanel(key, from, to)
+  const body = pg === 'slip' ? payslipPanel()
     : pg === 'src' ? `${sourcesPanel}${histPanel}`
     : `${summary}${chartPanel}${wherePanel}`;
   view.innerHTML = `<div class="stack view">${exampleNotice()}${pageTabs('Income section', 'income-page', INCOME_PAGES, pg)}${missPanel}${body}
@@ -4150,34 +4150,54 @@ function slipSum(from, to) {
   for (const p of slips) { t.gross += p.gross; t.net += p.net; SLIP_ROWS.forEach(([k]) => { t[k] += p[k] || 0; }); }
   return t;
 }
-// 2.0.17: a month picked on the Payslip strip (not saved) overrides the period buttons.
+// 2.0.17: Payslip has its own period: Month, Tax year or Year (ui.slipMode), each with a strip to pick which one
+// (slipPick, not saved; it opens on the latest). Month compares with the tax year up to that month.
+const SLIP_MODES = { m: 'Month', ty: 'Tax year', y: 'Year' };
 let slipPick = null;
-function slipStrip(cur) {
-  const first = state.pay.reduce((m, p) => p.date < m ? p.date : m, TODAY).slice(0, 7), now = TODAY.slice(0, 7), tiles = [];
-  if (first >= now) return '';
-  let [y, m] = first.split('-').map(Number), lastY = null;
-  for (let k = first; k <= now; m === 12 ? (y++, m = 1) : m++, k = `${y}-${String(m).padStart(2, '0')}`) {
-    if (y !== lastY) { tiles.push(`<span class="ms-yr" aria-hidden="true">${y}</span>`); lastY = y; }
-    const mid = Date.UTC(y, m - 1, 15), has = state.pay.some(p => p.gross > 0 && p.date.startsWith(k));
-    tiles.push(`<button type="button" data-action="slip-month" data-id="${k}" aria-pressed="${k === cur}" aria-label="${monthYear(mid)}${has ? '' : ', no payslip details'}">${fmtMonth.format(new Date(mid)).slice(0, 3)}<i class="${has ? 'on' : ''}"></i></button>`);
+function slipPeriods(mode) {
+  const first = state.pay.reduce((m, p) => p.date < m ? p.date : m, TODAY), out = [];
+  const has = (a, b) => state.pay.some(p => p.gross > 0 && p.date >= a && p.date <= b);
+  if (mode === 'm') {
+    let [y, m] = first.split('-').map(Number);
+    for (;;) {
+      const id = `${y}-${String(m).padStart(2, '0')}`, mid = Date.UTC(y, m - 1, 15), e = msIso(Date.UTC(y, m, 0));
+      if (id > TODAY.slice(0, 7)) break;
+      out.push({ id, yr: y, short: fmtMonth.format(new Date(mid)).slice(0, 3), name: monthYear(mid), col: fmtMonthLong.format(new Date(mid)), from: `${id}-01`, to: e < TODAY ? e : TODAY });
+      m === 12 ? (y++, m = 1) : m++;
+    }
+  } else if (mode === 'ty') {
+    for (let y = +taxYearStart(first).slice(0, 4); y <= +taxYearStart(TODAY).slice(0, 4); y++) {
+      const e = `${y + 1}-04-05`;
+      out.push({ id: String(y), short: `${String(y).slice(2)}/${String(y + 1).slice(2)}`, name: `tax year ${tyLabel(y)}`, col: tyLabel(y), from: `${y}-04-06`, to: e < TODAY ? e : TODAY });
+    }
+  } else {
+    for (let y = +first.slice(0, 4); y <= +TODAY.slice(0, 4); y++) {
+      const e = `${y}-12-31`;
+      out.push({ id: String(y), short: String(y), name: String(y), col: String(y), from: `${y}-01-01`, to: e < TODAY ? e : TODAY });
+    }
   }
-  return `<div class="month-strip" role="group" aria-label="Month to show">${tiles.join('')}</div>`;
+  out.forEach(x => { x.has = has(x.from, x.to); });
+  return out;
 }
-function payslipPanel(key, from, to) {
-  const lastM = monthBounds(1)[0].slice(0, 7);
-  const cur = slipPick || (key === 'month' ? TODAY.slice(0, 7) : key === 'last' ? lastM : null);
-  let tyFrom = taxYearStart(TODAY), tyTo = TODAY, tyHead = 'Tax year so far', name = incomeRangeName(key);
-  if (slipPick) {
-    const [y, m] = slipPick.split('-').map(Number), e = msIso(Date.UTC(y, m, 0));
-    from = `${slipPick}-01`; to = e < TODAY ? e : TODAY; key = 'pick'; name = monthYear(Date.UTC(y, m - 1, 15));
-    tyFrom = taxYearStart(to); tyTo = to;
-    if (tyFrom !== taxYearStart(TODAY) || to < monthBounds(0)[0]) tyHead = `Tax year to ${fmtMonth.format(new Date(Date.UTC(y, m - 1, 15))).slice(0, 3)}`;
-  }
-  const strip = slipStrip(cur);
-  const row2 = slipPick ? `<div class="month-row"><span><b>${esc(name)}</b></span><button type="button" class="btn sm" data-action="slip-month" data-id="">Latest ${CHEVRON}</button></div>` : '';
-  const head = `<div class="panel-head"><h2 class="tt">${ti('doc')}Payslip breakdown</h2>${incomeSeg(slipPick ? null : key)}</div>${strip}${row2}${strip ? '<div style="height:14px"></div>' : ''}`;
+function payslipPanel() {
+  const mode = SLIP_MODES[ui.slipMode] ? ui.slipMode : 'm', list = slipPeriods(mode);
+  // Opens on the latest period with payslip details (for months, never the month still under way unless it has some).
+  const latest = [...list].reverse().find(x => x.has) || list[list.length - 1];
+  const cur = list.find(x => x.id === slipPick) || latest;
+  let { from, to } = cur, name = cur.name, tyFrom = null, tyHead = '';
+  if (mode === 'm') { tyFrom = taxYearStart(to); tyHead = to >= monthBounds(0)[0] ? 'Tax year so far' : `Tax year to ${cur.short}`; }
+  let lastY = null;
+  const tiles = list.map(x => {
+    const yr = mode === 'm' && x.yr !== lastY ? `<span class="ms-yr" aria-hidden="true">${x.yr}</span>` : '';
+    lastY = x.yr;
+    return `${yr}<button type="button" data-action="slip-pick" data-id="${x.id}" aria-pressed="${x === cur}" aria-label="${esc(x.name)}${x.has ? '' : ', no payslip details'}"${mode === 'm' ? '' : ' style="width:auto;padding:0 12px"'}>${x.short}<i class="${x.has ? 'on' : ''}"></i></button>`;
+  }).join('');
+  const strip = list.length > 1 ? `<div class="month-strip" role="group" aria-label="Which ${SLIP_MODES[mode].toLowerCase()}">${tiles}</div>
+    <div class="month-row"><span><b>${esc(cur.name.replace(/^tax year/, 'Tax year'))}</b>${cur.to === TODAY ? ' · so far' : ''}</span>${cur !== latest ? `<button type="button" class="btn sm" data-action="slip-pick" data-id="">Latest ${CHEVRON}</button>` : ''}</div><div style="height:14px"></div>` : '';
+  const seg = `<div class="seg" role="group" aria-label="Period">${Object.entries(SLIP_MODES).map(([k, l]) => `<button data-action="slip-mode" data-id="${k}" aria-pressed="${mode === k}">${l}</button>`).join('')}</div>`;
+  const head = `<div class="panel-head"><h2 class="tt">${ti('doc')}Payslip breakdown</h2>${seg}</div>${strip}`;
   if (!state.pay.some(p => p.gross > 0)) return `<section class="panel">${head}<div class="chart-empty"><div class="empty-cta"><b>See where your gross pay goes</b><span>When you log pay, open "Payslip details" and add your gross pay, tax, National Insurance and pension. Aurum then shows how much of each £1 you keep.</span><button class="btn sm" data-action="open-pay">Log pay</button></div></div></section>`;
-  const st = slipSum(from, to), ty = slipSum(tyFrom, tyTo), both = key !== 'TY';
+  const st = slipSum(from, to), both = mode === 'm', ty = both ? slipSum(tyFrom, to) : st;
   if (!st.n) return `<section class="panel">${head}<p class="hint" style="margin:0">Gross pay and deductions aren't logged for ${esc(name)}. Add them under "Payslip details" when you log pay.</p></section>`;
   const pc = v => st.gross > 0 ? (v / st.gross * 100).toFixed(1) + '%' : '—';
   const parts = [['net', 'Take-home', 'var(--c1)'], ...SLIP_ROWS].filter(([k]) => st[k] > 0.005);
@@ -4190,7 +4210,7 @@ function payslipPanel(key, from, to) {
   return `<section class="panel">${head}
     ${bar}${legend}
     <div class="table-wrap"><table>
-      <thead><tr><th></th><th class="r">${both ? esc(key === '12M' ? '12 months' : fmtMonthLong.format(new Date(toMs(from)))) : 'Tax year'}</th>${both ? `<th class="r">${tyHead}</th>` : ''}<th class="r hide-sm">Of gross</th></tr></thead>
+      <thead><tr><th></th><th class="r">${esc(cur.col)}</th>${both ? `<th class="r">${tyHead}</th>` : ''}<th class="r hide-sm">Of gross</th></tr></thead>
       <tbody>${row('gross', 'Gross pay', true)}${SLIP_ROWS.map(([k, l]) => row(k, l)).join('')}${row('net', 'Take-home', true)}</tbody></table></div>
     <p class="explain" style="margin-bottom:0">Deductions took ${pc(ded)} of your gross pay: you kept <b>${kept}p</b> of every £1 you earned.${withPen}</p>
     ${st.n < st.of ? `<p class="hint" style="margin-bottom:0">Based on ${st.n} of ${st.of} payments; the others don't have payslip details.</p>` : ''}
@@ -4203,7 +4223,7 @@ const FAQ = [
   // Finding your way
   ['tab-overview', 'What is on Overview?', 'Your net worth card (total, change over 30 days and how much is growth versus money you paid in, with a trend you can drag along), what you have saved this month, each type at a glance under <b>Holdings</b> (tap a type to see its accounts), where your wealth came from, allocation by type, paid in versus growth by month, recent activity and goals. The full performance chart (by type or account, any range) is on <b>Accounts › All accounts</b>. From the 1st to the 10th, a gold line at the top opens last month\'s review.', 'Finding your way'],
   ['tab-accounts', 'What is on Accounts?', 'Pick an account at the top to see its chart, what you paid in and its growth, rate and allowance details, year by year figures at each 5 April, and its full history of balances, payments and income. You can edit or delete any entry there. <b>All</b> shows every account together.', 'Finding your way'],
-  ['tab-income', 'What is on Income?', 'Where your money comes from (salary, rental, side income and so on) and how much of it you save. Log each payment as it arrives with <b>Log pay</b>; Aurum compares it with what you paid into your accounts. It has three pages, picked at the top: <b>Savings</b> (your savings rate for the period you pick, month by month, and where the money went), <b>Payslip</b> (where your gross pay went, from the optional payslip details; tap a month on its strip to see any month) and <b>Sources</b> (each source of income and your pay history).', 'Finding your way'],
+  ['tab-income', 'What is on Income?', 'Where your money comes from (salary, rental, side income and so on) and how much of it you save. Log each payment as it arrives with <b>Log pay</b>; Aurum compares it with what you paid into your accounts. It has three pages, picked at the top: <b>Savings</b> (your savings rate for the period you pick, month by month, and where the money went), <b>Payslip</b> (where your gross pay went, from the optional payslip details; pick Month, Tax year or Year, then any one on its strip, such as June or last tax year) and <b>Sources</b> (each source of income and your pay history).', 'Finding your way'],
   ['tab-planner', 'What is on Planner?', 'Planner has three sections, picked at the top. <b>Retirement</b> projects your pensions and ISAs to your retirement age, with the income they might give; change the assumptions under <b>Your inputs</b> and the result updates below. <b>Goals</b> track targets such as an ISA total by a date; change a goal\'s target, date or monthly amount on the goal itself. <b>SIPP vs ISA</b> compares where your next pound does more. All are illustrations, not advice.', 'Finding your way'],
   ['tab-insights', 'What is on Insights?', 'A plain-English summary of your money, on three pages. <b>Summary</b>: what changed over the period you pick (net worth, paid in, growth), tips, each account\'s growth, last month\'s review and milestones you have reached. <b>Tax year</b>: your ISA and pension allowances this tax year, paid in by tax year with pension carry-forward, and your year in review. <b>Tax return</b>: the tax return helper and P60 refund check.', 'Finding your way'],
   ['tab-settings', 'What is in Settings?', 'About you (name, date of birth, retirement age, tax band), this help, Family, your accounts and their order, privacy (demo mode, hide balances, PIN and fingerprint lock), backup and restore, appearance, notifications and reminders.', 'Finding your way'],
@@ -6329,10 +6349,9 @@ document.addEventListener('click', async e => {
     case 'jump': jumpAnswer(id); break;
     case 'pay-copy': copySlip(); break;
     case 'pay-same': { const inp = document.getElementById('pay-net'); inp.value = t.dataset.v; updatePayCheck(); break; }
-    case 'income-range': ui.incomeRange = id; slipPick = null; saveUi(); render(); break;
-    case 'slip-month': { const st = document.querySelector('.month-strip'); stripFrom = st ? st.scrollLeft : null; const now = TODAY.slice(0, 7), last = monthBounds(1)[0].slice(0, 7);
-      // This month and last month are the period buttons; any other month is a pick.
-      slipPick = id && id !== now && id !== last ? id : null; if (!slipPick) ui.incomeRange = id === now ? 'month' : 'last'; saveUi(); render(); break; }
+    case 'income-range': ui.incomeRange = id; saveUi(); render(); break;
+    case 'slip-mode': ui.slipMode = id; slipPick = null; saveUi(); render(); break;
+    case 'slip-pick': { const st = document.querySelector('.month-strip'); stripFrom = st ? st.scrollLeft : null; slipPick = id || null; render(); break; }
     case 'income-page': ui.incomePage = id; saveUi(); render(); window.scrollTo({ top: 0 }); break;
     case 'pay-months': ui.payMonths = +id; saveUi(); render(); break;
     case 'p60-from-pay': {
