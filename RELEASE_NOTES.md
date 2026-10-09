@@ -1,7 +1,2 @@
-- Overview is about half as long: the same figures, with the details a tap away
-- From the 1st to the 10th, last month's review is one gold line at the top; tap it to open the review on Insights
-- Pensions, Accessible now and ISA allowance sit two across on a phone
-- Holdings shows one line per type with its total and share; tap a type to see its accounts
-- "Where your wealth came from" keeps the headline and bars; the table by type and the top movers fold away
-- The Performance chart (by type or by account, any range) has moved to Accounts › All accounts
-- Recent activity shows the last 3 entries (View all opens the full history) and each goal is one line, like on Planner
+- New colour choice in Settings › Appearance: Gold (as before), midnight Green, Navy with champagne, or Graphite with copper
+- Colours apply to the Dark theme and are saved on this phone only; gains stay green and losses red in every option

@@ -79,7 +79,7 @@ There is no local Java/Android SDK on the owner's PC — **APKs are only built b
 - Collapsible sections use `foldOpen(key,title,sub)`/`foldClose` (round chevron); open state in `ui.folds`.
 - `income` (interest/dividends/prizes) feeds the tax helper and is shown on Income; not money in or the savings rate. Since 1.9.9, entries
   marked `added` raise the balance via an estimated log (so they show as growth). Employer pension payments are flows with `employer: true, own: 0`.
-- Device-only keys (not in backups): `aurum_lock` (PIN hash), `aurum_bio`, `aurum_reminder` (day), `aurum_update` (cached release), `aurum_taxrem` (June P60 / January SA reminders), `aurum_autobackup`/`_last` (weekly copy to Documents/Aurum).
+- Device-only keys (not in backups): `aurum_lock` (PIN hash), `aurum_bio`, `aurum_reminder` (day), `aurum_update` (cached release), `aurum_taxrem` (June P60 / January SA reminders), `aurum_palette` (2.0.13), `aurum_autobackup`/`_last` (weekly copy to Documents/Aurum).
 - `archived` accounts stay in totals/charts but are hidden from pickers, Update all, reminders and the planner.
 - Native plugins: Preferences, Filesystem, Share, LocalNotifications (monthly reminder), NativeBiometric (@capgo, fingerprint), Haptics.
   saved to `localStorage['aurum_v1']` (key name kept). UI prefs in `aurum_ui`, theme in `aurum_theme`, PIN hash in `aurum_lock`.
@@ -119,6 +119,8 @@ There is no local Java/Android SDK on the owner's PC — **APKs are only built b
 
 - **Black and gold, dark by default.** Dark tokens live on bare `:root`; Light is opt-in only via
   `data-aurum="light"` (Settings). Don't reintroduce `prefers-color-scheme` switching.
+  Since 2.0.13 the user may pick another dark palette (Green/Navy/Copper) via `:root[data-pal=…]:not([data-aurum="light"])`
+  token blocks; gold stays the default and the brand.
 - Palette: bg `#080807`, surfaces `#121110`/`#1B1916`, gold `#D4AF5A`/`#D9B666`, ink `#F3EFE6`.
   Account colours `--c1..c6` = gold, ivory, copper, … Semantic green/red only for gains/losses.
 - Fonts: Geist (UI) + Geist Mono (table figures, chart axes). Bundled, no external font requests.
@@ -233,6 +235,10 @@ not advice — keep that disclaimer.
   `.kpis` two across on phones; Holdings groups are `tbody.hg` (`hold-grp` toggles `.open`, saved as fold `hold-<group>`, `holdOpen(g)`
   defaults open only ≥1000px); `wealthSources` folds its table and movers (fold `ws-more`); Performance is `perfPanel(accts)`/`drawPerf(accts, tl)`
   inside the All accounts card (no longer on Overview); activity 3 rows (`hist-all` opens All accounts history); `goalList()` = `goalSum` rows.
+
+- 2.0.13 colour palettes: `PALETTES` [key,name,bg,accent,c1..c6 names], `applyPalette(k)` sets `data-pal` (none for gold), the
+  theme-color meta and the account swatch labels; device-only `aurum_palette`; picker `.pal-pick` (`name="palette"`) in Settings
+  Appearance. Gold tints use `rgba(var(--gold-rgb),a)`; new colours must come from tokens so every palette follows. Lock screen stays fixed dark gold.
 
 ## Status (latest)
 

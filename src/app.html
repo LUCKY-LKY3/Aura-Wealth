@@ -5,14 +5,15 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400..700&family=Geist+Mono:wght@400..600&display=swap">
 <style>
-/* Black and gold is the default look; Light is an opt-in setting (data-aurum="light"). */
+/* Black and gold is the default look; Light is an opt-in setting (data-aurum="light").
+   2.0.13: other dark palettes are opt-in via data-pal (Settings > Appearance, device-only aurum_palette). */
 :root{
   color-scheme:dark;
   --bg:#080807; --surface:#121110; --surface-2:#1B1916; --line:#27241F; --line-strong:#3A352D;
   --ink:#F3EFE6; --ink-2:#B5AE9F; --ink-3:#7C7568;
   --primary:#D4AF5A; --primary-ink:#0A0906; --focus:#E8C877;
-  --gold:#D9B666; --gold-soft:#231D10;
-  --navy:#0E0D0B; --navy-2:#1A1712; --on-navy:#F6F1E4; --on-navy-2:#B2A993; --on-navy-line:rgba(217,182,102,.22); --gold-on-navy:#D9B666;
+  --gold:#D9B666; --gold-soft:#231D10; --gold-rgb:217,182,102;
+  --navy:#0E0D0B; --navy-2:#1A1712; --on-navy:#F6F1E4; --on-navy-2:#B2A993; --on-navy-line:rgba(var(--gold-rgb),.22); --gold-on-navy:#D9B666;
   --pos:#4CC98E; --neg:#F07360; --pos-soft:#10241A; --neg-soft:#2B1512;
   --c1:#D9B666; --c2:#EDE4D0; --c3:#C0784A; --c4:#9C8F6A; --c5:#D9967F; --c6:#8E8A82;
   --c1-hi:#E3C47A; --c2-hi:#F2EBDB; --c3-hi:#D38D5E; --c4-hi:#B3A57E; --c5-hi:#E6A994; --c6-hi:#A7A39A;
@@ -46,6 +47,42 @@ button{cursor:pointer}
 .mono{font-family:var(--mono);font-variant-numeric:tabular-nums;letter-spacing:-.01em}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 
+
+/* 2.0.13 colour palettes (dark only; Light ignores them). Contrast checked: ink-3 ≥4.3:1, gains/losses ≥6:1 on --surface. */
+:root[data-pal="green"]:not([data-aurum="light"]){
+  --bg:#06110E; --surface:#0C1A16; --surface-2:#13241F; --line:#1D322B; --line-strong:#2B463D; --ink:#EEF1EA; --ink-2:#A9B8AE; --ink-3:#738A7F;
+  --primary:#D6B46C; --primary-ink:#07120F; --focus:#E8CB86; --gold:#D9B96F; --gold-soft:#1D2414; --gold-rgb:217,185,111; --navy:#081512; --navy-2:#11241E;
+  --on-navy:#F2F1E6; --on-navy-2:#A9B8A6; --gold-on-navy:#D9B96F; --pos:#6BDCA4; --neg:#F4826E; --pos-soft:#0F2A1F; --neg-soft:#2C1714; --c1:#D9B96F;
+  --c2:#E9E5D4; --c3:#C8875A; --c4:#7FB3A0; --c5:#D9967F; --c6:#8B9891; --c1-hi:#E4C885; --c2-hi:#F2EEE0; --c3-hi:#D69B70;
+  --c4-hi:#97C5B3; --c5-hi:#E6A994; --c6-hi:#A3AEA8;
+  --on-navy-line:rgba(217,185,111,.22);
+}
+:root[data-pal="navy"]:not([data-aurum="light"]){
+  --bg:#070A13; --surface:#0E1322; --surface-2:#151C2E; --line:#212A3F; --line-strong:#313C56; --ink:#EEF0F5; --ink-2:#A9B0C2; --ink-3:#737D94;
+  --primary:#E2CB98; --primary-ink:#0A0D16; --focus:#EEDAAE; --gold:#E2CB98; --gold-soft:#1F1E1E; --gold-rgb:226,203,152; --navy:#0A0F1C; --navy-2:#141B2D;
+  --on-navy:#F3F1EA; --on-navy-2:#AFB3BF; --gold-on-navy:#E2CB98; --pos:#55CF98; --neg:#F27B6B; --pos-soft:#0F2420; --neg-soft:#2B1719; --c1:#E2CB98;
+  --c2:#ECE7DA; --c3:#C98B62; --c4:#7FA0CF; --c5:#D99A8A; --c6:#8A92A6; --c1-hi:#EDD9AE; --c2-hi:#F4F0E6; --c3-hi:#D89F78;
+  --c4-hi:#98B4DC; --c5-hi:#E6AEA0; --c6-hi:#A2A9BA;
+  --on-navy-line:rgba(226,203,152,.22);
+}
+:root[data-pal="copper"]:not([data-aurum="light"]){
+  --bg:#0C0B0B; --surface:#161515; --surface-2:#201E1D; --line:#2E2B29; --line-strong:#423D3A; --ink:#F2EFEC; --ink-2:#B7AFA8; --ink-3:#827972;
+  --primary:#D38E62; --primary-ink:#120B07; --focus:#E3A57D; --gold:#D9966A; --gold-soft:#271911; --gold-rgb:217,150,106; --navy:#100F0E; --navy-2:#1C1A18;
+  --on-navy:#F5F1EC; --on-navy-2:#B5ABA2; --gold-on-navy:#D9966A; --pos:#5BCB97; --neg:#F2667A; --pos-soft:#11241B; --neg-soft:#2C1419; --c1:#D9966A;
+  --c2:#ECE6DD; --c3:#CDAE6A; --c4:#8FA796; --c5:#B98AA6; --c6:#8C8681; --c1-hi:#E5AA82; --c2-hi:#F4EFE8; --c3-hi:#DBBF80;
+  --c4-hi:#A6BBAC; --c5-hi:#CA9FB8; --c6-hi:#A49F9A;
+  --on-navy-line:rgba(217,150,106,.22);
+}
+.pal-pick{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.pal-pick label{display:grid;gap:6px;justify-items:center;cursor:pointer;font-size:12px;font-weight:550;color:var(--ink-2)}
+.pal-pick input{position:absolute;opacity:0;pointer-events:none}
+.pal-pick i{position:relative;width:100%;height:48px;border-radius:10px;border:1px solid var(--line-strong);background:var(--pb);overflow:hidden}
+.pal-pick i::before{content:'';position:absolute;left:10px;top:10px;width:16px;height:16px;border-radius:50%;background:var(--pa)}
+.pal-pick i::after{content:'';position:absolute;left:10px;right:10px;bottom:10px;height:3px;border-radius:2px;background:var(--pa);opacity:.55}
+.pal-pick input:checked+i{border-color:var(--gold);box-shadow:0 0 0 2px var(--gold-soft),0 0 0 3px var(--gold)}
+.pal-pick input:checked~span{color:var(--ink)}
+.pal-pick input:focus-visible+i{outline:2px solid var(--focus);outline-offset:2px}
+[data-aurum="light"] .pal-pick{opacity:.5}
 
 /* ---------- 1.9.1 motion ---------- */
 /* Bell panel: grows out of the bell, pointing at it. */
@@ -252,7 +289,7 @@ h2{font-size:15px;font-weight:600;letter-spacing:-.01em;margin:0}
 /* statement card: the one bold element */
 .summary{display:grid;gap:16px;grid-template-columns:minmax(0,1fr)}
 @media (min-width:1000px){.summary{grid-template-columns:minmax(0,1.55fr) minmax(0,1fr)}}
-.statement{display:flex;flex-direction:column;position:relative;overflow:hidden;border-radius:14px;padding:22px;background:radial-gradient(90% 120% at 100% 0%,rgba(217,182,102,.13),transparent 55%),linear-gradient(160deg,var(--navy) 0%,var(--navy-2) 100%);box-shadow:0 20px 50px -30px rgba(217,182,102,.35);color:var(--on-navy);border:1px solid var(--on-navy-line)}
+.statement{display:flex;flex-direction:column;position:relative;overflow:hidden;border-radius:14px;padding:22px;background:radial-gradient(90% 120% at 100% 0%,rgba(var(--gold-rgb),.13),transparent 55%),linear-gradient(160deg,var(--navy) 0%,var(--navy-2) 100%);box-shadow:0 20px 50px -30px rgba(var(--gold-rgb),.35);color:var(--on-navy);border:1px solid var(--on-navy-line)}
 @media (min-width:760px){.statement{padding:26px 28px}}
 .statement::after{content:"";position:absolute;right:-70px;top:-70px;width:240px;height:240px;border-radius:50%;border:1px solid color-mix(in srgb,var(--gold-on-navy) 28%,transparent);box-shadow:inset 0 0 0 22px color-mix(in srgb,var(--gold-on-navy) 4%,transparent);pointer-events:none}
 .statement>*{position:relative}
@@ -262,7 +299,7 @@ h2{font-size:15px;font-weight:600;letter-spacing:-.01em;margin:0}
 .stmt-trend{position:relative;flex:1 1 96px;min-height:80px;max-height:170px;margin:18px 0 20px}
 .stmt-trend svg{position:absolute;inset:0;width:100%;height:100%}
 .stmt-trend{touch-action:pan-y;cursor:crosshair}
-.stmt-cursor{position:absolute;z-index:1;width:10px;height:10px;margin:-5px 0 0 -5px;border-radius:50%;background:#D9B666;box-shadow:0 0 0 3px rgba(217,182,102,.25);pointer-events:none}
+.stmt-cursor{position:absolute;z-index:1;width:10px;height:10px;margin:-5px 0 0 -5px;border-radius:50%;background:var(--gold-on-navy,var(--gold));box-shadow:0 0 0 3px rgba(var(--gold-rgb),.25);pointer-events:none}
 .stmt-at{position:absolute;z-index:1;top:-16px;left:0;font-size:12px;color:var(--on-navy-2);pointer-events:none}
 .stmt-stale{align-self:flex-start;margin-top:10px;border:0;background:none;padding:4px 0;font-size:12px;color:var(--on-navy-2);text-decoration:underline;text-decoration-color:color-mix(in srgb,var(--gold-on-navy) 50%,transparent);text-underline-offset:3px;cursor:pointer}
 @media (max-width:519px){.statement::after{width:170px;height:170px;right:-80px;top:-80px}}
@@ -682,23 +719,23 @@ dialog.sheet.wide{width:min(620px,calc(100% - 32px))}
 .plan-accts .money .input{padding-block:6px;font-size:13px}
 .big-figure{font-size:clamp(30px,6vw,40px);font-weight:600;letter-spacing:-.035em;line-height:1.1}
 .lock{position:fixed;inset:0;z-index:100;background:#080807;color:#F3EFE6;display:grid;place-items:center;padding:calc(24px + var(--sa-top)) 24px calc(24px + var(--sa-bottom));overflow:auto;transition:opacity .45s ease}
-.lock-glow{position:absolute;left:50%;top:22%;width:520px;height:520px;transform:translate(-50%,-50%);background:radial-gradient(closest-side,rgba(212,175,90,.26),rgba(212,175,90,.08) 55%,transparent);pointer-events:none}
+.lock-glow{position:absolute;left:50%;top:22%;width:520px;height:520px;transform:translate(-50%,-50%);background:radial-gradient(closest-side,rgba(var(--gold-rgb),.26),rgba(var(--gold-rgb),.08) 55%,transparent);pointer-events:none}
 .lock-box{position:relative;display:flex;flex-direction:column;align-items:center;gap:14px;width:min(300px,100%);text-align:center}
-.lock-coin{display:block;filter:drop-shadow(0 10px 30px rgba(212,175,90,.35));transition:transform .5s cubic-bezier(.6,0,.3,1),opacity .5s ease}
+.lock-coin{display:block;filter:drop-shadow(0 10px 30px rgba(var(--gold-rgb),.35));transition:transform .5s cubic-bezier(.6,0,.3,1),opacity .5s ease}
 .lock-brand{display:flex;flex-direction:column;gap:6px;margin-top:4px}
 .lock-word{font-size:15px;font-weight:600;letter-spacing:.42em;padding-left:.42em;color:#D9B666}
 .lock-tag{font-size:13px;color:#A49D8F}
 .pin-dots{display:flex;gap:14px;height:16px;align-items:center;margin-top:14px}
-.pin-dots i{width:12px;height:12px;border-radius:50%;border:1.5px solid rgba(217,182,102,.6);transition:background .15s,border-color .15s,transform .15s}
+.pin-dots i{width:12px;height:12px;border-radius:50%;border:1.5px solid rgba(var(--gold-rgb),.6);transition:background .15s,border-color .15s,transform .15s}
 .pin-dots i.on{background:#D9B666;border-color:#D9B666;transform:scale(1.1)}
 .pin-dots.bad i{border-color:#E5604F}.pin-dots.bad i.on{background:#E5604F}
 .lock-err{min-height:18px;font-size:13px;color:#E5604F;margin:0}
 .keypad{display:grid;grid-template-columns:repeat(3,72px);gap:14px 22px;justify-content:center}
-.key{position:relative;overflow:hidden;width:72px;height:72px;border-radius:50%;border:1px solid rgba(217,182,102,.45);background:rgba(255,255,255,.02);color:#F3EFE6;font:500 26px/1 var(--sans,inherit);display:grid;place-items:center;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.key{position:relative;overflow:hidden;width:72px;height:72px;border-radius:50%;border:1px solid rgba(var(--gold-rgb),.45);background:rgba(255,255,255,.02);color:#F3EFE6;font:500 26px/1 var(--sans,inherit);display:grid;place-items:center;cursor:pointer;-webkit-tap-highlight-color:transparent}
 .key.txt{border-color:transparent;background:none;font-size:13px;color:#A49D8F}
 .key:disabled{opacity:.35;cursor:default}
 .key:focus-visible{outline:2px solid #D9B666;outline-offset:2px}
-.key .rip{position:absolute;left:50%;top:50%;width:72px;height:72px;margin:-36px 0 0 -36px;border-radius:50%;background:rgba(217,182,102,.38);animation:rip .45s ease-out forwards;pointer-events:none}
+.key .rip{position:absolute;left:50%;top:50%;width:72px;height:72px;margin:-36px 0 0 -36px;border-radius:50%;background:rgba(var(--gold-rgb),.38);animation:rip .45s ease-out forwards;pointer-events:none}
 @keyframes rip{from{transform:scale(.2);opacity:1}to{transform:scale(1.3);opacity:0}}
 .lock .btn.ghost{color:#D9B666}
 #lock-forgot{min-height:20px}#lock-forgot .hint{color:#A49D8F}
@@ -840,7 +877,7 @@ details.fold:not([open])>summary h2::after{content:' ▸'}
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <symbol id="aurum-coin" viewBox="0 0 48 48">
-    <defs><linearGradient id="coin-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F6E3A6"/><stop offset=".45" stop-color="#D9B666"/><stop offset="1" stop-color="#9C7A31"/></linearGradient></defs>
+    <defs><linearGradient id="coin-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F6E3A6"/><stop offset=".45" style="stop-color:var(--gold-on-navy)"/><stop offset="1" stop-color="#9C7A31"/></linearGradient></defs>
     <circle cx="24" cy="24" r="22" fill="url(#coin-g)"/>
     <circle cx="24" cy="24" r="18.6" fill="none" stroke="#0B0A08" stroke-opacity=".28" stroke-width="1"/>
     <path d="M15.6 31.8L24 14.8l8.4 17" fill="none" stroke="#0B0A08" stroke-opacity=".82" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -1314,6 +1351,7 @@ const STORE_KEY = 'aurum_v1';
 const OLD_KEYS = ['aura_wealth_v2'];
 const UI_KEY = 'aurum_ui';
 const THEME_KEY = 'aurum_theme';
+const PALETTE_KEY = 'aurum_palette';
 const LOCK_KEY = 'aurum_lock';
 const LEGACY_KEYS = { hl_sipp: 'aura_v1_hl_sipp', hl_isa: 'aura_v1_hl_isa', aegon: 'aura_v1_aegon' };
 const COLORS = ['c1', 'c2', 'c3', 'c4', 'c5', 'c6'];
@@ -1707,6 +1745,23 @@ function applyTheme(t) {
   else document.documentElement.removeAttribute('data-aurum');
 }
 applyTheme(store.get(THEME_KEY));
+// 2.0.13: dark colour palettes. [key, name, background, accent, account colour names (c1..c6)]
+const PALETTES = [
+  ['gold', 'Gold', '#080807', '#D4AF5A', ['Gold', 'Ivory', 'Copper', 'Khaki', 'Rose', 'Stone']],
+  ['green', 'Green', '#06110E', '#D6B46C', ['Gold', 'Ivory', 'Copper', 'Sage', 'Rose', 'Slate']],
+  ['navy', 'Navy', '#070A13', '#E2CB98', ['Champagne', 'Ivory', 'Copper', 'Blue', 'Rose', 'Slate']],
+  ['copper', 'Copper', '#0C0B0B', '#D38E62', ['Copper', 'Ivory', 'Gold', 'Sage', 'Mauve', 'Stone']],
+];
+const palOf = k => PALETTES.find(p => p[0] === k) || PALETTES[0];
+function applyPalette(k) {
+  const p = palOf(k);
+  if (p[0] === 'gold') document.documentElement.removeAttribute('data-pal');
+  else document.documentElement.setAttribute('data-pal', p[0]);
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if (meta) meta.content = p[2];
+  document.querySelectorAll('input[name="acct-color"]').forEach((r, i) => r.setAttribute('aria-label', p[4][i] || r.getAttribute('aria-label')));
+}
+applyPalette(store.get(PALETTE_KEY));
 
 /* ---------- format ---------- */
 const fmtGBP = new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP', maximumFractionDigits: 0 });
@@ -2356,9 +2411,9 @@ function totalTrend(tl) {
   const line = xy.map(p => p.join(',')).join('L');
   trendPts = pts;
   return `<div class="stmt-trend${tabJustOpened ? ' reveal' : ''}" aria-hidden="true"><i class="stmt-cursor" hidden></i><span class="stmt-at" hidden></span><svg viewBox="0 0 100 100" preserveAspectRatio="none">
-    <defs><linearGradient id="stmt-fill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#D9B666" stop-opacity=".28"/><stop offset="1" stop-color="#D9B666" stop-opacity="0"/></linearGradient></defs>
+    <defs><linearGradient id="stmt-fill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:var(--gold-on-navy)" stop-opacity=".28"/><stop offset="1" style="stop-color:var(--gold-on-navy)" stop-opacity="0"/></linearGradient></defs>
     <path d="M${line}L100,100L0,100Z" fill="url(#stmt-fill)"/>
-    <path d="M${line}" fill="none" stroke="#D9B666" stroke-width="1.8" vector-effect="non-scaling-stroke" stroke-linejoin="round" stroke-linecap="round"/>
+    <path d="M${line}" fill="none" style="stroke:var(--gold-on-navy)" stroke-width="1.8" vector-effect="non-scaling-stroke" stroke-linejoin="round" stroke-linecap="round"/>
   </svg></div>`;
 }
 
@@ -4173,7 +4228,7 @@ function settingsMenu(page) {
       ['privacy', 'Privacy and PIN lock', [store.get(LOCK_KEY) ? 'PIN on' : 'PIN off', ui.hidden ? 'balances hidden' : '', demo ? 'demo mode on' : ''].filter(Boolean).join(' · ')]]],
     ['App', [
       ['notify', 'Notifications and reminders', `${notesOn} of ${NOTE_KINDS.length} on${rem}`],
-      ['look', 'Appearance', `${store.get(THEME_KEY) === 'light' ? 'Light' : 'Dark'} · ${ui.pence ? 'with pence' : 'whole pounds'}${ui.compactNums ? ' · short figures' : ''}`],
+      ['look', 'Appearance', `${store.get(THEME_KEY) === 'light' ? 'Light' : palOf(store.get(PALETTE_KEY))[1] + ' dark'} · ${ui.pence ? 'with pence' : 'whole pounds'}${ui.compactNums ? ' · short figures' : ''}`],
       ['help', 'Help and FAQ', `${FAQ.length} answers, with search`],
       ['about', 'About Aurum', `Version ${APP_VERSION} · share, download, updates`]]]
   ];
@@ -4312,6 +4367,11 @@ function renderSettings() {
         <label class="check tgl"><input type="checkbox" role="switch" id="set-compact" ${ui.compactNums ? 'checked' : ''}><span>Short figures for large amounts (£104.1k)</span></label>
         <div class="seg" role="radiogroup" aria-label="Theme" style="width:max-content">
           ${['dark', 'light'].map(t => `<input type="radio" name="theme" id="theme-${t}" value="${t}" ${theme === t ? 'checked' : ''}><label for="theme-${t}">${t[0].toUpperCase() + t.slice(1)}</label>`).join('')}
+        </div>
+        <div class="field">
+          <span class="label" id="pal-label">Colours</span>
+          <div class="pal-pick" role="radiogroup" aria-labelledby="pal-label">${PALETTES.map(([k, name, bg, acc]) => `<label><input type="radio" name="palette" value="${k}" ${palOf(store.get(PALETTE_KEY))[0] === k ? 'checked' : ''}><i style="--pb:${bg};--pa:${acc}" aria-hidden="true"></i><span>${name}</span></label>`).join('')}</div>
+          <p class="hint" style="margin:0" id="pal-hint">${theme === 'light' ? 'Colours apply to the Dark theme. Switch to Dark to use them.' : 'Changes the background and highlight colours on this device. Gains stay green and losses red.'}</p>
         </div>
       </section>`],
     ['notify', `
@@ -6487,7 +6547,11 @@ document.addEventListener('change', e => {
   if (t.id === 'csv-file' && t.files && t.files[0]) readFile(t, importCsv);
   if (t.name === 'theme') {
     if (t.value === 'light') store.set(THEME_KEY, 'light'); else store.del(THEME_KEY);
-    applyTheme(t.value);
+    applyTheme(t.value); render();
+  }
+  if (t.name === 'palette') {
+    if (t.value === 'gold') store.del(PALETTE_KEY); else store.set(PALETTE_KEY, t.value);
+    applyPalette(t.value); render();
   }
   if (t.id === 'opt-fit') { ui.fit = t.checked; saveUi(); render(); }
   if (t.id === 'opt-paid') { ui.paidLine = t.checked; saveUi(); render(); }
