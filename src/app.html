@@ -292,7 +292,22 @@ h2{font-size:15px;font-weight:600;letter-spacing:-.01em;margin:0}
 .goal-scope summary{list-style:none;cursor:pointer}.goal-scope summary::-webkit-details-marker{display:none}
 .goal-acc{display:inline-flex;align-items:center;gap:2px;flex-wrap:wrap}.goal-chev{display:inline-flex;width:14px;height:14px;color:var(--gold);transition:transform .2s}.goal-chev svg{width:14px;height:14px}
 .goal-scope[open] .goal-chev{transform:rotate(180deg)}
-.page-seg{display:flex;width:100%;padding:4px}.page-seg button{flex:1;padding:8px 10px;font-size:13px}
+/* 2.0.8: page tabs (Insights, Planner): boxed icon tiles, open page gold-edged on a soft gold tile; pinned under the header, compact once stuck. */
+.ptabs{position:sticky;top:var(--ptabs-top,0px);z-index:24;background:var(--bg);margin-inline:-16px;padding:2px 16px 8px;transition:box-shadow .2s ease}
+.ptabs-in{display:flex;gap:6px;max-width:560px}
+.ptabs button{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:5px;border:1px solid var(--line);background:var(--surface);color:var(--ink-2);padding:10px 4px 9px;border-radius:12px;font:inherit;font-size:13px;font-weight:560;cursor:pointer;transition:color .18s,background .2s,border-color .2s,transform .12s ease}
+.ptabs button:active{transform:scale(.96)}
+.ptabs button>span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.ptabs svg{width:20px;height:20px;flex:none;color:var(--ink-3);transition:width .2s ease,height .2s ease,color .18s}
+.ptabs button[aria-current="page"]{background:var(--gold-soft);border-color:color-mix(in srgb,var(--gold) 45%,transparent);color:var(--gold)}
+.ptabs button[aria-current="page"] svg{color:var(--gold)}
+.ptabs button[aria-current="page"] .faint{color:inherit;opacity:.7}
+.ptabs.stuck{box-shadow:0 1px 0 var(--line),0 10px 24px -18px rgba(0,0,0,.8)}
+.ptabs.stuck button{flex-direction:row;justify-content:center;gap:6px;padding:7px 4px}
+.ptabs.stuck svg{width:15px;height:15px}
+body.tabs-stuck .top{box-shadow:none}
+@media (min-width:960px){.ptabs{margin-inline:0;padding-inline:0}}
+@media (prefers-reduced-motion:reduce){.ptabs button,.ptabs svg{transition:none}.ptabs button:active{transform:none}}
 .plan-form{display:grid;gap:16px;grid-template-columns:minmax(0,1fr)}
 @media (min-width:760px){.plan-form{grid-template-columns:repeat(2,minmax(0,1fr));gap:16px 28px}}
 .chart-bar{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px}
@@ -3112,12 +3127,32 @@ function historicRate(accts) {
 }
 // 2.0.5: Planner has three sections (ui.planPage): the retirement plan, goals and the SIPP vs ISA calculator.
 // The plan shows its result first (one panel: pot, milestones, history + projection) with the settings folded below.
+// 2.0.8: icon tabs at the top of Insights and Planner (pinned under the header; .stuck makes them compact).
+const PAGE_ICONS = {
+  now: '<path d="M4 19V10M10 19V5M16 19v-6M21 19H3"/>',
+  year: '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',
+  tax: '<path d="M6 3h8.5L19 7.5V21H6z"/><path d="M14 3v5h5M9 13h7M9 17h5"/>',
+  plan: '<path d="M3 19l6-7 4 4 8-10"/><path d="M15 6h6v6"/>',
+  goals: '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.3"/>',
+  calc: '<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8M8 12h1.5M14.5 12H16M8 16h1.5M14.5 16H16"/>'
+};
+const pageTabs = (label, action, pages, cur, extra = {}) => `<nav class="ptabs" aria-label="${label}"><div class="ptabs-in">${Object.entries(pages).map(([k, l]) =>
+  `<button type="button" data-action="${action}" data-id="${k}"${k === cur ? ' aria-current="page"' : ''}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${PAGE_ICONS[k] || ''}</svg><span>${l}${extra[k] ? ` <span class="faint">${extra[k]}</span>` : ''}</span></button>`).join('')}</div></nav>`;
+function placePageTabs() {
+  const t = document.querySelector('.ptabs'), top = document.querySelector('.top');
+  if (!t) { document.body.classList.remove('tabs-stuck'); return; }
+  const cs = top && getComputedStyle(top);
+  const at = cs && cs.position === 'sticky' ? top.getBoundingClientRect().bottom : (document.body.classList.contains('demo') ? document.querySelector('.demo-bar').offsetHeight : 0);
+  t.style.setProperty('--ptabs-top', Math.max(0, Math.round(at)) + 'px');
+  const stuck = window.scrollY > 24 && t.getBoundingClientRect().top <= at + 1;
+  t.classList.toggle('stuck', stuck); document.body.classList.toggle('tabs-stuck', stuck);
+}
 const PLAN_PAGES = { plan: 'Retirement', goals: 'Goals', calc: 'SIPP vs ISA' };
 const planSummary = () => { const p = state.profile; return `${p.dob ? 'Retire at ' + p.retireAge : ui.plan.years + ' years to go'} · ${p.growth}% growth · ${p.inflation}% inflation`; };
 function renderPlanner() {
   const p = state.profile, accts = mine();
   const pg = PLAN_PAGES[ui.planPage] ? ui.planPage : 'plan';
-  const tabs = `<div class="seg page-seg" role="group" aria-label="Planner section">${Object.entries(PLAN_PAGES).map(([k, l]) => `<button data-action="plan-page" data-id="${k}" aria-pressed="${pg === k}">${l}${k === 'goals' && state.goals.length ? ` <span class="faint">${state.goals.length}</span>` : ''}</button>`).join('')}</div>`;
+  const tabs = pageTabs('Planner section', 'plan-page', PLAN_PAGES, pg, { goals: state.goals.length || '' });
   let body = '';
   if (pg === 'plan') {
     const hist = historicRate(accts.filter(planIncluded));
@@ -3652,7 +3687,7 @@ function renderInsights() {
 
   const own = ui.person === 'me';
   const pg = own && INSIGHT_PAGES[ui.insightPage] ? ui.insightPage : 'now';
-  const tabs = own ? `<div class="seg page-seg" role="group" aria-label="Insights section">${Object.entries(INSIGHT_PAGES).map(([k, l]) => `<button data-action="insight-page" data-id="${k}" aria-pressed="${pg === k}">${l}</button>`).join('')}</div>` : '';
+  const tabs = own ? pageTabs('Insights section', 'insight-page', INSIGHT_PAGES, pg) : '';
   let body;
   if (pg === 'year') body = `${allowancesPanel()}${yearsPanel()}${reviewPanel()}`;
   else if (pg === 'tax') body = taxPanel();
@@ -4282,6 +4317,7 @@ function render() {
   setupPicker();
   refreshBell();
   placeTabPill();
+  placePageTabs();
   countUp();
   tabJustOpened = false;
   if (glowIds.length) requestAnimationFrame(glowChanged);
@@ -5550,7 +5586,10 @@ let scrolledTop = false;
 window.addEventListener('scroll', () => {
   const on = window.scrollY > 24;
   if (on !== scrolledTop) { scrolledTop = on; document.body.classList.toggle('scrolled', on); }
+  placePageTabs();
 }, { passive: true });
+window.addEventListener('resize', placePageTabs);
+document.querySelector('.top').addEventListener('transitionend', placePageTabs);
 // Bell panel: opens from the bell and shrinks back into it.
 function placeNotes() {
   const b = document.getElementById('bell-btn').getBoundingClientRect();
@@ -5912,7 +5951,7 @@ function slideView(x, opacity, ms) {
 }
 document.addEventListener('touchstart', e => {
   const t = e.target;
-  if (e.touches.length !== 1 || document.querySelector('dialog[open]') || !state.profile.setupDone || t.closest('svg, input, select, textarea, .seg, .acct-picker, .table-wrap, .heatmap, .calc-keys, .drag-h')) { swipe = null; return; }
+  if (e.touches.length !== 1 || document.querySelector('dialog[open]') || !state.profile.setupDone || t.closest('svg, input, select, textarea, .seg, .ptabs, .acct-picker, .table-wrap, .heatmap, .calc-keys, .drag-h')) { swipe = null; return; }
   swipe = { x: e.touches[0].clientX, y: e.touches[0].clientY, t: Date.now(), dx: 0, lock: null };
 }, { passive: true });
 document.addEventListener('touchmove', e => {

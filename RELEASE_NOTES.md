@@ -1,3 +1,2 @@
-- Fixed: picking an older tax year in Year in review (such as 2023/24) made the whole section disappear, year buttons and all. It now stays, and says when your records start if that year has no balances
-- Last month's review on Insights now has arrows and a month list, so you can look back at any month since your first balance
-- For an older month, the "months in a row" streak is counted as it was at that month, and goal progress (only known for today) is left out
+- New page tabs on Insights and Planner: each section (Summary, Tax year, Tax return / Retirement, Goals, SIPP vs ISA) now has its own icon tile, with the open one in gold
+- The tabs stay pinned under the header as you scroll, shrinking to a slim row, so you can switch section without scrolling back up
