@@ -395,6 +395,8 @@ body.tabs-stuck .top{box-shadow:none}
 .statement .changes{display:flex;flex-wrap:wrap;gap:8px 20px;font-size:13px;color:var(--on-navy-2)}
 .statement .changes b{font-weight:600;margin-right:4px}
 .statement .changes b.plain{color:var(--on-navy)}
+.stmt-net{display:flex;flex-wrap:wrap;gap:4px 18px;margin-top:8px;font-size:12px;color:var(--on-navy-2)}
+.stmt-net b{font-weight:600;color:var(--on-navy);margin-left:4px}
 .statement .up{color:#6FE0A9} .statement .down{color:#FF9A88}
 .alloc-bar{display:flex;flex:none;height:6px;border-radius:99px;overflow:hidden;gap:2px;margin-top:auto;background:var(--on-navy-line)}
 .alloc-bar i{display:block;height:100%;min-width:3px}
@@ -1008,7 +1010,7 @@ details.fold:not([open])>summary h2::after{content:' ▸'}
       <div class="seg scroll date-chips" role="group" aria-label="Quick dates" id="log-date-chips"></div>
     </div>
     <div class="field" id="log-value-field">
-      <label for="log-value">Current balance</label>
+      <label for="log-value" id="log-value-label">Current balance</label>
       <div class="money"><span>£</span><input id="log-value" class="input" type="number" inputmode="decimal" step="0.01" min="0" placeholder="0.00"></div>
       <p class="hint" id="log-prev"></p>
     </div>
@@ -1074,9 +1076,16 @@ details.fold:not([open])>summary h2::after{content:' ▸'}
       <select id="acct-owner" class="input"></select>
       <p class="hint">Add family members, such as a child with a Junior ISA, in Settings. Their accounts show separately from your net worth.</p>
     </div>
+    <div class="field" id="acct-joint-field" hidden>
+      <label class="check"><input type="checkbox" id="acct-joint"><span>Joint account <span class="faint">Shared with someone else, such as a partner</span></span></label>
+      <div class="two" id="acct-share-wrap" hidden>
+        <div class="field"><label for="acct-share">Your share <span class="faint">%</span></label><input id="acct-share" class="input" type="number" inputmode="numeric" min="1" max="99" step="1" placeholder="50"></div>
+        <p class="hint" style="align-self:end">Only your share counts in your net worth. Log the whole balance, as your bank shows it.</p>
+      </div>
+    </div>
     <div class="two" id="acct-opening">
       <div class="field">
-        <label for="acct-open-value">Current balance</label>
+        <label for="acct-open-value" id="acct-open-label">Current balance</label>
         <div class="money"><span>£</span><input id="acct-open-value" class="input" type="number" inputmode="decimal" step="0.01" min="0" placeholder="Optional"></div>
       </div>
       <div class="field">
@@ -1085,12 +1094,19 @@ details.fold:not([open])>summary h2::after{content:' ▸'}
       </div>
     </div>
     <label class="check" id="acct-split-wrap" hidden><input type="checkbox" id="acct-split"><span>Some of this was there before 6 April, or went in over several months <span class="faint">Next you can add the 5 April balance and what you paid in each month, so this tax year and your savings rate are right</span></span></label>
-    <div class="field">
+    <p class="hint" id="acct-debt-tip" hidden>Enter what you owe as a positive amount: it is taken off your net worth. Log each repayment as money in, so only the interest shows as a cost. Mortgage, loan or card balances are on your statement or in your lender's app.</p>
+    <div class="field" id="acct-fee-field">
       <label for="acct-fee">Yearly fees <span class="faint">Optional, %</span></label>
       <input id="acct-fee" class="input" type="number" inputmode="decimal" step="0.01" min="0" max="5" placeholder="e.g. 0.45">
     </div>
-    <fieldset class="field">
-      <legend class="label">Regular payment <span class="faint">Optional</span></legend>
+    <div class="field" id="acct-secures-field" hidden>
+      <label for="acct-secures">Secured on <span class="faint">Optional</span></label>
+      <select id="acct-secures" class="input"></select>
+      <p class="hint">Link a mortgage to its property to see your equity in it.</p>
+    </div>
+    <p class="hint" id="acct-prop-tip" hidden>Use a recent valuation or an online estimate (for example Zoopla or Rightmove) and update it once or twice a year; changes show as growth. Add the mortgage as a debt and link it to this property to see your equity. Put what you paid in <b>Purchase price</b> so the rise since then counts as growth.</p>
+    <fieldset class="field" id="acct-reg-field">
+      <legend class="label" id="acct-reg-legend">Regular payment <span class="faint">Optional</span></legend>
       <div class="two">
         <div class="money"><span>£</span><input id="acct-reg-amount" class="input" type="number" inputmode="decimal" step="0.01" min="0" placeholder="Per month" aria-label="Monthly amount"></div>
         <select id="acct-reg-day" class="input" aria-label="Day of the month"></select>
@@ -1098,24 +1114,24 @@ details.fold:not([open])>summary h2::after{content:' ▸'}
       <label class="check" id="acct-reg-relief-wrap" hidden><input type="checkbox" id="acct-reg-relief"><span id="acct-reg-relief-label"></span></label>
       <p class="hint">Logged for you automatically each month from today, so you only need to update the balance.</p>
     </fieldset>
-    <div class="two">
+    <div class="two" id="acct-prior-field">
       <div class="field">
-        <label for="acct-prior">Total paid in so far <span class="faint">Optional</span></label>
+        <label for="acct-prior" id="acct-prior-label">Total paid in so far <span class="faint">Optional</span></label>
         <div class="money"><span>£</span><input id="acct-prior" class="input" type="number" inputmode="decimal" step="0.01" min="0" placeholder="e.g. 5000"></div>
       </div>
       <div class="field">
-        <label for="acct-since">Invested since <span class="faint">Year</span></label>
+        <label for="acct-since" id="acct-since-label">Invested since <span class="faint">Year</span></label>
         <input id="acct-since" class="input" type="number" inputmode="numeric" min="1950" placeholder="e.g. 2019">
       </div>
     </div>
-    <p class="hint" style="margin-top:-8px">Your own money in before you started tracking here (including tax relief). The rest of the first balance counts as growth. Leave blank if the first balance was all money in.</p>
+    <p class="hint" style="margin-top:-8px" id="acct-prior-hint">Your own money in before you started tracking here (including tax relief). The rest of the first balance counts as growth. Leave blank if the first balance was all money in.</p>
     <div class="field" id="acct-ytd-field">
       <label for="acct-ytd" id="acct-ytd-label">Paid in this tax year so far</label>
       <div class="money"><span>£</span><input id="acct-ytd" class="input" type="number" inputmode="decimal" step="0.01" min="0" placeholder="Since 6 April"></div>
       <p class="hint" id="acct-ytd-hint"></p>
     </div>
     <div class="field" id="acct-rate-field">
-      <label for="acct-rate">Advertised rate <span class="faint">Optional, % a year</span></label>
+      <label for="acct-rate" id="acct-rate-label">Advertised rate <span class="faint">Optional, % a year</span></label>
       <input id="acct-rate" class="input" type="number" inputmode="decimal" step="0.01" min="0" max="20" placeholder="e.g. 4.4 (Premium Bonds prize fund rate)">
     </div>
     <div class="field">
@@ -1285,6 +1301,11 @@ details.fold:not([open])>summary h2::after{content:' ▸'}
       <label for="src-kind">Type</label>
       <select id="src-kind" class="input"></select>
     </div>
+    <div class="field" id="src-owner-field">
+      <label for="src-owner">Whose income</label>
+      <select id="src-owner" class="input"></select>
+      <p class="hint">For a partner's pay, add them as a person in Settings first. Only your own income counts in your savings rate.</p>
+    </div>
     <fieldset class="field">
       <legend class="label">Usual take-home <span class="faint">Optional</span></legend>
       <div class="two">
@@ -1407,10 +1428,19 @@ const TYPES = {
   'Fixed': { label: 'Fixed-term savings', group: 'cash' },
   'Premium Bonds': { label: 'Premium Bonds', group: 'cash' },
   'Cash': { label: 'Current account or cash', group: 'cash' },
-  'Other': { label: 'Other', group: 'other' }
+  'Other': { label: 'Other', group: 'other' },
+  // 2.0.22 debts: balances are stored as negative numbers (what you owe), so every total is assets minus debts.
+  // Repayments are money in (they raise your net worth); interest charged shows as negative growth.
+  'Mortgage': { label: 'Mortgage', group: 'debt', debt: true },
+  'Loan': { label: 'Loan', group: 'debt', debt: true },
+  'Credit card': { label: 'Credit card', group: 'debt', debt: true },
+  'Student loan': { label: 'Student loan', group: 'debt', debt: true },
+  // 2.0.23 property: an estimated value you update now and then (changes show as growth); a mortgage can be linked to it.
+  'Home': { label: 'Home', group: 'property' },
+  'Property': { label: 'Other property', group: 'property' }
 };
-const GROUPS = { pension: 'Pensions', isa: 'ISAs', invest: 'Investments', cash: 'Cash and savings', other: 'Other' };
-const GROUP_COLOR = { pension: 'c1', isa: 'c2', invest: 'c3', cash: 'c4', other: 'c6' };
+const GROUPS = { pension: 'Pensions', isa: 'ISAs', invest: 'Investments', cash: 'Cash and savings', property: 'Property', other: 'Other', debt: 'Debts' };
+const GROUP_COLOR = { pension: 'c1', isa: 'c2', invest: 'c3', cash: 'c4', property: 'c6', other: 'c6', debt: 'c5' };
 // 1.9.5 income sources. One-off kinds are left out of the typical savings rate.
 const SOURCE_KINDS = { salary: 'Salary', bonus: 'Bonus', 'self-employed': 'Self-employed', rental: 'Rental', pension: 'Pension income', benefits: 'Benefits', side: 'Side income', gift: 'Gift', windfall: 'Windfall', other: 'Other' };
 const ONE_OFF = ['bonus', 'gift', 'windfall'];
@@ -1421,6 +1451,21 @@ const PSA = { basic: 1000, higher: 500, additional: 0 }; // Personal Savings All
 const EASY_CASH = ['Cash', 'Savings', 'Premium Bonds', 'Cash ISA'];
 const typeOf = a => TYPES[a.type] || TYPES.Other;
 const groupOf = a => typeOf(a).group;
+const isDebt = a => !!(a && typeOf(a).debt);
+// 2.0.24 joint accounts: `share` is your percentage (1 to 99); totals count only your share, account pages show the whole.
+const shareOf = a => a && a.share ? a.share / 100 : 1;
+const curOf = a => accountStats(a.id).cur * shareOf(a);
+const JOINT_GROUPS = ['cash', 'invest', 'other', 'property', 'debt'];
+const isProperty = a => !!a && typeOf(a).group === 'property';
+// Equity in a property: its value less any mortgage linked to it (a mortgage's `secures` is the property's id).
+const mortgagesOf = p => state.accounts.filter(a => isDebt(a) && a.secures === p.id);
+const equityOf = p => curOf(p) + mortgagesOf(p).reduce((t, m) => t + curOf(m), 0);
+const isDebtId = id => isDebt(state.accounts.find(x => x.id === id));
+// What you type for a debt is the amount owed; it is saved as a negative balance. owedOf turns it back for forms.
+const toBal = (id, v) => isDebtId(id) ? -Math.abs(v) : v;
+const owedOf = (id, v) => isDebtId(id) ? Math.abs(v) : v;
+// A balance never crosses zero by itself: savings stop at 0, and a debt paid off stops at 0.
+const clampBal = (id, v) => isDebtId(id) ? Math.min(0, v) : Math.max(0, v);
 
 const store = {
   get(k) { try { return localStorage.getItem(k); } catch { return null; } },
@@ -1467,6 +1512,7 @@ function normProfile(p, done) {
     inflation: clamp(num(p.inflation, 2.5), 0, 10),
     drawRate: clamp(num(p.drawRate, 4), 1, 10),
     monthlySpend: Math.max(0, num(p.monthlySpend, 0)),
+    cashBench: clamp(num(p.cashBench, 4), 0, 15),
     people: Array.isArray(p.people) ? p.people.filter(x => x && x.id && x.name).map(x => ({ id: String(x.id), name: String(x.name).slice(0, 30) })) : [],
     lastBackup: isIso(p.lastBackup) ? p.lastBackup : '',
     sources: Array.isArray(p.sources) ? p.sources.filter(x => x && x.id && x.name).map(x => {
@@ -1474,6 +1520,7 @@ function normProfile(p, done) {
         regular: x.regular && isFinite(+x.regular.net) && +x.regular.net > 0 ? { net: +x.regular.net, day: x.regular.day ? clamp(Math.round(num(x.regular.day, 0)), 1, 31) : 0 } : null };
       if (x.demo) src.demo = true;
       if (x.db) src.db = true;
+      if (x.owner && x.owner !== 'me') src.owner = String(x.owner);
       return src;
     }) : [],
     p60: Object.fromEntries(Object.entries(p.p60 && typeof p.p60 === 'object' ? p.p60 : {}).filter(([y, v]) => /^\d{4}$/.test(y) && v && typeof v === 'object').map(([y, v]) => [y, {
@@ -1494,7 +1541,7 @@ function seedExample(profile) {
   const today = new Date(), M = 24, day = Math.min(today.getDate(), 28);
   let r = 11;
   const rnd = () => (r = (r * 16807) % 2147483647) / 2147483647;
-  const kid = { id: 'demo_kid', name: 'Maya' };
+  const kid = { id: 'demo_kid', name: 'Maya' }, partner = { id: 'demo_sam', name: 'Sam' };
   // [id, name, provider, type, colour, opening value, monthly own payment, monthly growth, wobble, extras]
   const spec = [
     ['demo_sipp', 'SIPP', 'Hargreaves Lansdown', 'SIPP', 'c1', 14200, 200, 0.006, 0.022, { relief: true, fee: 0.45, pinned: true }],
@@ -1504,13 +1551,19 @@ function seedExample(profile) {
     ['demo_cisa', 'Cash ISA', 'Trading 212', 'Cash ISA', 'c4', 5000, 100, 0.0036, 0, { rate: 4.4, interest: true }],
     ['demo_gia', 'Share dealing', 'Freetrade', 'GIA', 'c6', 1500, 50, 0.006, 0.03, { dividends: true }],
     ['demo_bonds', 'Premium Bonds', 'NS&I', 'Premium Bonds', 'c4', 15000, 0, 0, 0, { prizes: true }],
-    ['demo_save', 'Easy Access Saver', 'Chase', 'Savings', 'c5', 9000, 150, 0.0034, 0, { rate: 4.1, interest: true }],
-    ['demo_current', 'Current account', 'Monzo', 'Cash', 'c2', 1800, 0, 0, 0.12, {}],
-    ['demo_jisa', `${kid.name}'s Junior ISA`, 'Fidelity', 'JISA', 'c6', 3200, 100, 0.006, 0.022, { owner: kid.id }]
+    ['demo_save', 'Easy Access Saver', 'High Street Bank', 'Savings', 'c5', 9000, 150, 0.0013, 0, { rate: 1.6, interest: true }],
+    ['demo_current', 'Joint current account', 'Monzo', 'Cash', 'c2', 1800, 0, 0, 0.12, { share: 50 }],
+    ['demo_jisa', `${kid.name}'s Junior ISA`, 'Fidelity', 'JISA', 'c6', 3200, 100, 0.006, 0.022, { owner: kid.id }],
+    ['demo_sampen', `${partner.name}'s Workplace Pension`, 'Nest', 'Pension', 'c3', 18000, 150, 0.0055, 0.018, { owner: partner.id, employer: 120 }]
   ];
-  const accounts = spec.map(([id, name, provider, type, color, , , , , x]) => ({ id, name, provider, type, color, owner: x.owner || 'me', fee: x.fee || 0, rate: x.rate || 0, pinned: !!x.pinned, regular: null, demo: true }));
+  const accounts = spec.map(([id, name, provider, type, color, , , , , x]) => ({ id, name, provider, type, color, owner: x.owner || 'me', fee: x.fee || 0, rate: x.rate || 0, pinned: !!x.pinned, regular: null, demo: true, ...(x.share ? { share: x.share } : {}) }));
   // Extra accounts: a 1-year fix opened from savings 10 months ago, and an old Cash ISA moved into the Stocks & Shares ISA 14 months ago.
   accounts.push({ id: 'demo_fixed', name: '1-year fixed saver', provider: 'Atom', type: 'Fixed', color: 'c3', owner: 'me', fee: 0, rate: 4.6, regular: null, demo: true });
+  // 2.0.22: a car loan taken out 18 months ago at 7.9%, repaid £350 a month (owed is stored below zero).
+  accounts.push({ id: 'demo_car', name: 'Car loan', provider: 'Santander', type: 'Loan', color: 'c5', owner: 'me', fee: 0, rate: 7.9, regular: null, demo: true });
+  // 2.0.23: a home bought six years ago for £285,000, with its mortgage linked (4.5%, £1,150 a month).
+  accounts.push({ id: 'demo_home', name: 'Home', provider: 'Zoopla estimate', type: 'Home', color: 'c6', owner: 'me', fee: 0, rate: 0, priorPaid: 285000, since: String(today.getFullYear() - 6), regular: null, demo: true });
+  accounts.push({ id: 'demo_mort', name: 'Mortgage', provider: 'Nationwide', type: 'Mortgage', color: 'c5', owner: 'me', fee: 0, rate: 4.5, secures: 'demo_home', regular: null, demo: true });
   accounts.push({ id: 'demo_oldisa', name: 'Old Cash ISA', provider: 'Nationwide', type: 'Cash ISA', color: 'c6', owner: 'me', fee: 0, rate: 1.5, archived: true, regular: null, demo: true });
   const logs = [], flows = [], income = [];
   const dateAt = (i, dd) => isoLocal(i === 0 && dd == null ? today : new Date(today.getFullYear(), today.getMonth() - i, dd || day));
@@ -1549,6 +1602,17 @@ function seedExample(profile) {
       if (i === 10) flow('demo_fixed', d, 5000, 5000, 'Moved from Easy Access Saver', { transfer: true });
       logs.push({ id: uid(), accountId: 'demo_fixed', date: d, value: Math.round(val.demo_fixed), note: i === 10 ? 'Opening balance' : '' });
     }
+    // The home is revalued every six months; the mortgage is repaid each month.
+    val.demo_home = i === M ? 318000 : i % 6 === 0 ? val.demo_home * (1 + 0.012 + (rnd() - 0.4) * 0.02) : val.demo_home;
+    if (i % 6 === 0) logs.push({ id: uid(), accountId: 'demo_home', date: d, value: Math.round(val.demo_home / 1000) * 1000, note: i === M ? 'Online estimate' : '' });
+    val.demo_mort = i === M ? -206500 : Math.min(0, val.demo_mort * (1 + 0.045 / 12) + 1150);
+    if (i < M) flow('demo_mort', first, 1150, 1150, 'Mortgage payment');
+    logs.push({ id: uid(), accountId: 'demo_mort', date: d, value: Math.round(val.demo_mort), note: i === M ? 'Opening balance' : '' });
+    if (i <= 18) {
+      val.demo_car = i === 18 ? -12000 : Math.min(0, val.demo_car * (1 + 0.079 / 12) + 350);
+      if (i < 18) flow('demo_car', first, 350, 350, 'Monthly repayment');
+      logs.push({ id: uid(), accountId: 'demo_car', date: d, value: Math.round(val.demo_car), note: i === 18 ? 'Opening balance' : '' });
+    }
     if (i >= 14) {
       val.demo_oldisa = i === M ? 2950 : val.demo_oldisa * (1 + 0.015 / 12);
       if (i === 14) flow('demo_oldisa', d, -3000, -3000, 'Transferred to Stocks & Shares ISA', { isaTransfer: true });
@@ -1567,12 +1631,15 @@ function seedExample(profile) {
   const sources = [
     { id: 'demo_job', name: 'Employer Ltd', kind: 'salary', regular: { net: 2780, day: 25 }, demo: true },
     { id: 'demo_bonus', name: 'Annual bonus', kind: 'bonus', regular: null, demo: true },
-    { id: 'demo_side', name: 'Freelance design', kind: 'side', regular: null, demo: true }
+    { id: 'demo_side', name: 'Freelance design', kind: 'side', regular: null, demo: true },
+    // 2.0.25: a partner's salary, shown in Household income but not in your savings rate.
+    { id: 'demo_samjob', name: 'Hospital Trust', kind: 'salary', regular: { net: 2350, day: 28 }, owner: partner.id, demo: true }
   ];
   const pay = [];
   for (let i = M - 1; i >= 1; i--) {
     const d = isoLocal(new Date(today.getFullYear(), today.getMonth() - i, 25)), raise = i <= 12;
     pay.push({ id: uid(), date: d, source: 'demo_job', net: raise ? 2780 : 2640, gross: raise ? 3850 : 3650, tax: raise ? 561 : 521, ni: raise ? 220 : 204, pension: 178, studentLoan: raise ? 111 : 95, other: 0, note: i === 12 ? 'Pay rise' : '', oneOff: false });
+    pay.push({ id: uid(), date: isoLocal(new Date(today.getFullYear(), today.getMonth() - i, 28)), source: 'demo_samjob', net: 2350, gross: 0, tax: 0, ni: 0, pension: 0, studentLoan: 0, other: 0, note: '', oneOff: false });
     if (i === 6 || i === 18) pay.push({ id: uid(), date: d, source: 'demo_bonus', net: i === 6 ? 1900 : 1700, gross: 0, tax: 0, ni: 0, pension: 0, studentLoan: 0, other: 0, note: '', oneOff: true });
     if (i % 5 === 2) pay.push({ id: uid(), date: isoLocal(new Date(today.getFullYear(), today.getMonth() - i, 12)), source: 'demo_side', net: 350 + (i % 3) * 150, gross: 0, tax: 0, ni: 0, pension: 0, studentLoan: 0, other: 0, note: 'Logo project', oneOff: false });
   }
@@ -1580,7 +1647,7 @@ function seedExample(profile) {
   const tyEnd = taxYearStart(isoLocal(today)), ty = String(+tyEnd.slice(0, 4) - 1), tyStart = `${ty}-04-06`;
   const inTy = pay.filter(x => x.source === 'demo_job' && x.date >= tyStart && x.date < tyEnd);
   const p60 = inTy.length ? { [ty]: { pay: inTy.reduce((t, x) => t + x.gross, 0), tax: inTy.reduce((t, x) => t + x.tax, 0), code: '1257L' } } : {};
-  const prof = { ...profile, dob: profile.dob || '1990-05-14', retireAge: profile.retireAge || 60, monthlySpend: 2100, people: [kid], sources, p60, setupDone: true };
+  const prof = { ...profile, dob: profile.dob || '1990-05-14', retireAge: profile.retireAge || 60, monthlySpend: 2100, people: [kid, partner], sources, p60, setupDone: true };
   return { version: 2, example: true, profile: normProfile(prof, true), accounts, logs, flows, income, goals, pay };
 }
 
@@ -1603,12 +1670,15 @@ function normalize(o) {
         since: /^(19|20)\d\d$/.test(String(a.since || '')) ? String(a.since) : '',
         yearly: normYearly(a.yearly)
       };
+      if (a.secures) acct.secures = String(a.secures);
+      if (+a.share >= 1 && +a.share <= 99) acct.share = Math.round(+a.share);
       const gains = normGains(a.gains);
       if (Object.keys(gains).length) acct.gains = gains;
       if (a.demo) acct.demo = true;
       return acct;
     });
     const ids = new Set(accounts.map(a => a.id));
+    accounts.forEach(a => { if (a.secures && !accounts.some(p => p.id === a.secures && TYPES[p.type] && TYPES[p.type].group === 'property')) delete a.secures; });
     const logs = o.logs.filter(l => validLog(l) && ids.has(String(l.accountId))).map(l => {
       const x = { id: String(l.id || uid()), accountId: String(l.accountId), date: l.date, value: +l.value, note: String(l.note || '') };
       if (l.estimated) { x.estimated = true; x.flowIds = Array.isArray(l.flowIds) ? l.flowIds.map(String) : []; if (isFinite(+l.baseValue) && l.baseValue !== null) x.baseValue = +l.baseValue; }
@@ -1632,6 +1702,7 @@ function normalize(o) {
     const profile = normProfile(o.profile, !o.example);
     const known = new Set(['me', ...profile.people.map(p => p.id)]);
     accounts.forEach(a => { if (!known.has(a.owner)) a.owner = 'me'; });
+    profile.sources.forEach(x => { if (x.owner && !known.has(x.owner)) delete x.owner; });
     const srcIds = new Set(profile.sources.map(x => x.id)), money0 = v => Math.max(0, num(v, 0));
     const pay = (Array.isArray(o.pay) ? o.pay : []).filter(x => x && isIso(x.date) && isFinite(+x.net) && +x.net >= 0 && srcIds.has(String(x.source))).map(x => {
       const src = profile.sources.find(q => q.id === String(x.source));
@@ -1745,16 +1816,16 @@ function addEstimate(f) {
   if (last.date === f.date) {
     // Same day as a balance: the payment came after it, so add it on. The typed value is kept to restore on delete.
     if (!last.estimated) { last.baseValue = last.value; last.estimated = true; last.flowIds = []; }
-    last.value = Math.max(0, last.value + f.amount); last.flowIds.push(f.id); return;
+    last.value = clampBal(f.accountId, last.value + f.amount); last.flowIds.push(f.id); return;
   }
-  state.logs.push({ id: uid(), accountId: f.accountId, date: f.date, value: Math.max(0, last.value + f.amount), note: '', estimated: true, flowIds: [f.id] });
+  state.logs.push({ id: uid(), accountId: f.accountId, date: f.date, value: clampBal(f.accountId, last.value + f.amount), note: '', estimated: true, flowIds: [f.id] });
 }
 function dropEstimate(f) {
   for (const l of state.logs.filter(x => x.estimated && x.flowIds && x.flowIds.includes(f.id))) {
     l.flowIds = l.flowIds.filter(id => id !== f.id);
     if (!l.flowIds.length && l.baseValue != null) { l.value = l.baseValue; delete l.baseValue; delete l.estimated; delete l.flowIds; }
     else if (!l.flowIds.length) state.logs = state.logs.filter(x => x !== l);
-    else l.value = Math.max(0, l.value - f.amount);
+    else l.value = clampBal(l.accountId, l.value - f.amount);
   }
 }
 function runRegular() {
@@ -1847,7 +1918,7 @@ const deltaChip = (n, text) => `<span class="delta ${cls(n)}">${text}</span>`;
 /* ---------- people ---------- */
 const people = () => [{ id: 'me', name: state.profile.name || 'Me' }, ...state.profile.people];
 const personName = id => (people().find(p => p.id === id) || { name: 'Me' }).name;
-const ownerChip = a => a.owner && a.owner !== 'me' ? `<span class="owner">${esc(personName(a.owner))}</span>` : '';
+const ownerChip = a => (a.owner && a.owner !== 'me' ? `<span class="owner">${esc(personName(a.owner))}</span>` : '') + (a.share ? `<span class="owner" title="Only your share counts in your totals">joint ${a.share}%</span>` : '');
 function visibleAccounts() {
   if (ui.person === 'all') return state.accounts;
   if (!people().some(p => p.id === ui.person)) ui.person = 'me';
@@ -1883,16 +1954,20 @@ function periodStats(a, startMs, endMs = TODAY_MS) {
   let v0 = null;
   for (const l of s) { if (toMs(l.date) <= startMs) v0 = l.value; else break; }
   let opening = 0, from;
-  if (v0 == null) { opening = s[0].value; v0 = 0; from = s[0].date; } else from = msIso(startMs);
+  const debt = isDebt(a);
+  // A debt's first balance is where it started, not money you paid in: repayments are paid in, interest is growth.
+  if (v0 == null && debt) { v0 = s[0].value; from = s[0].date; }
+  else if (v0 == null) { opening = s[0].value; v0 = 0; from = s[0].date; } else from = msIso(startMs);
   const fl = flowsOf(a.id).filter(f => f.date > from && f.date <= end);
   const flowSum = fl.reduce((t, f) => t + f.amount, 0);
-  const allTime = !isFinite(startMs) && a.priorPaid != null;
+  const allTime = !isFinite(startMs) && a.priorPaid != null && !debt;
   // All-time figures also count yearly reference amounts for tax years after the first balance, less what was logged.
   const extra = !isFinite(startMs) ? yearlyExtra(a, s[0].date, end) : 0;
   const paid = (allTime ? a.priorPaid : opening) + flowSum + extra;
   const change = cur - v0;
   const growth = change - paid;
-  const base = v0 + (allTime ? a.priorPaid : opening) + (flowSum + extra) / 2;
+  // Debts have no return: their interest counts against growth, but they add nothing to the money invested.
+  const base = debt ? 0 : v0 + (allTime ? a.priorPaid : opening) + (flowSum + extra) / 2;
   return { v0, cur, change, paid, opening, growth, base, ret: base > 0 ? growth / base * 100 : null };
 }
 function yearlyExtra(a, firstIso, toIso) {
@@ -1904,7 +1979,12 @@ function yearlyExtra(a, firstIso, toIso) {
   return t;
 }
 function periodTotals(accts, startMs, endMs) {
-  const rows = accts.map(a => ({ a, p: periodStats(a, startMs, endMs) })).filter(r => r.p);
+  // A joint account counts only your share of every figure (its return is the same either way).
+  const rows = accts.map(a => {
+    const p = periodStats(a, startMs, endMs), k = shareOf(a);
+    if (!p || k === 1) return { a, p };
+    return { a, p: { ...p, v0: p.v0 * k, cur: p.cur * k, change: p.change * k, paid: p.paid * k, opening: p.opening * k, growth: p.growth * k, base: p.base * k } };
+  }).filter(r => r.p);
   const t = rows.reduce((o, r) => { o.v0 += r.p.v0; o.cur += r.p.cur; o.paid += r.p.paid; o.opening += r.p.opening; o.growth += r.p.growth; o.base += r.p.base; return o; }, { v0: 0, cur: 0, paid: 0, opening: 0, growth: 0, base: 0 });
   t.change = t.cur - t.v0;
   t.ret = t.base > 0 ? t.growth / t.base * 100 : null;
@@ -1937,7 +2017,7 @@ function timeline(accts) {
     for (const a of accts) {
       const s = sorted[a.id];
       while (ptr[a.id] + 1 < s.length && s[ptr[a.id] + 1].date <= date) ptr[a.id]++;
-      vals[a.id] = ptr[a.id] >= 0 ? s[ptr[a.id]].value : 0;
+      vals[a.id] = ptr[a.id] >= 0 ? s[ptr[a.id]].value * shareOf(a) : 0;
       total += vals[a.id];
     }
     return { date, t: toMs(date), vals, total };
@@ -2151,9 +2231,26 @@ function taxText(r) {
 function emergencyFund() {
   const spend = state.profile.monthlySpend;
   if (!spend) return null;
-  const cash = mine().filter(a => EASY_CASH.includes(a.type)).reduce((t, a) => t + accountStats(a.id).cur, 0);
+  const cash = mine().filter(a => EASY_CASH.includes(a.type)).reduce((t, a) => t + curOf(a), 0);
   return { cash, spend, months: cash / spend };
 }
+// 2.0.26 cash drag: money in easy-access cash earning well below a good rate (profile.cashBench, default 4%).
+// A current account keeps one month's spending (or £1,500) as a float; the rest counts as idle.
+// The rate is the one entered on the account, else what logged interest worked out at, else 0% for a current account.
+function cashDrag(a) {
+  if (a.archived || !['Cash', 'Savings', 'Cash ISA'].includes(a.type)) return null;
+  const bench = state.profile.cashBench, bal = curOf(a);
+  let rate = a.rate || null;
+  if (rate == null) {
+    const since = msIso(TODAY_MS - 365 * 864e5), got = state.income.filter(x => x.accountId === a.id && x.kind === 'interest' && x.date > since).reduce((t, x) => t + x.amount, 0);
+    rate = got > 0 && bal > 0 ? got / bal * 100 : a.type === 'Cash' ? 0 : null;
+  }
+  if (rate == null || rate >= bench - 1) return null;
+  const idle = a.type === 'Cash' ? bal - (state.profile.monthlySpend || 1500) : bal;
+  if (idle < 1000) return null;
+  return { a, idle, rate, bench, extra: idle * (bench - rate) / 100 };
+}
+const cashDrags = () => active(mine()).map(cashDrag).filter(Boolean).sort((x, y) => y.extra - x.extra);
 const lisaUsed = () => allowanceUsed(mine().filter(a => a.type === 'LISA'), 'isa');
 const staleAccounts = accts => active(accts).filter(a => { const s = logsOf(a.id).filter(l => !l.estimated); return !s.length || daysSince(s[s.length - 1].date) > 30; });
 function ageOn(dob, iso) {
@@ -2257,9 +2354,10 @@ function chart(host, cfg) {
   const all = [...layers.flatMap(l => l.hi), ...(cfg.band ? [...cfg.band.lo, ...cfg.band.hi] : [])].filter(v => v != null);
   // "Fit to data" starts the axis near the lowest value so changes are visible; stacked charts always start at zero.
   const fit = cfg.fit && !cfg.stacked;
-  const lo = fit ? Math.min(...all) : 0, hi = Math.max(1, ...all);
+  // Debts (2.0.22) are below zero: the axis then reaches down to them, and a chart of only debts tops out at 0.
+  const top = Math.max(...all), lo = fit ? Math.min(...all) : Math.min(0, ...all), hi = top > 0 || !all.length ? Math.max(1, top) : fit ? top : 0;
   // Round steps (£250k, £500k…) rather than quarters of the top value, so axes read £1m, not £1.1m.
-  const sc = fit && hi > lo ? niceScale(lo - (hi - lo) * 0.08, hi + (hi - lo) * 0.04, 4) : niceScale(0, hi * 1.02, 4);
+  const sc = fit && hi > lo ? niceScale(lo - (hi - lo) * 0.08, hi + (hi - lo) * 0.04, 4) : niceScale(lo * 1.02, hi * 1.02, 4);
   if (fit && sc.min < 0 && lo >= 0) { sc.min = 0; sc.ticks = sc.ticks.filter(v => v >= 0); }
   const X = x => m.l + (x - x0) / span * (W - m.l - m.r);
   const Y = v => m.t + (1 - (v - sc.min) / ((sc.max - sc.min) || 1)) * (H - m.t - m.b);
@@ -2530,7 +2628,7 @@ function rangeBar(action) {
 }
 function groupSummary(accts) {
   const out = {};
-  for (const a of accts) { const g = groupOf(a); out[g] = (out[g] || 0) + accountStats(a.id).cur; }
+  for (const a of accts) { const g = groupOf(a); out[g] = (out[g] || 0) + curOf(a); }
   return Object.keys(GROUPS).filter(g => out[g] != null).map(g => ({ g, label: GROUPS[g], value: out[g], color: `var(--${GROUP_COLOR[g]})`, hi: `var(--${GROUP_COLOR[g]}-hi)` }));
 }
 
@@ -2538,7 +2636,8 @@ function groupSummary(accts) {
 function goalAccounts(g) {
   // 2.0.3: a goal can count any mix of accounts (g.accounts); older goals keep their scope.
   if (Array.isArray(g.accounts)) return state.accounts.filter(a => g.accounts.includes(a.id));
-  const m = mine();
+  // Goals count savings, so debts and property are left out of "All my accounts".
+  const m = mine().filter(a => !isDebt(a) && !isProperty(a));
   if (g.scope === 'all') return m;
   if (GROUPS[g.scope]) return m.filter(a => groupOf(a) === g.scope);
   return state.accounts.filter(a => a.id === g.scope);
@@ -2571,7 +2670,7 @@ function monthsToReach(pv, monthly, target, annual) {
 // mon: a monthly amount to try instead of what the goal's accounts usually get (Planner's goal inputs).
 function goalStatus(g, mon) {
   const accts = goalAccounts(g);
-  const cur = accts.reduce((t, a) => t + accountStats(a.id).cur, 0);
+  const cur = accts.reduce((t, a) => t + curOf(a), 0);
   const usual = accts.reduce((t, a) => t + monthlyIn(a), 0), monthly = mon != null ? mon : usual;
   const progress = clamp(cur / g.target, 0, 1);
   if (cur >= g.target) return { cur, progress, monthly, usual, done: true, text: 'Reached' };
@@ -2662,7 +2761,7 @@ function refreshGoal(id) {
 }
 
 // 2.0.3: "Includes N accounts" on each goal in Planner, with tick boxes to change which accounts count.
-const goalPickList = () => state.accounts.filter(a => !a.archived);
+const goalPickList = () => state.accounts.filter(a => !a.archived && !isDebt(a));
 const acctLabel = a => esc(a.name) + (a.owner && a.owner !== 'me' ? ` <span class="faint">${esc(personName(a.owner))}</span>` : '');
 // 2.1.0: under a goal's inputs, which accounts count (tap to change).
 function goalPicker(g) {
@@ -2670,7 +2769,7 @@ function goalPicker(g) {
   const list = [...goalPickList(), ...inc.filter(a => a.archived)];
   const lbl = n === 1 ? inc[0].name : !n ? 'No accounts' : Array.isArray(g.accounts) ? `${n} accounts` : `${scopeName(g.scope)} · ${n} accounts`;
   return `<details class="scope goal-scope plan-acct-fold" data-fold="goal-${esc(g.id)}" ${ui.folds && ui.folds['goal-' + g.id] ? 'open' : ''}>
-    <summary aria-label="Accounts this goal counts"><span class="pa-sum"><b>Accounts that count</b><span>${esc(lbl)} · ${gbp(inc.reduce((t, a) => t + accountStats(a.id).cur, 0))} now</span></span><span class="scope-tg" aria-hidden="true"></span></summary>
+    <summary aria-label="Accounts this goal counts"><span class="pa-sum"><b>Accounts that count</b><span>${esc(lbl)} · ${gbp(inc.reduce((t, a) => t + curOf(a), 0))} now</span></span><span class="scope-tg" aria-hidden="true"></span></summary>
     <ul class="scope-list">${list.map(a => `<li><label class="check scope-pick"><input type="checkbox" data-goal-acct="${esc(g.id)}" value="${esc(a.id)}" ${ids.has(a.id) ? 'checked' : ''} ${ids.has(a.id) && ids.size === 1 ? 'disabled' : ''}><i class="sw" style="background:${colorOf(a)}"></i><span class="ws-name">${acctLabel(a)}</span></label><span class="mono">${gbp(accountStats(a.id).cur)}</span></li>`).join('')}</ul>
   </details>`;
 }
@@ -2760,6 +2859,28 @@ function wealthSources(t, r, sinceMs, sc) {
 }
 
 /* ---------- overview ---------- */
+// 2.0.23: a property's equity tile (value less any linked mortgage, with the loan-to-value), and a mortgage's link back.
+function propTile(a, cur) {
+  const ms = mortgagesOf(a), owed = -ms.reduce((t, m) => t + accountStats(m.id).cur, 0);
+  if (!ms.length) return `<div class="stat"><div class="k">Equity</div><div class="v">${gbp(cur)}</div><div class="k">No mortgage linked</div></div>`;
+  return `<div class="stat"><div class="k">Equity</div><div class="v">${gbp(cur - owed)}</div><div class="k">after ${gbp(owed)} mortgage${cur > 0 ? ` · ${Math.round(owed / cur * 100)}% loan to value` : ''}</div></div>`;
+}
+function securedLine(m) {
+  const p = state.accounts.find(a => a.id === m.secures);
+  if (!p) return '';
+  const v = accountStats(p.id).cur, owed = -accountStats(m.id).cur;
+  return `<p class="hint" style="margin-top:12px">Secured on <button class="link-btn" data-action="goto-account" data-id="${esc(p.id)}">${esc(p.name)}</button>, valued at ${gbp(v)}: equity <b>${gbp(v - owed)}</b>${v > 0 ? `, ${Math.round(owed / v * 100)}% loan to value` : ''}.</p>`;
+}
+// 2.0.24: accountStats scaled to your share of a joint account (Overview's figures and Holdings rows).
+function myStats(a) {
+  const st = accountStats(a.id), k = shareOf(a);
+  return k === 1 ? st : { ...st, cur: st.cur * k, change: st.change * k, lastChange: st.lastChange * k, m30: st.m30 == null ? null : st.m30 * k, s: st.s.map(l => ({ ...l, value: l.value * k })) };
+}
+// 2.0.22: the Debts tile's small line: how many, and roughly what goes to them each month.
+function debtLine(accts) {
+  const d = active(accts.filter(isDebt)), m = d.reduce((t, a) => t + monthlyIn(a), 0);
+  return `${d.length} debt${d.length === 1 ? '' : 's'}${m >= 1 ? ` · about ${gbp(m)} a month repaid` : ''}`;
+}
 // 2.0.12: Holdings groups fold to one line (total and share); closed on phones, open on wide screens until toggled.
 const holdOpen = g => ui.folds && ui.folds['hold-' + g] != null ? ui.folds['hold-' + g] : !!(window.matchMedia && matchMedia('(min-width:1000px)').matches);
 function renderOverview() {
@@ -2767,7 +2888,7 @@ function renderOverview() {
   const all = visibleAccounts();
   const accts = all.filter(a => !chartOff(a));
   const tl = timeline(accts);
-  const stats = accts.map(a => ({ a, ...accountStats(a.id) }));
+  const stats = accts.map(a => ({ a, ...myStats(a) }));
   const total = stats.reduce((s, x) => s + x.cur, 0);
   // 2.0: the 1M · 1Y · All chips set the card's change line, its trend and "Where your wealth came from".
   const nwr = NW_RANGES[ui.nwRange] ? ui.nwRange : '1M';
@@ -2778,7 +2899,12 @@ function renderOverview() {
   const staleN = tl.length ? staleAccounts(accts).filter(a => logsOf(a.id).some(l => !l.estimated)).length : 0;
   const groups = groupSummary(accts).filter(g => g.value > 0);
   const pension = stats.filter(x => groupOf(x.a) === 'pension').reduce((s, x) => s + x.cur, 0);
-  const access = total - pension;
+  // 2.0.22: net worth is assets minus debts; shares and "Accessible now" are worked out on assets only.
+  const debts = -stats.filter(x => isDebt(x.a)).reduce((s, x) => s + x.cur, 0), hasDebt = stats.some(x => isDebt(x.a));
+  const assets = total + debts;
+  // 2.0.23: property isn't money you can get at, so it's left out of "Accessible now"; the card shows your equity in it.
+  const props = stats.filter(x => isProperty(x.a)), propVal = props.reduce((s, x) => s + x.cur, 0);
+  const access = assets - pension - propVal;
   const who = viewName();
   const scope = chartScope(all);
   const showWs = tl.length > 1 && nw;
@@ -2796,9 +2922,10 @@ function renderOverview() {
       ${showWs || scope.hidden ? `<button type="button" class="stmt-stale" data-action="scope-open">Includes ${scopeLabel(scope)}</button>` : ''}
       ${staleN ? `<button type="button" class="stmt-stale" data-action="open-bulk">${staleN} balance${staleN > 1 ? 's' : ''} over a month old · Update all</button>` : ''}
       ${totalTrend(nwr === 'All' ? rangePoints(tl, -Infinity) : rangePoints(tl, nwStart))}
-      ${total > 0 && groups.length > 1 ? `
+      ${hasDebt || props.length ? `<div class="stmt-net"><span>Assets <b class="num">${gbp(assets)}</b></span>${hasDebt ? `<span>Debts <b class="num">${gbp(-debts)}</b></span>` : ''}${props.length ? `<span>${props.length === 1 && props[0].a.type === 'Home' ? 'Home' : 'Property'} equity <b class="num">${gbp(props.reduce((s, x) => s + equityOf(x.a), 0))}</b></span>` : ''}</div>` : ''}
+      ${assets > 0 && groups.length > 1 ? `
         <div class="alloc-bar" aria-hidden="true">${groups.map(g => `<i style="flex:${g.value};background:${g.hi}"></i>`).join('')}</div>
-        <div class="alloc-legend">${groups.map(g => `<span><i class="sw" style="background:${g.hi}"></i>${esc(g.label)} <b class="num">${(g.value / total * 100).toFixed(0)}%</b></span>`).join('')}</div>` : ''}
+        <div class="alloc-legend">${groups.map(g => `<span><i class="sw" style="background:${g.hi}"></i>${esc(g.label)} <b class="num">${(g.value / assets * 100).toFixed(0)}%</b></span>`).join('')}</div>` : ''}
     </section>`;
 
   const isaAccts = all.filter(a => typeOf(a).allow === 'isa');
@@ -2814,10 +2941,12 @@ function renderOverview() {
       <div class="kpi"><div class="k">Pensions</div><div class="v num">${gbp(pension)}</div><div class="s">Usually locked until ${accessAge(state.profile.dob)}</div></div>
       <div class="kpi"><div class="k">Accessible now</div><div class="v num">${gbp(access)}</div><div class="s">ISAs, cash and investments</div></div>
       ${allowKpi}
+      ${hasDebt ? `<div class="kpi"><div class="k">Debts ${why('debts', 'How are debts counted?')}</div><div class="v num">${gbp(debts)}</div><div class="s">${debtLine(accts)}</div></div>` : ''}
     </div>`;
 
   // Holdings, grouped with subtotals: every account, also ones left out of the charts.
-  const hStats = all.map(a => ({ a, ...accountStats(a.id) })), hTotal = hStats.reduce((s, x) => s + x.cur, 0);
+  // Shares (the bars and Weight) are of assets, so a debt never makes them run past 100%.
+  const hStats = all.map(a => ({ a, ...myStats(a) })), hTotal = hStats.filter(x => !isDebt(x.a)).reduce((s, x) => s + x.cur, 0);
   const closedStats = hStats.filter(x => x.a.archived);
   const byGroup = Object.keys(GROUPS).map(g => ({ g, rows: pinFirst(hStats.filter(x => groupOf(x.a) === g && !x.a.archived).map(x => Object.assign(x, { pinned: x.a.pinned }))) })).filter(x => x.rows.length);
   const holdings = `
@@ -2826,16 +2955,16 @@ function renderOverview() {
       ${hStats.length ? `<div class="table-wrap"><table>
         <thead><tr><th>Account</th><th class="r">Value</th><th class="r hide-sm">30 days</th><th class="r hide-sm">Since start</th><th class="r hide-sm">Weight</th><th class="r hide-sm">Trend</th></tr></thead>
         ${byGroup.map(({ g, rows }) => {
-          const sub = rows.reduce((t, x) => t + x.cur, 0), share = hTotal ? sub / hTotal * 100 : 0, open = holdOpen(g);
+          const sub = rows.reduce((t, x) => t + x.cur, 0), share = hTotal && g !== 'debt' ? sub / hTotal * 100 : 0, open = holdOpen(g);
           return `<tbody class="hg${open ? ' open' : ''}"><tr class="grp hg-head clickable" data-action="hold-grp" data-id="${g}" tabindex="0" aria-expanded="${open}">
             <td><span class="hg-t"><span class="hg-chev" aria-hidden="true">${CHEVRON}</span>${esc(GROUPS[g])}<span class="hg-n">${rows.length}</span></span><span class="hg-bar" aria-hidden="true"><i style="width:${share.toFixed(1)}%;background:var(--${GROUP_COLOR[g]})"></i></span></td>
-            <td class="r val">${gbp(sub)}<span class="hg-pc">${share.toFixed(0)}%</span></td><td class="hide-sm"></td><td class="hide-sm"></td><td class="r hide-sm mono">${share.toFixed(1)}%</td><td class="hide-sm"></td></tr>` + rows.map(x => `
+            <td class="r val">${gbp(sub)}${g !== 'debt' ? `<span class="hg-pc">${share.toFixed(0)}%</span>` : ''}</td><td class="hide-sm"></td><td class="hide-sm"></td><td class="r hide-sm mono">${g !== 'debt' ? share.toFixed(1) + '%' : ''}</td><td class="hide-sm"></td></tr>` + rows.map(x => `
           <tr class="clickable" data-action="goto-account" data-id="${esc(x.a.id)}" tabindex="0">
             <td><div class="acct-cell">${badge(x.a)}<div><div class="n">${esc(x.a.name)}${ownerChip(x.a)}${chartOff(x.a) ? '<span class="owner" title="Left out of your net worth and charts">not in totals</span>' : ''}</div><div class="p">${esc(x.a.provider || typeOf(x.a).label)} · ${x.last ? 'Updated ' + ago(x.last.date).toLowerCase() : 'No values yet'}</div></div></div></td>
             <td class="r val" data-count="row-${esc(x.a.id)}" data-value="${x.cur}">${gbp(x.cur)}</td>
             <td class="r hide-sm">${x.m30 != null ? deltaChip(x.m30, signed(x.m30)) : '<span class="faint">—</span>'}</td>
             <td class="r hide-sm">${x.s.length > 1 ? deltaChip(x.change, pct(x.pct)) : '<span class="faint">—</span>'}</td>
-            <td class="r hide-sm"><div class="weight"><span class="mono">${hTotal ? (x.cur / hTotal * 100).toFixed(1) : '0.0'}%</span><span class="bar"><i style="width:${hTotal ? x.cur / hTotal * 100 : 0}%;background:${colorOf(x.a)}"></i></span></div></td>
+            <td class="r hide-sm">${isDebt(x.a) ? '<span class="faint">—</span>' : `<div class="weight"><span class="mono">${hTotal ? (x.cur / hTotal * 100).toFixed(1) : '0.0'}%</span><span class="bar"><i style="width:${hTotal ? x.cur / hTotal * 100 : 0}%;background:${colorOf(x.a)}"></i></span></div>`}</td>
             <td class="r hide-sm">${sparkline(x.s.slice(-12).map(l => l.value), x.m30 > 0 ? 'var(--pos)' : x.m30 < 0 ? 'var(--neg)' : 'var(--ink-3)')}</td>
           </tr>`).join('') + '</tbody>';
         }).join('')}
@@ -2845,12 +2974,12 @@ function renderOverview() {
 
   const allocation = `
     <section class="panel">${foldOpen('ov-alloc', 'Allocation', 'How your money is split · tap a type for its accounts')}
-      ${total > 0 ? `<ul class="alloc-list">${groups.map(g => {
+      ${assets > 0 ? `<ul class="alloc-list">${groups.map(g => {
         const rows = stats.filter(x => groupOf(x.a) === g.g && x.cur > 0).sort((p, q) => q.cur - p.cur);
         return `<li><details><summary>
-          <span class="al-top"><i class="sw" style="background:${g.color}"></i><span class="nm">${esc(g.label)}</span><b>${gbp(g.value)}</b><span class="pc">${(g.value / total * 100).toFixed(1)}%</span></span>
-          <span class="al-bar"><i style="width:${(g.value / total * 100).toFixed(2)}%;background:${g.color}"></i></span>
-        </summary><ul class="al-sub">${rows.map(x => `<li><span>${esc(x.a.name)}${ownerChip(x.a)}</span><span class="mono">${gbp(x.cur)}</span><span class="mono faint">${(x.cur / total * 100).toFixed(1)}%</span></li>`).join('')}</ul></details></li>`;
+          <span class="al-top"><i class="sw" style="background:${g.color}"></i><span class="nm">${esc(g.label)}</span><b>${gbp(g.value)}</b><span class="pc">${(g.value / assets * 100).toFixed(1)}%</span></span>
+          <span class="al-bar"><i style="width:${(g.value / assets * 100).toFixed(2)}%;background:${g.color}"></i></span>
+        </summary><ul class="al-sub">${rows.map(x => `<li><span>${esc(x.a.name)}${ownerChip(x.a)}</span><span class="mono">${gbp(x.cur)}</span><span class="mono faint">${(x.cur / assets * 100).toFixed(1)}%</span></li>`).join('')}</ul></details></li>`;
       }).join('')}</ul>` : '<div class="chart-empty">Your split between account types shows here.</div>'}
     ${foldClose}</section>`;
 
@@ -2925,6 +3054,14 @@ function renderAccounts() {
   const rate = rateInfo(a);
   const hist = ui.hist;
   const years = [...new Set([...state.logs, ...state.flows, ...state.income].map(x => taxYear(x.date)))].sort().reverse();
+  // 2.0.22 debts: the figure is what you owe; tiles show where it started, repayments and the interest charged.
+  const debt = isDebt(a), prop = isProperty(a);
+  const debtStats = debt ? `<div class="stats">
+          <div class="stat"><div class="k">Owed at start</div><div class="v">${all ? gbp(-all.v0) : '—'}</div></div>
+          <div class="stat"><div class="k">Repaid</div><div class="v">${all ? gbp(all.paid) : '—'}</div></div>
+          <div class="stat"><div class="k">Interest charged</div><div class="v ${all && all.growth < -0.5 ? 'neg' : ''}">${all && st.s.length > 1 ? gbp(Math.max(0, -all.growth)) : '—'}</div></div>
+          <div class="stat"><div class="k">Interest rate</div><div class="v">${a.rate ? a.rate + '%' : '—'}</div></div>
+        </div>` : '';
   view.innerHTML = `
     <div class="stack view">
       ${exampleNotice()}
@@ -2934,28 +3071,29 @@ function renderAccounts() {
       <section class="panel">
         <div class="panel-head" style="align-items:flex-end">
           <div class="acct-cell" style="min-width:0;align-items:flex-end">${badge(a, true)}<div>
-            <div class="eyebrow">${esc(a.provider || 'Account')} · ${esc(typeOf(a).label)}${a.owner !== 'me' ? ' · ' + esc(personName(a.owner)) : ''}${a.archived ? ' · Closed' : ''}</div>
-            <div class="acct-figure num" data-count="acct-${esc(a.id)}" data-value="${st.cur}">${gbp(st.cur)}</div>${streakLine(a)}
+            <div class="eyebrow">${esc(a.provider || 'Account')} · ${esc(typeOf(a).label)}${a.owner !== 'me' ? ' · ' + esc(personName(a.owner)) : ''}${a.archived ? ' · Closed' : ''}${debt ? ' · Owed' : ''}</div>
+            <div class="acct-figure num" data-count="acct-${esc(a.id)}" data-value="${debt ? -st.cur : st.cur}">${gbp(debt ? -st.cur : st.cur)}</div>${a.share ? `<div class="hint" style="margin:2px 0 0">Joint · your ${a.share}% share is <b>${gbp(Math.abs(st.cur) * a.share / 100)}</b>, which is what counts in your totals</div>` : ''}${debt ? '' : streakLine(a)}
           </div></div>
           <div class="acct-actions">
             <button class="btn" data-action="edit-acct" data-id="${esc(a.id)}">${icons.edit}Edit</button>
-            <button class="btn" data-action="goal-for" data-id="${esc(a.id)}">Set a goal</button>
+            ${debt || prop ? '' : `<button class="btn" data-action="goal-for" data-id="${esc(a.id)}">Set a goal</button>`}
             <button class="btn primary" data-action="open-log" data-id="${esc(a.id)}">${icons.plus}Log value</button>
           </div>
         </div>
-        <div class="stats">
-          <div class="stat"><div class="k">Paid in</div><div class="v">${all ? gbp(all.paid) : '—'}</div></div>
+        ${debt ? debtStats : `<div class="stats">
+          <div class="stat"><div class="k">${prop && a.priorPaid != null ? 'Purchase price' : 'Paid in'}</div><div class="v">${all ? gbp(all.paid) : '—'}</div></div>
           <div class="stat"><div class="k">Growth</div><div class="v ${cls(all ? all.growth : 0)}">${hasRet ? signed(all.growth) : '—'}</div></div>
           <div class="stat"><div class="k">Return</div><div class="v ${cls(all && all.ret || 0)}">${hasRet ? pct(all.ret) : '—'}</div>${yearly != null ? `<div class="k">about ${pct(yearly)} a year${a.since ? ' since ' + esc(a.since) : ''}</div>` : ''}${realRet != null ? `<div class="k">${pct(realRet)} after inflation</div>` : ''}</div>
-          <div class="stat"><div class="k">Fees a year</div><div class="v">${a.fee ? gbp(st.cur * a.fee / 100) : '—'}</div></div>
-        </div>
-        ${hasRet && all.paid > 0 ? miniSplit(all.paid, st.cur) : ''}
+          ${prop ? propTile(a, st.cur) : `<div class="stat"><div class="k">Fees a year</div><div class="v">${a.fee ? gbp(st.cur * a.fee / 100) : '—'}</div></div>`}
+        </div>`}
+        ${debt && a.secures ? securedLine(a) : ''}
+        ${!debt && hasRet && all.paid > 0 ? miniSplit(all.paid, st.cur) : ''}
         ${rate ? `<p class="explain" style="margin-top:12px">${rate}</p>` : ''}
         ${reg ? `<p class="hint" style="margin-top:12px">Regular payment: ${reg}.</p>` : ''}
         ${a.notes ? `<p class="hint" style="margin-top:8px;white-space:pre-wrap"><b>Notes:</b> ${esc(a.notes)}</p>` : ''}
         ${canSplit(a) ? `<p class="hint" style="margin-top:8px">First balance is after 6 April, so all of it counts as paid in this tax year. ${why('april', 'Help: started tracking after 6 April')} <button class="btn sm ghost" data-action="open-ty" data-id="${esc(a.id)}">Split it: 5 April balance and monthly payments</button></p>` : ''}
-        ${ytdForm(a.type) && st.s.length && st.s[0].date >= taxYearStart(TODAY) && !ytdFlow(a) && !canSplit(a) ? `<p class="hint" style="margin-top:8px">Paid into this account since 6 April? <button class="btn sm ghost" data-action="edit-acct" data-id="${esc(a.id)}">Add it for your ${taxYear(TODAY)} allowance</button></p>` : ''}
-        ${a.priorPaid == null && st.s.length ? `<p class="hint" style="margin-top:8px">Had gains before you started tracking? <button class="btn sm ghost" data-action="edit-acct" data-id="${esc(a.id)}">Add total paid in so far</button> or <button class="btn sm ghost" data-action="open-past" data-id="${esc(a.id)}">add past balances</button></p>` : `<div class="row-actions" style="margin-top:8px"><button class="btn sm ghost" data-action="open-past" data-id="${esc(a.id)}">Add past balances</button></div>`}
+        ${debt ? '' : ytdForm(a.type) && st.s.length && st.s[0].date >= taxYearStart(TODAY) && !ytdFlow(a) && !canSplit(a) ? `<p class="hint" style="margin-top:8px">Paid into this account since 6 April? <button class="btn sm ghost" data-action="edit-acct" data-id="${esc(a.id)}">Add it for your ${taxYear(TODAY)} allowance</button></p>` : ''}
+        ${debt ? `<div class="row-actions" style="margin-top:8px"><button class="btn sm ghost" data-action="open-past" data-id="${esc(a.id)}">Add past amounts owed</button></div>` : prop && a.priorPaid == null && st.s.length ? `<p class="hint" style="margin-top:8px">Add what you paid for it, so the rise since then counts as growth. <button class="btn sm ghost" data-action="edit-acct" data-id="${esc(a.id)}">Add purchase price</button></p>` : a.priorPaid == null && st.s.length ? `<p class="hint" style="margin-top:8px">Had gains before you started tracking? <button class="btn sm ghost" data-action="edit-acct" data-id="${esc(a.id)}">Add total paid in so far</button> or <button class="btn sm ghost" data-action="open-past" data-id="${esc(a.id)}">add past balances</button></p>` : `<div class="row-actions" style="margin-top:8px"><button class="btn sm ghost" data-action="open-past" data-id="${esc(a.id)}">Add past balances</button></div>`}
         <div class="readout" id="acct-readout" style="margin-top:18px" aria-live="polite"></div>
         <div class="chart" id="acct-chart"></div>
         <label class="check tgl mini" style="margin-top:10px"><input type="checkbox" role="switch" id="opt-fit" ${ui.fit ? 'checked' : ''}><span>Zoom to fit</span></label>
@@ -2977,12 +3115,12 @@ function renderAccounts() {
   drawAcctYears(a);
   const pts = st.s.map(l => ({ t: toMs(l.date), v: l.value, note: l.note && l.note !== 'Opening balance' ? l.note : '' }));
   if (pts.length && pts[pts.length - 1].t < TODAY_MS) pts.push({ t: TODAY_MS, v: pts[pts.length - 1].v, note: '' });
-  const deposits = flowsOf(a.id).filter(f => f.amount > 0 && !f.ytd).map(f => ({ t: toMs(f.date), label: `${dateLabel(toMs(f.date))}: ${f.employer ? 'employer paid in' : 'paid in'} ${gbp(f.amount)}` }));
+  const deposits = flowsOf(a.id).filter(f => f.amount > 0 && !f.ytd).map(f => ({ t: toMs(f.date), label: `${dateLabel(toMs(f.date))}: ${f.employer ? 'employer paid in' : debt ? 'repaid' : 'paid in'} ${gbp(f.amount)}` }));
   chart(document.getElementById('acct-chart'), {
     xs: pts.map(p => p.t), label: a.name + ' value over time', fit: ui.fit, tipAlways: ui.paidLine, markers: deposits, notes: pts.map(p => p.note),
     empty: 'Log another balance to see how this account changes.', emptyAction: ['Log value', 'open-log', a.id],
     readout: pts.length ? { id: 'acct-readout', html: i => { const d = pts[i].v - pts[0].v; return `<span class="rv">${gbp(pts[i].v)}</span>${i ? `<span class="delta ${cls(d)}">${signed(d)}</span>` : ''}<span class="rd">${i === pts.length - 1 ? 'Now' : dateLabel(pts[i].t)}</span>${pts[i].note ? `<span class="rn">${esc(pts[i].note)}</span>` : ''}`; } } : null,
-    series: [{ label: a.name, color: colorOf(a), values: pts.map(p => p.v) }, ...(ui.paidLine ? [{ label: 'Paid in', color: 'var(--ink-3)', values: pts.map(p => paidAt([a], p.t)), overlay: true, dash: true, fill: false }] : [])]
+    series: [{ label: a.name, color: colorOf(a), values: pts.map(p => p.v) }, ...(ui.paidLine && !debt ? [{ label: 'Paid in', color: 'var(--ink-3)', values: pts.map(p => paidAt([a], p.t)), overlay: true, dash: true, fill: false }] : [])]
   });
 }
 // 2.0.21 account picker: the chosen account on one button, ‹ › step to the neighbours, and the button opens a list of every account by type.
@@ -3039,7 +3177,7 @@ function yearRows(a) {
   return rows;
 }
 function yearlyPanel(a) {
-  if (a.type === 'Premium Bonds' || a.type === 'Cash') return '';
+  if (a.type === 'Premium Bonds' || a.type === 'Cash' || isDebt(a) || isProperty(a)) return '';
   const cur = +taxYearStart(TODAY).slice(0, 4);
   const pension = groupOf(a) === 'pension';
   const rows = yearRows(a);
@@ -3180,10 +3318,13 @@ function miniSplit(paid, cur) {
     : `Worth <b>${gbp(cur)}</b> against <b>${gbp(paid)}</b> put in: <b class="neg">${gbp(-g)}</b> below what you paid.`}</div></div>`;
 }
 // Split by type as a donut (few slices, so a donut reads well), plus accessible vs locked-away money.
-function splitPanel(accts, stats, total) {
+function splitPanel(accts, stats, net) {
+  // Shares are of assets only (2.0.22): debts are shown as their own line under the split.
+  const debts = -stats.filter(x => isDebt(x.a)).reduce((t, x) => t + curOf(x.a), 0), total = net + debts;
   if (total <= 0) return '';
   const groups = groupSummary(active(accts)).filter(g => g.value > 0);
-  const locked = stats.filter(x => groupOf(x.a) === 'pension' && !x.a.archived).reduce((t, x) => t + x.st.cur, 0);
+  const locked = stats.filter(x => (groupOf(x.a) === 'pension' || isProperty(x.a)) && !x.a.archived).reduce((t, x) => t + curOf(x.a), 0);
+  const propVal = stats.filter(x => isProperty(x.a) && !x.a.archived).reduce((t, x) => t + curOf(x.a), 0);
   const free = total - locked, dob = state.profile.dob, age = accessAge(dob);
   const unlock = dob ? `${+dob.slice(0, 4) + age}${dob.slice(4)}` : '';
   const sub = `${groups.length} type${groups.length === 1 ? '' : 's'} · ${gbp(free)} accessible · ${gbp(locked)} locked`;
@@ -3199,7 +3340,8 @@ function splitPanel(accts, stats, total) {
     <div style="margin-top:18px">
       <div class="goal-top"><span><b>Accessible now</b> <span class="mono">${gbp(free)}</span></span><span><b>Locked</b> <span class="mono">${gbp(locked)}</span></span></div>
       <div class="split-bar" role="img" aria-label="Accessible ${gbp(free)}, locked ${gbp(locked)}"><i style="flex:${Math.max(free, 0)};background:var(--c2)"></i><i style="flex:${locked};background:var(--c1)"></i></div>
-      <div class="goal-meta"><span>${(free / total * 100).toFixed(0)}% ISAs, savings and investments</span><span>${locked ? `Pensions from age ${age}${unlock ? ` (${monthYear(toMs(unlock))})` : ''}` : ''}</span></div>
+      <div class="goal-meta"><span>${(free / total * 100).toFixed(0)}% ISAs, savings and investments</span><span>${locked - propVal >= 0.5 ? `Pensions from age ${age}${unlock ? ` (${monthYear(toMs(unlock))})` : ''}` : ''}${propVal >= 0.5 ? `${locked - propVal >= 0.5 ? ' · ' : ''}${gbp(propVal)} property` : ''}</span></div>
+      ${debts >= 0.5 ? `<p class="hint" style="margin:10px 0 0">Debts of <b>${gbp(debts)}</b> are taken off these ${gbp(total)} of assets, leaving a net worth of <b>${gbp(net)}</b>.</p>` : ''}
     </div>
     ${foldClose}
   </section>`;
@@ -3208,7 +3350,7 @@ function splitPanel(accts, stats, total) {
 // your money (ivory) then growth (green), or the part lost (red), scaled to the largest account.
 function everyAccount(order) {
   const list = order.filter(x => !ui.allType || groupOf(x.a) === ui.allType);
-  const hasBar = x => x.p && (x.st.s.length > 1 || x.a.priorPaid != null || Object.keys(x.a.yearly || {}).length);
+  const hasBar = x => x.p && !isDebt(x.a) && (x.st.s.length > 1 || x.a.priorPaid != null || Object.keys(x.a.yearly || {}).length);
   const max = Math.max(1, ...list.filter(hasBar).map(x => Math.max(x.p.paid, x.st.cur)));
   const w = v => (Math.max(0, v) / max * 100).toFixed(2) + '%';
   const bar = x => {
@@ -3222,7 +3364,7 @@ function everyAccount(order) {
       <tbody>${list.map(x => `<tr class="clickable${hasBar(x) ? ' has-bar' : ''}" data-action="pick-account" data-id="${esc(x.a.id)}" tabindex="0">
         <td><div class="acct-cell">${badge(x.a)}<div style="min-width:0"><div class="n">${esc(x.a.name)}${ownerChip(x.a)}</div><div class="p hide-sm">${esc(typeOf(x.a).label)}</div></div></div></td>
         <td class="r val">${gbp(x.st.cur)}</td>
-        <td class="r val hide-sm">${x.p ? gbp(x.p.paid) : '—'}</td>
+        <td class="r val hide-sm">${x.p ? gbp(x.p.paid) + (isDebt(x.a) && x.p.paid >= 0.5 ? '<span class="faint"> repaid</span>' : '') : '—'}</td>
         <td class="r">${x.p && (x.st.s.length > 1 || x.a.priorPaid != null) ? deltaChip(x.p.growth, signed(x.p.growth)) : '<span class="faint">—</span>'}</td>
         <td class="r hide-sm mono">${x.p && x.p.ret != null && (x.st.s.length > 1 || x.a.priorPaid != null) ? pct(x.p.ret) : '—'}</td>
       </tr>${hasBar(x) ? bar(x) : ''}`).join('')}</tbody>
@@ -3266,6 +3408,15 @@ function heatmapPanel(accts) {
 }
 // "Effective rate" for Premium Bonds and savings over the last 12 months, against the advertised rate.
 function rateInfo(a) {
+  const d = cashDrag(a);
+  if (d) return `${rateInfoBase(a) ? rateInfoBase(a) + ' ' : ''}<span class="drag-tip">${gbp(d.idle)} here is earning ${d.rate ? 'about ' + d.rate.toFixed(1) + '%' : 'no interest'}. At ${d.bench}% it would earn about <b>${gbp(d.extra)}</b> more a year. ${why('drag', 'About low-interest cash')}</span>`;
+  return rateInfoBase(a);
+}
+function rateInfoBase(a) {
+  if (isDebt(a)) {
+    const owed = -accountStats(a.id).cur;
+    return a.rate && owed > 0 ? `At ${a.rate}% a year, interest on what you owe is about <b>${gbp(owed * a.rate / 1200)}</b> a month.` : '';
+  }
   if (groupOf(a) !== 'cash' && a.type !== 'Cash ISA') return '';
   const start = TODAY_MS - 365 * 864e5, p = periodStats(a, start);
   if (!p || p.v0 <= 0) return '';
@@ -3343,7 +3494,8 @@ function renderHistory() {
 
 /* ---------- planner ---------- */
 const LSA = 268275; // Lump Sum Allowance: the most you can take tax-free from pensions
-const planIncluded = a => { const v = ui.plan.include[a.id]; return v != null ? !!v : !a.archived && ( groupOf(a) === 'pension' || (groupOf(a) === 'isa' && a.type !== 'JISA')); };
+// Debts (2.0.22) never join the retirement projection: the plan grows pots, and a debt isn't one.
+const planIncluded = a => { if (isDebt(a) || isProperty(a)) return false; const v = ui.plan.include[a.id]; return v != null ? !!v : !a.archived && ( groupOf(a) === 'pension' || (groupOf(a) === 'isa' && a.type !== 'JISA')); };
 const planMonthly = a => { const v = ui.plan.monthly[a.id]; return v != null && v !== '' ? Math.max(0, num(v, 0)) : Math.round(monthlyIn(a)); };
 function retireDate() {
   const p = state.profile;
@@ -3352,7 +3504,7 @@ function retireDate() {
 }
 const planMonths = () => { const d = retireDate(); return d ? Math.max(0, monthsUntil(d)) : ui.plan.years * 12; };
 function project(accts, months, adj, noFees) {
-  const pots = accts.map(a => ({ a, v: accountStats(a.id).cur, c: planMonthly(a), r: Math.pow(1 + Math.max(0, state.profile.growth + adj - (noFees ? 0 : a.fee)) / 100, 1 / 12) - 1 }));
+  const pots = accts.map(a => ({ a, v: curOf(a), c: planMonthly(a), r: Math.pow(1 + Math.max(0, state.profile.growth + adj - (noFees ? 0 : a.fee)) / 100, 1 / 12) - 1 }));
   const sum = () => pots.reduce((t, p) => t + p.v, 0);
   let paid = sum();
   const xs = [0], tot = [paid], paidV = [paid];
@@ -3408,7 +3560,7 @@ function renderPlanner() {
   if (pg === 'plan') {
     const hist = historicRate(accts.filter(planIncluded));
     const age = p.dob ? ageOn(p.dob, TODAY) : null;
-    const listed = accts.filter(a => !a.archived || planIncluded(a)), on = listed.filter(planIncluded), off = listed.filter(a => !planIncluded(a));
+    const listed = accts.filter(a => !isDebt(a) && !isProperty(a) && (!a.archived || planIncluded(a))), on = listed.filter(planIncluded), off = listed.filter(a => !planIncluded(a));
     const row = a => `<li>
               <input type="checkbox" data-plan-inc="${esc(a.id)}" ${planIncluded(a) ? 'checked' : ''} aria-label="Include ${esc(a.name)}" style="accent-color:var(--primary);width:16px;height:16px">
               <div><div style="font-weight:550">${esc(a.name)}</div><div class="hint">${gbp(accountStats(a.id).cur)}${a.fee ? ` · ${a.fee}% fees` : ''}</div></div>
@@ -3480,8 +3632,8 @@ function openGoal() {
     <div class="field"><label for="goal-scope">Which accounts count</label>
       <select id="goal-scope" class="input">
         <option value="all">All my accounts</option>
-        ${Object.keys(GROUPS).map(k => `<option value="${k}">${esc(scopeName(k))}</option>`).join('')}
-        ${active(state.accounts).map(a => `<option value="${esc(a.id)}" ${ui.goalScope === a.id ? 'selected' : ''}>${esc(a.name)}${a.owner !== 'me' ? ' (' + esc(personName(a.owner)) + ')' : ''}</option>`).join('')}
+        ${Object.keys(GROUPS).filter(k => k !== 'debt').map(k => `<option value="${k}">${esc(scopeName(k))}</option>`).join('')}
+        ${active(state.accounts).filter(a => !isDebt(a)).map(a => `<option value="${esc(a.id)}" ${ui.goalScope === a.id ? 'selected' : ''}>${esc(a.name)}${a.owner !== 'me' ? ' (' + esc(personName(a.owner)) + ')' : ''}</option>`).join('')}
         <option value="pick">Choose accounts…</option>
       </select>
     </div>
@@ -3495,7 +3647,7 @@ function updatePlan(changed) {
   if (!host) return;
   const p = state.profile, all = mine(), accts = all.filter(planIncluded);
   const months = planMonths(), rd = retireDate();
-  const nAll = all.filter(a => !a.archived || planIncluded(a)).length;
+  const nAll = all.filter(a => !isDebt(a) && !isProperty(a) && (!a.archived || planIncluded(a))).length;
   const sum = document.getElementById('plan-acct-sum');
   if (sum) sum.textContent = planAcctLine(accts, nAll);
   if (!accts.length) { host.innerHTML = `<div class="chart-empty"><div class="empty-cta"><span>Tick at least one account to see a projection.</span><button class="btn sm" data-action="plan-accts">Choose accounts</button></div></div>`; return; }
@@ -3664,7 +3816,7 @@ function updateCalc(changed) {
 function p60Form(y) {
   const v = state.profile.p60[y] || {};
   const money = (id, val, ph, label) => `<div class="field"><label for="${id}">${label}</label><div class="money"><span>£</span><input id="${id}" class="input" type="number" inputmode="decimal" min="0" step="1" placeholder="${ph}" value="${val || ''}"></div></div>`;
-  const slips = state.pay.filter(p => p.date >= `${y}-04-06` && p.date <= `${y + 1}-04-05` && p.gross > 0 && ['salary', 'bonus'].includes((sourceOf(p.source) || {}).kind));
+  const slips = myPay().filter(p => p.date >= `${y}-04-06` && p.date <= `${y + 1}-04-05` && p.gross > 0 && ['salary', 'bonus'].includes((sourceOf(p.source) || {}).kind));
   const fromPay = slips.length ? `<p class="hint">From your pay records: ${gbp(slips.reduce((t, p) => t + taxableOf(p), 0))} taxable pay and ${gbp(slips.reduce((t, p) => t + p.tax, 0))} tax (${slips.length} payslip${slips.length === 1 ? '' : 's'}). Check against your P60. <button class="btn sm" data-action="p60-from-pay" data-id="${y}">Use these</button></p>` : '';
   return `${fromPay}<div class="two">${money('p60-pay', v.pay, '0', 'Pay (main job)')}${money('p60-tax', v.tax, '0', 'Tax deducted')}</div>
     <details ${v.pay2 || v.other || v.giftAid || v.expenses || v.cb || v.kids || (v.marriage && v.marriage !== 'none') || v.code ? 'open' : ''}><summary>Second job, other income, Gift Aid, work expenses, Child Benefit, Marriage Allowance, tax code</summary>
@@ -3925,12 +4077,17 @@ function renderInsights() {
       add('▲', `<b>${esc(best.a.name)}</b> did best, ${pct(best.p.ret)} (${signed(best.p.growth)} growth).`);
       if (worst.p.ret < best.p.ret) add('▼', `<b>${esc(worst.a.name)}</b> did least well, ${pct(worst.p.ret)} (${signed(worst.p.growth)}).`);
     }
+    const debtRows = pt.rows.filter(r => isDebt(r.a));
+    if (debtRows.length) {
+      const sum = f => debtRows.reduce((t, r) => t + f(r.p), 0), fell = sum(p => p.change);
+      add('−', `What you owe ${fell >= 0 ? 'fell' : 'rose'} by <b>${gbp(Math.abs(fell))}</b>: ${gbp(sum(p => p.paid))} repaid, ${gbp(Math.max(0, -sum(p => p.growth)))} interest.`);
+    }
     const bonds = pt.rows.filter(r => r.a.type === 'Premium Bonds' && r.p.growth > 0);
     if (bonds.length) add('★', `Premium Bonds prizes of about <b>${gbp(bonds.reduce((t, r) => t + r.p.growth, 0))}</b>.`);
     const crossed = milestones(timeline(accts)).filter(m => m.t > start);
     if (crossed.length) add('◆', `You passed <b>${crossed.map(m => compact(m.v)).join(', ')}</b> in this period. Well done.`);
   }
-  if (ui.person === 'me' && state.pay.length) {
+  if (ui.person === 'me' && myPay().length) {
     const ps = payStats(isFinite(start) ? msIso(start + 864e5) : '0000-01-01', TODAY);
     if (ps.net > 0) add('£', `You saved <b>${rateText(ps.rate)}</b> of your take-home pay: <b>${gbp(ps.saved)}</b> of ${gbp(ps.net)}.`, goLink('Income', 'data-action="tab" data-tab="income" data-page="save"'));
   }
@@ -3943,6 +4100,8 @@ function renderInsights() {
     if (j.length) { const used = allowanceUsed(j, 'jisa'); add('£', `${esc(person.name)}'s Junior ISA: <b>${gbp(used)}</b> of ${gbp(JISA_ALLOWANCE)} used this tax year.`); }
   }
   if (ui.person !== 'all' && ui.person !== 'me') { /* allowances below are the user's own */ } else {
+    const drags = cashDrags();
+    if (drags.length) add('%', `<b>${gbp(drags.reduce((t, d) => t + d.idle, 0))}</b> in ${drags.length === 1 ? `<b>${esc(drags[0].a.name)}</b> is` : `${drags.length} accounts is`} earning little interest. At ${state.profile.cashBench}% it could earn about <b>${gbp(drags.reduce((t, d) => t + d.extra, 0))}</b> more a year.`, why('drag', 'About low-interest cash'));
     const ef = emergencyFund();
     if (ef) add('☂', `Your easy-access cash of <b>${gbp(ef.cash)}</b> covers about <b>${ef.months.toFixed(1)} months</b> of spending. A common guide is 3 to 6 months.`);
   }
@@ -3999,6 +4158,10 @@ function renderInsights() {
 // Pay entries record take-home (`net`). "Saved" is the user's own money into their accounts (flows `own`, less money taken out),
 // so tax relief, LISA bonus and employer payments don't count. Interest and dividends (`income`) are shown but left out of the rate.
 const sourceOf = id => state.profile.sources.find(x => x.id === id);
+// 2.0.25 partner income: a source can belong to someone else (profile.people, e.g. a partner). Your savings rate, payslip
+// and tax figures use only your own pay (myPay); the Sources page adds a household total.
+const isMySource = x => !x || !x.owner || x.owner === 'me';
+const myPay = () => state.pay.filter(p => isMySource(sourceOf(p.source)));
 const sourceName = id => (sourceOf(id) || { name: 'Removed source' }).name;
 const rateText = r => r == null ? '—' : `${Math.round(r * 100)}%`;
 const pointsText = d => `${d > 0 ? '+' : d < 0 ? '−' : ''}${Math.abs(Math.round(d * 100))} pts`;
@@ -4009,9 +4172,10 @@ function monthBounds(k) {
 }
 function payStats(from, to) {
   const inR = x => x.date >= from && x.date <= to && x.date <= TODAY;
-  const pay = state.pay.filter(inR);
+  const pay = myPay().filter(inR);
   const net = pay.reduce((t, p) => t + p.net, 0), oneOff = pay.filter(p => p.oneOff).reduce((t, p) => t + p.net, 0);
-  const ids = new Set(mine().map(a => a.id)), byAcct = {};
+  // Debt repayments (2.0.22) aren't counted as saving: most of a loan or mortgage payment is a bill.
+  const ids = new Set(mine().filter(a => !isDebt(a)).map(a => a.id)), byAcct = {};
   let paidIn = 0, takenOut = 0, employer = 0;
   for (const f of state.flows) {
     if (!ids.has(f.accountId) || !inR(f) || f.ytd || f.transfer) continue;
@@ -4071,10 +4235,10 @@ function fillPay(id) {
 function payStrip() {
   if (ui.person !== 'me') return '';
   const now = payStats(...monthBounds(0)), [s, e] = monthBounds(1), m = payStats(s, e), ty = payStats(taxYearStart(TODAY), TODAY);
-  const hasPay = state.pay.length > 0 && (m.net || ty.net), moved = now.paidIn || now.takenOut;
+  const hasPay = myPay().length > 0 && (m.net || ty.net), moved = now.paidIn || now.takenOut;
   if (!hasPay && !moved) return '';
   // This month's rate so far: against pay logged this month, or the usual monthly pay before payday.
-  const usual = state.profile.sources.reduce((t, x) => t + (!x.archived && x.regular && x.regular.net || 0), 0);
+  const usual = state.profile.sources.reduce((t, x) => t + (!x.archived && isMySource(x) && x.regular && x.regular.net || 0), 0);
   const nowRate = now.net > 0 ? now.rate : hasPay && usual > 0 ? now.saved / usual : null;
   return `<section class="panel pay-strip clickable" data-action="tab" data-tab="income" data-page="save" tabindex="0" aria-label="Savings this month">
     <div><div class="k">Saved in ${esc(fmtMonthLong.format(new Date(toMs(monthBounds(0)[0]))))} so far</div><div class="v num">${gbp(now.saved)}${now.net ? ` <span class="faint">of ${gbp(now.net)}</span>` : ''}</div></div>
@@ -4109,7 +4273,7 @@ function renderIncome() {
   // Year on year: take-home for the same stretch of the previous tax year, once that year has pay logged from its start.
   let yoy = '';
   const ty0 = pp.mode === 'ty' ? +pp.cur.id : 0;
-  if (ty0 && st.core > 0 && state.pay.some(p => p.date <= `${ty0 - 1}-05-05`)) {
+  if (ty0 && st.core > 0 && myPay().some(p => p.date <= `${ty0 - 1}-05-05`)) {
     // One-offs are left out on both sides, so a bonus doesn't swing it.
     const prev = payStats(`${ty0 - 1}-04-06`, `${+to.slice(0, 4) - 1}${to.slice(4)}`).core;
     if (prev > 0) yoy = `<li><span>${to === TODAY ? 'Vs the same months last tax year' : 'Vs the tax year before'}:</span> <b class="${cls(st.core - prev)}">${(st.core >= prev ? '+' : '−') + Math.abs((st.core - prev) / prev * 100).toFixed(1)}%</b> <span class="faint">regular take-home (${gbp(st.core)} vs ${gbp(prev)})</span></li>`;
@@ -4166,16 +4330,17 @@ function renderIncome() {
   const tyNet = (id, yy) => state.pay.filter(p => p.source === id && p.date >= `${yy}-04-06` && p.date <= `${yy + 1}-04-05`).reduce((t, p) => t + p.net, 0);
   const shown = srcs.filter(x => !x.archived || state.pay.some(p => p.source === x.id));
   const spark = id => payMonths(12).map(m => m.st.pay.filter(p => p.source === id).reduce((t, p) => t + p.net, 0));
-  const tyTot = srcs.reduce((t, x) => t + tyNet(x.id, y), 0), multi = srcs.filter(x => tyNet(x.id, y) > 0).length >= 2;
-  const top = multi ? [...srcs].sort((a, b) => tyNet(b.id, y) - tyNet(a.id, y))[0] : null, topShare = top ? tyNet(top.id, y) / tyTot : 0;
-  const oneOffs = state.pay.filter(p => p.oneOff && p.date >= `${y}-04-06` && p.date <= TODAY), oneOffSum = oneOffs.reduce((t, p) => t + p.net, 0);
+  const mySrcs = srcs.filter(isMySource);
+  const tyTot = mySrcs.reduce((t, x) => t + tyNet(x.id, y), 0), multi = mySrcs.filter(x => tyNet(x.id, y) > 0).length >= 2;
+  const top = multi ? [...mySrcs].sort((a, b) => tyNet(b.id, y) - tyNet(a.id, y))[0] : null, topShare = top ? tyNet(top.id, y) / tyTot : 0;
+  const oneOffs = myPay().filter(p => p.oneOff && p.date >= `${y}-04-06` && p.date <= TODAY), oneOffSum = oneOffs.reduce((t, p) => t + p.net, 0);
   const sourcesPanel = `<section class="panel">
     <div class="panel-head"><h2 class="tt">${ti('case')}Income sources</h2><div class="acct-actions"><button class="btn sm" data-action="open-pay">Log pay</button><button class="btn sm" data-action="add-src">${icons.plus}Add source</button></div></div>
     <div class="table-wrap"><table>
       <thead><tr><th>Source</th><th class="r">${tyLabel(y)}</th>${multi ? '<th class="r">Of income</th>' : ''}<th class="r hide-sm">${tyLabel(y - 1)}</th><th class="r hide-sm">12 months</th></tr></thead>
       <tbody>${shown.map(x => `<tr class="clickable" data-action="edit-src" data-id="${esc(x.id)}" tabindex="0">
-        <td><div class="n">${esc(x.name)}</div><div class="p faint">${esc(SOURCE_KINDS[x.kind])}${x.regular ? ` · usually ${gbp(x.regular.net)}${x.regular.day ? ` on day ${x.regular.day}` : ''}` : ''}${x.archived ? ' · ended' : ''}</div></td>
-        <td class="r val">${gbp(tyNet(x.id, y))}</td>${multi ? `<td class="r mono">${tyTot > 0 ? (tyNet(x.id, y) / tyTot * 100).toFixed(0) + '%' : '—'}</td>` : ''}<td class="r val hide-sm">${gbp(tyNet(x.id, y - 1))}</td>
+        <td><div class="n">${esc(x.name)}${isMySource(x) ? '' : `<span class="owner">${esc(personName(x.owner))}</span>`}</div><div class="p faint">${esc(SOURCE_KINDS[x.kind])}${x.regular ? ` · usually ${gbp(x.regular.net)}${x.regular.day ? ` on day ${x.regular.day}` : ''}` : ''}${x.archived ? ' · ended' : ''}</div></td>
+        <td class="r val">${gbp(tyNet(x.id, y))}</td>${multi ? `<td class="r mono">${tyTot > 0 && isMySource(x) ? (tyNet(x.id, y) / tyTot * 100).toFixed(0) + '%' : '—'}</td>` : ''}<td class="r val hide-sm">${gbp(tyNet(x.id, y - 1))}</td>
         <td class="r hide-sm">${sparkline(spark(x.id), 'var(--gold)')}</td></tr>`).join('')}
       </tbody></table></div>
     ${topShare >= 0.8 ? `<p class="hint" style="margin-bottom:0">${Math.round(topShare * 100)}% of your take-home this tax year comes from ${esc(top.name)}.</p>` : ''}
@@ -4193,7 +4358,7 @@ function renderIncome() {
 
   const pg = INCOME_PAGES[ui.incomePage] ? ui.incomePage : 'save';
   const body = pg === 'slip' ? payslipPanel()
-    : pg === 'src' ? `${sourcesPanel}${histPanel}`
+    : pg === 'src' ? `${householdPanel(srcs, tyNet, y)}${sourcesPanel}${histPanel}`
     : `${summary}${chartPanel}${wherePanel}`;
   view.innerHTML = `<div class="stack view">${exampleNotice()}${pageTabs('Income section', 'income-page', INCOME_PAGES, pg)}${missPanel}${body}
     <p class="hint">Worked out on this device from your own entries. Figures are estimates, not financial advice.</p></div>`;
@@ -4206,10 +4371,26 @@ function renderIncome() {
   });
 }
 
+// 2.0.25: household take-home when any source belongs to someone else: this tax year and last, by person, and the total.
+function householdPanel(srcs, tyNet, y) {
+  if (srcs.every(isMySource)) return '';
+  const who = [...new Set(srcs.map(x => x.owner || 'me'))].sort((a, b) => (a === 'me' ? -1 : b === 'me' ? 1 : 0));
+  const sum = (id, yy) => srcs.filter(x => (x.owner || 'me') === id).reduce((t, x) => t + tyNet(x.id, yy), 0);
+  const tot = yy => who.reduce((t, id) => t + sum(id, yy), 0), now = tot(y);
+  return `<section class="panel">
+    <div class="panel-head"><div><h2 class="tt">${ti('family')}Household income ${why('household', 'How household income works')}</h2><span class="aside">Take-home pay, ${tyLabel(y)} so far</span></div></div>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Person</th><th class="r">${tyLabel(y)}</th><th class="r">Share</th><th class="r hide-sm">${tyLabel(y - 1)}</th></tr></thead>
+      <tbody>${who.map(id => `<tr><td>${esc(id === 'me' ? (state.profile.name || 'Me') : personName(id))}</td><td class="r val">${gbp(sum(id, y))}</td><td class="r mono">${now > 0 ? (sum(id, y) / now * 100).toFixed(0) + '%' : '—'}</td><td class="r val hide-sm">${gbp(sum(id, y - 1))}</td></tr>`).join('')}
+      <tr class="grp"><td>Household</td><td class="r val">${gbp(now)}</td><td></td><td class="r val hide-sm">${gbp(tot(y - 1))}</td></tr></tbody>
+    </table></div>
+    <p class="hint" style="margin-bottom:0">Your savings rate, payslip and tax figures use only your own pay.</p>
+  </section>`;
+}
 // Payslip breakdown (1.9.6): where gross pay went, from payslips that have the optional details filled in.
 const SLIP_ROWS = [['tax', 'Income tax', 'var(--c3)'], ['ni', 'National Insurance', 'var(--c2)'], ['pension', 'Pension', 'var(--c4)'], ['studentLoan', 'Student loan', 'var(--c5)'], ['other', 'Other deductions', 'var(--c6)']];
 function slipSum(from, to) {
-  const all = state.pay.filter(p => p.date >= from && p.date <= to && p.date <= TODAY), slips = all.filter(p => p.gross > 0);
+  const all = myPay().filter(p => p.date >= from && p.date <= to && p.date <= TODAY), slips = all.filter(p => p.gross > 0);
   const t = { n: slips.length, of: all.length, gross: 0, net: 0 };
   SLIP_ROWS.forEach(([k]) => { t[k] = 0; });
   for (const p of slips) { t.gross += p.gross; t.net += p.net; SLIP_ROWS.forEach(([k]) => { t[k] += p[k] || 0; }); }
@@ -4220,8 +4401,8 @@ function slipSum(from, to) {
 const SLIP_MODES = { m: 'Month', ty: 'Tax year', y: 'Year' };
 const periodPicks = { slip: null, save: null }; // not saved: each opens on the latest
 function slipPeriods(mode, test = p => p.gross > 0) {
-  const first = state.pay.reduce((m, p) => p.date < m ? p.date : m, TODAY), out = [];
-  const has = (a, b) => state.pay.some(p => test(p) && p.date >= a && p.date <= b);
+  const first = myPay().reduce((m, p) => p.date < m ? p.date : m, TODAY), out = [];
+  const has = (a, b) => myPay().some(p => test(p) && p.date >= a && p.date <= b);
   if (mode === 'm') {
     let [y, m] = first.split('-').map(Number);
     for (;;) {
@@ -4267,7 +4448,7 @@ function payslipPanel() {
   if (mode === 'm') { tyFrom = taxYearStart(to); tyHead = to >= monthBounds(0)[0] ? 'Tax year so far' : `Tax year to ${cur.short}`; }
   const head = `<div class="panel-head"><h2 class="tt">${ti('doc')}Payslip breakdown ${why('slip', 'What does Payslip show?')}</h2>${seg}</div>${strip}`;
   // 2.0.18: log pay from here. A month with pay but no details edits that pay; otherwise it opens Log pay dated in the month.
-  const inP = state.pay.filter(p => p.date >= from && p.date <= to), bare = inP.filter(p => !(p.gross > 0));
+  const inP = myPay().filter(p => p.date >= from && p.date <= to), bare = inP.filter(p => !(p.gross > 0));
   const logBtn = (label, cls = 'btn sm') => mode === 'm' && bare.length === 1 && inP.length === 1
     ? `<button class="${cls}" data-action="edit-pay-slip" data-id="${esc(bare[0].id)}">${icons.edit}Add payslip details</button>`
     : `<button class="${cls}" data-action="open-pay-slip" data-id="${mode === 'm' ? cur.id : ''}">${icons.plus}${label}</button>`;
@@ -4275,12 +4456,12 @@ function payslipPanel() {
   // 2.0.19: pay logged without payslip details still shows its take-home (and the tax year's, for a month).
   const takeHome = () => {
     const inT = inP.filter(p => p.date <= TODAY), net = inT.reduce((t, p) => t + (p.net || 0), 0);
-    const tyNet = mode === 'm' ? state.pay.filter(p => p.date >= tyFrom && p.date <= to && p.date <= TODAY).reduce((t, p) => t + (p.net || 0), 0) : 0;
+    const tyNet = mode === 'm' ? myPay().filter(p => p.date >= tyFrom && p.date <= to && p.date <= TODAY).reduce((t, p) => t + (p.net || 0), 0) : 0;
     return `<div class="kpis" style="margin-top:4px"><div class="kpi"><div class="k">${esc(cur.col)}</div><div class="v num">${gbp(net)}</div><div class="s">Take-home, ${inT.length} payment${inT.length === 1 ? '' : 's'}</div></div>${mode === 'm' ? `<div class="kpi"><div class="k">${esc(tyHead)}</div><div class="v num">${gbp(tyNet)}</div><div class="s">Take-home since ${fmtDate.format(new Date(toMs(tyFrom)))}</div></div>` : ''}</div>
       <div class="chart-empty" style="min-height:0;padding:14px 0 4px"><div class="empty-cta"><span>Add gross pay, tax, National Insurance and pension under "Payslip details" to see where the rest of your pay goes.</span>${logBtn('Log pay')}</div></div>`;
   };
-  if (!state.pay.some(p => p.gross > 0) && inP.some(p => p.date <= TODAY)) return `<section class="panel">${head}${takeHome()}</section>`;
-  if (!state.pay.some(p => p.gross > 0)) return `<section class="panel">${head}<div class="chart-empty"><div class="empty-cta"><b>See where your gross pay goes</b><span>When you log pay, open "Payslip details" and add your gross pay, tax, National Insurance and pension. Aurum then shows how much of each £1 you keep.</span>${logBtn('Log pay')}</div></div></section>`;
+  if (!myPay().some(p => p.gross > 0) && inP.some(p => p.date <= TODAY)) return `<section class="panel">${head}${takeHome()}</section>`;
+  if (!myPay().some(p => p.gross > 0)) return `<section class="panel">${head}<div class="chart-empty"><div class="empty-cta"><b>See where your gross pay goes</b><span>When you log pay, open "Payslip details" and add your gross pay, tax, National Insurance and pension. Aurum then shows how much of each £1 you keep.</span>${logBtn('Log pay')}</div></div></section>`;
   const st = slipSum(from, to), both = mode === 'm', ty = both ? slipSum(tyFrom, to) : st;
   if (!st.n && inP.some(p => p.date <= TODAY)) return `<section class="panel">${head}${takeHome()}</section>`;
   if (!st.n) return `<section class="panel">${head}<div class="chart-empty"><div class="empty-cta"><span>No pay logged for ${esc(name)}.</span>${logBtn(monthName ? `Log ${monthName} pay` : 'Log pay')}</div></div></section>`;
@@ -4318,6 +4499,11 @@ const FAQ = [
   ['est', 'Why do some balances say "est."?', '<b>est.</b> means estimated. When you log a payment, interest or a regular payment without a new balance, Aurum adds it to your last balance so your totals stay up to date. It isn\'t your provider\'s real figure: growth and price changes since then are missing. Log the real balance from your provider\'s app or statement when you can (<b>Update all</b> does every account at once) and it takes over from that date. Deleting the payment takes the estimate back out.', 'Accounts and balances'],
   ['growth', "What's the difference between paid in, growth and interest?", '<b>Paid in</b> is money you (or your employer, or tax relief) put in. <b>Growth</b> is everything else: the change in balance less what was paid in, so it includes interest, dividends and price changes. Interest, dividends and prizes you log are growth too: if they were paid into the account (the default), Aurum adds them to its balance as an estimate until you next log a real balance. They also feed the tax helper.', 'Accounts and balances'],
   ['sources', 'How is "Where your wealth came from" worked out?', 'For the range you pick (1M, 1Y or All, also on the net worth card), the change in your wealth is split into <b>paid in</b> (money in, less money taken out) and <b>growth</b> (everything else). For 1M and 1Y, an account first logged in that period counts its opening balance as paid in. <b>Return</b> is growth as a share of the money invested over the period. <b>Accounts that drove growth</b> lists the five that moved most, up or down; tap one to open it. <b>Includes N of M accounts</b> (also on the net worth card) shows which accounts are counted: those of the person picked at the top, closed ones too, and only accounts with a balance. Open it to see the list and what is left out, and untick an account to leave it out of your net worth, these charts and Performance (it stays in Holdings and ISA allowances, marked <b>not in totals</b>).', 'Accounts and balances'],
+  ['debts', 'How are debts counted?', 'Add a mortgage, loan, credit card or student loan as an account (type <b>Debts</b>) and enter <b>what you owe</b> as a positive amount. It is taken off your total, so your net worth is everything you have minus everything you owe. Log each <b>repayment</b> as money in: what you owe falls and your net worth rises, but it isn\'t counted as growth. The interest the lender adds shows as a small negative growth, so you can see what the debt costs. <b>Borrowed more</b> adds to what you owe without counting as a loss. A debt\'s first amount is where it started, not money you paid in. Debts stay out of the retirement plan, goals and your savings rate (a repayment is mostly a bill, not saving), and shares such as Allocation are of your assets only. Student loans: many people leave Plan 2 and later loans out, as they are taken from pay and written off after 30 to 40 years; untick it under <b>Includes N of M accounts</b> if you prefer.', 'Accounts and balances'],
+  ['property', 'How do I add my home or other property?', 'Add an account of type <b>Home</b> (where you live) or <b>Other property</b> (a buy-to-let or second home) with what it is worth now. Use a recent valuation or an online estimate and update it once or twice a year: a change in value shows as growth. Put what you paid in <b>Purchase price</b>, so the rise since you bought it counts as growth rather than money paid in. Then add the mortgage as a debt and pick the property under <b>Secured on</b>: the property\'s page shows your <b>equity</b> (its value less the mortgage) and the loan to value, and the net worth card shows your equity. Property is counted in your net worth but not in <b>Accessible now</b>, the retirement plan or goals.', 'Accounts and balances'],
+  ['joint', 'How do joint accounts work?', 'For an account you share, such as a joint current account, savings or a mortgage with a partner, tick <b>Joint account</b> in Add or Edit account and enter <b>your share</b> (50% for an even split). Log the whole balance, as your bank shows it: the account\'s own page shows the whole amount, while your net worth, charts and Overview count only your share (Holdings shows your share, marked <b>joint 50%</b>). Joint isn\'t offered for pensions and ISAs, which are always in one person\'s name. If you\'d rather track a partner\'s own accounts separately, add them as a person in Settings instead.', 'Accounts and balances'],
+  ['household', 'Can I add my partner\'s income?', 'Yes. Add your partner as a person in <b>Settings</b>, then add their pay as an income source and pick them under <b>Whose income</b>. Log their pay as usual. <b>Income › Sources</b> then shows <b>Household income</b>: take-home pay this tax year and last, for each of you and in total. Your savings rate, payslip breakdown and tax figures still use only your own pay, so they stay right for your own tax return. For an account you share, use <b>Joint account</b> instead.', 'Saving and income'],
+  ['drag', 'What is the low-interest cash check?', 'Cash earning little or no interest loses value to inflation. Aurum looks at your current accounts, savings accounts and Cash ISAs and compares each one\'s rate with <b>a good savings rate today</b> (4% unless you change it in <b>Settings › You</b>). It uses the rate you entered on the account, or what the interest you logged works out at; a current account with no rate counts as 0%. A current account keeps one month\'s spending (from Settings, or £1,500) as day-to-day money, and only the rest counts. When the rate is more than 1% below and at least £1,000 is affected, the account page and <b>Insights</b> show what a better rate would add a year. It\'s a prompt to shop around, not advice: think about access and the FSCS £85,000 limit too.', 'Saving and income'],
   ['move', 'How do I log money moved between my accounts?', 'Log it on both accounts: <b>Taken out</b> on the one it left and <b>Paid in</b> on the one it reached, ticking <b>Moved</b> on both. Your savings rate stays the same and each account\'s growth stays right. GIA to ISA uses your ISA allowance; a proper ISA to ISA transfer doesn\'t, so tick <b>ISA transfer</b>. Into a SIPP, also tick the tax relief box.', 'Accounts and balances'],
   ['april', 'I started tracking after 6 April. How do I fix this tax year?', 'Open the account and tap <b>Split it: 5 April balance and monthly payments</b>. Enter what was there on 5 April (0 if it opened later) and what you paid in each month. Only those payments then count as paid in this tax year.', 'Accounts and balances'],
   ['pick', 'How do I choose which accounts count?', '<b>Net worth and Overview charts:</b> open <b>Includes N of M accounts</b> on the net worth card or under "Where your wealth came from" and untick an account to leave it out. <b>Planner:</b> tick accounts under <b>Accounts and monthly payments</b> in Retirement\'s inputs; the <b>Includes N of M accounts</b> link under your pot takes you there. <b>Goals:</b> pick <b>Choose accounts…</b> when adding a goal, or open <b>Accounts that count</b> on a goal in Planner → Goals to change it.', 'Accounts and balances'],
@@ -4441,6 +4627,7 @@ function renderSettings() {
             <div class="field"><label for="pf-retire">Retirement age</label><input id="pf-retire" class="input" type="number" min="40" max="80" inputmode="numeric" value="${p.retireAge}"></div>
             <div class="field"><label for="pf-band">Income tax band</label><select id="pf-band" class="input">${Object.entries(BANDS).map(([k, b]) => `<option value="${k}" ${p.band === k ? 'selected' : ''}>${b.label}</option>`).join('')}</select></div>
           </div>
+          <div class="field"><label for="pf-bench">A good savings rate today <span class="faint">% a year, for the low-interest cash check</span></label><input id="pf-bench" class="input" type="number" inputmode="decimal" min="0" max="15" step="0.1" value="${p.cashBench}"></div>
           <div class="field"><label for="pf-spend">Monthly spending <span class="faint">Optional, for the emergency fund check</span></label><div class="money"><span>£</span><input id="pf-spend" class="input" type="number" inputmode="decimal" min="0" step="50" value="${p.monthlySpend || ''}"></div></div>
           <p class="hint">Used by the planner, tax helper and pension access age. Stored only on this device.</p>
           <div class="row-actions"><button class="btn primary" type="submit">Save details</button><span class="status" id="profile-status" role="status"></span></div>
@@ -4458,7 +4645,7 @@ function renderSettings() {
         <h2 class="tt">${ti('family')}Family</h2>
         <p class="explain">Track accounts you hold for others, such as a child's Junior ISA. Their accounts are kept out of your own net worth, and you can view each person or everyone together.</p>
         ${p.people.length ? `<ul class="acct-list">${p.people.map(x => pendingPerson === x.id ? `
-          <li style="background:var(--neg-soft)"><span class="grow">Remove <b>${esc(x.name)}</b>? Their accounts will move to you.</span><button class="btn sm ghost" data-action="person-del-no">Keep</button><button class="btn sm danger solid" data-action="person-del-yes" data-id="${esc(x.id)}">Remove</button></li>` : `
+          <li style="background:var(--neg-soft)"><span class="grow">Remove <b>${esc(x.name)}</b>? Their accounts and income will move to you.</span><button class="btn sm ghost" data-action="person-del-no">Keep</button><button class="btn sm danger solid" data-action="person-del-yes" data-id="${esc(x.id)}">Remove</button></li>` : `
           <li><span class="grow"><b>${esc(x.name)}</b> <span class="faint">${state.accounts.filter(a => a.owner === x.id).length} accounts</span></span><button class="icon-btn" data-action="person-del" data-id="${esc(x.id)}" aria-label="Remove ${esc(x.name)}">${icons.trash}</button></li>`).join('')}</ul>` : ''}
         <form id="person-form" class="inline-form">
           <input id="person-name" class="input" placeholder="Name, e.g. Arjun" maxlength="30" required aria-label="Name">
@@ -4760,21 +4947,26 @@ const logAccount = document.getElementById('log-account');
 function updateLogHints() {
   const a = state.accounts.find(x => x.id === logAccount.value);
   const st = accountStats(logAccount.value);
-  document.getElementById('log-prev').textContent = st.last ? `Last balance ${gbp(st.last.value)} on ${dateLabel(toMs(st.last.date))}` : 'First balance for this account';
+  const debt = isDebt(a);
+  document.getElementById('log-value-label').textContent = debt ? 'Amount owed now' : isProperty(a) ? 'Value now' : 'Current balance';
+  document.getElementById('log-prev').textContent = st.last ? `Last ${debt ? 'owed' : 'balance'} ${gbp(debt ? -st.last.value : st.last.value)} on ${dateLabel(toMs(st.last.date))}` : debt ? 'First amount owed for this debt' : 'First balance for this account';
   const kind = document.getElementById('log-kind');
   const prev = kind.value;
   const g = a ? groupOf(a) : 'other';
-  const opts = [['in', 'Paid in by me']];
+  // Debts: a repayment is money in (what you owe falls), borrowing more is money out.
+  const opts = debt ? [['in', 'Repayment'], ['out', 'Borrowed more']] : [['in', 'Paid in by me']];
+  if (!debt) {
   if (g === 'pension') opts.push(['employer', 'Paid in by employer']);
   if (a && a.type === 'Premium Bonds') opts.push(['prize', 'Prize won']);
   opts.push(['out', 'Taken out']);
   if (g === 'invest' || g === 'other') opts.push(['dividend', 'Dividend received']);
-  if (g !== 'pension' && g !== 'isa' && a && a.type !== 'Premium Bonds') opts.push(['interest', 'Interest received']);
+  if (g !== 'pension' && g !== 'isa' && g !== 'property' && a && a.type !== 'Premium Bonds') opts.push(['interest', 'Interest received']);
+  }
   kind.innerHTML = opts.map(([v, l]) => `<option value="${v}">${l}</option>`).join('');
   kind.value = opts.some(o => o[0] === prev) ? prev : 'in';
   const last = a ? lastPaid(a.id) : 0, same = document.getElementById('log-same');
   same.hidden = !last || !!editingEntry;
-  same.textContent = last ? `Paid in: same as last time (${gbp(last)})` : '';
+  same.textContent = last ? `${debt ? 'Repayment' : 'Paid in'}: same as last time (${gbp(last)})` : '';
   updateKindHint();
 }
 function updateKindHint() {
@@ -4783,12 +4975,13 @@ function updateKindHint() {
   const lbl = a && k === 'in' ? topupLabel(a) : '';
   document.getElementById('log-relief-wrap').hidden = !lbl;
   document.getElementById('log-relief-label').textContent = lbl;
-  document.getElementById('log-move-wrap').hidden = document.getElementById('log-move-why').hidden = k !== 'in' && k !== 'out';
+  const debt = isDebt(a);
+  document.getElementById('log-move-wrap').hidden = document.getElementById('log-move-why').hidden = debt || (k !== 'in' && k !== 'out');
   document.getElementById('log-move-label').textContent = k === 'out' ? 'Moved to another of my accounts' : 'Moved from savings I already had';
   document.getElementById('log-move-hint').textContent = k === 'out' ? 'Not counted as taking money out of your savings' : 'Still money in for growth, but not new saving in your savings rate';
   document.getElementById('log-added-wrap').hidden = !['interest', 'dividend', 'prize'].includes(k);
   document.getElementById('log-isat-wrap').hidden = !(a && k === 'in' && ['isa', 'jisa'].includes(typeOf(a).allow));
-  document.getElementById('log-kind-hint').textContent = {
+  document.getElementById('log-kind-hint').textContent = debt ? (k === 'out' ? 'Adds to what you owe, without counting as a loss.' : 'Lowers what you owe. Counts as money in, so only the interest shows as a cost.') : {
     in: 'Recording deposits means they are not counted as growth.',
     employer: 'Employer payments count towards your pension annual allowance.',
     out: 'Withdrawals are not counted as losses.',
@@ -4836,7 +5029,7 @@ function openLog(accountId, entryId) {
   if (found) {
     const e = found.e;
     document.getElementById('log-note').value = e.note || '';
-    if (found.kind === 'log') document.getElementById('log-value').value = e.value;
+    if (found.kind === 'log') document.getElementById('log-value').value = owedOf(e.accountId, e.value);
     else {
       const kind = found.kind === 'income' ? e.kind : e.employer ? 'employer' : e.amount < 0 ? 'out' : 'in';
       document.getElementById('log-kind').value = kind;
@@ -4856,11 +5049,12 @@ logAccount.addEventListener('change', updateLogHints);
 document.getElementById('log-form').addEventListener('submit', e => {
   e.preventDefault();
   const rawV = document.getElementById('log-value').value, rawF = document.getElementById('log-flow').value;
-  const value = parseFloat(rawV), flow = parseFloat(rawF);
-  const date = document.getElementById('log-date').value;
+  let value = parseFloat(rawV);
+  const flow = parseFloat(rawF), date = document.getElementById('log-date').value;
   const hasV = rawV !== '' && isFinite(value) && value >= 0, hasF = rawF !== '' && isFinite(flow) && flow > 0;
   if (!date || (!hasV && !hasF)) { document.getElementById('log-err').textContent = editingEntry ? 'Enter an amount.' : 'Enter a balance, an amount paid in or out, or both.'; return; }
   const accountId = logAccount.value, note = document.getElementById('log-note').value.trim();
+  if (hasV) value = toBal(accountId, value);
   // A balance well above the last one with no payment logged: ask before counting it all as growth.
   if (hasV && !hasF && !editingEntry && !jumpOk) {
     const j = balanceJump(accountId, date, value);
@@ -4925,7 +5119,7 @@ sheet.addEventListener('close', () => { editingEntry = null; logAccount.disabled
 let jumpOk = false, jumpAmt = 0;
 function balanceJump(id, date, value) {
   const a = state.accounts.find(x => x.id === id), prev = logsOf(id).filter(l => !l.estimated && l.date < date).pop();
-  if (!a || !prev) return 0;
+  if (!a || !prev || isDebt(a) || isProperty(a)) return 0;
   const paid = state.flows.filter(f => f.accountId === id && f.date > prev.date && f.date <= date).reduce((t, f) => t + f.amount, 0);
   const jump = value - prev.value - paid, days = Math.max(1, (toMs(date) - toMs(prev.date)) / 864e5);
   const cash = groupOf(a) === 'cash' || a.type === 'Cash ISA';
@@ -5048,6 +5242,9 @@ function openSrc(id, thenPay) {
   document.getElementById('src-day').value = x && x.regular && x.regular.day ? String(x.regular.day) : '';
   document.getElementById('src-archived').checked = !!(x && x.archived);
   document.getElementById('src-db').checked = !!(x && x.db);
+  document.getElementById('src-owner').innerHTML = people().map(p => `<option value="${esc(p.id)}">${esc(p.id === 'me' ? (state.profile.name ? state.profile.name + ' (me)' : 'Me') : p.name)}</option>`).join('');
+  document.getElementById('src-owner').value = x && x.owner ? x.owner : 'me';
+  document.getElementById('src-owner-field').hidden = !state.profile.people.length;
   document.getElementById('src-db-wrap').hidden = (x ? x.kind : 'salary') !== 'salary';
   document.getElementById('src-archived-wrap').hidden = !x;
   document.getElementById('src-del').hidden = !x;
@@ -5063,6 +5260,8 @@ document.getElementById('src-form').addEventListener('submit', e => {
   if (!name) return;
   const amount = fieldAmount('src-amount'), day = +document.getElementById('src-day').value || 0;
   const vals = { name, kind: document.getElementById('src-kind').value, regular: amount > 0 ? { net: amount, day } : null, archived: !!editingSrc && document.getElementById('src-archived').checked, db: document.getElementById('src-kind').value === 'salary' && document.getElementById('src-db').checked };
+  const owner = document.getElementById('src-owner').value;
+  vals.owner = owner && owner !== 'me' ? owner : undefined;
   let id = editingSrc;
   if (id) Object.assign(sourceOf(id), vals);
   else { clearExample([]); id = uid(); state.profile.sources.push({ id, ...vals }); }
@@ -5082,10 +5281,33 @@ function updateAcctRelief() {
   const lbl = topupLabel({ type: document.getElementById('acct-type').value });
   document.getElementById('acct-reg-relief-wrap').hidden = !lbl;
   document.getElementById('acct-reg-relief-label').textContent = lbl;
-  document.getElementById('acct-rate-field').hidden = TYPES[document.getElementById('acct-type').value]?.group !== 'cash' && document.getElementById('acct-type').value !== 'Cash ISA';
-  const type = document.getElementById('acct-type').value;
+  const type = document.getElementById('acct-type').value, debt = !!(TYPES[type] && TYPES[type].debt);
+  document.getElementById('acct-rate-field').hidden = !debt && TYPES[type]?.group !== 'cash' && type !== 'Cash ISA';
+  document.getElementById('acct-rate-label').innerHTML = debt ? 'Interest rate <span class="faint">Optional, % a year (APR)</span>' : 'Advertised rate <span class="faint">Optional, % a year</span>';
+  document.getElementById('acct-rate').placeholder = debt ? 'e.g. 4.5' : 'e.g. 4.4 (Premium Bonds prize fund rate)';
+  document.getElementById('acct-reg-legend').innerHTML = `${debt ? 'Monthly repayment' : 'Regular payment'} <span class="faint">Optional</span>`;
+  const prop = !!(TYPES[type] && TYPES[type].group === 'property');
+  ['acct-fee-field', 'acct-prior-field', 'acct-prior-hint'].forEach(id => { document.getElementById(id).hidden = debt; });
+  document.getElementById('acct-fee-field').hidden = debt || prop;
+  document.getElementById('acct-reg-field').hidden = prop;
+  document.getElementById('acct-prior-hint').hidden = debt || prop;
+  document.getElementById('acct-prop-tip').hidden = !prop;
+  document.getElementById('acct-prior-label').innerHTML = prop ? 'Purchase price <span class="faint">Optional</span>' : 'Total paid in so far <span class="faint">Optional</span>';
+  document.getElementById('acct-since-label').innerHTML = prop ? 'Bought in <span class="faint">Year</span>' : 'Invested since <span class="faint">Year</span>';
+  document.getElementById('acct-open-label').textContent = debt ? 'Amount owed' : prop ? 'Value now' : 'Current balance';
+  // A mortgage can be linked to one of the properties.
+  const props = state.accounts.filter(a => isProperty(a) && a.id !== editingAcct), sec = document.getElementById('acct-secures');
+  document.getElementById('acct-secures-field').hidden = type !== 'Mortgage' || !props.length;
+  if (type === 'Mortgage' && props.length && !sec.options.length) {
+    sec.innerHTML = '<option value="">Not linked</option>' + props.map(a => `<option value="${esc(a.id)}">${esc(a.name)}</option>`).join('');
+    const cur = editingAcct && state.accounts.find(a => a.id === editingAcct);
+    sec.value = cur && cur.secures ? cur.secures : props.length === 1 && !editingAcct ? props[0].id : '';
+  }
+  document.getElementById('acct-debt-tip').hidden = !debt;
+  document.getElementById('acct-joint-field').hidden = !(TYPES[type] && JOINT_GROUPS.includes(TYPES[type].group)) || document.getElementById('acct-owner').value !== 'me';
+  document.getElementById('acct-share-wrap').hidden = !document.getElementById('acct-joint').checked;
   const f = ytdForm(type);
-  const split = !editingAcct && document.getElementById('acct-open-date').value > taxYearStart(TODAY) && document.getElementById('acct-open-value').value.trim() !== '';
+  const split = !editingAcct && !debt && document.getElementById('acct-open-date').value > taxYearStart(TODAY) && document.getElementById('acct-open-value').value.trim() !== '';
   document.getElementById('acct-split-wrap').hidden = !split;
   document.getElementById('acct-ytd-field').hidden = !f || !ytdEligible || (split && document.getElementById('acct-split').checked);
   if (f) { document.getElementById('acct-ytd-label').textContent = f.label; document.getElementById('acct-ytd-hint').textContent = f.hint; }
@@ -5150,6 +5372,9 @@ function openAcctSheet(id) {
   document.getElementById('acct-notes').value = a ? a.notes || '' : '';
   document.getElementById('acct-archived').checked = !!(a && a.archived);
   document.getElementById('acct-archived-wrap').hidden = !a;
+  document.getElementById('acct-secures').innerHTML = '';
+  document.getElementById('acct-joint').checked = !!(a && a.share);
+  document.getElementById('acct-share').value = a && a.share ? a.share : 50;
   updateAcctRelief();
   openSheet(acctSheet);
   setTimeout(() => document.getElementById(a ? 'acct-name' : 'acct-type').focus(), 50);
@@ -5162,12 +5387,13 @@ document.getElementById('acct-type').addEventListener('change', () => {
 });
 document.getElementById('acct-name').addEventListener('input', e => { e.target.dataset.auto = ''; });
 ['acct-open-value', 'acct-open-date', 'acct-split'].forEach(id => document.getElementById(id).addEventListener(id === 'acct-split' ? 'change' : 'input', updateAcctRelief));
+['acct-joint', 'acct-owner'].forEach(id => document.getElementById(id).addEventListener('change', updateAcctRelief));
 document.getElementById('acct-form').addEventListener('submit', e => {
   e.preventDefault();
   const name = document.getElementById('acct-name').value.trim();
   if (!name) return;
   const type = document.getElementById('acct-type').value;
-  const regAmount = num(document.getElementById('acct-reg-amount').value, 0);
+  const regAmount = document.getElementById('acct-reg-field').hidden ? 0 : num(document.getElementById('acct-reg-amount').value, 0);
   const regDay = clamp(+document.getElementById('acct-reg-day').value || 1, 1, 28);
   const relief = !document.getElementById('acct-reg-relief-wrap').hidden && document.getElementById('acct-reg-relief').checked;
   const fields = {
@@ -5180,11 +5406,19 @@ document.getElementById('acct-form').addEventListener('submit', e => {
     since: (v => /^(19|20)\d\d$/.test(v) && v <= TODAY.slice(0, 4) ? v : '')(document.getElementById('acct-since').value.trim()),
     archived: !!editingAcct && document.getElementById('acct-archived').checked
   };
+  const secures = !document.getElementById('acct-secures-field').hidden && document.getElementById('acct-secures').value;
+  fields.secures = secures || undefined;
+  const joint = !document.getElementById('acct-joint-field').hidden && document.getElementById('acct-joint').checked;
+  fields.share = joint ? clamp(Math.round(num(document.getElementById('acct-share').value, 50)), 1, 99) : undefined;
+  if (TYPES[type] && TYPES[type].group === 'property') fields.fee = 0;
   const pick = acctSheet.querySelector('input[name="acct-color"]:checked');
   if (pick && COLORS.includes(pick.value)) fields.color = pick.value;
   if (editingAcct) {
-    const a = state.accounts.find(x => x.id === editingAcct);
+    const a = state.accounts.find(x => x.id === editingAcct), wasDebt = isDebt(a);
     Object.assign(a, fields);
+    // Switching between a debt and any other type flips the sign of its balances (owed is stored below zero).
+    if (wasDebt !== isDebt(a)) state.logs.forEach(l => { if (l.accountId === a.id) { l.value = -l.value; if (l.baseValue != null) l.baseValue = -l.baseValue; } });
+    if (isDebt(a)) { a.fee = 0; a.priorPaid = null; a.since = ''; }
     if (regAmount > 0) {
       const same = a.regular && a.regular.day === regDay;
       a.regular = { amount: regAmount, day: regDay, relief, since: same ? a.regular.since : TODAY, last: same ? a.regular.last : '' };
@@ -5194,9 +5428,10 @@ document.getElementById('acct-form').addEventListener('submit', e => {
     clearExample([]);
     const used = new Set(state.accounts.map(a => a.color));
     const a = { id: uid(), color: COLORS.find(c => !used.has(c)) || COLORS[state.accounts.length % COLORS.length], ...fields, regular: regAmount > 0 ? { amount: regAmount, day: regDay, relief, since: TODAY, last: '' } : null };
+    if (isDebt(a)) { a.fee = 0; a.priorPaid = null; a.since = ''; }
     state.accounts.push(a);
     const open = parseFloat(document.getElementById('acct-open-value').value);
-    if (isFinite(open) && open >= 0) state.logs.push({ id: uid(), accountId: a.id, date: document.getElementById('acct-open-date').value || TODAY, value: open, note: 'Opening balance' });
+    if (isFinite(open) && open >= 0) state.logs.push({ id: uid(), accountId: a.id, date: document.getElementById('acct-open-date').value || TODAY, value: toBal(a.id, open), note: 'Opening balance' });
     if (!document.getElementById('acct-split-wrap').hidden && document.getElementById('acct-split').checked && logsOf(a.id).length) splitNext = a.id;
     else setYtd(a, document.getElementById('acct-ytd').value);
     ui.account = a.id;
@@ -5216,7 +5451,7 @@ document.getElementById('acct-form').addEventListener('submit', e => {
 // The 5 April balance becomes the first balance, so only the monthly payments count as money in this year.
 const tySheet = document.getElementById('ty-sheet');
 let tyAcct = null, splitNext = null;
-const canSplit = a => { const s = logsOf(a.id); return s.length > 0 && s[0].date > taxYearStart(TODAY) && s[0].date <= TODAY; };
+const canSplit = a => { const s = logsOf(a.id); return !isDebt(a) && s.length > 0 && s[0].date > taxYearStart(TODAY) && s[0].date <= TODAY; };
 function openTy(id) {
   const a = state.accounts.find(x => x.id === id);
   if (!a || !canSplit(a)) return;
@@ -5265,10 +5500,10 @@ document.getElementById('ty-form').addEventListener('submit', e => {
 // Add past balances: one row per date (e.g. each 5 April), with money paid in since the row before.
 const pastSheet = document.getElementById('past-sheet');
 let pastAcct = null;
-const pastRow = (date = '') => `<div class="bulk-row">
+const pastRow = (date = '', debt = isDebtId(pastAcct)) => `<div class="bulk-row">
   <div class="who"><input class="input" type="date" data-past="date" max="${TODAY}" value="${esc(date)}" aria-label="Date"></div>
-  <div class="money"><span>£</span><input class="input" type="number" inputmode="decimal" step="0.01" min="0" data-past="value" placeholder="Balance" aria-label="Balance"></div>
-  <div class="money"><span>£</span><input class="input" type="number" inputmode="decimal" step="0.01" min="0" data-past="paid" placeholder="Paid in" aria-label="Paid in since the row before"></div>
+  <div class="money"><span>£</span><input class="input" type="number" inputmode="decimal" step="0.01" min="0" data-past="value" placeholder="${debt ? 'Owed' : 'Balance'}" aria-label="${debt ? 'Amount owed' : 'Balance'}"></div>
+  <div class="money"><span>£</span><input class="input" type="number" inputmode="decimal" step="0.01" min="0" data-past="paid" placeholder="${debt ? 'Repaid' : 'Paid in'}" aria-label="${debt ? 'Repaid' : 'Paid in'} since the row before"></div>
 </div>`;
 function openPast(id) {
   const a = state.accounts.find(x => x.id === id);
@@ -5280,7 +5515,7 @@ function openPast(id) {
   const dates = [];
   for (let k = 0; k < 4; k++) dates.unshift(`${y - k}-04-05`);
   document.getElementById('past-title').textContent = `Past balances: ${a.name}`;
-  document.getElementById('past-hint').textContent = `One row per date, oldest first is fine. "Paid in" is money you added since the row before. Dates are suggestions (5 April, when annual statements are dated); change them or leave rows blank.${a.priorPaid != null ? ' If you add balances older than your first one, update "Total paid in so far" in Edit account to what you had paid in by the earliest date.' : ''}`;
+  document.getElementById('past-hint').textContent = `One row per date, oldest first is fine. ${isDebt(a) ? '"Owed" is what you owed on that date; "Repaid" is what you paid off' : '"Paid in" is money you added'} since the row before. Dates are suggestions (5 April, when annual statements are dated); change them or leave rows blank.${a.priorPaid != null ? ' If you add balances older than your first one, update "Total paid in so far" in Edit account to what you had paid in by the earliest date.' : ''}`;
   document.getElementById('past-rows').innerHTML = dates.map(d => pastRow(d)).join('');
   document.getElementById('past-err').textContent = '';
   moneyInputs(pastSheet);
@@ -5305,7 +5540,7 @@ document.getElementById('past-form').addEventListener('submit', e => {
   clearExample([pastAcct]);
   for (const r of rows) {
     const v = parseFloat(r.value), p = parseFloat(r.paid);
-    if (r.value !== '' && isFinite(v) && v >= 0) { upsertLog(pastAcct, r.date, v, ''); n++; }
+    if (r.value !== '' && isFinite(v) && v >= 0) { upsertLog(pastAcct, r.date, toBal(pastAcct, v), ''); n++; }
     if (r.paid !== '' && isFinite(p) && p > 0) { state.flows.push({ id: uid(), accountId: pastAcct, date: r.date, amount: p, own: p, note: 'Past payment', auto: false }); n++; }
   }
   if (!n) { document.getElementById('past-err').textContent = 'Enter at least one balance.'; return; }
@@ -5323,10 +5558,11 @@ function openBulk() {
     const st = accountStats(a.id);
     // Regular payments logged automatically since the last balance, so they aren't entered twice.
     const auto = st.last ? state.flows.filter(f => f.accountId === a.id && f.auto && f.date > st.last.date && f.date <= TODAY).reduce((t, f) => t + f.amount, 0) : 0;
+    const debt = isDebt(a), bal = debt ? 'Owed' : 'Balance', paid = debt ? 'Repaid' : 'Paid in';
     return `<div class="bulk-row">
-      <div class="who"><b>${esc(a.name)}</b>${ownerChip(a)}<div class="hint">${st.last ? `${gbp(st.last.value)} · ${ago(st.last.date).toLowerCase()}` : 'No balance yet'}${auto ? ` · ${gbp(auto)} regular payment already logged` : ''}</div></div>
-      <div class="money"><span>£</span><input class="input" type="number" inputmode="decimal" step="0.01" min="0" data-bulk="value" data-id="${esc(a.id)}" placeholder="Balance" aria-label="${esc(a.name)} balance"></div>
-      <div class="money"><span>£</span><input class="input" type="number" inputmode="decimal" step="0.01" min="0" data-bulk="paid" data-id="${esc(a.id)}" placeholder="Paid in" aria-label="${esc(a.name)} paid in"></div>
+      <div class="who"><b>${esc(a.name)}</b>${ownerChip(a)}<div class="hint">${st.last ? `${debt ? 'owed ' : ''}${gbp(debt ? -st.last.value : st.last.value)} · ${ago(st.last.date).toLowerCase()}` : 'No balance yet'}${auto ? ` · ${gbp(auto)} regular payment already logged` : ''}</div></div>
+      <div class="money"><span>£</span><input class="input" type="number" inputmode="decimal" step="0.01" min="0" data-bulk="value" data-id="${esc(a.id)}" placeholder="${bal}" aria-label="${esc(a.name)} ${bal.toLowerCase()}"></div>
+      <div class="money"><span>£</span><input class="input" type="number" inputmode="decimal" step="0.01" min="0" data-bulk="paid" data-id="${esc(a.id)}" placeholder="${paid}" aria-label="${esc(a.name)} ${paid.toLowerCase()}"></div>
     </div>`;
   }).join('');
   document.getElementById('bulk-same').hidden = !accts.some(a => lastPaid(a.id));
@@ -5348,7 +5584,7 @@ document.getElementById('bulk-form').addEventListener('submit', e => {
   });
   if (!entries.length) { bulkSheet.close(); return; }
   clearExample(entries.map(x => x.id));
-  for (const x of entries) if (x.kind === 'value') upsertLog(x.id, date, x.v, '');
+  for (const x of entries) if (x.kind === 'value') upsertLog(x.id, date, toBal(x.id, x.v), '');
   for (const x of entries) {
     if (x.kind !== 'paid' || !(x.v > 0)) continue;
     const f = { id: uid(), accountId: x.id, date, amount: x.v, own: x.v, note: '', auto: false };
@@ -5420,7 +5656,7 @@ function importCsv(text) {
       state.accounts.push(a); byName.set(name.toLowerCase(), a); created++;
     }
     const note = col.note >= 0 ? String(r[col.note] || '').slice(0, 80) : '';
-    if (isFinite(value) && value >= 0) { state.logs.push({ id: uid(), accountId: a.id, date, value, note }); logs++; }
+    if (isFinite(value) && value >= 0) { state.logs.push({ id: uid(), accountId: a.id, date, value: toBal(a.id, value), note }); logs++; }
     if (isFinite(paid) && paid !== 0) { state.flows.push({ id: uid(), accountId: a.id, date, amount: paid, own: paid, note: '', auto: false }); flows++; }
   }
   save(); render();
@@ -5784,7 +6020,7 @@ function computeNotes() {
       const basis = ui.notes.move.basis, som = Date.UTC(+TODAY.slice(0, 4), +TODAY.slice(5, 7) - 1, 0);
       for (const a of my) {
         const s = real(a.id);
-        if (s.length < 2) continue;
+        if (s.length < 2 || isDebt(a)) continue;
         const l1 = s[s.length - 1];
         if (basis === 'month') {
           const p = periodStats(a, som);
@@ -6019,6 +6255,7 @@ const emptyArt = k => `<div class="empty-art" aria-hidden="true"><svg viewBox="0
 // Months in a row with money paid in (this month counts once something is paid).
 // ym ('YYYY-MM') counts back from that month instead, for a past month's review.
 function streakOf(a, ym) {
+  if (isDebt(a)) return 0;
   const months = new Set(state.flows.filter(f => f.accountId === a.id && f.amount > 0 && !f.ytd && f.date <= TODAY).map(f => f.date.slice(0, 7)));
   let y = +(ym || TODAY).slice(0, 4), m = +(ym || TODAY).slice(5, 7);
   const key = () => `${y}-${pad(m)}`, back = () => { if (--m === 0) { m = 12; y--; } };
@@ -6286,7 +6523,7 @@ function backupHealth() {
 let visitInfo = undefined;
 function visitStrip(total) {
   if (state.example || ui.person !== 'me' || !state.profile.setupDone) return '';
-  const mineTotal = mine().reduce((t, a) => t + accountStats(a.id).cur, 0);
+  const mineTotal = mine().reduce((t, a) => t + curOf(a), 0);
   if (visitInfo === undefined) {
     const prev = ui.lastVisit;
     visitInfo = null;
@@ -6472,7 +6709,7 @@ document.addEventListener('click', async e => {
     case 'income-page': ui.incomePage = id; saveUi(); render(); window.scrollTo({ top: 0 }); break;
     case 'pay-months': ui.payMonths = +id; saveUi(); render(); break;
     case 'p60-from-pay': {
-      const yy = +id, slips = state.pay.filter(p => p.date >= `${yy}-04-06` && p.date <= `${yy + 1}-04-05` && p.gross > 0 && ['salary', 'bonus'].includes((sourceOf(p.source) || {}).kind));
+      const yy = +id, slips = myPay().filter(p => p.date >= `${yy}-04-06` && p.date <= `${yy + 1}-04-05` && p.gross > 0 && ['salary', 'bonus'].includes((sourceOf(p.source) || {}).kind));
       document.getElementById('p60-pay').value = Math.round(slips.reduce((s, p) => s + taxableOf(p), 0));
       document.getElementById('p60-tax').value = Math.round(slips.reduce((s, p) => s + p.tax, 0));
       break;
@@ -6542,6 +6779,7 @@ document.addEventListener('click', async e => {
       snapshot('Person removed');
       state.profile.people = state.profile.people.filter(p => p.id !== id);
       state.accounts.forEach(a => { if (a.owner === id) a.owner = 'me'; });
+      state.profile.sources.forEach(x => { if (x.owner === id) delete x.owner; });
       if (ui.person === id) ui.person = 'me';
       pendingPerson = null; save(); saveUi(); render(); break;
     case 'use-hist': state.profile.growth = clamp(Math.round(+id * 2) / 2, 0, 12); save(); render(); break;
@@ -6843,6 +7081,7 @@ document.addEventListener('submit', async e => {
     p.retireAge = clamp(Math.round(num(document.getElementById('pf-retire').value, 60)), 40, 80);
     p.band = BANDS[document.getElementById('pf-band').value] ? document.getElementById('pf-band').value : 'basic';
     p.monthlySpend = Math.max(0, num(document.getElementById('pf-spend').value, 0));
+    p.cashBench = clamp(num(document.getElementById('pf-bench').value, 4), 0, 15);
     save(); render(); setStatus('Saved.', false, 'profile-status');
   } else if (f.id === 'person-form') {
     e.preventDefault();

@@ -276,6 +276,30 @@ not advice — keep that disclaimer.
   Account picker (2.0.21): `acctPicker(accts, a)` = `.acct-bar` (‹ › `pick-account` neighbours, `acct-list` button opens `dialog#acct-list` grouped by GROUPS, closed at the bottom). Old `.acct-picker` strip is gone.
   `.month-strip` has no scroll snap (it stopped flings at each tile); keep it free-scrolling.
 
+- 2.0.22 debts: `TYPES` Mortgage/Loan/Credit card/Student loan (group `debt`, `debt: true`, `isDebt(a)`). Balances are stored
+  NEGATIVE; forms take the amount owed and convert with `toBal(id, v)` / prefill with `owedOf`; `clampBal` keeps estimates from
+  crossing 0. Changing an account to/from a debt type flips its log signs. `periodStats`: a debt's first balance is its start
+  (v0), not money in; repayments are paid in, interest is growth; `base` 0 so no return. Shares (alloc bar, Holdings weight,
+  Allocation, "Where it is") use assets only. Debts are left out of `planIncluded`, goals (`goalAccounts` 'all', pickers),
+  `payStats`, streaks and value-move notes. `chart()` axes reach below 0. Overview: `.stmt-net` Assets/Debts line, Debts KPI
+  (`debtLine`). FAQ `debts`. Demo has `demo_car` (Loan, 7.9%).
+- 2.0.23 property: types Home / Property (group `property`, `isProperty`). Value updates are growth; Purchase price uses
+  `priorPaid`, Bought in uses `since`. A Mortgage may carry `secures: propertyId` (`#acct-secures`, cleaned in `normalize`);
+  `mortgagesOf(p)`, `equityOf(p)`, `propTile`, `securedLine`. Property is left out of Accessible now, the planner, goals
+  ('all'), balanceJump and Year by year; it counts as locked in "Where it is". Card `.stmt-net` shows Home/Property equity.
+  FAQ `property`. Demo: `demo_home` (£285k bought 6 years ago) + `demo_mort` (4.5%, £1,150/month).
+- 2.0.24 joint accounts: `account.share` (1–99, your %) for groups in `JOINT_GROUPS`, only when owner is me (`#acct-joint`).
+  `shareOf(a)`, `curOf(a)`, `myStats(a)`; `timeline` and `periodTotals` scale by share, so every total, chart and Insight
+  counts your share; account pages and pickers show the whole balance. `ownerChip` adds "joint N%". FAQ `joint`.
+- 2.0.25 partner income: sources may carry `owner` (a `profile.people` id; `#src-owner`, shown when people exist).
+  `isMySource`, `myPay()` replace `state.pay` in payStats, payslip, P60 fill and tax views; `householdPanel()` on Income ›
+  Sources (by person, this and last tax year). Removing a person moves their sources to you. FAQ `household`. Demo partner
+  `demo_sam` (pension `demo_sampen`, salary `demo_samjob`).
+- 2.0.26 cash drag: `cashDrag(a)`/`cashDrags()` for Cash, Savings and Cash ISA (rate = account rate, else logged interest,
+  else 0% for Cash; a current account keeps monthlySpend or £1,500 as float; flagged when ≥£1,000 idle and rate < bench − 1).
+  `profile.cashBench` (default 4, Settings › You `#pf-bench`). Shown in `rateInfo` (base text now `rateInfoBase`) and Insights.
+  FAQ `drag`. Demo Easy Access Saver is at 1.6%.
+
 ## Status (latest)
 
 - 1.9.9 merged to main (PR #23); owner publishes the v1.9.9 release. Owner says when to merge.
