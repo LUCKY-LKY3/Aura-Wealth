@@ -65,7 +65,7 @@ From the net worth audit. One version and one PR each, in this order:
   savings rate, payslip and tax stay on your own pay
 - 2.0.26 Cash drag warning: cash earning more than 1% below a good rate (Settings, default 4%), on the account page
   and in Insights, with what a better rate would add a year
-- 2.0.27 Loan history: optional amount borrowed, date taken out and last payment month on a debt; its page shows
+- 2.0.27 Loan history: optional amount borrowed, date taken out and loan end date (last payment month) on a debt; its page shows
   borrowed, repaid since taken out, % paid off and time left (owner asked: a loan taken out 3 years ago with 1 year left)
 DB pension value and State Pension stay in 3.0 (shown separately from net worth).
 
