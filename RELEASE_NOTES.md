@@ -1,3 +1,5 @@
+- Partner income: add your partner as a person in Settings and their pay as an income source ("Whose income"); Income › Sources shows household take-home for each of you and in total, while your savings rate and tax figures stay yours
+- New Help question: can I add my partner's income?
 - Joint accounts: tick "Joint account" on a current account, savings, investments, property or a debt you share and enter your share; only your share counts in your net worth, charts and Overview, while the account page shows the whole balance
 - New Help question: how do joint accounts work?
 - Property: add your home or another property with what it's worth now and its purchase price; value changes show as growth

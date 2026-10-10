@@ -61,7 +61,8 @@ From the net worth audit. One version and one PR each, in this order:
   left out of Accessible now, the planner and goals
 - 2.0.24 Joint accounts: "Joint account" tick with your share (e.g. 50%) on cash, investment, property and debt accounts;
   totals count your share, the account page shows the whole balance
-- 2.0.25 Partner income: an owner on each income source (me / partner / joint) so household pay and saving can be shown
+- 2.0.25 Partner income: "Whose income" on each source (a person from Settings); Household income on Income › Sources;
+  savings rate, payslip and tax stay on your own pay
 - 2.0.26 Cash drag warning: lots of cash in a low-interest account (uses the rate entered on the account), with what a
   better rate would add a year
 DB pension value and State Pension stay in 3.0 (shown separately from net worth).

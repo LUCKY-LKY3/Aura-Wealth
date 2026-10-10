@@ -291,6 +291,10 @@ not advice — keep that disclaimer.
 - 2.0.24 joint accounts: `account.share` (1–99, your %) for groups in `JOINT_GROUPS`, only when owner is me (`#acct-joint`).
   `shareOf(a)`, `curOf(a)`, `myStats(a)`; `timeline` and `periodTotals` scale by share, so every total, chart and Insight
   counts your share; account pages and pickers show the whole balance. `ownerChip` adds "joint N%". FAQ `joint`.
+- 2.0.25 partner income: sources may carry `owner` (a `profile.people` id; `#src-owner`, shown when people exist).
+  `isMySource`, `myPay()` replace `state.pay` in payStats, payslip, P60 fill and tax views; `householdPanel()` on Income ›
+  Sources (by person, this and last tax year). Removing a person moves their sources to you. FAQ `household`. Demo partner
+  `demo_sam` (pension `demo_sampen`, salary `demo_samjob`).
 
 ## Status (latest)
 
