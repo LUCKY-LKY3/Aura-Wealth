@@ -1,2 +1,2 @@
-- Payslip now shows your take-home pay for the month (and the tax year so far) even when you've only logged what reached your bank, without gross pay or deductions
-- New Help questions: how to log pay, how your savings rate is worked out, how to see an earlier month or year, and what Payslip shows. Savings rate and Payslip breakdown have a "?" button that opens them
+- Capital gains on the tax return helper: enter each investment account's profit or loss for the tax year (for example a CFD or share dealing account's closed positions, from your provider's yearly statement). Aurum checks it against the £3,000 tax-free amount, carries losses forward and adds any capital gains tax to the refund check. It's only used for tax, so your balances and net worth don't change
+- New Help question: how to record capital gains, for example from a CFD account

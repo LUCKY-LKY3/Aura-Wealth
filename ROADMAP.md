@@ -103,6 +103,8 @@ Always in today's money and marked "illustration, not advice".
   use logged interest where there is some, otherwise balance growth in the tax year, marked "estimated from balances" with a
   "Log as interest" button; Personal Savings Allowance meter by band (£1,000 / £500 / £0); flag growth far above the account's
   advertised rate as a probably unlogged payment rather than interest
+- Started in 2.0.20: a yearly realised gain/loss per investment account on the Tax return helper (e.g. a CFD account's
+  closed positions), annual exempt amount, losses carried forward, CGT at 18%/24% in the refund check. Still to come:
 - Capital gains panel (Insights › Tax year, first CGT piece, feeds the engine): log sales from a GIA (date, proceeds,
   allowable cost, copied from the provider's CGT report; new `disposals` list), optional losses carried forward;
   £3,000 annual exempt amount meter and estimated CGT at 18%/24% by band (2026-27 rates, GOV.UK); rough unrealised gain

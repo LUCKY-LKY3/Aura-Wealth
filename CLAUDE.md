@@ -263,6 +263,11 @@ not advice — keep that disclaimer.
   plus tax year so far in Month view) and the details prompt instead of an empty state.
   FAQ `log-pay`, `rate`, `periods`, `slip` (Saving and income); `why()` on the Savings rate and Payslip breakdown titles.
 
+- 2.0.20: `account.gains` {'YYYY': realised gain/loss, may be negative} for invest/other accounts (`normGains`, `gainAccts()`), typed
+  from the provider's yearly statement; tax only, never money in or growth. `capitalGains(y, band)` (in `taxReport` as `r.cg`): net,
+  annual exempt (`taxRules(y).cgt`), earlier losses used down to the exempt amount, carry-forward, CGT 10/20% before 2024 else 18/24%;
+  `est.cgtTax` joins the refund check. `gainsRow()` on the Tax return helper (`data-gain`/`data-year` inputs, saved on change). FAQ `cgt`.
+
 ## Status (latest)
 
 - 1.9.9 merged to main (PR #23); owner publishes the v1.9.9 release. Owner says when to merge.

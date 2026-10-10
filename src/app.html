@@ -539,6 +539,12 @@ tr.confirm td{background:var(--neg-soft)}
 .money{position:relative}
 .money span{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--ink-3)}
 .money .input{padding-left:24px;font-family:var(--mono)}
+tr:has(+ .gain-tr) td{border-bottom:0}
+.gain-tr td{padding-top:0}
+.gain-list{display:grid;gap:6px;margin:0 0 8px}
+.gain-in{display:grid;grid-template-columns:1fr 130px;gap:10px;align-items:center;color:var(--ink-2)}
+.gain-in > span:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.gain-in .input{padding-block:6px;font-size:13px}
 input[type=range]{width:100%;accent-color:var(--primary)}
 .form-grid{display:grid;gap:18px}
 .hint{font-size:12px;color:var(--ink-3);margin:0}
@@ -1430,6 +1436,11 @@ function normYearly(o) {
   if (!o || typeof o !== 'object') return {};
   return Object.fromEntries(Object.entries(o).filter(([y, v]) => /^\d{4}$/.test(y) && isFinite(+v) && +v >= 0 && v !== null && v !== '').map(([y, v]) => [y, +v]));
 }
+// 2.0.20 realised gains per tax year may be negative (a loss).
+function normGains(o) {
+  if (!o || typeof o !== 'object') return {};
+  return Object.fromEntries(Object.entries(o).filter(([y, v]) => /^\d{4}$/.test(y) && v !== null && v !== '' && isFinite(+v)).map(([y, v]) => [y, +v]));
+}
 function normProfile(p, done) {
   p = p && typeof p === 'object' ? p : {};
   return {
@@ -1577,6 +1588,8 @@ function normalize(o) {
         since: /^(19|20)\d\d$/.test(String(a.since || '')) ? String(a.since) : '',
         yearly: normYearly(a.yearly)
       };
+      const gains = normGains(a.gains);
+      if (Object.keys(gains).length) acct.gains = gains;
       if (a.demo) acct.demo = true;
       return acct;
     });
@@ -2038,6 +2051,7 @@ function taxReport(y) {
   const giaOut = sum(state.flows.filter(f => gia.some(a => a.id === f.accountId) && inTY(f.date) && f.amount < 0), f => -f.amount);
   const interestTotal = sum(interest, x => x.amount), divTotal = sum(dividends, x => x.amount);
   const rules = taxRules(y), psa = PSA[band];
+  const cg = capitalGains(y, band);
   // With a P60: PAYE should have taken tax as if there were no pension relief; the difference is extra relief to claim.
   let est = null;
   if (p60) {
@@ -2052,7 +2066,7 @@ function taxReport(y) {
     const rate = { basic: 0.2, higher: 0.4, additional: 0.45 }[band], divRate = { basic: 0.0875, higher: 0.3375, additional: 0.3935 }[band];
     const taxPaid = p60.tax + p60.tax2, expected = plain.tax - maCut;
     const relief = afterExp.tax - withRelief.tax, giftRelief = withRelief.tax - withAll.tax;
-    const savingsTax = Math.max(0, interestTotal - psa) * rate, divTax = Math.max(0, divTotal - rules.div) * divRate;
+    const savingsTax = Math.max(0, interestTotal - psa) * rate, divTax = Math.max(0, divTotal - rules.div) * divRate, cgtTax = cg.tax;
     // PAYE can't collect tax on "other income"; it's paid through Self Assessment.
     const otherTax = p60.other ? plain.tax - incomeTax(income - p60.other, y, 0, paAdj).tax : 0;
     const payeDiff = taxPaid - (expected - otherTax);
@@ -2060,7 +2074,7 @@ function taxReport(y) {
     const ani = net0 - ras - giftGross;
     const cbAmount = p60.cb || childBenefit(y, p60.kids), cbc = cbAmount ? hicbc(y, ani, cbAmount) : null;
     const hicbcCharge = cbc ? cbc.charge : 0;
-    const net = taxPaid - (withAll.tax - maCut) - savingsTax - divTax - hicbcCharge;
+    const net = taxPaid - (withAll.tax - maCut) - savingsTax - divTax - cgtTax - hicbcCharge;
     // Tips: gross pension needed to clear the Child Benefit charge, or to get back out of the £100k allowance taper.
     const tips = [];
     if (hicbcCharge > 0) tips.push({ kind: 'cb', gross: ani - cbc.from, saves: hicbcCharge + (ani - cbc.from) * ({ basic: 0.2, higher: 0.4, additional: 0.45 }[band] - 0.2) });
@@ -2076,10 +2090,28 @@ function taxReport(y) {
     }
     const maHint = p60.marriage === 'none' && income < rules.pa ? 'You earn under the personal allowance: if your spouse or civil partner is a basic-rate taxpayer, you could transfer £1,260 of it to them (Marriage Allowance), worth up to £252 a year.'
       : p60.marriage === 'none' && plain.band === 'basic' ? 'If your spouse or civil partner earns under £12,570, they could transfer £1,260 of their allowance to you (Marriage Allowance), worth up to £252 a year.' : '';
-    est = { income, pay: p60.pay, taxPaid, expected, payeDiff, relief, giftRelief, giftGross, maCut, otherTax, savingsTax, divTax, net, expCode, codeNote, maHint, other: p60.other, expRelief, exp, ani, cbAmount, cbc, hicbcCharge, tips };
+    est = { income, pay: p60.pay, taxPaid, expected, payeDiff, relief, giftRelief, giftGross, maCut, otherTax, savingsTax, divTax, cgtTax, net, expCode, codeNote, maHint, other: p60.other, expRelief, exp, ani, cbAmount, cbc, hicbcCharge, tips };
   }
   return { y, start, end, partial: last < end, band, ras, extraRelief: est ? est.relief : ras * BANDS[band].extra, aaUsed, aa: rules.aa, employer: sum(employerFlows, f => f.amount),
-    interest, interestTotal, psa, dividends, divTotal, divAllow: rules.div, cgt: rules.cgt, isaSubs, bonds, giaOut, est, fromP60: !!p60 };
+    interest, interestTotal, psa, dividends, divTotal, divAllow: rules.div, cgt: rules.cgt, isaSubs, bonds, giaOut, cg, est, fromP60: !!p60 };
+}
+// 2.0.20 capital gains: one realised profit or loss per tax year on each investment account (account.gains, keyed by the
+// tax year's start), typed in from the provider's yearly statement (e.g. a CFD account's closed positions). Tax pages only:
+// never money in or growth, which come from balances. Net losses from earlier years entered here are carried forward and
+// used only down to the annual exempt amount, as HMRC does. Rates: 10/20% before 2024/25, then 18/24% (from 30 Oct 2024).
+const gainAccts = () => mine().filter(a => groupOf(a) === 'invest' || groupOf(a) === 'other');
+function capitalGains(y, band) {
+  const accts = gainAccts(), netOf = yr => accts.reduce((t, a) => t + ((a.gains && a.gains[yr]) || 0), 0);
+  const years = [...new Set(accts.flatMap(a => Object.keys(a.gains || {}).map(Number)))].filter(v => v < y).sort((a, b) => a - b);
+  let bf = 0;
+  for (const yr of years) { const n = netOf(yr); if (n < 0) bf -= n; else bf -= Math.min(bf, Math.max(0, n - taxRules(yr).cgt)); }
+  const list = accts.filter(a => !a.archived || (a.gains && a.gains[y] != null));
+  const entered = list.filter(a => a.gains && a.gains[y] != null);
+  const net = netOf(y), exempt = taxRules(y).cgt;
+  const lossUsed = net > 0 ? Math.min(bf, Math.max(0, net - exempt)) : 0;
+  const taxable = Math.max(0, net - lossUsed - exempt);
+  const rate = y >= 2024 ? (band === 'basic' ? 0.18 : 0.24) : (band === 'basic' ? 0.1 : 0.2);
+  return { list, entered: entered.length > 0, net, exempt, bf, lossUsed, taxable, rate, tax: taxable * rate, cf: bf - lossUsed + Math.max(0, -net) };
 }
 function taxText(r) {
   const L = [`Aurum tax year summary ${r.y}/${String(r.y + 1).slice(2)} (6 April ${r.y} to 5 April ${r.y + 1})${r.partial ? ', so far' : ''}`, ''];
@@ -2091,6 +2123,10 @@ function taxText(r) {
   r.interest.forEach(x => L.push(`  - ${x.a.name}${x.a.provider ? ' (' + x.a.provider + ')' : ''}: ${g(x.amount)}${x.estimated ? ' estimated' : ''}`));
   L.push(`Dividends outside ISAs and pensions: ${g(r.divTotal)}; Dividend Allowance ${g(r.divAllow)}`);
   r.dividends.forEach(x => L.push(`  - ${x.a.name}: ${g(x.amount)}`));
+  if (r.cg.entered) {
+    L.push(`Capital gains (net, outside ISAs and pensions): ${r.cg.net < 0 ? '-' : ''}${g(Math.abs(r.cg.net))}; annual exempt amount ${g(r.cg.exempt)}${r.cg.lossUsed > 0 ? `; earlier losses used ${g(r.cg.lossUsed)}` : ''}; taxable ${g(r.cg.taxable)}`);
+    r.cg.list.filter(a => a.gains && a.gains[r.y] != null).forEach(a => L.push(`  - ${a.name}: ${a.gains[r.y] < 0 ? '-' : ''}${g(Math.abs(a.gains[r.y]))}`));
+  }
   L.push(`ISA subscriptions (tax-free, not reported): ${g(r.isaSubs)}`);
   if (r.bonds > 0) L.push(`Premium Bonds prizes (tax-free, not reported): ${g(r.bonds)}`);
   if (r.est) { L.push(`Income ${g(r.est.income)}, tax deducted ${g(r.est.taxPaid)}, tax due ${g(r.est.expected)}.`); if (r.est.giftRelief > 0.5) L.push(`Gift Aid relief to claim: ${g(r.est.giftRelief)} (gross donations ${g(r.est.giftGross)})`); L.push(`Estimated ${r.est.net >= 0 ? 'refund' : 'amount owed'}: ${g(Math.abs(r.est.net))}`); }
@@ -3640,7 +3676,7 @@ function p60Form(y) {
 function taxEstimate(r) {
   const e = r.est, line = (k, v, note, c) => `<tr><td>${k}${note ? `<div class="hint">${note}</div>` : ''}</td><td class="r val ${c || ''}">${v}</td></tr>`;
   const net = e.net, cap = w => w[0].toUpperCase() + w.slice(1);
-  const needSA = e.other > 0 || e.savingsTax > 0.5 || e.divTax > 0.5 || e.hicbcCharge > 0;
+  const needSA = e.other > 0 || e.savingsTax > 0.5 || e.divTax > 0.5 || e.cgtTax > 0.5 || e.hicbcCharge > 0;
   const steps = [];
   if (e.relief > 0.5) steps.push(`<b>Pension relief (${gbp(e.relief)}):</b> in a Self Assessment return, enter ${gbp(r.ras)} in the pensions section. If you don't file one, call HMRC, write to them, or use your personal tax account. HMRC can also adjust your tax code for future years. <a href="https://www.gov.uk/tax-on-your-private-pension/pension-tax-relief" target="_blank" rel="noopener">gov.uk guide</a>`);
   if (e.giftRelief > 0.5) steps.push(`<b>Gift Aid (${gbp(e.giftRelief)}):</b> claimed the same way; the gross donation is ${gbp(e.giftGross)}. <a href="https://www.gov.uk/donating-to-charity/gift-aid" target="_blank" rel="noopener">gov.uk guide</a>`);
@@ -3650,7 +3686,7 @@ function taxEstimate(r) {
     if (tip.kind === 'cb') steps.push(`<b>Tip:</b> about <b>${gbp(tip.gross)}</b> more paid into a pension (gross, which costs you ${gbp(tip.gross * 0.8)} after basic-rate relief) would bring your adjusted net income to ${gbp(e.cbc.from)} and remove the ${gbp(e.hicbcCharge)} charge, as well as giving you higher-rate relief.`);
     if (tip.kind === 'taper') steps.push(`<b>Tip:</b> between £100,000 and £125,140 you lose £1 of personal allowance for every £2 earned, an effective 60% tax rate. About <b>${gbp(tip.gross)}</b> gross more into a pension would bring your adjusted net income back to £100,000.`);
   }
-  if (needSA) steps.push(`<b>Self Assessment:</b> untaxed income (such as rental profit, or savings interest and dividends over your allowances) usually has to be declared. Online returns are due by 31 January. <a href="https://www.gov.uk/self-assessment-tax-returns" target="_blank" rel="noopener">gov.uk guide</a>`);
+  if (needSA) steps.push(`<b>Self Assessment:</b> untaxed income (such as rental profit, or savings interest and dividends over your allowances) and capital gains over the annual exempt amount usually has to be declared. Online returns are due by 31 January. <a href="https://www.gov.uk/self-assessment-tax-returns" target="_blank" rel="noopener">gov.uk guide</a>`);
   if (Math.abs(e.payeDiff) >= 50) steps.push(`<b>Tax deducted looks ${e.payeDiff > 0 ? 'too high' : 'low'}:</b> check your tax code in your personal tax account. HMRC usually refunds overpaid PAYE automatically after the tax year. <a href="https://www.gov.uk/check-income-tax-current-year" target="_blank" rel="noopener">Check your Income Tax</a>`);
   if (e.maHint) steps.push(`<b>Marriage Allowance:</b> ${e.maHint} <a href="https://www.gov.uk/marriage-allowance" target="_blank" rel="noopener">gov.uk guide</a>`);
   return `<div class="table-wrap"><table><tbody>
@@ -3661,6 +3697,7 @@ function taxEstimate(r) {
     ${e.giftRelief > 0.5 ? line('Gift Aid relief to claim', '+' + gbp(e.giftRelief), 'Higher or additional-rate relief on your donations', 'pos') : ''}
     ${e.savingsTax > 0.5 ? line('Tax on savings interest', '−' + gbp(e.savingsTax), 'Interest over your Personal Savings Allowance', 'neg') : ''}
     ${e.divTax > 0.5 ? line('Tax on dividends', '−' + gbp(e.divTax), 'Dividends over the Dividend Allowance', 'neg') : ''}
+    ${e.cgtTax > 0.5 ? line('Capital gains tax', '−' + gbp(e.cgtTax), `${gbp(r.cg.taxable)} of gains over the annual exempt amount`, 'neg') : ''}
     ${e.cbc ? line('High Income Child Benefit Charge', e.hicbcCharge ? '−' + gbp(e.hicbcCharge) : gbp(0), `${e.cbc.pct}% of ${gbp(e.cbAmount)} Child Benefit. Adjusted net income ${gbp(e.ani)}; the charge runs from ${gbp(e.cbc.from)} to ${gbp(e.cbc.to)}.`, e.hicbcCharge ? 'neg' : '') : ''}
     ${e.codeNote ? line('Tax code', esc(state.profile.p60[r.y].code), esc(e.codeNote)) : ''}
     <tr class="grp"><td>${net >= 0 ? 'Estimated refund due to you' : 'Estimated tax you may owe'}</td><td class="r val ${net >= 0 ? 'pos' : 'neg'}">${gbp(Math.abs(net))}</td></tr>
@@ -3814,7 +3851,7 @@ function taxPanel() {
       ${row('<b>Pension annual allowance used</b>', gbp(r.aaUsed) + over(r.aaUsed, r.aa), `You and your employer, against ${gbp(r.aa)}. Unused allowance from the last 3 years can be carried forward.`)}
       ${row('<b>Untaxed UK interest</b>', gbp(r.interestTotal) + over(r.interestTotal, r.psa), `Non-ISA savings. Personal Savings Allowance ${gbp(r.psa)} for ${BANDS[r.band].word}-rate.${r.interest.length ? '<br>' + r.interest.map(x => `${esc(x.a.name)}: ${gbp(x.amount)}${x.estimated ? ' (estimated from growth: log interest for exact figures)' : ''}`).join('<br>') : ''}`)}
       ${row('<b>Dividends</b>', gbp(r.divTotal) + over(r.divTotal, r.divAllow), `Outside ISAs and pensions, against the ${gbp(r.divAllow)} Dividend Allowance. Log dividends from your investment accounts.`)}
-      ${r.giaOut > 0 ? row('<b>Sold from investment accounts</b>', gbp(r.giaOut), `Withdrawals may involve selling shares. Gains over ${gbp(r.cgt)} need reporting; Aurum does not track purchase costs, so check your provider's capital gains report.`) : ''}
+      ${gainsRow(r, row)}
       ${row('ISA subscriptions', gbp(r.isaSubs), 'Tax-free, not reported.')}
       ${r.bonds > 0 ? row('Premium Bonds prizes', gbp(r.bonds), 'Tax-free, not reported.') : ''}
     </tbody></table></div>
@@ -3826,6 +3863,22 @@ function taxPanel() {
     <div class="row-actions"><button class="btn" data-action="tax-copy" data-id="${y}">Copy summary</button><button class="btn ghost" data-action="tax-share" data-id="${y}">Share</button><span class="status" id="tax-status" role="status"></span></div>
     <p class="hint">A helper only, not tax advice. Uses ${r.fromP60 ? `your ${tyLabel(y)} P60 (${BANDS[r.band].word}-rate)` : 'your tax band from Settings'}. Check figures against your providers' annual statements and the HMRC guidance for each section.</p>
   </section>`;
+}
+
+// 2.0.20 one input per investment account for the tax year's realised gain or loss (saved on change).
+function gainsRow(r, row) {
+  const c = r.cg;
+  if (!c.list.length) return r.giaOut > 0 ? row('<b>Sold from investment accounts</b>', gbp(r.giaOut), `Withdrawals may involve selling shares. Gains over ${gbp(r.cgt)} need reporting; check your provider's capital gains report and enter the gain below.`) : '';
+  const inputs = c.list.map(a => `<label class="gain-in"><span>${esc(a.name)}</span><span class="money"><span>£</span><input class="input" type="number" step="any" data-gain="${esc(a.id)}" data-year="${r.y}" value="${a.gains && a.gains[r.y] != null ? a.gains[r.y] : ''}" placeholder="0" aria-label="Gain or loss on ${esc(a.name)} in ${tyLabel(r.y)}"></span></label>`).join('');
+  let out = '';
+  if (c.entered) {
+    if (c.net < 0) out = `A net loss of <b>${gbp(-c.net)}</b>. Report it to HMRC within 4 years and you can set it against future gains.`;
+    else out = `Tax-free up to ${gbp(c.exempt)}${c.lossUsed > 0 ? `; ${gbp(c.lossUsed)} of earlier losses used` : ''}. ${c.taxable > 0 ? `Taxable gain <b>${gbp(c.taxable)}</b>, about <b>${gbp(c.tax)}</b> tax at ${Math.round(c.rate * 100)}% (${BANDS[r.band].word}-rate), paid through Self Assessment.` : 'Nothing to pay.'}`;
+    if (c.cf > 0.5) out += ` Losses to carry forward: ${gbp(c.cf)}.`;
+  } else if (r.giaOut > 0) out = `You took ${gbp(r.giaOut)} out this year, which may have meant selling.`;
+  const val = c.entered ? signed(c.net) : '<span class="faint">Not entered</span>';
+  return row(`<b>Capital gains</b> ${why('cgt', 'How capital gains work')}`, val, `Profit or loss on investments sold or positions closed this tax year, outside ISAs and pensions, from your provider's yearly statement. Enter a loss with a minus sign.`)
+    + `<tr class="gain-tr"><td colspan="2"><div class="gain-list">${inputs}</div>${out ? `<div class="hint">${out}</div>` : ''}</td></tr>`;
 }
 
 /* ---------- what's changed ---------- */
@@ -4265,6 +4318,7 @@ const FAQ = [
   ['typical', 'What is the typical savings rate?', 'Your savings rate with one-offs like bonuses and gifts left out, assuming you saved those first. It shows what you save from your normal pay. Mark pay as <b>One-off</b> when you log it.', 'Saving and income'],
   // Pensions and tax
   ['relief', 'Why does my pension get 25% more than I paid?', 'With relief at source, you pay 80% and the pension provider claims 20% basic-rate tax back, so £80 becomes £100. Tick the tax relief box and Aurum adds it. Higher-rate taxpayers can claim more through a tax return; see the tax helper.', 'Pensions and tax'],
+  ['cgt', 'How do I record capital gains, for example from a CFD or share dealing account?', 'Log the account\'s balance as usual (for a CFD account, your equity: cash plus or minus open profit or loss), with deposits as paid in. Your profit or loss then shows as growth in net worth. Tax is due on the profit from positions you <b>close</b>, not on withdrawals. Once a year, take the total realised profit or loss for 6 April to 5 April from your provider (on Trading 212: History › Export, Closed Positions, the Result column) and enter it under <b>Insights › Tax return › Capital gains</b>. It is only used for tax: it doesn\'t change your balance or net worth, so nothing is counted twice. Gains up to the annual exempt amount (£3,000) are tax-free; a loss can be set against later gains if you report it to HMRC within 4 years. Spread betting profits are tax-free, so leave those out.', 'Pensions and tax'],
   // Your data and privacy
   ['backup', 'How do backups work?', 'Aurum keeps your data on this device only, so a backup is the only copy if you lose or change your phone. In <b>Settings → Backup and restore</b>: <b>Export backup</b> shares a file you can save to Google Drive or email to yourself; <b>Save to phone</b> puts it in Documents; <b>Automatic weekly backup</b> (Android app) keeps the 8 newest copies in Documents/Aurum. Add a <b>password</b> to encrypt every backup; it can\'t be recovered, so keep it safe. To restore, use <b>Import backup file</b> (or paste the text). The card at the top of that section shows when you last backed up.', 'Your data and privacy'],
   ['privacy', 'Where is my data, and how do I move to a new phone?', 'Everything stays on this device; nothing is sent anywhere. Use <b>Settings → Backup and restore → Export backup</b> regularly (you can add a password), then <b>Import backup file</b> on the new phone.', 'Your data and privacy'],
@@ -5564,7 +5618,7 @@ async function scheduleTaxReminders() {
   const last = +taxYearStart(TODAY).slice(0, 4) - 1;
   const note = [{ id: 1002, title: 'P60 time', body: `Add your ${tyLabel(last + 1)} P60 in Aurum to check for a tax refund.`, schedule: { on: { month: 6, day: 15, hour: 9, minute: 0 }, allowWhileIdle: true } }];
   const r = taxReport(last), e = r.est;
-  if (e && (Math.abs(e.net) >= 50 || e.other > 0 || e.savingsTax > 0.5 || e.divTax > 0.5)) {
+  if (e && (Math.abs(e.net) >= 50 || e.other > 0 || e.savingsTax > 0.5 || e.divTax > 0.5 || e.cgtTax > 0.5)) {
     note.push({ id: 1003, title: 'Self Assessment due 31 January', body: `Your ${tyLabel(last)} figures show ${e.net >= 0 ? `about ${fmtGBP.format(Math.round(e.net))} to claim` : 'tax to declare'}. Open Aurum's tax helper.`, schedule: { on: { month: 1, day: 10, hour: 9, minute: 0 }, allowWhileIdle: true } });
   }
   await N.schedule({ notifications: note });
@@ -6667,6 +6721,13 @@ function readFile(input, fn) {
 }
 document.addEventListener('change', e => {
   const t = e.target;
+  if (t.dataset && t.dataset.gain) {
+    const a = state.accounts.find(x => x.id === t.dataset.gain); if (!a) return;
+    a.gains = a.gains || {};
+    if (t.value.trim() === '' || !isFinite(+t.value)) delete a.gains[t.dataset.year]; else a.gains[t.dataset.year] = Math.round(+t.value * 100) / 100;
+    if (!Object.keys(a.gains).length) delete a.gains;
+    save(); render(); return;
+  }
   if (t.id === 'goal-scope') { document.getElementById('goal-picks').hidden = t.value !== 'pick'; return; }
   if (t.dataset && t.dataset.goalAcct) {
     const g = state.goals.find(x => x.id === t.dataset.goalAcct); if (!g) return;
