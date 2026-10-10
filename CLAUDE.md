@@ -295,6 +295,10 @@ not advice — keep that disclaimer.
   `isMySource`, `myPay()` replace `state.pay` in payStats, payslip, P60 fill and tax views; `householdPanel()` on Income ›
   Sources (by person, this and last tax year). Removing a person moves their sources to you. FAQ `household`. Demo partner
   `demo_sam` (pension `demo_sampen`, salary `demo_samjob`).
+- 2.0.26 cash drag: `cashDrag(a)`/`cashDrags()` for Cash, Savings and Cash ISA (rate = account rate, else logged interest,
+  else 0% for Cash; a current account keeps monthlySpend or £1,500 as float; flagged when ≥£1,000 idle and rate < bench − 1).
+  `profile.cashBench` (default 4, Settings › You `#pf-bench`). Shown in `rateInfo` (base text now `rateInfoBase`) and Insights.
+  FAQ `drag`. Demo Easy Access Saver is at 1.6%.
 
 ## Status (latest)
 

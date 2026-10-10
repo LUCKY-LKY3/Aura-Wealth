@@ -1512,6 +1512,7 @@ function normProfile(p, done) {
     inflation: clamp(num(p.inflation, 2.5), 0, 10),
     drawRate: clamp(num(p.drawRate, 4), 1, 10),
     monthlySpend: Math.max(0, num(p.monthlySpend, 0)),
+    cashBench: clamp(num(p.cashBench, 4), 0, 15),
     people: Array.isArray(p.people) ? p.people.filter(x => x && x.id && x.name).map(x => ({ id: String(x.id), name: String(x.name).slice(0, 30) })) : [],
     lastBackup: isIso(p.lastBackup) ? p.lastBackup : '',
     sources: Array.isArray(p.sources) ? p.sources.filter(x => x && x.id && x.name).map(x => {
@@ -1550,7 +1551,7 @@ function seedExample(profile) {
     ['demo_cisa', 'Cash ISA', 'Trading 212', 'Cash ISA', 'c4', 5000, 100, 0.0036, 0, { rate: 4.4, interest: true }],
     ['demo_gia', 'Share dealing', 'Freetrade', 'GIA', 'c6', 1500, 50, 0.006, 0.03, { dividends: true }],
     ['demo_bonds', 'Premium Bonds', 'NS&I', 'Premium Bonds', 'c4', 15000, 0, 0, 0, { prizes: true }],
-    ['demo_save', 'Easy Access Saver', 'Chase', 'Savings', 'c5', 9000, 150, 0.0034, 0, { rate: 4.1, interest: true }],
+    ['demo_save', 'Easy Access Saver', 'High Street Bank', 'Savings', 'c5', 9000, 150, 0.0013, 0, { rate: 1.6, interest: true }],
     ['demo_current', 'Joint current account', 'Monzo', 'Cash', 'c2', 1800, 0, 0, 0.12, { share: 50 }],
     ['demo_jisa', `${kid.name}'s Junior ISA`, 'Fidelity', 'JISA', 'c6', 3200, 100, 0.006, 0.022, { owner: kid.id }],
     ['demo_sampen', `${partner.name}'s Workplace Pension`, 'Nest', 'Pension', 'c3', 18000, 150, 0.0055, 0.018, { owner: partner.id, employer: 120 }]
@@ -2233,6 +2234,23 @@ function emergencyFund() {
   const cash = mine().filter(a => EASY_CASH.includes(a.type)).reduce((t, a) => t + curOf(a), 0);
   return { cash, spend, months: cash / spend };
 }
+// 2.0.26 cash drag: money in easy-access cash earning well below a good rate (profile.cashBench, default 4%).
+// A current account keeps one month's spending (or £1,500) as a float; the rest counts as idle.
+// The rate is the one entered on the account, else what logged interest worked out at, else 0% for a current account.
+function cashDrag(a) {
+  if (a.archived || !['Cash', 'Savings', 'Cash ISA'].includes(a.type)) return null;
+  const bench = state.profile.cashBench, bal = curOf(a);
+  let rate = a.rate || null;
+  if (rate == null) {
+    const since = msIso(TODAY_MS - 365 * 864e5), got = state.income.filter(x => x.accountId === a.id && x.kind === 'interest' && x.date > since).reduce((t, x) => t + x.amount, 0);
+    rate = got > 0 && bal > 0 ? got / bal * 100 : a.type === 'Cash' ? 0 : null;
+  }
+  if (rate == null || rate >= bench - 1) return null;
+  const idle = a.type === 'Cash' ? bal - (state.profile.monthlySpend || 1500) : bal;
+  if (idle < 1000) return null;
+  return { a, idle, rate, bench, extra: idle * (bench - rate) / 100 };
+}
+const cashDrags = () => active(mine()).map(cashDrag).filter(Boolean).sort((x, y) => y.extra - x.extra);
 const lisaUsed = () => allowanceUsed(mine().filter(a => a.type === 'LISA'), 'isa');
 const staleAccounts = accts => active(accts).filter(a => { const s = logsOf(a.id).filter(l => !l.estimated); return !s.length || daysSince(s[s.length - 1].date) > 30; });
 function ageOn(dob, iso) {
@@ -3390,6 +3408,11 @@ function heatmapPanel(accts) {
 }
 // "Effective rate" for Premium Bonds and savings over the last 12 months, against the advertised rate.
 function rateInfo(a) {
+  const d = cashDrag(a);
+  if (d) return `${rateInfoBase(a) ? rateInfoBase(a) + ' ' : ''}<span class="drag-tip">${gbp(d.idle)} here is earning ${d.rate ? 'about ' + d.rate.toFixed(1) + '%' : 'no interest'}. At ${d.bench}% it would earn about <b>${gbp(d.extra)}</b> more a year. ${why('drag', 'About low-interest cash')}</span>`;
+  return rateInfoBase(a);
+}
+function rateInfoBase(a) {
   if (isDebt(a)) {
     const owed = -accountStats(a.id).cur;
     return a.rate && owed > 0 ? `At ${a.rate}% a year, interest on what you owe is about <b>${gbp(owed * a.rate / 1200)}</b> a month.` : '';
@@ -4077,6 +4100,8 @@ function renderInsights() {
     if (j.length) { const used = allowanceUsed(j, 'jisa'); add('£', `${esc(person.name)}'s Junior ISA: <b>${gbp(used)}</b> of ${gbp(JISA_ALLOWANCE)} used this tax year.`); }
   }
   if (ui.person !== 'all' && ui.person !== 'me') { /* allowances below are the user's own */ } else {
+    const drags = cashDrags();
+    if (drags.length) add('%', `<b>${gbp(drags.reduce((t, d) => t + d.idle, 0))}</b> in ${drags.length === 1 ? `<b>${esc(drags[0].a.name)}</b> is` : `${drags.length} accounts is`} earning little interest. At ${state.profile.cashBench}% it could earn about <b>${gbp(drags.reduce((t, d) => t + d.extra, 0))}</b> more a year.`, why('drag', 'About low-interest cash'));
     const ef = emergencyFund();
     if (ef) add('☂', `Your easy-access cash of <b>${gbp(ef.cash)}</b> covers about <b>${ef.months.toFixed(1)} months</b> of spending. A common guide is 3 to 6 months.`);
   }
@@ -4478,6 +4503,7 @@ const FAQ = [
   ['property', 'How do I add my home or other property?', 'Add an account of type <b>Home</b> (where you live) or <b>Other property</b> (a buy-to-let or second home) with what it is worth now. Use a recent valuation or an online estimate and update it once or twice a year: a change in value shows as growth. Put what you paid in <b>Purchase price</b>, so the rise since you bought it counts as growth rather than money paid in. Then add the mortgage as a debt and pick the property under <b>Secured on</b>: the property\'s page shows your <b>equity</b> (its value less the mortgage) and the loan to value, and the net worth card shows your equity. Property is counted in your net worth but not in <b>Accessible now</b>, the retirement plan or goals.', 'Accounts and balances'],
   ['joint', 'How do joint accounts work?', 'For an account you share, such as a joint current account, savings or a mortgage with a partner, tick <b>Joint account</b> in Add or Edit account and enter <b>your share</b> (50% for an even split). Log the whole balance, as your bank shows it: the account\'s own page shows the whole amount, while your net worth, charts and Overview count only your share (Holdings shows your share, marked <b>joint 50%</b>). Joint isn\'t offered for pensions and ISAs, which are always in one person\'s name. If you\'d rather track a partner\'s own accounts separately, add them as a person in Settings instead.', 'Accounts and balances'],
   ['household', 'Can I add my partner\'s income?', 'Yes. Add your partner as a person in <b>Settings</b>, then add their pay as an income source and pick them under <b>Whose income</b>. Log their pay as usual. <b>Income › Sources</b> then shows <b>Household income</b>: take-home pay this tax year and last, for each of you and in total. Your savings rate, payslip breakdown and tax figures still use only your own pay, so they stay right for your own tax return. For an account you share, use <b>Joint account</b> instead.', 'Saving and income'],
+  ['drag', 'What is the low-interest cash check?', 'Cash earning little or no interest loses value to inflation. Aurum looks at your current accounts, savings accounts and Cash ISAs and compares each one\'s rate with <b>a good savings rate today</b> (4% unless you change it in <b>Settings › You</b>). It uses the rate you entered on the account, or what the interest you logged works out at; a current account with no rate counts as 0%. A current account keeps one month\'s spending (from Settings, or £1,500) as day-to-day money, and only the rest counts. When the rate is more than 1% below and at least £1,000 is affected, the account page and <b>Insights</b> show what a better rate would add a year. It\'s a prompt to shop around, not advice: think about access and the FSCS £85,000 limit too.', 'Saving and income'],
   ['move', 'How do I log money moved between my accounts?', 'Log it on both accounts: <b>Taken out</b> on the one it left and <b>Paid in</b> on the one it reached, ticking <b>Moved</b> on both. Your savings rate stays the same and each account\'s growth stays right. GIA to ISA uses your ISA allowance; a proper ISA to ISA transfer doesn\'t, so tick <b>ISA transfer</b>. Into a SIPP, also tick the tax relief box.', 'Accounts and balances'],
   ['april', 'I started tracking after 6 April. How do I fix this tax year?', 'Open the account and tap <b>Split it: 5 April balance and monthly payments</b>. Enter what was there on 5 April (0 if it opened later) and what you paid in each month. Only those payments then count as paid in this tax year.', 'Accounts and balances'],
   ['pick', 'How do I choose which accounts count?', '<b>Net worth and Overview charts:</b> open <b>Includes N of M accounts</b> on the net worth card or under "Where your wealth came from" and untick an account to leave it out. <b>Planner:</b> tick accounts under <b>Accounts and monthly payments</b> in Retirement\'s inputs; the <b>Includes N of M accounts</b> link under your pot takes you there. <b>Goals:</b> pick <b>Choose accounts…</b> when adding a goal, or open <b>Accounts that count</b> on a goal in Planner → Goals to change it.', 'Accounts and balances'],
@@ -4601,6 +4627,7 @@ function renderSettings() {
             <div class="field"><label for="pf-retire">Retirement age</label><input id="pf-retire" class="input" type="number" min="40" max="80" inputmode="numeric" value="${p.retireAge}"></div>
             <div class="field"><label for="pf-band">Income tax band</label><select id="pf-band" class="input">${Object.entries(BANDS).map(([k, b]) => `<option value="${k}" ${p.band === k ? 'selected' : ''}>${b.label}</option>`).join('')}</select></div>
           </div>
+          <div class="field"><label for="pf-bench">A good savings rate today <span class="faint">% a year, for the low-interest cash check</span></label><input id="pf-bench" class="input" type="number" inputmode="decimal" min="0" max="15" step="0.1" value="${p.cashBench}"></div>
           <div class="field"><label for="pf-spend">Monthly spending <span class="faint">Optional, for the emergency fund check</span></label><div class="money"><span>£</span><input id="pf-spend" class="input" type="number" inputmode="decimal" min="0" step="50" value="${p.monthlySpend || ''}"></div></div>
           <p class="hint">Used by the planner, tax helper and pension access age. Stored only on this device.</p>
           <div class="row-actions"><button class="btn primary" type="submit">Save details</button><span class="status" id="profile-status" role="status"></span></div>
@@ -7054,6 +7081,7 @@ document.addEventListener('submit', async e => {
     p.retireAge = clamp(Math.round(num(document.getElementById('pf-retire').value, 60)), 40, 80);
     p.band = BANDS[document.getElementById('pf-band').value] ? document.getElementById('pf-band').value : 'basic';
     p.monthlySpend = Math.max(0, num(document.getElementById('pf-spend').value, 0));
+    p.cashBench = clamp(num(document.getElementById('pf-bench').value, 4), 0, 15);
     save(); render(); setStatus('Saved.', false, 'profile-status');
   } else if (f.id === 'person-form') {
     e.preventDefault();

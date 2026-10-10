@@ -1,3 +1,5 @@
+- Low-interest cash check: when a current account, savings account or Cash ISA holds £1,000 or more earning well below a good rate (4%, change it in Settings › You), its page and Insights show what a better rate would add a year
+- New Help question: what is the low-interest cash check?
 - Partner income: add your partner as a person in Settings and their pay as an income source ("Whose income"); Income › Sources shows household take-home for each of you and in total, while your savings rate and tax figures stay yours
 - New Help question: can I add my partner's income?
 - Joint accounts: tick "Joint account" on a current account, savings, investments, property or a debt you share and enter your share; only your share counts in your net worth, charts and Overview, while the account page shows the whole balance

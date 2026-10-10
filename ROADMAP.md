@@ -63,8 +63,8 @@ From the net worth audit. One version and one PR each, in this order:
   totals count your share, the account page shows the whole balance
 - 2.0.25 Partner income: "Whose income" on each source (a person from Settings); Household income on Income › Sources;
   savings rate, payslip and tax stay on your own pay
-- 2.0.26 Cash drag warning: lots of cash in a low-interest account (uses the rate entered on the account), with what a
-  better rate would add a year
+- 2.0.26 Cash drag warning: cash earning more than 1% below a good rate (Settings, default 4%), on the account page
+  and in Insights, with what a better rate would add a year
 DB pension value and State Pension stay in 3.0 (shown separately from net worth).
 
 ## 2.x: Future Me and "what your saving means" (owner idea)
