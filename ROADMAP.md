@@ -48,9 +48,20 @@ Order: 2.0 polish and charts → 2.x Future Me → 3.0 pensions, property and de
 - Done in 2.0.21: Accounts › All accounts tidy (3,456px to 2,647px on a phone): "Your money vs growth" bars merged
   into "Every account" (one slim bar and return under each row), "Where it is" donut folded to one line, account picker as one bar with a list
 - Native SVG Tooltips: hover/touch interaction on all charts showing exact data values at each point
-- Cash drag warning: lots of cash in a low-interest account (user enters rate)
 - Interest checker: savings rate vs a benchmark rate the user sets
-- Income follow-ups: household / partner income (owner per source), goal dates from current savings rate
+- Income follow-ups: goal dates from current savings rate
+
+## 2.0.22+: core net worth gaps (owner, 10 Oct 2026: "add these to 2.x", order picked by Claude)
+From the net worth audit. One version and one PR each, in this order:
+- 2.0.22 Debts: Mortgage, Loan, Credit card and Student loan account types (group "Debts"); what you owe is taken off
+  net worth (assets − debts); repayments count as money in, interest as negative growth; Debts tile and Assets/Debts line
+  on the net worth card; kept out of the planner, goals and savings rate; FAQ "How are debts counted?"
+- 2.0.23 Property and home equity: home / buy-to-let values, linked mortgage, equity in net worth, value updates as growth
+- 2.0.24 Joint accounts: an account owned jointly, with your share counted in your net worth (e.g. 50%)
+- 2.0.25 Partner income: an owner on each income source (me / partner / joint) so household pay and saving can be shown
+- 2.0.26 Cash drag warning: lots of cash in a low-interest account (uses the rate entered on the account), with what a
+  better rate would add a year
+DB pension value and State Pension stay in 3.0 (shown separately from net worth).
 
 ## 2.x: Future Me and "what your saving means" (owner idea)
 Turns the planner into a simulator from the user's own data (planner growth, inflation, retirement age, goals, pay).
@@ -88,8 +99,7 @@ Always in today's money and marked "illustration, not advice".
     and keeps the DB income estimate up to date
 - State Pension: yearly amount (from the user's forecast) from State Pension age, same "yearly income from an age" model
   as DB; in the planner, and optionally in pension wealth; NI Qualifying Years tracker (path to state pension eligibility)
-- Property and debts: home/property values and liabilities (mortgage, loans, cards), so net worth = assets − liabilities
-  and debt reduction shows in "where your wealth came from"
+- Property and debts: moved to 2.0.22 / 2.0.23 (see above)
 - Workplace DC pensions shown properly (employer vs own contributions, salary sacrifice vs relief at source)
 - Tax-free cash tracker (25%, Lump Sum Allowance £268,275), drawdown
 - LISA Penalty Coaching: explain 25% withdrawal penalty on lifetime ISAs, flag risky situations, provide guidance on eligible uses

@@ -276,6 +276,14 @@ not advice — keep that disclaimer.
   Account picker (2.0.21): `acctPicker(accts, a)` = `.acct-bar` (‹ › `pick-account` neighbours, `acct-list` button opens `dialog#acct-list` grouped by GROUPS, closed at the bottom). Old `.acct-picker` strip is gone.
   `.month-strip` has no scroll snap (it stopped flings at each tile); keep it free-scrolling.
 
+- 2.0.22 debts: `TYPES` Mortgage/Loan/Credit card/Student loan (group `debt`, `debt: true`, `isDebt(a)`). Balances are stored
+  NEGATIVE; forms take the amount owed and convert with `toBal(id, v)` / prefill with `owedOf`; `clampBal` keeps estimates from
+  crossing 0. Changing an account to/from a debt type flips its log signs. `periodStats`: a debt's first balance is its start
+  (v0), not money in; repayments are paid in, interest is growth; `base` 0 so no return. Shares (alloc bar, Holdings weight,
+  Allocation, "Where it is") use assets only. Debts are left out of `planIncluded`, goals (`goalAccounts` 'all', pickers),
+  `payStats`, streaks and value-move notes. `chart()` axes reach below 0. Overview: `.stmt-net` Assets/Debts line, Debts KPI
+  (`debtLine`). FAQ `debts`. Demo has `demo_car` (Loan, 7.9%).
+
 ## Status (latest)
 
 - 1.9.9 merged to main (PR #23); owner publishes the v1.9.9 release. Owner says when to merge.

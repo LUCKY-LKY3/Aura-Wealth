@@ -1,7 +1,5 @@
-- Tidier Accounts › All accounts: "Your money vs growth" and "Every account" are now one list, with each account's money-in vs growth bar and return under its row, and "Where it is" folds to one line (accessible vs locked) until you open it
-- Account picker on Accounts: one bar shows the account you're on, ‹ › step to the next one, and the middle button opens a list of every account grouped by type, with closed accounts at the bottom
-- Month and year strips (Insights month review, Income Savings and Payslip) scroll faster: a flick now keeps rolling smoothly instead of stopping at each month
-- Capital gains on the tax return helper: enter each investment account's profit or loss for the tax year (for example a CFD or share dealing account's closed positions, from your provider's yearly statement). Aurum checks it against the £3,000 tax-free amount, carries losses forward and adds any capital gains tax to the refund check. It's only used for tax, so your balances and net worth don't change
-- New Help question: how to record capital gains, for example from a CFD account
-- Clearer how-to: Help has a worked example for capital gains (Trading 212's Closed Positions export), and choosing General investment account explains how to log a share dealing, CFD or crypto account
-- Capital gains on the Tax year page next to your allowances (so far this year, out of £3,000), and a reminder after 6 April if last year's gains aren't entered yet
+- Debts: add a mortgage, loan, credit card or student loan as an account and what you owe is taken off your net worth, so your total is now everything you have minus everything you owe
+- Log repayments as money in: what you owe falls and your net worth rises, while the interest the lender adds shows as the cost of the debt
+- The net worth card shows your assets and debts, Overview has a Debts tile, and each debt's page shows what you owed at the start, what you've repaid, the interest charged and roughly what interest costs a month
+- Debts stay out of the retirement plan, goals and your savings rate; shares such as Allocation are of your assets only
+- New Help question: how are debts counted?
