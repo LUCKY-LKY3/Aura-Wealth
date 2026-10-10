@@ -1,3 +1,4 @@
+- With a rate, a loan shows its monthly payment and the interest charged so far (an estimate from the rate)
 - Loans you've had a while: add the amount borrowed, when you took it out and the month of the last payment (Edit account). The loan's page then shows what you borrowed, how much is paid off, what's left and the time to go
 - Low-interest cash check: when a current account, savings account or Cash ISA holds £1,000 or more earning well below a good rate (4%, change it in Settings › You), its page and Insights show what a better rate would add a year
 - New Help question: what is the low-interest cash check?

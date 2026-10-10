@@ -1985,7 +1985,9 @@ function periodStats(a, startMs, endMs = TODAY_MS) {
   else if (v0 == null) { opening = s[0].value; v0 = 0; from = s[0].date; } else from = msIso(startMs);
   // 2.0.27: all-time, a loan starts at what was borrowed; its fall to the first balance counts as repaid (interest then is unknown).
   const ln = debt && !isFinite(startMs) ? loanFrom(a, s) : null;
-  const pre = ln ? s[0].value + ln.amount : 0;
+  // With the rate and last payment known, the interest charged before the first balance comes from the loan's schedule (an estimate).
+  const lp = ln ? loanPlan(a) : null;
+  const pre = ln ? s[0].value + ln.amount + (lp ? lp.interestTo(lp.paidBy(s[0].date)) : 0) : 0;
   if (ln) v0 = -ln.amount;
   const fl = flowsOf(a.id).filter(f => f.date > from && f.date <= end);
   const flowSum = fl.reduce((t, f) => t + f.amount, 0) + pre;
@@ -2001,6 +2003,21 @@ function periodStats(a, startMs, endMs = TODAY_MS) {
 }
 // A debt's loan details (2.0.27) count only when the amount and a start date before the first balance are known.
 const loanFrom = (a, s = logsOf(a.id)) => a.loan && a.loan.amount > 0 && a.loan.start && s.length && a.loan.start < s[0].date ? a.loan : null;
+// A fixed-rate loan's schedule (2.0.27): the level monthly payment that clears the amount by the last payment month,
+// and the interest charged after k payments. Needs amount, start and end; a rate of 0 splits the amount evenly.
+function loanPlan(a) {
+  const L = a.loan;
+  if (!L || !(L.amount > 0) || !L.start || !L.end) return null;
+  const mi = iso => { const [y, m] = iso.split('-').map(Number); return y * 12 + m; };
+  const n = mi(L.end) - mi(L.start);
+  if (n < 1) return null;
+  const A = L.amount, r = (a.rate || 0) / 1200, g = 1 + r;
+  const pay = r ? A * r / (1 - Math.pow(g, -n)) : A / n;
+  const owedAfter = k => r ? A * Math.pow(g, k) - pay * (Math.pow(g, k) - 1) / r : A - pay * k;
+  // Payments made by a date: one a month after it was taken out, counting a month once its day has come round.
+  const paidBy = iso => Math.min(n, Math.max(0, mi(iso) - mi(L.start) - (+iso.slice(8, 10) < +L.start.slice(8, 10) ? 1 : 0)));
+  return { n, pay, rate: a.rate || 0, owedAfter, paidBy, interestTo: k => Math.max(0, pay * k - (A - owedAfter(k))), total: Math.max(0, pay * n - A) };
+}
 const monthsLeft = end => { if (!end) return null; const [y, m] = end.split('-').map(Number), [ny, nm] = TODAY.split('-').map(Number); return (y * 12 + m) - (ny * 12 + nm); };
 const spanText = n => { const y = Math.floor(n / 12), m = n % 12; return [y ? `${y} year${y === 1 ? '' : 's'}` : '', m ? `${m} month${m === 1 ? '' : 's'}` : ''].filter(Boolean).join(' ') || 'under a month'; };
 function yearlyExtra(a, firstIso, toIso) {
@@ -2906,9 +2923,12 @@ function loanLine(a, st) {
   const amt = ln ? ln.amount : 0, off = amt ? Math.min(1, Math.max(0, (amt - owed) / amt)) : null;
   const when = [L.start ? `Taken out ${dateLabel(toMs(L.start))}` : '', L.end ? `last payment ${fmtMonth.format(new Date(toMs(L.end + '-01')))} ${L.end.slice(0, 4)}` : ''].filter(Boolean).join(' · ');
   const time = left == null ? '' : owed < 0.5 ? '' : left > 0 ? `<b>${spanText(left)}</b> left` : left === 0 ? 'Last payment due this month' : 'Past its last payment date';
-  if (off == null && !when && !time) return '';
+  // With a rate, the schedule gives the monthly payment and the interest charged so far (an estimate, as lenders round).
+  const lp = loanPlan(a), k = lp ? lp.paidBy(TODAY) : 0;
+  const sched = lp && k ? `<p class="hint" style="margin:6px 0 0">Monthly payment about <b>${gbp(lp.pay)}</b> at ${lp.rate}%. About <b>${gbp(lp.interestTo(k))}</b> interest charged over the ${k} payment${k === 1 ? '' : 's'} so far, an estimate from the rate.</p>` : '';
+  if (off == null && !when && !time && !sched) return '';
   return `<div class="loan-line" style="margin-top:12px">${off != null ? `<div class="pg-bar" role="img" aria-label="${Math.round(off * 100)}% paid off"><i style="flex:${off};background:var(--pos)"></i><i style="flex:${1 - off};background:var(--line-strong)"></i></div>` : ''}
-    <p class="hint" style="margin:6px 0 0">${off != null ? `<b>${Math.round(off * 100)}%</b> paid off: ${gbp(amt - owed)} of ${gbp(amt)}, ${gbp(owed)} to go. ` : ''}${[when, time].filter(Boolean).join(' · ')}${when || time ? '.' : ''}</p></div>`;
+    <p class="hint" style="margin:6px 0 0">${off != null ? `<b>${Math.round(off * 100)}%</b> paid off: ${gbp(amt - owed)} of ${gbp(amt)}, ${gbp(owed)} to go. ` : ''}${[when, time].filter(Boolean).join(' · ')}${when || time ? '.' : ''}</p>${sched}</div>`;
 }
 function securedLine(m) {
   const p = state.accounts.find(a => a.id === m.secures);
@@ -3100,11 +3120,11 @@ function renderAccounts() {
   const hist = ui.hist;
   const years = [...new Set([...state.logs, ...state.flows, ...state.income].map(x => taxYear(x.date)))].sort().reverse();
   // 2.0.22 debts: the figure is what you owe; tiles show where it started, repayments and the interest charged.
-  const debt = isDebt(a), prop = isProperty(a), ln = debt ? loanFrom(a, st.s) : null;
+  const debt = isDebt(a), prop = isProperty(a), ln = debt ? loanFrom(a, st.s) : null, lp = ln ? loanPlan(a) : null;
   const debtStats = debt ? `<div class="stats">
           <div class="stat"><div class="k">${ln ? 'Borrowed' : 'Owed at start'}</div><div class="v">${all ? gbp(-all.v0) : '—'}</div>${ln ? `<div class="k">${dateLabel(toMs(ln.start))}</div>` : ''}</div>
           <div class="stat"><div class="k">Repaid</div><div class="v">${all ? gbp(all.paid) : '—'}</div>${ln ? '<div class="k">since taken out</div>' : ''}</div>
-          <div class="stat"><div class="k">Interest charged</div><div class="v ${all && all.growth < -0.5 ? 'neg' : ''}">${all && st.s.length > 1 ? gbp(Math.max(0, -all.growth)) : '—'}</div>${ln && st.s.length > 1 ? `<div class="k">since ${dateLabel(toMs(st.s[0].date))}</div>` : ''}</div>
+          <div class="stat"><div class="k">Interest charged</div><div class="v ${all && all.growth < -0.5 ? 'neg' : ''}">${all && (st.s.length > 1 || lp) ? gbp(Math.max(0, -all.growth)) : '—'}</div>${ln && lp ? '<div class="k">about, since taken out</div>' : ln && st.s.length > 1 ? `<div class="k">since ${dateLabel(toMs(st.s[0].date))}</div>` : ''}</div>
           <div class="stat"><div class="k">Interest rate</div><div class="v">${a.rate ? a.rate + '%' : '—'}</div></div>
         </div>` : '';
   view.innerHTML = `

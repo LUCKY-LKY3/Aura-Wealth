@@ -304,6 +304,9 @@ not advice — keep that disclaimer.
   then starts at −amount and counts the fall to the first balance as repaid (`pre`); ranged figures are unchanged. Account page:
   "Borrowed" tile, `loanLine()` (% paid off bar, taken out, last payment, `monthsLeft`/`spanText`), a "Borrowed" point on the chart.
   Demo `demo_car`: £15,000 taken out 30 months ago over 5 years, tracked for 18 months at £303/month.
+  `loanPlan(a)` (needs amount, start, end and the account rate): level monthly payment, schedule and interest so far (`paidBy`, `interestTo`).
+  With it, `periodStats` adds the estimated interest before the first balance to the repaid figure (so growth = interest, not a guess),
+  and `loanLine` shows the payment and interest so far as an estimate.
 
 ## Status (latest)
 
