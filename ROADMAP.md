@@ -230,6 +230,8 @@ Always in today's money and marked "illustration, not advice".
     to see take-home, tax/NI, pension and savings-rate changes, and what saving part of the rise does long term
   - Bills-free-month check: flag accounts with no balance logged for 90 days (bell note + Overview line, tap to
     Update all), so stale balances don't skew net worth
+  - Hide sections: a list of sections in Settings with a tick-box to show or hide each (like the account picker),
+    so people can switch off parts they don't use; hidden sections keep their data. Parked ("no need for now")
 
 ## Monetisation (owner to decide; tax helper is now 4.0)
 - Plan: free core + one-off "Aurum Pro" unlock (~£5–£15) via Google Play; optional tip jar on the website
