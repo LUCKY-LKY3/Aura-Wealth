@@ -207,6 +207,13 @@ Always in today's money and marked "illustration, not advice".
   custom account types; printable one-page PDF net-worth report
 - 3.x+: couple mode (shared via backup file); estate summary for family; documents vault;
   home-screen widget; Wear OS tile; shareable year-in-review each April
+- Owner ideas (10 Oct 2026):
+  - Money-to-date coach: a weekly line such as "On track for £X paid in by 5 April" (this tax year's pace vs
+    allowances and the usual monthly amount), on Overview or in the bell
+  - Pay-rise simulator: a "Pay rise" tab in Planner, also reachable from Income › Payslip; enter a new salary or %
+    to see take-home, tax/NI, pension and savings-rate changes, and what saving part of the rise does long term
+  - Bills-free-month check: flag accounts with no balance logged for 90 days (bell note + Overview line, tap to
+    Update all), so stale balances don't skew net worth
 
 ## Monetisation (owner to decide; tax helper is now 4.0)
 - Plan: free core + one-off "Aurum Pro" unlock (~£5–£15) via Google Play; optional tip jar on the website
