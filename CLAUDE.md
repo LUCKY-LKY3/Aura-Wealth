@@ -270,6 +270,12 @@ not advice — keep that disclaimer.
   `allowancesPanel()` adds a Capital gains block (this year vs exempt); bell note `cgt-<y>` (20 Apr to 31 Jan) when last year's gains are
   missing for invest/other accounts held then; `#acct-type-tip` explains logging CFD/trading accounts when type GIA is picked.
 
+- 2.0.21 All accounts tidy: `everyAccount(order)` replaces `paidGrowthPanel` + the inline table (`table.every`): each row with a
+  balance history gets a `tr.pg-row` underneath (money-vs-growth `.pg-bar`, scaled to the largest listed account, plus return on phones).
+  `splitPanel` ("Where it is" donut + accessible/locked) is fold `all-where`, closed by default; its legend still filters via `ui.allType`.
+  Account picker (2.0.21): `acctPicker(accts, a)` = `.acct-bar` (‹ › `pick-account` neighbours, `acct-list` button opens `dialog#acct-list` grouped by GROUPS, closed at the bottom). Old `.acct-picker` strip is gone.
+  `.month-strip` has no scroll snap (it stopped flings at each tile); keep it free-scrolling.
+
 ## Status (latest)
 
 - 1.9.9 merged to main (PR #23); owner publishes the v1.9.9 release. Owner says when to merge.

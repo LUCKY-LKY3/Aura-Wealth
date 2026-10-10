@@ -135,9 +135,8 @@ body.swiping .tabbar button:active{transform:none}
 .stmt-trend.reveal svg{animation:reveal 1.2s cubic-bezier(.3,.7,.2,1) both}
 @keyframes reveal{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}}
 /* Press feedback */
-.btn,.icon-btn,.tabbar button,.acct-picker button,.seg button,.note-act,.pk-btn{transition:transform .12s ease,background .15s,border-color .15s,color .15s}
-.btn:active,.icon-btn:active,.tabbar button:active,.acct-picker button:active,.seg button:active,.pk-btn:active{transform:scale(.95)}
-tr.clickable,.set-row,.note{transition:background .15s,opacity .12s}
+.btn,.icon-btn,.tabbar button,.ab-step,.seg button,.note-act{transition:transform .12s ease,background .15s,border-color .15s,color .15s}
+.btn:active,.icon-btn:active,.tabbar button:active,.seg button:active,tr.clickable,.set-row,.note{transition:background .15s,opacity .12s}
 tr.clickable:active,.set-row:active,.note:active,.pressing{opacity:.7}
 /* Empty states */
 .menu-btn{justify-content:flex-start;padding:12px 14px;font-size:14px;width:100%}.menu-btn svg{width:18px;height:18px;color:var(--gold)}
@@ -177,7 +176,7 @@ tr.clickable:active,.set-row:active,.note:active,.pressing{opacity:.7}
 .health li span{flex:1;color:var(--ink-2)}.health li b{font-weight:550}
 .hdot{width:9px;height:9px;border-radius:50%;flex:none}
 .hdot.green{background:var(--pos)}.hdot.amber{background:var(--gold)}.hdot.red{background:var(--neg)}
-@media (prefers-reduced-motion:reduce){.stmt-trend.reveal svg{animation:none}.btn:active,.icon-btn:active,.tabbar button:active,.acct-picker button:active,.seg button:active,.pk-btn:active{transform:none}}
+@media (prefers-reduced-motion:reduce){.stmt-trend.reveal svg{animation:none}.btn:active,.icon-btn:active,.tabbar button:active,.seg button:active,.ab-step:active{transform:none}}
 
 
 /* ---------- 1.9.3 ---------- */
@@ -521,9 +520,6 @@ tr.confirm td{background:var(--neg-soft)}
 .activity .amt{text-align:right;font-family:var(--mono);font-weight:500}
 .activity .d{font-size:12px;text-align:right;font-family:var(--mono)}
 
-.acct-picker{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;border-bottom:1px solid var(--line)}
-.acct-picker button{flex:none;display:flex;align-items:center;gap:8px;border:0;border-bottom:2px solid transparent;background:transparent;color:var(--ink-2);padding:10px 12px;font-weight:550;font-size:13px;margin-bottom:-1px}
-.acct-picker button[aria-pressed="true"]{border-bottom-color:var(--gold);color:var(--ink)}
 .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:0;border:1px solid var(--line);border-radius:10px;overflow:hidden}
 .stat{padding:12px 14px;border-right:1px solid var(--line);margin-right:-1px}
 .stat .k{font-size:12px;color:var(--ink-3)}
@@ -707,11 +703,12 @@ dialog.sheet.wide{width:min(620px,calc(100% - 32px))}
 .ms-chip{display:inline-flex;align-items:baseline;gap:8px;padding:6px 12px;border:1px solid color-mix(in srgb,var(--gold) 35%,var(--line));border-radius:999px;font-size:13px;color:var(--ink-3)}
 .ms-chip b{color:var(--gold);font-weight:600}
 .review details.fold2 .fold-body .review-grid{margin-top:14px}
-.month-strip{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin:14px -18px 0;padding:2px 18px 4px;scroll-snap-type:x proximity;mask-image:linear-gradient(90deg,transparent,#000 16px,#000 calc(100% - 16px),transparent)}
+.month-strip{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin:14px -18px 0;padding:2px 18px 4px;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;will-change:scroll-position;mask-image:linear-gradient(90deg,transparent,#000 16px,#000 calc(100% - 16px),transparent)}
 .month-strip::-webkit-scrollbar{display:none}
+/* 2.0.21: no scroll snap, so a flick keeps rolling with full momentum instead of stopping at each tile */
 @media (min-width:760px){.month-strip{margin-inline:-22px;padding-inline:22px}}
 .month-strip .ms-yr{flex:none;align-self:center;font-family:var(--mono);font-size:11px;color:var(--ink-3);writing-mode:vertical-rl;transform:rotate(180deg);letter-spacing:.06em}
-.month-strip button{flex:none;scroll-snap-align:center;width:52px;height:52px;border-radius:12px;border:1px solid var(--line);background:var(--surface-2);color:var(--ink-2);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;font:inherit;font-size:13px;font-weight:600;cursor:pointer}
+.month-strip button{flex:none;width:52px;height:52px;border-radius:12px;border:1px solid var(--line);background:var(--surface-2);color:var(--ink-2);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;font:inherit;font-size:13px;font-weight:600;cursor:pointer}
 .month-strip button i{width:18px;height:3px;border-radius:2px;background:var(--line-strong)}
 .month-strip button i.on{background:color-mix(in srgb,var(--gold) 75%,transparent)}.month-strip button i.up{background:color-mix(in srgb,var(--pos) 75%,transparent)}.month-strip button i.down{background:color-mix(in srgb,var(--neg) 75%,transparent)}
 .month-strip button[aria-pressed=true]{border-color:color-mix(in srgb,var(--gold) 55%,transparent);background:var(--gold-soft);color:var(--gold)}
@@ -811,16 +808,28 @@ details.fold2.inner[open]{box-shadow:inset 3px 0 0 var(--gold);padding-left:12px
 .sheet-actions{position:sticky;bottom:0;background:var(--surface);padding:12px 0 calc(4px + var(--sa-bottom));margin-top:0;z-index:2;border-top:1px solid var(--line)}
 /* Account picker stays at the top while scrolling */
 .picker-wrap{position:sticky;top:0;z-index:5;background:var(--bg);padding-top:2px}
-.picker-box{position:relative}
-.picker-wrap .acct-picker{scroll-behavior:smooth}
-.pk-edge{position:absolute;top:0;bottom:1px;width:64px;display:flex;align-items:center;pointer-events:none;opacity:0;transition:opacity .15s}
-.pk-edge.on{opacity:1}
-.pk-edge.r{right:0;justify-content:flex-end;background:linear-gradient(90deg,transparent,var(--bg) 62%)}
-.pk-edge.l{left:0;justify-content:flex-start;background:linear-gradient(270deg,transparent,var(--bg) 62%)}
-.pk-btn{pointer-events:auto;width:32px;height:32px;border-radius:50%;background:var(--surface-2);border:1px solid var(--line-strong);color:var(--gold);display:grid;place-items:center;padding:0}
-.pk-btn svg{width:16px;height:16px}
-.pk-count{font-size:12px;color:var(--ink-3);padding:6px 2px 2px}
-@media (prefers-reduced-motion:reduce){.picker-wrap .acct-picker{scroll-behavior:auto}}
+/* 2.0.21 account bar: ‹ › step to the neighbouring account, the middle button opens the list (dialog#acct-list) */
+.acct-bar{display:flex;align-items:center;gap:8px;padding:4px 0 8px}
+.ab-step{flex:none;width:40px;height:44px;border-radius:12px;border:1px solid var(--line);background:var(--surface);color:var(--ink-2);display:grid;place-items:center;cursor:pointer;padding:0}
+.ab-step:active{transform:scale(.95)}
+.ab-step:disabled{opacity:.35;cursor:default}
+.ab-step svg{width:18px;height:18px}
+.ab-pick{flex:1;min-width:0;height:44px;display:flex;align-items:center;gap:8px;border-radius:12px;border:1px solid rgba(var(--gold-rgb),.45);background:rgba(var(--gold-rgb),.08);color:var(--ink);padding:0 12px;font:inherit;text-align:left;cursor:pointer}
+.ab-pick .sw{flex:none}
+.ab-pick .n{flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}
+.ab-pick .s{flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;color:var(--ink-3)}
+.ab-pick .s{display:none}
+@media (min-width:760px){.ab-pick .s{display:block}}
+.ab-pick .v{margin-left:auto;flex:none;font-family:var(--mono);font-size:13px;color:var(--ink-2);white-space:nowrap}
+.ab-pick svg{flex:none;width:16px;height:16px;color:var(--gold)}
+.al-list{display:flex;flex-direction:column;gap:2px}
+.al-grp{display:flex;justify-content:space-between;align-items:baseline;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);padding:12px 8px 4px}
+.al-row{width:100%;display:flex;align-items:center;gap:10px;padding:10px 8px;border:0;border-radius:10px;background:none;color:var(--ink);font:inherit;text-align:left;cursor:pointer}
+.al-row .n{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:550}
+.al-row .v{font-family:var(--mono);font-size:13px;color:var(--ink-2);white-space:nowrap}
+.al-row[aria-pressed=true]{background:rgba(var(--gold-rgb),.12)}
+.al-row[aria-pressed=true] .n{color:var(--gold)}
+.al-row.faint .n{color:var(--ink-3)}
 /* Something just changed */
 .glow{animation:glow 1.6s ease}
 @keyframes glow{0%{background:color-mix(in srgb,var(--gold) 30%,transparent)}100%{background:transparent}}
@@ -859,11 +868,16 @@ details.fold>summary{list-style:none;cursor:pointer}
 .legend-btn:hover,.legend-btn.on{background:var(--surface-2)}
 .split-bar{display:flex;gap:2px;height:10px;border-radius:99px;overflow:hidden;margin:8px 0}
 .split-bar i{display:block;height:100%}
-.pg-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:14px}
-.pg-list li{display:flex;flex-direction:column;gap:6px;cursor:pointer}
 .pg-bar{display:flex;gap:2px;height:10px}
 .pg-bar i{display:block;height:100%;min-width:2px}
 .pg-bar i:first-child{border-radius:99px 0 0 99px}.pg-bar i:last-child{border-radius:0 99px 99px 0}
+/* Every account (2.0.21): the money-vs-growth bar sits on a slim row under each account */
+table.every tr.has-bar td{border-bottom:0;padding-bottom:6px}
+table.every tr.pg-row td{padding-top:0;padding-bottom:12px}
+table.every .pg-line{display:flex;align-items:center;gap:10px}
+table.every .pg-bar{height:6px;flex:1;min-width:0}
+table.every .pg-line .pc{font-size:11.5px;flex:none}
+@media (min-width:760px){table.every .pg-line .pc{display:none}}
 .pg-bar i.loss{background:repeating-linear-gradient(135deg,var(--neg) 0 3px,transparent 3px 6px);border:1px solid var(--neg)}
 .heatmap{display:grid;grid-template-columns:22px repeat(12,minmax(0,1fr));gap:4px;align-items:center}
 .hm-h,.hm-y{font-family:var(--mono);font-size:12px;color:var(--ink-3);text-align:center}
@@ -2210,7 +2224,7 @@ const TITLE_ICONS = {
   reset: '<path d="M4 12a8 8 0 1 0 2.4-5.7"/><path d="M4 4v4h4"/>'
 };
 const FOLD_ICONS = { 'ws-more': 'pie', 'ov-alloc': 'pie', 'ov-monthly': 'bars', hist: 'clock', 'hist-all': 'clock', years: 'month', 'ins-years': 'month',
-  p60: 'doc', 'ins-acct': 'wallet', payhist: 'clock', 'month-review': 'month' };
+  p60: 'doc', 'ins-acct': 'wallet', 'all-where': 'pie', payhist: 'clock', 'month-review': 'month' };
 const ti = k => { const d = TITLE_ICONS[k] || SET_ICONS[k]; return d ? `<i class="t-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">${d}</svg></i>` : ''; };
 const foldOpen = (key, title, sub, extraCls) => `<details class="fold2${extraCls ? ' ' + extraCls : ''}" data-fold="${key}" ${ui.folds && ui.folds[key] ? 'open' : ''}><summary><span class="fold-titles"><h2 class="tt">${ti(FOLD_ICONS[key])}${title}</h2>${sub ? `<span class="fold-sub">${sub}</span>` : ''}</span><span class="fold-btn" aria-hidden="true">${CHEVRON}</span></summary><div class="fold-body">`;
 const foldClose = '</div></details>';
@@ -2971,39 +2985,36 @@ function renderAccounts() {
     series: [{ label: a.name, color: colorOf(a), values: pts.map(p => p.v) }, ...(ui.paidLine ? [{ label: 'Paid in', color: 'var(--ink-3)', values: pts.map(p => paidAt([a], p.t)), overlay: true, dash: true, fill: false }] : [])]
   });
 }
+// 2.0.21 account picker: the chosen account on one button, ‹ › step to the neighbours, and the button opens a list of every account by type.
 function acctPicker(accts, a) {
   const ordered = pinFirst(Object.keys(GROUPS).flatMap(g => accts.filter(x => groupOf(x) === g)));
   const open = ordered.filter(x => !x.archived), closed = ordered.filter(x => x.archived);
   const cur = a ? a.id : 'all';
-  const idx = cur === 'all' ? 0 : open.findIndex(x => x.id === cur) + 1;
+  const order = ['all', ...open.map(x => x.id)];
+  const i = order.indexOf(cur);
+  const prev = i > 0 ? order[i - 1] : null, next = i < order.length - 1 ? order[i + 1] : null;
+  const val = a ? accountStats(a.id).cur : open.reduce((t, x) => t + accountStats(x.id).cur, 0);
+  const sub = a ? GROUPS[groupOf(a)] : `${open.length} accounts`;
   const arrow = d => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="${d}"/></svg>`;
-  return `<div class="picker-wrap"><div class="picker-box">
-  <div class="acct-picker" role="group" aria-label="Choose account" id="acct-picker">
-    <button data-action="pick-account" data-id="all" aria-pressed="${cur === 'all'}">All accounts</button>
-    ${open.map(x => `<button data-action="pick-account" data-id="${esc(x.id)}" aria-pressed="${x.id === cur}"><i class="sw" style="background:${colorOf(x)}"></i>${esc(x.name)}</button>`).join('')}
-    ${closed.length ? (ui.showClosed || (a && a.archived) ? closed.map(x => `<button data-action="pick-account" data-id="${esc(x.id)}" aria-pressed="${x.id === cur}" class="faint"><i class="sw" style="background:${colorOf(x)};opacity:.5"></i>${esc(x.name)} (closed)</button>`).join('') : `<button data-action="show-closed">${closed.length} closed</button>`) : ''}
-  </div>
-  <span class="pk-edge l"><button class="pk-btn" data-action="pk-scroll" data-id="-1" aria-label="Earlier accounts">${arrow('M15 6l-6 6 6 6')}</button></span>
-  <span class="pk-edge r"><button class="pk-btn" data-action="pk-scroll" data-id="1" aria-label="More accounts">${arrow('M9 6l6 6-6 6')}</button></span>
-  </div><div class="pk-count" id="pk-count" hidden>${idx ? `${idx} of ${open.length} accounts` : `All ${open.length} accounts`} · swipe or tap › for more</div></div>`;
-}
-// Shows the fades, arrows and count only when accounts are hidden off the edge; keeps the chosen one in view.
-function setupPicker() {
-  const strip = document.getElementById('acct-picker');
-  if (!strip) return;
-  const box = strip.parentElement, l = box.querySelector('.pk-edge.l'), r = box.querySelector('.pk-edge.r'), count = document.getElementById('pk-count');
-  const sel = strip.querySelector('[aria-pressed="true"]');
-  if (sel && (sel.offsetLeft + sel.offsetWidth > strip.clientWidth - 60 || sel.offsetLeft < strip.scrollLeft)) {
-    strip.style.scrollBehavior = 'auto'; strip.scrollLeft = sel.offsetLeft - 40; strip.style.scrollBehavior = '';
-  }
-  const update = () => {
-    const over = strip.scrollWidth > strip.clientWidth + 4;
-    l.classList.toggle('on', over && strip.scrollLeft > 4);
-    r.classList.toggle('on', over && strip.scrollLeft + strip.clientWidth < strip.scrollWidth - 4);
-    count.hidden = !over;
-  };
-  strip.addEventListener('scroll', update, { passive: true });
-  update();
+  const row = x => `<button type="button" class="al-row${x.archived ? ' faint' : ''}" data-action="pick-account" data-id="${esc(x.id)}" aria-pressed="${x.id === cur}"><i class="sw" style="background:${colorOf(x)}${x.archived ? ';opacity:.5' : ''}"></i><span class="n">${esc(x.name)}${x.archived ? ' (closed)' : ''}</span><span class="v">${gbp(accountStats(x.id).cur)}</span></button>`;
+  const groups = Object.keys(GROUPS).map(g => [g, open.filter(x => groupOf(x) === g)]).filter(([, xs]) => xs.length);
+  return `<div class="picker-wrap"><div class="acct-bar">
+    <button type="button" class="ab-step" data-action="pick-account" data-id="${prev || ''}" ${prev ? '' : 'disabled'} aria-label="Previous account">${arrow('M15 6l-6 6 6 6')}</button>
+    <button type="button" class="ab-pick" data-action="acct-list" aria-haspopup="dialog" aria-label="Choose account, now ${esc(a ? a.name : 'All accounts')}">
+      ${a ? `<i class="sw" style="background:${colorOf(a)}"></i>` : ''}<span class="n">${esc(a ? a.name : 'All accounts')}</span><span class="s">${esc(sub)}</span><span class="v">${gbp(val)}</span>${arrow('M6 9l6 6 6-6')}
+    </button>
+    <button type="button" class="ab-step" data-action="pick-account" data-id="${next || ''}" ${next ? '' : 'disabled'} aria-label="Next account">${arrow('M9 6l6 6-6 6')}</button>
+    <dialog class="sheet" id="acct-list" aria-labelledby="acct-list-title"><div class="grab" aria-hidden="true"></div>
+      <div style="padding:22px 18px calc(18px + var(--sa-bottom))">
+        <div class="sheet-head"><h2 id="acct-list-title">Choose account</h2><button type="button" class="icon-btn" data-action="close-sheet" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+        <div class="al-list" style="margin-top:6px">
+          <button type="button" class="al-row" data-action="pick-account" data-id="all" aria-pressed="${cur === 'all'}"><i class="sw" style="background:var(--gold)"></i><span class="n">All accounts</span><span class="v">${gbp(open.reduce((t, x) => t + accountStats(x.id).cur, 0))}</span></button>
+          ${groups.map(([g, xs]) => `<div class="al-grp"><span>${GROUPS[g]}</span><span class="mono">${gbp(xs.reduce((t, x) => t + accountStats(x.id).cur, 0))}</span></div>${xs.map(row).join('')}`).join('')}
+          ${closed.length ? `<div class="al-grp"><span>Closed</span></div>${closed.map(row).join('')}` : ''}
+        </div>
+      </div>
+    </dialog>
+  </div></div>`;
 }
 // Year by year: reference "paid in" per tax year plus the value at each 5 April (saved as balances),
 // giving growth for each tax year and a real history for the chart.
@@ -3143,20 +3154,7 @@ function renderAllAccounts(accts) {
         ${perfPanel(accts)}
       </section>
       ${splitPanel(accts, stats, all.cur)}
-      ${paidGrowthPanel(order)}
-      <section class="panel">
-        <div class="panel-head"><h2 class="tt">${ti('wallet')}Every account</h2><span class="aside">${ui.allType && GROUPS[ui.allType] ? `${esc(GROUPS[ui.allType])} · <button class="btn sm ghost" data-action="all-type" data-id="">Show all</button>` : 'All time'}</span></div>
-        <div class="table-wrap"><table>
-          <thead><tr><th>Account</th><th class="r">Value</th><th class="r hide-sm">Paid in</th><th class="r">Growth</th><th class="r hide-sm">Return</th></tr></thead>
-          <tbody>${order.filter(x => !ui.allType || groupOf(x.a) === ui.allType).map(x => `<tr class="clickable" data-action="pick-account" data-id="${esc(x.a.id)}" tabindex="0">
-            <td><div class="acct-cell">${badge(x.a)}<div style="min-width:0"><div class="n">${esc(x.a.name)}${ownerChip(x.a)}</div><div class="p hide-sm">${esc(typeOf(x.a).label)}</div></div></div></td>
-            <td class="r val">${gbp(x.st.cur)}</td>
-            <td class="r val hide-sm">${x.p ? gbp(x.p.paid) : '—'}</td>
-            <td class="r">${x.p && (x.st.s.length > 1 || x.a.priorPaid != null) ? deltaChip(x.p.growth, signed(x.p.growth)) : '<span class="faint">—</span>'}</td>
-            <td class="r hide-sm mono">${x.p && x.p.ret != null && (x.st.s.length > 1 || x.a.priorPaid != null) ? pct(x.p.ret) : '—'}</td>
-          </tr>`).join('')}</tbody>
-        </table></div>
-      </section>
+      ${everyAccount(order)}
       ${heatmapPanel(accts)}
       <section class="panel">
         ${foldOpen('hist-all', 'History', histSummary(accts.map(x => x.id)) + ' · all accounts')}
@@ -3188,8 +3186,10 @@ function splitPanel(accts, stats, total) {
   const locked = stats.filter(x => groupOf(x.a) === 'pension' && !x.a.archived).reduce((t, x) => t + x.st.cur, 0);
   const free = total - locked, dob = state.profile.dob, age = accessAge(dob);
   const unlock = dob ? `${+dob.slice(0, 4) + age}${dob.slice(4)}` : '';
+  const sub = `${groups.length} type${groups.length === 1 ? '' : 's'} · ${gbp(free)} accessible · ${gbp(locked)} locked`;
   return `<section class="panel">
-    <div class="panel-head"><h2 class="tt">${ti('pie')}Where it is</h2><span class="aside">Tap a type to filter</span></div>
+    ${foldOpen('all-where', 'Where it is', sub)}
+    <p class="hint" style="margin:12px 0 0">Tap a type to show only those accounts below.</p>
     <div class="donut-wrap">
       <div class="donut-box">${donut(groups.map(g => ({ value: g.value, color: g.color })), total)}
         <div class="donut-center"><b class="mono">${compact(total)}</b><span>${groups.length} type${groups.length === 1 ? '' : 's'}</span></div>
@@ -3201,24 +3201,33 @@ function splitPanel(accts, stats, total) {
       <div class="split-bar" role="img" aria-label="Accessible ${gbp(free)}, locked ${gbp(locked)}"><i style="flex:${Math.max(free, 0)};background:var(--c2)"></i><i style="flex:${locked};background:var(--c1)"></i></div>
       <div class="goal-meta"><span>${(free / total * 100).toFixed(0)}% ISAs, savings and investments</span><span>${locked ? `Pensions from age ${age}${unlock ? ` (${monthYear(toMs(unlock))})` : ''}` : ''}</span></div>
     </div>
+    ${foldClose}
   </section>`;
 }
-// Each account as one bar: your money (ivory) then growth (green), or the part lost (red), scaled to the largest.
-function paidGrowthPanel(order) {
-  const rows = order.filter(x => x.p && (x.st.s.length > 1 || x.a.priorPaid != null || Object.keys(x.a.yearly || {}).length));
-  if (!rows.length) return '';
-  const max = Math.max(1, ...rows.map(x => Math.max(x.p.paid, x.st.cur)));
+// Every account (2.0.21): one table that also carries the old "Your money vs growth" bars, one slim bar under each row:
+// your money (ivory) then growth (green), or the part lost (red), scaled to the largest account.
+function everyAccount(order) {
+  const list = order.filter(x => !ui.allType || groupOf(x.a) === ui.allType);
+  const hasBar = x => x.p && (x.st.s.length > 1 || x.a.priorPaid != null || Object.keys(x.a.yearly || {}).length);
+  const max = Math.max(1, ...list.filter(hasBar).map(x => Math.max(x.p.paid, x.st.cur)));
   const w = v => (Math.max(0, v) / max * 100).toFixed(2) + '%';
+  const bar = x => {
+    const paid = x.p.paid, g = x.st.cur - paid;
+    return `<tr class="pg-row clickable" data-action="pick-account" data-id="${esc(x.a.id)}"><td colspan="5"><div class="pg-line"><span class="pg-bar" role="img" aria-label="${esc(x.a.name)}: ${gbp(paid)} your money, ${g >= 0 ? `${gbp(g)} growth` : `${gbp(-g)} loss`}">${g >= 0 ? `<i style="width:${w(paid)};background:var(--c2)"></i><i style="width:${w(g)};background:var(--pos)"></i>` : `<i style="width:${w(x.st.cur)};background:var(--c2)"></i><i class="loss" style="width:${w(-g)}"></i>`}</span>${x.p.ret != null ? `<span class="pc mono ${cls(g)}">${pct(x.p.ret)}</span>` : ''}</div></td></tr>`;
+  };
   return `<section class="panel">
-    <div class="panel-head"><h2 class="tt">${ti('bars')}Your money vs growth</h2><span class="aside">All time</span></div>
-    <ul class="pg-list">${[...rows].sort((a, b) => b.st.cur - a.st.cur).map(x => {
-      const paid = x.p.paid, g = x.st.cur - paid;
-      return `<li data-action="pick-account" data-id="${esc(x.a.id)}" tabindex="0">
-        <div class="al-top"><span class="nm">${esc(x.a.name)}</span><b>${gbp(x.st.cur)}</b><span class="pc ${cls(g)}">${x.p.ret != null ? pct(x.p.ret) : ''}</span></div>
-        <span class="pg-bar">${g >= 0 ? `<i style="width:${w(paid)};background:var(--c2)"></i><i style="width:${w(g)};background:var(--pos)"></i>` : `<i style="width:${w(x.st.cur)};background:var(--c2)"></i><i class="loss" style="width:${w(-g)}"></i>`}</span>
-      </li>`;
-    }).join('')}</ul>
-    <div class="bar-legend"><span><i class="sw" style="background:var(--c2)"></i>Your money</span><span><i class="sw" style="background:var(--pos)"></i>Growth</span><span><i class="sw" style="background:var(--neg)"></i>Loss</span></div>
+    <div class="panel-head"><h2 class="tt">${ti('wallet')}Every account</h2><span class="aside">${ui.allType && GROUPS[ui.allType] ? `${esc(GROUPS[ui.allType])} · <button class="btn sm ghost" data-action="all-type" data-id="">Show all</button>` : 'All time'}</span></div>
+    <div class="table-wrap"><table class="every">
+      <thead><tr><th>Account</th><th class="r">Value</th><th class="r hide-sm">Paid in</th><th class="r">Growth</th><th class="r hide-sm">Return</th></tr></thead>
+      <tbody>${list.map(x => `<tr class="clickable${hasBar(x) ? ' has-bar' : ''}" data-action="pick-account" data-id="${esc(x.a.id)}" tabindex="0">
+        <td><div class="acct-cell">${badge(x.a)}<div style="min-width:0"><div class="n">${esc(x.a.name)}${ownerChip(x.a)}</div><div class="p hide-sm">${esc(typeOf(x.a).label)}</div></div></div></td>
+        <td class="r val">${gbp(x.st.cur)}</td>
+        <td class="r val hide-sm">${x.p ? gbp(x.p.paid) : '—'}</td>
+        <td class="r">${x.p && (x.st.s.length > 1 || x.a.priorPaid != null) ? deltaChip(x.p.growth, signed(x.p.growth)) : '<span class="faint">—</span>'}</td>
+        <td class="r hide-sm mono">${x.p && x.p.ret != null && (x.st.s.length > 1 || x.a.priorPaid != null) ? pct(x.p.ret) : '—'}</td>
+      </tr>${hasBar(x) ? bar(x) : ''}`).join('')}</tbody>
+    </table></div>
+    ${list.some(hasBar) ? '<div class="bar-legend"><span><i class="sw" style="background:var(--c2)"></i>Your money</span><span><i class="sw" style="background:var(--pos)"></i>Growth</span><span><i class="sw" style="background:var(--neg)"></i>Loss</span></div>' : ''}
   </section>`;
 }
 // Month-by-month growth as a heatmap: rows are years, cells are months, green for growth and red for a fall.
@@ -4659,7 +4668,6 @@ function render() {
     view.innerHTML = `<div class="stack view"><section class="panel"><div class="chart-empty"><div class="empty-cta"><b>Something went wrong showing this screen.</b><span>Your data is safe. Try reloading, or open another tab.</span><button class="btn primary" data-action="reload">Reload</button><details><summary>Details</summary><p class="hint mono" style="margin-top:8px">${esc(String(err && err.message || err))}</p></details></div></div></section></div>`;
   }
   moneyInputs();
-  setupPicker();
   refreshBell();
   placeTabPill();
   placePageTabs();
@@ -6339,7 +6347,7 @@ function inSideScroll(el) {
 }
 document.addEventListener('touchstart', e => {
   const t = e.target;
-  if (e.touches.length !== 1 || document.querySelector('dialog[open]') || !state.profile.setupDone || t.closest('svg, input, select, textarea, .seg, .ptabs, .acct-picker, .table-wrap, .month-strip, .heatmap, .calc-keys, .drag-h') || inSideScroll(t)) { swipe = null; return; }
+  if (e.touches.length !== 1 || document.querySelector('dialog[open]') || !state.profile.setupDone || t.closest('svg, input, select, textarea, .seg, .ptabs, .acct-bar, .table-wrap, .month-strip, .heatmap, .calc-keys, .drag-h') || inSideScroll(t)) { swipe = null; return; }
   swipe = { x: e.touches[0].clientX, y: e.touches[0].clientY, t: Date.now(), dx: 0, lock: null };
 }, { passive: true });
 document.addEventListener('touchmove', e => {
@@ -6424,7 +6432,7 @@ document.addEventListener('click', async e => {
       if (t.dataset.tab === ui.tab && t.dataset.page) { saveUi(); render(); window.scrollTo({ top: 0 }); }
       else if (t.dataset.tab === ui.tab && state.profile.setupDone) window.scrollTo({ top: 0, behavior: 'smooth' }); else goTab(t.dataset.tab);
       break;
-    case 'pk-scroll': { const strip = document.getElementById('acct-picker'); if (strip) strip.scrollBy({ left: +id * strip.clientWidth * 0.7 }); break; }
+    case 'acct-list': openSheet(document.getElementById('acct-list')); break;
     case 'pick-type': {
       const sel = document.getElementById('acct-type');
       sel.value = id; sel.dispatchEvent(new Event('change'));
@@ -6626,7 +6634,6 @@ document.addEventListener('click', async e => {
       break;
     }
     case 'bio-unlock': tryBio(); break;
-    case 'show-closed': ui.showClosed = true; saveUi(); render(); break;
     case 'move-acct': {
       // Swap with the neighbouring account in the same group.
       const a = state.accounts.find(x => x.id === id), dir = +t.dataset.dir;
