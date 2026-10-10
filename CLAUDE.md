@@ -273,6 +273,7 @@ not advice — keep that disclaimer.
 - 2.0.21 All accounts tidy: `everyAccount(order)` replaces `paidGrowthPanel` + the inline table (`table.every`): each row with a
   balance history gets a `tr.pg-row` underneath (money-vs-growth `.pg-bar`, scaled to the largest listed account, plus return on phones).
   `splitPanel` ("Where it is" donut + accessible/locked) is fold `all-where`, closed by default; its legend still filters via `ui.allType`.
+  Account picker (2.0.21): `acctPicker(accts, a)` = `.acct-bar` (‹ › `pick-account` neighbours, `acct-list` button opens `dialog#acct-list` grouped by GROUPS, closed at the bottom). Old `.acct-picker` strip is gone.
   `.month-strip` has no scroll snap (it stopped flings at each tile); keep it free-scrolling.
 
 ## Status (latest)

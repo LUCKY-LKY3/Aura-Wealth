@@ -46,7 +46,7 @@ Order: 2.0 polish and charts → 2.x Future Me → 3.0 pensions, property and de
   savings rate. Not added: NI-able pay (clutter), tax period (worked out from the pay date)
 - Done in 2.0.19: Payslip shows take-home (month + tax year so far) for pay logged without payslip details (owner, 9 Oct 2026); FAQ log-pay, rate, periods, slip with "?" buttons on Savings rate and Payslip breakdown
 - Done in 2.0.21: Accounts › All accounts tidy (3,456px to 2,647px on a phone): "Your money vs growth" bars merged
-  into "Every account" (one slim bar and return under each row), "Where it is" donut folded to one line
+  into "Every account" (one slim bar and return under each row), "Where it is" donut folded to one line, account picker as one bar with a list
 - Native SVG Tooltips: hover/touch interaction on all charts showing exact data values at each point
 - Cash drag warning: lots of cash in a low-interest account (user enters rate)
 - Interest checker: savings rate vs a benchmark rate the user sets
