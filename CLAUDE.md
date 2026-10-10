@@ -299,6 +299,14 @@ not advice — keep that disclaimer.
   else 0% for Cash; a current account keeps monthlySpend or £1,500 as float; flagged when ≥£1,000 idle and rate < bench − 1).
   `profile.cashBench` (default 4, Settings › You `#pf-bench`). Shown in `rateInfo` (base text now `rateInfoBase`) and Insights.
   FAQ `drag`. Demo Easy Access Saver is at 1.6%.
+- 2.0.27 loan history: debts (not Credit card) may carry `loan: {amount, start:'YYYY-MM-DD', end:'YYYY-MM'}` (`normLoan`, any part
+  blank; `#acct-loan-field`). `loanFrom(a)` = the loan when amount and a start before the first balance exist: all-time `periodStats`
+  then starts at −amount and counts the fall to the first balance as repaid (`pre`); ranged figures are unchanged. Account page:
+  "Borrowed" tile, `loanLine()` (% paid off bar, taken out, last payment, `monthsLeft`/`spanText`), a "Borrowed" point on the chart.
+  Demo `demo_car`: £15,000 taken out 30 months ago over 5 years, tracked for 18 months at £303/month.
+  `loanPlan(a)` (needs amount, start, end and the account rate): level monthly payment, schedule and interest so far (`paidBy`, `interestTo`).
+  With it, `periodStats` adds the estimated interest before the first balance to the repaid figure (so growth = interest, not a guess),
+  and `loanLine` shows the payment and interest so far as an estimate.
 
 ## Status (latest)
 
