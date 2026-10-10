@@ -1095,6 +1095,18 @@ details.fold:not([open])>summary h2::after{content:' ▸'}
     </div>
     <label class="check" id="acct-split-wrap" hidden><input type="checkbox" id="acct-split"><span>Some of this was there before 6 April, or went in over several months <span class="faint">Next you can add the 5 April balance and what you paid in each month, so this tax year and your savings rate are right</span></span></label>
     <p class="hint" id="acct-debt-tip" hidden>Enter what you owe as a positive amount: it is taken off your net worth. Log each repayment as money in, so only the interest shows as a cost. Mortgage, loan or card balances are on your statement or in your lender's app.</p>
+    <fieldset class="field" id="acct-loan-field" hidden>
+      <legend class="label">When you took it out <span class="faint">Optional</span></legend>
+      <div class="two">
+        <div class="field"><label for="acct-loan-amount">Amount borrowed</label><div class="money"><span>£</span><input id="acct-loan-amount" class="input" type="number" inputmode="decimal" step="0.01" min="0" placeholder="e.g. 15000"></div></div>
+        <div class="field"><label for="acct-loan-start">Taken out</label><input id="acct-loan-start" class="input" type="date"></div>
+      </div>
+      <div class="two">
+        <div class="field"><label for="acct-loan-end">Last payment <span class="faint">Month</span></label><input id="acct-loan-end" class="input" type="month" placeholder="YYYY-MM"></div>
+        <p class="hint" style="align-self:end">From your loan agreement or statement.</p>
+      </div>
+      <p class="hint">For a loan you've had a while. What it has fallen by since then counts as repaid, so its page shows the whole loan and the time left. Interest from before you started tracking isn't known.</p>
+    </fieldset>
     <div class="field" id="acct-fee-field">
       <label for="acct-fee">Yearly fees <span class="faint">Optional, %</span></label>
       <input id="acct-fee" class="input" type="number" inputmode="decimal" step="0.01" min="0" max="5" placeholder="e.g. 0.45">
@@ -1559,8 +1571,11 @@ function seedExample(profile) {
   const accounts = spec.map(([id, name, provider, type, color, , , , , x]) => ({ id, name, provider, type, color, owner: x.owner || 'me', fee: x.fee || 0, rate: x.rate || 0, pinned: !!x.pinned, regular: null, demo: true, ...(x.share ? { share: x.share } : {}) }));
   // Extra accounts: a 1-year fix opened from savings 10 months ago, and an old Cash ISA moved into the Stocks & Shares ISA 14 months ago.
   accounts.push({ id: 'demo_fixed', name: '1-year fixed saver', provider: 'Atom', type: 'Fixed', color: 'c3', owner: 'me', fee: 0, rate: 4.6, regular: null, demo: true });
-  // 2.0.22: a car loan taken out 18 months ago at 7.9%, repaid £350 a month (owed is stored below zero).
-  accounts.push({ id: 'demo_car', name: 'Car loan', provider: 'Santander', type: 'Loan', color: 'c5', owner: 'me', fee: 0, rate: 7.9, regular: null, demo: true });
+  // 2.0.22: a car loan at 7.9%, repaid £303 a month and tracked for 18 months (owed is stored below zero).
+  // 2.0.27: it was taken out 30 months ago for £15,000 over five years, so its page shows the whole loan.
+  const carEnd = new Date(today.getFullYear(), today.getMonth() + 30, 1);
+  accounts.push({ id: 'demo_car', name: 'Car loan', provider: 'Santander', type: 'Loan', color: 'c5', owner: 'me', fee: 0, rate: 7.9, regular: null, demo: true,
+    loan: { amount: 15000, start: isoLocal(new Date(today.getFullYear(), today.getMonth() - 30, day)), end: `${carEnd.getFullYear()}-${String(carEnd.getMonth() + 1).padStart(2, '0')}` } });
   // 2.0.23: a home bought six years ago for £285,000, with its mortgage linked (4.5%, £1,150 a month).
   accounts.push({ id: 'demo_home', name: 'Home', provider: 'Zoopla estimate', type: 'Home', color: 'c6', owner: 'me', fee: 0, rate: 0, priorPaid: 285000, since: String(today.getFullYear() - 6), regular: null, demo: true });
   accounts.push({ id: 'demo_mort', name: 'Mortgage', provider: 'Nationwide', type: 'Mortgage', color: 'c5', owner: 'me', fee: 0, rate: 4.5, secures: 'demo_home', regular: null, demo: true });
@@ -1609,8 +1624,8 @@ function seedExample(profile) {
     if (i < M) flow('demo_mort', first, 1150, 1150, 'Mortgage payment');
     logs.push({ id: uid(), accountId: 'demo_mort', date: d, value: Math.round(val.demo_mort), note: i === M ? 'Opening balance' : '' });
     if (i <= 18) {
-      val.demo_car = i === 18 ? -12000 : Math.min(0, val.demo_car * (1 + 0.079 / 12) + 350);
-      if (i < 18) flow('demo_car', first, 350, 350, 'Monthly repayment');
+      val.demo_car = i === 18 ? -12450 : Math.min(0, val.demo_car * (1 + 0.079 / 12) + 303);
+      if (i < 18) flow('demo_car', first, 303, 303, 'Monthly repayment');
       logs.push({ id: uid(), accountId: 'demo_car', date: d, value: Math.round(val.demo_car), note: i === 18 ? 'Opening balance' : '' });
     }
     if (i >= 14) {
@@ -1654,6 +1669,14 @@ function seedExample(profile) {
 const validLog = l => l && isIso(l.date) && isFinite(+l.value);
 
 // Accepts Aurum backups (v1 and v2) and both older Aura Wealth formats.
+// A loan's details (2.0.27): amount borrowed, date taken out, last payment month. Any may be blank; none at all = undefined.
+function normLoan(x) {
+  if (!x || typeof x !== 'object') return undefined;
+  const amount = isFinite(+x.amount) && +x.amount > 0 ? Math.round(+x.amount * 100) / 100 : 0;
+  const start = isIso(x.start) && x.start <= TODAY ? x.start : '';
+  const end = /^(19|20)\d\d-(0[1-9]|1[0-2])$/.test(String(x.end || '')) && (!start || x.end >= start.slice(0, 7)) ? x.end : '';
+  return amount || start || end ? { amount, start, end } : undefined;
+}
 function normalize(o) {
   if (o && Array.isArray(o.accounts) && Array.isArray(o.logs)) {
     const accounts = o.accounts.filter(a => a && a.id && a.name).map((a, i) => {
@@ -1671,6 +1694,8 @@ function normalize(o) {
         yearly: normYearly(a.yearly)
       };
       if (a.secures) acct.secures = String(a.secures);
+      const loan = TYPES[acct.type] && TYPES[acct.type].debt ? normLoan(a.loan) : undefined;
+      if (loan) acct.loan = loan;
       if (+a.share >= 1 && +a.share <= 99) acct.share = Math.round(+a.share);
       const gains = normGains(a.gains);
       if (Object.keys(gains).length) acct.gains = gains;
@@ -1958,8 +1983,12 @@ function periodStats(a, startMs, endMs = TODAY_MS) {
   // A debt's first balance is where it started, not money you paid in: repayments are paid in, interest is growth.
   if (v0 == null && debt) { v0 = s[0].value; from = s[0].date; }
   else if (v0 == null) { opening = s[0].value; v0 = 0; from = s[0].date; } else from = msIso(startMs);
+  // 2.0.27: all-time, a loan starts at what was borrowed; its fall to the first balance counts as repaid (interest then is unknown).
+  const ln = debt && !isFinite(startMs) ? loanFrom(a, s) : null;
+  const pre = ln ? s[0].value + ln.amount : 0;
+  if (ln) v0 = -ln.amount;
   const fl = flowsOf(a.id).filter(f => f.date > from && f.date <= end);
-  const flowSum = fl.reduce((t, f) => t + f.amount, 0);
+  const flowSum = fl.reduce((t, f) => t + f.amount, 0) + pre;
   const allTime = !isFinite(startMs) && a.priorPaid != null && !debt;
   // All-time figures also count yearly reference amounts for tax years after the first balance, less what was logged.
   const extra = !isFinite(startMs) ? yearlyExtra(a, s[0].date, end) : 0;
@@ -1970,6 +1999,10 @@ function periodStats(a, startMs, endMs = TODAY_MS) {
   const base = debt ? 0 : v0 + (allTime ? a.priorPaid : opening) + (flowSum + extra) / 2;
   return { v0, cur, change, paid, opening, growth, base, ret: base > 0 ? growth / base * 100 : null };
 }
+// A debt's loan details (2.0.27) count only when the amount and a start date before the first balance are known.
+const loanFrom = (a, s = logsOf(a.id)) => a.loan && a.loan.amount > 0 && a.loan.start && s.length && a.loan.start < s[0].date ? a.loan : null;
+const monthsLeft = end => { if (!end) return null; const [y, m] = end.split('-').map(Number), [ny, nm] = TODAY.split('-').map(Number); return (y * 12 + m) - (ny * 12 + nm); };
+const spanText = n => { const y = Math.floor(n / 12), m = n % 12; return [y ? `${y} year${y === 1 ? '' : 's'}` : '', m ? `${m} month${m === 1 ? '' : 's'}` : ''].filter(Boolean).join(' ') || 'under a month'; };
 function yearlyExtra(a, firstIso, toIso) {
   let t = 0;
   for (const [k, v] of Object.entries(a.yearly || {})) {
@@ -2865,6 +2898,18 @@ function propTile(a, cur) {
   if (!ms.length) return `<div class="stat"><div class="k">Equity</div><div class="v">${gbp(cur)}</div><div class="k">No mortgage linked</div></div>`;
   return `<div class="stat"><div class="k">Equity</div><div class="v">${gbp(cur - owed)}</div><div class="k">after ${gbp(owed)} mortgage${cur > 0 ? ` · ${Math.round(owed / cur * 100)}% loan to value` : ''}</div></div>`;
 }
+// 2.0.27: a loan's progress: how much of what was borrowed is paid off, and the time left to its last payment.
+function loanLine(a, st) {
+  const L = a.loan;
+  if (!L || !st.s.length) return '';
+  const owed = Math.max(0, -st.cur), left = monthsLeft(L.end), ln = loanFrom(a, st.s);
+  const amt = ln ? ln.amount : 0, off = amt ? Math.min(1, Math.max(0, (amt - owed) / amt)) : null;
+  const when = [L.start ? `Taken out ${dateLabel(toMs(L.start))}` : '', L.end ? `last payment ${fmtMonth.format(new Date(toMs(L.end + '-01')))} ${L.end.slice(0, 4)}` : ''].filter(Boolean).join(' · ');
+  const time = left == null ? '' : owed < 0.5 ? '' : left > 0 ? `<b>${spanText(left)}</b> left` : left === 0 ? 'Last payment due this month' : 'Past its last payment date';
+  if (off == null && !when && !time) return '';
+  return `<div class="loan-line" style="margin-top:12px">${off != null ? `<div class="pg-bar" role="img" aria-label="${Math.round(off * 100)}% paid off"><i style="flex:${off};background:var(--pos)"></i><i style="flex:${1 - off};background:var(--line-strong)"></i></div>` : ''}
+    <p class="hint" style="margin:6px 0 0">${off != null ? `<b>${Math.round(off * 100)}%</b> paid off: ${gbp(amt - owed)} of ${gbp(amt)}, ${gbp(owed)} to go. ` : ''}${[when, time].filter(Boolean).join(' · ')}${when || time ? '.' : ''}</p></div>`;
+}
 function securedLine(m) {
   const p = state.accounts.find(a => a.id === m.secures);
   if (!p) return '';
@@ -3055,11 +3100,11 @@ function renderAccounts() {
   const hist = ui.hist;
   const years = [...new Set([...state.logs, ...state.flows, ...state.income].map(x => taxYear(x.date)))].sort().reverse();
   // 2.0.22 debts: the figure is what you owe; tiles show where it started, repayments and the interest charged.
-  const debt = isDebt(a), prop = isProperty(a);
+  const debt = isDebt(a), prop = isProperty(a), ln = debt ? loanFrom(a, st.s) : null;
   const debtStats = debt ? `<div class="stats">
-          <div class="stat"><div class="k">Owed at start</div><div class="v">${all ? gbp(-all.v0) : '—'}</div></div>
-          <div class="stat"><div class="k">Repaid</div><div class="v">${all ? gbp(all.paid) : '—'}</div></div>
-          <div class="stat"><div class="k">Interest charged</div><div class="v ${all && all.growth < -0.5 ? 'neg' : ''}">${all && st.s.length > 1 ? gbp(Math.max(0, -all.growth)) : '—'}</div></div>
+          <div class="stat"><div class="k">${ln ? 'Borrowed' : 'Owed at start'}</div><div class="v">${all ? gbp(-all.v0) : '—'}</div>${ln ? `<div class="k">${dateLabel(toMs(ln.start))}</div>` : ''}</div>
+          <div class="stat"><div class="k">Repaid</div><div class="v">${all ? gbp(all.paid) : '—'}</div>${ln ? '<div class="k">since taken out</div>' : ''}</div>
+          <div class="stat"><div class="k">Interest charged</div><div class="v ${all && all.growth < -0.5 ? 'neg' : ''}">${all && st.s.length > 1 ? gbp(Math.max(0, -all.growth)) : '—'}</div>${ln && st.s.length > 1 ? `<div class="k">since ${dateLabel(toMs(st.s[0].date))}</div>` : ''}</div>
           <div class="stat"><div class="k">Interest rate</div><div class="v">${a.rate ? a.rate + '%' : '—'}</div></div>
         </div>` : '';
   view.innerHTML = `
@@ -3086,6 +3131,7 @@ function renderAccounts() {
           <div class="stat"><div class="k">Return</div><div class="v ${cls(all && all.ret || 0)}">${hasRet ? pct(all.ret) : '—'}</div>${yearly != null ? `<div class="k">about ${pct(yearly)} a year${a.since ? ' since ' + esc(a.since) : ''}</div>` : ''}${realRet != null ? `<div class="k">${pct(realRet)} after inflation</div>` : ''}</div>
           ${prop ? propTile(a, st.cur) : `<div class="stat"><div class="k">Fees a year</div><div class="v">${a.fee ? gbp(st.cur * a.fee / 100) : '—'}</div></div>`}
         </div>`}
+        ${debt ? loanLine(a, st) : ''}
         ${debt && a.secures ? securedLine(a) : ''}
         ${!debt && hasRet && all.paid > 0 ? miniSplit(all.paid, st.cur) : ''}
         ${rate ? `<p class="explain" style="margin-top:12px">${rate}</p>` : ''}
@@ -3114,6 +3160,7 @@ function renderAccounts() {
   renderHistory();
   drawAcctYears(a);
   const pts = st.s.map(l => ({ t: toMs(l.date), v: l.value, note: l.note && l.note !== 'Opening balance' ? l.note : '' }));
+  if (ln) pts.unshift({ t: toMs(ln.start), v: -ln.amount, note: 'Borrowed' });
   if (pts.length && pts[pts.length - 1].t < TODAY_MS) pts.push({ t: TODAY_MS, v: pts[pts.length - 1].v, note: '' });
   const deposits = flowsOf(a.id).filter(f => f.amount > 0 && !f.ytd).map(f => ({ t: toMs(f.date), label: `${dateLabel(toMs(f.date))}: ${f.employer ? 'employer paid in' : debt ? 'repaid' : 'paid in'} ${gbp(f.amount)}` }));
   chart(document.getElementById('acct-chart'), {
@@ -4499,7 +4546,7 @@ const FAQ = [
   ['est', 'Why do some balances say "est."?', '<b>est.</b> means estimated. When you log a payment, interest or a regular payment without a new balance, Aurum adds it to your last balance so your totals stay up to date. It isn\'t your provider\'s real figure: growth and price changes since then are missing. Log the real balance from your provider\'s app or statement when you can (<b>Update all</b> does every account at once) and it takes over from that date. Deleting the payment takes the estimate back out.', 'Accounts and balances'],
   ['growth', "What's the difference between paid in, growth and interest?", '<b>Paid in</b> is money you (or your employer, or tax relief) put in. <b>Growth</b> is everything else: the change in balance less what was paid in, so it includes interest, dividends and price changes. Interest, dividends and prizes you log are growth too: if they were paid into the account (the default), Aurum adds them to its balance as an estimate until you next log a real balance. They also feed the tax helper.', 'Accounts and balances'],
   ['sources', 'How is "Where your wealth came from" worked out?', 'For the range you pick (1M, 1Y or All, also on the net worth card), the change in your wealth is split into <b>paid in</b> (money in, less money taken out) and <b>growth</b> (everything else). For 1M and 1Y, an account first logged in that period counts its opening balance as paid in. <b>Return</b> is growth as a share of the money invested over the period. <b>Accounts that drove growth</b> lists the five that moved most, up or down; tap one to open it. <b>Includes N of M accounts</b> (also on the net worth card) shows which accounts are counted: those of the person picked at the top, closed ones too, and only accounts with a balance. Open it to see the list and what is left out, and untick an account to leave it out of your net worth, these charts and Performance (it stays in Holdings and ISA allowances, marked <b>not in totals</b>).', 'Accounts and balances'],
-  ['debts', 'How are debts counted?', 'Add a mortgage, loan, credit card or student loan as an account (type <b>Debts</b>) and enter <b>what you owe</b> as a positive amount. It is taken off your total, so your net worth is everything you have minus everything you owe. Log each <b>repayment</b> as money in: what you owe falls and your net worth rises, but it isn\'t counted as growth. The interest the lender adds shows as a small negative growth, so you can see what the debt costs. <b>Borrowed more</b> adds to what you owe without counting as a loss. A debt\'s first amount is where it started, not money you paid in. Debts stay out of the retirement plan, goals and your savings rate (a repayment is mostly a bill, not saving), and shares such as Allocation are of your assets only. Student loans: many people leave Plan 2 and later loans out, as they are taken from pay and written off after 30 to 40 years; untick it under <b>Includes N of M accounts</b> if you prefer.', 'Accounts and balances'],
+  ['debts', 'How are debts counted?', 'Add a mortgage, loan, credit card or student loan as an account (type <b>Debts</b>) and enter <b>what you owe</b> as a positive amount. It is taken off your total, so your net worth is everything you have minus everything you owe. Log each <b>repayment</b> as money in: what you owe falls and your net worth rises, but it isn\'t counted as growth. The interest the lender adds shows as a small negative growth, so you can see what the debt costs. <b>Borrowed more</b> adds to what you owe without counting as a loss. A debt\'s first amount is where it started, not money you paid in. For a loan you\'ve had a while, add <b>Amount borrowed</b>, <b>Taken out</b> and <b>Last payment</b> in Edit account: its page then shows how much is paid off and the time left, and the fall from what you borrowed to your first amount counts as repaid. Debts stay out of the retirement plan, goals and your savings rate (a repayment is mostly a bill, not saving), and shares such as Allocation are of your assets only. Student loans: many people leave Plan 2 and later loans out, as they are taken from pay and written off after 30 to 40 years; untick it under <b>Includes N of M accounts</b> if you prefer.', 'Accounts and balances'],
   ['property', 'How do I add my home or other property?', 'Add an account of type <b>Home</b> (where you live) or <b>Other property</b> (a buy-to-let or second home) with what it is worth now. Use a recent valuation or an online estimate and update it once or twice a year: a change in value shows as growth. Put what you paid in <b>Purchase price</b>, so the rise since you bought it counts as growth rather than money paid in. Then add the mortgage as a debt and pick the property under <b>Secured on</b>: the property\'s page shows your <b>equity</b> (its value less the mortgage) and the loan to value, and the net worth card shows your equity. Property is counted in your net worth but not in <b>Accessible now</b>, the retirement plan or goals.', 'Accounts and balances'],
   ['joint', 'How do joint accounts work?', 'For an account you share, such as a joint current account, savings or a mortgage with a partner, tick <b>Joint account</b> in Add or Edit account and enter <b>your share</b> (50% for an even split). Log the whole balance, as your bank shows it: the account\'s own page shows the whole amount, while your net worth, charts and Overview count only your share (Holdings shows your share, marked <b>joint 50%</b>). Joint isn\'t offered for pensions and ISAs, which are always in one person\'s name. If you\'d rather track a partner\'s own accounts separately, add them as a person in Settings instead.', 'Accounts and balances'],
   ['household', 'Can I add my partner\'s income?', 'Yes. Add your partner as a person in <b>Settings</b>, then add their pay as an income source and pick them under <b>Whose income</b>. Log their pay as usual. <b>Income › Sources</b> then shows <b>Household income</b>: take-home pay this tax year and last, for each of you and in total. Your savings rate, payslip breakdown and tax figures still use only your own pay, so they stay right for your own tax return. For an account you share, use <b>Joint account</b> instead.', 'Saving and income'],
@@ -5304,6 +5351,7 @@ function updateAcctRelief() {
     sec.value = cur && cur.secures ? cur.secures : props.length === 1 && !editingAcct ? props[0].id : '';
   }
   document.getElementById('acct-debt-tip').hidden = !debt;
+  document.getElementById('acct-loan-field').hidden = !debt || type === 'Credit card';
   document.getElementById('acct-joint-field').hidden = !(TYPES[type] && JOINT_GROUPS.includes(TYPES[type].group)) || document.getElementById('acct-owner').value !== 'me';
   document.getElementById('acct-share-wrap').hidden = !document.getElementById('acct-joint').checked;
   const f = ytdForm(type);
@@ -5373,6 +5421,11 @@ function openAcctSheet(id) {
   document.getElementById('acct-archived').checked = !!(a && a.archived);
   document.getElementById('acct-archived-wrap').hidden = !a;
   document.getElementById('acct-secures').innerHTML = '';
+  const L = a && a.loan || {};
+  document.getElementById('acct-loan-amount').value = L.amount || '';
+  document.getElementById('acct-loan-start').value = L.start || '';
+  document.getElementById('acct-loan-start').max = TODAY;
+  document.getElementById('acct-loan-end').value = L.end || '';
   document.getElementById('acct-joint').checked = !!(a && a.share);
   document.getElementById('acct-share').value = a && a.share ? a.share : 50;
   updateAcctRelief();
@@ -5411,6 +5464,8 @@ document.getElementById('acct-form').addEventListener('submit', e => {
   const joint = !document.getElementById('acct-joint-field').hidden && document.getElementById('acct-joint').checked;
   fields.share = joint ? clamp(Math.round(num(document.getElementById('acct-share').value, 50)), 1, 99) : undefined;
   if (TYPES[type] && TYPES[type].group === 'property') fields.fee = 0;
+  // 2.0.27: a loan's original amount, start date and last payment month (all optional).
+  fields.loan = document.getElementById('acct-loan-field').hidden ? undefined : normLoan({ amount: document.getElementById('acct-loan-amount').value, start: document.getElementById('acct-loan-start').value, end: document.getElementById('acct-loan-end').value.trim() });
   const pick = acctSheet.querySelector('input[name="acct-color"]:checked');
   if (pick && COLORS.includes(pick.value)) fields.color = pick.value;
   if (editingAcct) {
