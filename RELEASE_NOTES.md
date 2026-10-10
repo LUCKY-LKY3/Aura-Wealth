@@ -1,2 +1,4 @@
 - Capital gains on the tax return helper: enter each investment account's profit or loss for the tax year (for example a CFD or share dealing account's closed positions, from your provider's yearly statement). Aurum checks it against the £3,000 tax-free amount, carries losses forward and adds any capital gains tax to the refund check. It's only used for tax, so your balances and net worth don't change
 - New Help question: how to record capital gains, for example from a CFD account
+- Clearer how-to: Help has a worked example for capital gains (Trading 212's Closed Positions export), and choosing General investment account explains how to log a share dealing, CFD or crypto account
+- Capital gains on the Tax year page next to your allowances (so far this year, out of £3,000), and a reminder after 6 April if last year's gains aren't entered yet

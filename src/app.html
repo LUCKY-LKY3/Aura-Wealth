@@ -1041,6 +1041,7 @@ details.fold:not([open])>summary h2::after{content:' ▸'}
       <label for="acct-type">Type</label>
       <div class="type-tiles" id="acct-tiles"></div>
       <select id="acct-type" class="input sr" tabindex="-1" aria-hidden="true"></select>
+      <p class="hint" id="acct-type-tip" hidden>Also for share dealing, CFD or crypto trading accounts. Log the balance you see in the app (for CFDs, your equity: cash plus or minus open profit or loss, not the size of your positions), with deposits as paid in. Profit or loss then shows as growth. Once a year, enter the tax year's realised gain in <b>Insights › Tax return</b>.</p>
     </div>
     <div class="field">
       <label for="acct-name">Name</label>
@@ -3727,6 +3728,9 @@ function allowancesPanel() {
   const parts = [];
   if (isas.length) parts.push(block('ISA allowance', isaUsed, ISA_ALLOWANCE, isaRows, lisa ? `Lifetime ISA ${gbp(lisa)} of ${gbp(LISA_ALLOWANCE)}` : ''));
   if (pens.length) parts.push(block('Pension annual allowance', penUsed, taxRules(y).aa, penRows, 'You, employer and tax relief'));
+  // 2.0.20 capital gains so far this tax year against the annual exempt amount (entered on the Tax return page).
+  const cg = capitalGains(y, state.profile.band), cgRows = cg.list.filter(a => a.gains && a.gains[y] != null).map(a => ({ a, v: a.gains[y] }));
+  if (cg.list.length) parts.push(block('Capital gains', Math.max(0, cg.net), cg.exempt, cgRows, `<button class="link-btn" data-action="tab" data-tab="insights" data-page="tax">${cg.entered ? 'Edit' : 'Enter'} on Tax return</button>`));
   for (const person of state.profile.people) {
     const j = state.accounts.filter(a => a.owner === person.id && a.type === 'JISA' && !a.archived);
     if (j.length) { const r = j.map(a => ({ a, v: yearPaid(a, y) })); parts.push(block(`${esc(person.name)}'s Junior ISA`, r.reduce((t, x) => t + x.v, 0), JISA_ALLOWANCE, r)); }
@@ -4318,7 +4322,7 @@ const FAQ = [
   ['typical', 'What is the typical savings rate?', 'Your savings rate with one-offs like bonuses and gifts left out, assuming you saved those first. It shows what you save from your normal pay. Mark pay as <b>One-off</b> when you log it.', 'Saving and income'],
   // Pensions and tax
   ['relief', 'Why does my pension get 25% more than I paid?', 'With relief at source, you pay 80% and the pension provider claims 20% basic-rate tax back, so £80 becomes £100. Tick the tax relief box and Aurum adds it. Higher-rate taxpayers can claim more through a tax return; see the tax helper.', 'Pensions and tax'],
-  ['cgt', 'How do I record capital gains, for example from a CFD or share dealing account?', 'Log the account\'s balance as usual (for a CFD account, your equity: cash plus or minus open profit or loss), with deposits as paid in. Your profit or loss then shows as growth in net worth. Tax is due on the profit from positions you <b>close</b>, not on withdrawals. Once a year, take the total realised profit or loss for 6 April to 5 April from your provider (on Trading 212: History › Export, Closed Positions, the Result column) and enter it under <b>Insights › Tax return › Capital gains</b>. It is only used for tax: it doesn\'t change your balance or net worth, so nothing is counted twice. Gains up to the annual exempt amount (£3,000) are tax-free; a loss can be set against later gains if you report it to HMRC within 4 years. Spread betting profits are tax-free, so leave those out.', 'Pensions and tax'],
+  ['cgt', 'How do I record capital gains, for example from a CFD or share dealing account?', 'Log the account\'s balance as usual (for a CFD account, your equity: cash plus or minus open profit or loss), with deposits as paid in. Your profit or loss then shows as growth in net worth. Tax is due on the profit from positions you <b>close</b>, not on withdrawals. Once a year, take the total realised profit or loss for 6 April to 5 April from your provider and enter it under <b>Insights › Tax return › Capital gains</b>. <b>Example:</b> on Trading 212, open History › Export, pick 6 April to 5 April, tick Closed Positions and add up the Result column. If it comes to £1,250 profit, enter 1250; a £400 loss, enter -400. It is only used for tax: it doesn\'t change your balance or net worth, so nothing is counted twice. Gains up to the annual exempt amount (£3,000) are tax-free; a loss can be set against later gains if you report it to HMRC within 4 years. Spread betting profits are tax-free, so leave those out.', 'Pensions and tax'],
   // Your data and privacy
   ['backup', 'How do backups work?', 'Aurum keeps your data on this device only, so a backup is the only copy if you lose or change your phone. In <b>Settings → Backup and restore</b>: <b>Export backup</b> shares a file you can save to Google Drive or email to yourself; <b>Save to phone</b> puts it in Documents; <b>Automatic weekly backup</b> (Android app) keeps the 8 newest copies in Documents/Aurum. Add a <b>password</b> to encrypt every backup; it can\'t be recovered, so keep it safe. To restore, use <b>Import backup file</b> (or paste the text). The card at the top of that section shows when you last backed up.', 'Your data and privacy'],
   ['privacy', 'Where is my data, and how do I move to a new phone?', 'Everything stays on this device; nothing is sent anywhere. Use <b>Settings → Backup and restore → Export backup</b> regularly (you can add a password), then <b>Import backup file</b> on the new phone.', 'Your data and privacy'],
@@ -5066,6 +5070,7 @@ srcSheet.addEventListener('close', () => { srcThenPay = false; });
 const acctSheet = document.getElementById('acct-sheet');
 let editingAcct = null;
 function updateAcctRelief() {
+  document.getElementById('acct-type-tip').hidden = document.getElementById('acct-type').value !== 'GIA';
   const lbl = topupLabel({ type: document.getElementById('acct-type').value });
   document.getElementById('acct-reg-relief-wrap').hidden = !lbl;
   document.getElementById('acct-reg-relief-label').textContent = lbl;
@@ -5736,6 +5741,11 @@ function computeNotes() {
     if (noteOn('tax')) {
       if (md >= '04-06' && md <= '04-30') out.push({ id: `ty-${cur}`, cat: 'tax', icon: 'calendar', date: `${cur}-04-06`, title: `New tax year ${tyLabel(cur)}`, body: 'Allowances have reset. Add your balances at 5 April to close off last year.', act: { action: 'open-bulk', label: 'Update all' } });
       if (md >= '06-01' && md <= '07-31' && !state.profile.p60[cur - 1]) out.push({ id: `p60-${cur - 1}`, cat: 'tax', icon: 'doc', date: `${cur}-06-01`, title: 'Your P60 should be ready', body: `Add your ${tyLabel(cur - 1)} P60 for a tax refund estimate.`, act: { action: 'note-go', id: 'insights', page: 'tax', fold: 'p60', label: 'Tax helper' } });
+      // 2.0.20: last tax year's realised gains not entered for any investment account held then.
+      if (md >= '04-20' || md <= '01-31') {
+        const y = cur - 1, held = gainAccts().filter(a => !a.archived && logsOf(a.id).some(l => l.date <= `${y + 1}-04-05`));
+        if (held.length && !held.some(a => a.gains && a.gains[y] != null)) out.push({ id: `cgt-${y}`, cat: 'tax', icon: 'doc', date: md >= '04-20' ? `${cur}-04-20` : `${cur + 1}-01-01`, title: `Capital gains for ${tyLabel(y)}`, body: `Enter the profit or loss you made on ${held.length === 1 ? esc(held[0].name) : 'your investment accounts'} from your provider's yearly statement. Enter 0 if you sold nothing.`, act: { action: 'note-go', id: 'insights', page: 'tax', label: 'Tax helper' } });
+      }
       if (md >= '10-01' || md <= '01-31') {
         const y = cur - 1, e = taxReport(y).est;
         const why = e && e.net >= 50 ? `Your figures show about ${gbp(e.net)} to claim back.` : e && e.net <= -50 ? `Your figures show about ${gbp(-e.net)} to pay.` : 'If you need to file, the deadline for paying and filing online is 31 January.';
