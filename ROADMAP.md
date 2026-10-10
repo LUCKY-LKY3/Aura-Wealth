@@ -59,7 +59,8 @@ From the net worth audit. One version and one PR each, in this order:
 - 2.0.23 Property and home equity: Home / Other property types (value now, purchase price, bought in), a mortgage
   "Secured on" a property, equity and loan to value on both pages and on the net worth card; value updates as growth;
   left out of Accessible now, the planner and goals
-- 2.0.24 Joint accounts: an account owned jointly, with your share counted in your net worth (e.g. 50%)
+- 2.0.24 Joint accounts: "Joint account" tick with your share (e.g. 50%) on cash, investment, property and debt accounts;
+  totals count your share, the account page shows the whole balance
 - 2.0.25 Partner income: an owner on each income source (me / partner / joint) so household pay and saving can be shown
 - 2.0.26 Cash drag warning: lots of cash in a low-interest account (uses the rate entered on the account), with what a
   better rate would add a year

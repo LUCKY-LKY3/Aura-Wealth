@@ -1,3 +1,5 @@
+- Joint accounts: tick "Joint account" on a current account, savings, investments, property or a debt you share and enter your share; only your share counts in your net worth, charts and Overview, while the account page shows the whole balance
+- New Help question: how do joint accounts work?
 - Property: add your home or another property with what it's worth now and its purchase price; value changes show as growth
 - Link a mortgage to its property ("Secured on") to see your equity and loan to value on both pages, and your home equity on the net worth card
 - Property counts in your net worth but not in "Accessible now", the retirement plan or goals

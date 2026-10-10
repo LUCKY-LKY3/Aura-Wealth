@@ -1076,6 +1076,13 @@ details.fold:not([open])>summary h2::after{content:' ▸'}
       <select id="acct-owner" class="input"></select>
       <p class="hint">Add family members, such as a child with a Junior ISA, in Settings. Their accounts show separately from your net worth.</p>
     </div>
+    <div class="field" id="acct-joint-field" hidden>
+      <label class="check"><input type="checkbox" id="acct-joint"><span>Joint account <span class="faint">Shared with someone else, such as a partner</span></span></label>
+      <div class="two" id="acct-share-wrap" hidden>
+        <div class="field"><label for="acct-share">Your share <span class="faint">%</span></label><input id="acct-share" class="input" type="number" inputmode="numeric" min="1" max="99" step="1" placeholder="50"></div>
+        <p class="hint" style="align-self:end">Only your share counts in your net worth. Log the whole balance, as your bank shows it.</p>
+      </div>
+    </div>
     <div class="two" id="acct-opening">
       <div class="field">
         <label for="acct-open-value" id="acct-open-label">Current balance</label>
@@ -1440,10 +1447,14 @@ const EASY_CASH = ['Cash', 'Savings', 'Premium Bonds', 'Cash ISA'];
 const typeOf = a => TYPES[a.type] || TYPES.Other;
 const groupOf = a => typeOf(a).group;
 const isDebt = a => !!(a && typeOf(a).debt);
+// 2.0.24 joint accounts: `share` is your percentage (1 to 99); totals count only your share, account pages show the whole.
+const shareOf = a => a && a.share ? a.share / 100 : 1;
+const curOf = a => accountStats(a.id).cur * shareOf(a);
+const JOINT_GROUPS = ['cash', 'invest', 'other', 'property', 'debt'];
 const isProperty = a => !!a && typeOf(a).group === 'property';
 // Equity in a property: its value less any mortgage linked to it (a mortgage's `secures` is the property's id).
 const mortgagesOf = p => state.accounts.filter(a => isDebt(a) && a.secures === p.id);
-const equityOf = p => accountStats(p.id).cur + mortgagesOf(p).reduce((t, m) => t + accountStats(m.id).cur, 0);
+const equityOf = p => curOf(p) + mortgagesOf(p).reduce((t, m) => t + curOf(m), 0);
 const isDebtId = id => isDebt(state.accounts.find(x => x.id === id));
 // What you type for a debt is the amount owed; it is saved as a negative balance. owedOf turns it back for forms.
 const toBal = (id, v) => isDebtId(id) ? -Math.abs(v) : v;
@@ -1534,10 +1545,10 @@ function seedExample(profile) {
     ['demo_gia', 'Share dealing', 'Freetrade', 'GIA', 'c6', 1500, 50, 0.006, 0.03, { dividends: true }],
     ['demo_bonds', 'Premium Bonds', 'NS&I', 'Premium Bonds', 'c4', 15000, 0, 0, 0, { prizes: true }],
     ['demo_save', 'Easy Access Saver', 'Chase', 'Savings', 'c5', 9000, 150, 0.0034, 0, { rate: 4.1, interest: true }],
-    ['demo_current', 'Current account', 'Monzo', 'Cash', 'c2', 1800, 0, 0, 0.12, {}],
+    ['demo_current', 'Joint current account', 'Monzo', 'Cash', 'c2', 1800, 0, 0, 0.12, { share: 50 }],
     ['demo_jisa', `${kid.name}'s Junior ISA`, 'Fidelity', 'JISA', 'c6', 3200, 100, 0.006, 0.022, { owner: kid.id }]
   ];
-  const accounts = spec.map(([id, name, provider, type, color, , , , , x]) => ({ id, name, provider, type, color, owner: x.owner || 'me', fee: x.fee || 0, rate: x.rate || 0, pinned: !!x.pinned, regular: null, demo: true }));
+  const accounts = spec.map(([id, name, provider, type, color, , , , , x]) => ({ id, name, provider, type, color, owner: x.owner || 'me', fee: x.fee || 0, rate: x.rate || 0, pinned: !!x.pinned, regular: null, demo: true, ...(x.share ? { share: x.share } : {}) }));
   // Extra accounts: a 1-year fix opened from savings 10 months ago, and an old Cash ISA moved into the Stocks & Shares ISA 14 months ago.
   accounts.push({ id: 'demo_fixed', name: '1-year fixed saver', provider: 'Atom', type: 'Fixed', color: 'c3', owner: 'me', fee: 0, rate: 4.6, regular: null, demo: true });
   // 2.0.22: a car loan taken out 18 months ago at 7.9%, repaid £350 a month (owed is stored below zero).
@@ -1649,6 +1660,7 @@ function normalize(o) {
         yearly: normYearly(a.yearly)
       };
       if (a.secures) acct.secures = String(a.secures);
+      if (+a.share >= 1 && +a.share <= 99) acct.share = Math.round(+a.share);
       const gains = normGains(a.gains);
       if (Object.keys(gains).length) acct.gains = gains;
       if (a.demo) acct.demo = true;
@@ -1894,7 +1906,7 @@ const deltaChip = (n, text) => `<span class="delta ${cls(n)}">${text}</span>`;
 /* ---------- people ---------- */
 const people = () => [{ id: 'me', name: state.profile.name || 'Me' }, ...state.profile.people];
 const personName = id => (people().find(p => p.id === id) || { name: 'Me' }).name;
-const ownerChip = a => a.owner && a.owner !== 'me' ? `<span class="owner">${esc(personName(a.owner))}</span>` : '';
+const ownerChip = a => (a.owner && a.owner !== 'me' ? `<span class="owner">${esc(personName(a.owner))}</span>` : '') + (a.share ? `<span class="owner" title="Only your share counts in your totals">joint ${a.share}%</span>` : '');
 function visibleAccounts() {
   if (ui.person === 'all') return state.accounts;
   if (!people().some(p => p.id === ui.person)) ui.person = 'me';
@@ -1955,7 +1967,12 @@ function yearlyExtra(a, firstIso, toIso) {
   return t;
 }
 function periodTotals(accts, startMs, endMs) {
-  const rows = accts.map(a => ({ a, p: periodStats(a, startMs, endMs) })).filter(r => r.p);
+  // A joint account counts only your share of every figure (its return is the same either way).
+  const rows = accts.map(a => {
+    const p = periodStats(a, startMs, endMs), k = shareOf(a);
+    if (!p || k === 1) return { a, p };
+    return { a, p: { ...p, v0: p.v0 * k, cur: p.cur * k, change: p.change * k, paid: p.paid * k, opening: p.opening * k, growth: p.growth * k, base: p.base * k } };
+  }).filter(r => r.p);
   const t = rows.reduce((o, r) => { o.v0 += r.p.v0; o.cur += r.p.cur; o.paid += r.p.paid; o.opening += r.p.opening; o.growth += r.p.growth; o.base += r.p.base; return o; }, { v0: 0, cur: 0, paid: 0, opening: 0, growth: 0, base: 0 });
   t.change = t.cur - t.v0;
   t.ret = t.base > 0 ? t.growth / t.base * 100 : null;
@@ -1988,7 +2005,7 @@ function timeline(accts) {
     for (const a of accts) {
       const s = sorted[a.id];
       while (ptr[a.id] + 1 < s.length && s[ptr[a.id] + 1].date <= date) ptr[a.id]++;
-      vals[a.id] = ptr[a.id] >= 0 ? s[ptr[a.id]].value : 0;
+      vals[a.id] = ptr[a.id] >= 0 ? s[ptr[a.id]].value * shareOf(a) : 0;
       total += vals[a.id];
     }
     return { date, t: toMs(date), vals, total };
@@ -2202,7 +2219,7 @@ function taxText(r) {
 function emergencyFund() {
   const spend = state.profile.monthlySpend;
   if (!spend) return null;
-  const cash = mine().filter(a => EASY_CASH.includes(a.type)).reduce((t, a) => t + accountStats(a.id).cur, 0);
+  const cash = mine().filter(a => EASY_CASH.includes(a.type)).reduce((t, a) => t + curOf(a), 0);
   return { cash, spend, months: cash / spend };
 }
 const lisaUsed = () => allowanceUsed(mine().filter(a => a.type === 'LISA'), 'isa');
@@ -2582,7 +2599,7 @@ function rangeBar(action) {
 }
 function groupSummary(accts) {
   const out = {};
-  for (const a of accts) { const g = groupOf(a); out[g] = (out[g] || 0) + accountStats(a.id).cur; }
+  for (const a of accts) { const g = groupOf(a); out[g] = (out[g] || 0) + curOf(a); }
   return Object.keys(GROUPS).filter(g => out[g] != null).map(g => ({ g, label: GROUPS[g], value: out[g], color: `var(--${GROUP_COLOR[g]})`, hi: `var(--${GROUP_COLOR[g]}-hi)` }));
 }
 
@@ -2624,7 +2641,7 @@ function monthsToReach(pv, monthly, target, annual) {
 // mon: a monthly amount to try instead of what the goal's accounts usually get (Planner's goal inputs).
 function goalStatus(g, mon) {
   const accts = goalAccounts(g);
-  const cur = accts.reduce((t, a) => t + accountStats(a.id).cur, 0);
+  const cur = accts.reduce((t, a) => t + curOf(a), 0);
   const usual = accts.reduce((t, a) => t + monthlyIn(a), 0), monthly = mon != null ? mon : usual;
   const progress = clamp(cur / g.target, 0, 1);
   if (cur >= g.target) return { cur, progress, monthly, usual, done: true, text: 'Reached' };
@@ -2723,7 +2740,7 @@ function goalPicker(g) {
   const list = [...goalPickList(), ...inc.filter(a => a.archived)];
   const lbl = n === 1 ? inc[0].name : !n ? 'No accounts' : Array.isArray(g.accounts) ? `${n} accounts` : `${scopeName(g.scope)} · ${n} accounts`;
   return `<details class="scope goal-scope plan-acct-fold" data-fold="goal-${esc(g.id)}" ${ui.folds && ui.folds['goal-' + g.id] ? 'open' : ''}>
-    <summary aria-label="Accounts this goal counts"><span class="pa-sum"><b>Accounts that count</b><span>${esc(lbl)} · ${gbp(inc.reduce((t, a) => t + accountStats(a.id).cur, 0))} now</span></span><span class="scope-tg" aria-hidden="true"></span></summary>
+    <summary aria-label="Accounts this goal counts"><span class="pa-sum"><b>Accounts that count</b><span>${esc(lbl)} · ${gbp(inc.reduce((t, a) => t + curOf(a), 0))} now</span></span><span class="scope-tg" aria-hidden="true"></span></summary>
     <ul class="scope-list">${list.map(a => `<li><label class="check scope-pick"><input type="checkbox" data-goal-acct="${esc(g.id)}" value="${esc(a.id)}" ${ids.has(a.id) ? 'checked' : ''} ${ids.has(a.id) && ids.size === 1 ? 'disabled' : ''}><i class="sw" style="background:${colorOf(a)}"></i><span class="ws-name">${acctLabel(a)}</span></label><span class="mono">${gbp(accountStats(a.id).cur)}</span></li>`).join('')}</ul>
   </details>`;
 }
@@ -2823,7 +2840,12 @@ function securedLine(m) {
   const p = state.accounts.find(a => a.id === m.secures);
   if (!p) return '';
   const v = accountStats(p.id).cur, owed = -accountStats(m.id).cur;
-  return `<p class="hint" style="margin-top:12px">Secured on <button class="link-btn" data-action="goto-account" data-id="${esc(p.id)}">${esc(p.name)}</button>, valued at ${gbp(v)}: equity <b>${gbp(equityOf(p))}</b>${v > 0 ? `, ${Math.round(owed / v * 100)}% loan to value` : ''}.</p>`;
+  return `<p class="hint" style="margin-top:12px">Secured on <button class="link-btn" data-action="goto-account" data-id="${esc(p.id)}">${esc(p.name)}</button>, valued at ${gbp(v)}: equity <b>${gbp(v - owed)}</b>${v > 0 ? `, ${Math.round(owed / v * 100)}% loan to value` : ''}.</p>`;
+}
+// 2.0.24: accountStats scaled to your share of a joint account (Overview's figures and Holdings rows).
+function myStats(a) {
+  const st = accountStats(a.id), k = shareOf(a);
+  return k === 1 ? st : { ...st, cur: st.cur * k, change: st.change * k, lastChange: st.lastChange * k, m30: st.m30 == null ? null : st.m30 * k, s: st.s.map(l => ({ ...l, value: l.value * k })) };
 }
 // 2.0.22: the Debts tile's small line: how many, and roughly what goes to them each month.
 function debtLine(accts) {
@@ -2837,7 +2859,7 @@ function renderOverview() {
   const all = visibleAccounts();
   const accts = all.filter(a => !chartOff(a));
   const tl = timeline(accts);
-  const stats = accts.map(a => ({ a, ...accountStats(a.id) }));
+  const stats = accts.map(a => ({ a, ...myStats(a) }));
   const total = stats.reduce((s, x) => s + x.cur, 0);
   // 2.0: the 1M · 1Y · All chips set the card's change line, its trend and "Where your wealth came from".
   const nwr = NW_RANGES[ui.nwRange] ? ui.nwRange : '1M';
@@ -2895,7 +2917,7 @@ function renderOverview() {
 
   // Holdings, grouped with subtotals: every account, also ones left out of the charts.
   // Shares (the bars and Weight) are of assets, so a debt never makes them run past 100%.
-  const hStats = all.map(a => ({ a, ...accountStats(a.id) })), hTotal = hStats.filter(x => !isDebt(x.a)).reduce((s, x) => s + x.cur, 0);
+  const hStats = all.map(a => ({ a, ...myStats(a) })), hTotal = hStats.filter(x => !isDebt(x.a)).reduce((s, x) => s + x.cur, 0);
   const closedStats = hStats.filter(x => x.a.archived);
   const byGroup = Object.keys(GROUPS).map(g => ({ g, rows: pinFirst(hStats.filter(x => groupOf(x.a) === g && !x.a.archived).map(x => Object.assign(x, { pinned: x.a.pinned }))) })).filter(x => x.rows.length);
   const holdings = `
@@ -3021,7 +3043,7 @@ function renderAccounts() {
         <div class="panel-head" style="align-items:flex-end">
           <div class="acct-cell" style="min-width:0;align-items:flex-end">${badge(a, true)}<div>
             <div class="eyebrow">${esc(a.provider || 'Account')} · ${esc(typeOf(a).label)}${a.owner !== 'me' ? ' · ' + esc(personName(a.owner)) : ''}${a.archived ? ' · Closed' : ''}${debt ? ' · Owed' : ''}</div>
-            <div class="acct-figure num" data-count="acct-${esc(a.id)}" data-value="${debt ? -st.cur : st.cur}">${gbp(debt ? -st.cur : st.cur)}</div>${debt ? '' : streakLine(a)}
+            <div class="acct-figure num" data-count="acct-${esc(a.id)}" data-value="${debt ? -st.cur : st.cur}">${gbp(debt ? -st.cur : st.cur)}</div>${a.share ? `<div class="hint" style="margin:2px 0 0">Joint · your ${a.share}% share is <b>${gbp(Math.abs(st.cur) * a.share / 100)}</b>, which is what counts in your totals</div>` : ''}${debt ? '' : streakLine(a)}
           </div></div>
           <div class="acct-actions">
             <button class="btn" data-action="edit-acct" data-id="${esc(a.id)}">${icons.edit}Edit</button>
@@ -3269,11 +3291,11 @@ function miniSplit(paid, cur) {
 // Split by type as a donut (few slices, so a donut reads well), plus accessible vs locked-away money.
 function splitPanel(accts, stats, net) {
   // Shares are of assets only (2.0.22): debts are shown as their own line under the split.
-  const debts = -stats.filter(x => isDebt(x.a)).reduce((t, x) => t + x.st.cur, 0), total = net + debts;
+  const debts = -stats.filter(x => isDebt(x.a)).reduce((t, x) => t + curOf(x.a), 0), total = net + debts;
   if (total <= 0) return '';
   const groups = groupSummary(active(accts)).filter(g => g.value > 0);
-  const locked = stats.filter(x => (groupOf(x.a) === 'pension' || isProperty(x.a)) && !x.a.archived).reduce((t, x) => t + x.st.cur, 0);
-  const propVal = stats.filter(x => isProperty(x.a) && !x.a.archived).reduce((t, x) => t + x.st.cur, 0);
+  const locked = stats.filter(x => (groupOf(x.a) === 'pension' || isProperty(x.a)) && !x.a.archived).reduce((t, x) => t + curOf(x.a), 0);
+  const propVal = stats.filter(x => isProperty(x.a) && !x.a.archived).reduce((t, x) => t + curOf(x.a), 0);
   const free = total - locked, dob = state.profile.dob, age = accessAge(dob);
   const unlock = dob ? `${+dob.slice(0, 4) + age}${dob.slice(4)}` : '';
   const sub = `${groups.length} type${groups.length === 1 ? '' : 's'} · ${gbp(free)} accessible · ${gbp(locked)} locked`;
@@ -3448,7 +3470,7 @@ function retireDate() {
 }
 const planMonths = () => { const d = retireDate(); return d ? Math.max(0, monthsUntil(d)) : ui.plan.years * 12; };
 function project(accts, months, adj, noFees) {
-  const pots = accts.map(a => ({ a, v: accountStats(a.id).cur, c: planMonthly(a), r: Math.pow(1 + Math.max(0, state.profile.growth + adj - (noFees ? 0 : a.fee)) / 100, 1 / 12) - 1 }));
+  const pots = accts.map(a => ({ a, v: curOf(a), c: planMonthly(a), r: Math.pow(1 + Math.max(0, state.profile.growth + adj - (noFees ? 0 : a.fee)) / 100, 1 / 12) - 1 }));
   const sum = () => pots.reduce((t, p) => t + p.v, 0);
   let paid = sum();
   const xs = [0], tot = [paid], paidV = [paid];
@@ -4422,6 +4444,7 @@ const FAQ = [
   ['sources', 'How is "Where your wealth came from" worked out?', 'For the range you pick (1M, 1Y or All, also on the net worth card), the change in your wealth is split into <b>paid in</b> (money in, less money taken out) and <b>growth</b> (everything else). For 1M and 1Y, an account first logged in that period counts its opening balance as paid in. <b>Return</b> is growth as a share of the money invested over the period. <b>Accounts that drove growth</b> lists the five that moved most, up or down; tap one to open it. <b>Includes N of M accounts</b> (also on the net worth card) shows which accounts are counted: those of the person picked at the top, closed ones too, and only accounts with a balance. Open it to see the list and what is left out, and untick an account to leave it out of your net worth, these charts and Performance (it stays in Holdings and ISA allowances, marked <b>not in totals</b>).', 'Accounts and balances'],
   ['debts', 'How are debts counted?', 'Add a mortgage, loan, credit card or student loan as an account (type <b>Debts</b>) and enter <b>what you owe</b> as a positive amount. It is taken off your total, so your net worth is everything you have minus everything you owe. Log each <b>repayment</b> as money in: what you owe falls and your net worth rises, but it isn\'t counted as growth. The interest the lender adds shows as a small negative growth, so you can see what the debt costs. <b>Borrowed more</b> adds to what you owe without counting as a loss. A debt\'s first amount is where it started, not money you paid in. Debts stay out of the retirement plan, goals and your savings rate (a repayment is mostly a bill, not saving), and shares such as Allocation are of your assets only. Student loans: many people leave Plan 2 and later loans out, as they are taken from pay and written off after 30 to 40 years; untick it under <b>Includes N of M accounts</b> if you prefer.', 'Accounts and balances'],
   ['property', 'How do I add my home or other property?', 'Add an account of type <b>Home</b> (where you live) or <b>Other property</b> (a buy-to-let or second home) with what it is worth now. Use a recent valuation or an online estimate and update it once or twice a year: a change in value shows as growth. Put what you paid in <b>Purchase price</b>, so the rise since you bought it counts as growth rather than money paid in. Then add the mortgage as a debt and pick the property under <b>Secured on</b>: the property\'s page shows your <b>equity</b> (its value less the mortgage) and the loan to value, and the net worth card shows your equity. Property is counted in your net worth but not in <b>Accessible now</b>, the retirement plan or goals.', 'Accounts and balances'],
+  ['joint', 'How do joint accounts work?', 'For an account you share, such as a joint current account, savings or a mortgage with a partner, tick <b>Joint account</b> in Add or Edit account and enter <b>your share</b> (50% for an even split). Log the whole balance, as your bank shows it: the account\'s own page shows the whole amount, while your net worth, charts and Overview count only your share (Holdings shows your share, marked <b>joint 50%</b>). Joint isn\'t offered for pensions and ISAs, which are always in one person\'s name. If you\'d rather track a partner\'s own accounts separately, add them as a person in Settings instead.', 'Accounts and balances'],
   ['move', 'How do I log money moved between my accounts?', 'Log it on both accounts: <b>Taken out</b> on the one it left and <b>Paid in</b> on the one it reached, ticking <b>Moved</b> on both. Your savings rate stays the same and each account\'s growth stays right. GIA to ISA uses your ISA allowance; a proper ISA to ISA transfer doesn\'t, so tick <b>ISA transfer</b>. Into a SIPP, also tick the tax relief box.', 'Accounts and balances'],
   ['april', 'I started tracking after 6 April. How do I fix this tax year?', 'Open the account and tap <b>Split it: 5 April balance and monthly payments</b>. Enter what was there on 5 April (0 if it opened later) and what you paid in each month. Only those payments then count as paid in this tax year.', 'Accounts and balances'],
   ['pick', 'How do I choose which accounts count?', '<b>Net worth and Overview charts:</b> open <b>Includes N of M accounts</b> on the net worth card or under "Where your wealth came from" and untick an account to leave it out. <b>Planner:</b> tick accounts under <b>Accounts and monthly payments</b> in Retirement\'s inputs; the <b>Includes N of M accounts</b> link under your pot takes you there. <b>Goals:</b> pick <b>Choose accounts…</b> when adding a goal, or open <b>Accounts that count</b> on a goal in Planner → Goals to change it.', 'Accounts and balances'],
@@ -5216,6 +5239,8 @@ function updateAcctRelief() {
     sec.value = cur && cur.secures ? cur.secures : props.length === 1 && !editingAcct ? props[0].id : '';
   }
   document.getElementById('acct-debt-tip').hidden = !debt;
+  document.getElementById('acct-joint-field').hidden = !(TYPES[type] && JOINT_GROUPS.includes(TYPES[type].group)) || document.getElementById('acct-owner').value !== 'me';
+  document.getElementById('acct-share-wrap').hidden = !document.getElementById('acct-joint').checked;
   const f = ytdForm(type);
   const split = !editingAcct && !debt && document.getElementById('acct-open-date').value > taxYearStart(TODAY) && document.getElementById('acct-open-value').value.trim() !== '';
   document.getElementById('acct-split-wrap').hidden = !split;
@@ -5283,6 +5308,8 @@ function openAcctSheet(id) {
   document.getElementById('acct-archived').checked = !!(a && a.archived);
   document.getElementById('acct-archived-wrap').hidden = !a;
   document.getElementById('acct-secures').innerHTML = '';
+  document.getElementById('acct-joint').checked = !!(a && a.share);
+  document.getElementById('acct-share').value = a && a.share ? a.share : 50;
   updateAcctRelief();
   openSheet(acctSheet);
   setTimeout(() => document.getElementById(a ? 'acct-name' : 'acct-type').focus(), 50);
@@ -5295,6 +5322,7 @@ document.getElementById('acct-type').addEventListener('change', () => {
 });
 document.getElementById('acct-name').addEventListener('input', e => { e.target.dataset.auto = ''; });
 ['acct-open-value', 'acct-open-date', 'acct-split'].forEach(id => document.getElementById(id).addEventListener(id === 'acct-split' ? 'change' : 'input', updateAcctRelief));
+['acct-joint', 'acct-owner'].forEach(id => document.getElementById(id).addEventListener('change', updateAcctRelief));
 document.getElementById('acct-form').addEventListener('submit', e => {
   e.preventDefault();
   const name = document.getElementById('acct-name').value.trim();
@@ -5315,6 +5343,8 @@ document.getElementById('acct-form').addEventListener('submit', e => {
   };
   const secures = !document.getElementById('acct-secures-field').hidden && document.getElementById('acct-secures').value;
   fields.secures = secures || undefined;
+  const joint = !document.getElementById('acct-joint-field').hidden && document.getElementById('acct-joint').checked;
+  fields.share = joint ? clamp(Math.round(num(document.getElementById('acct-share').value, 50)), 1, 99) : undefined;
   if (TYPES[type] && TYPES[type].group === 'property') fields.fee = 0;
   const pick = acctSheet.querySelector('input[name="acct-color"]:checked');
   if (pick && COLORS.includes(pick.value)) fields.color = pick.value;
@@ -6428,7 +6458,7 @@ function backupHealth() {
 let visitInfo = undefined;
 function visitStrip(total) {
   if (state.example || ui.person !== 'me' || !state.profile.setupDone) return '';
-  const mineTotal = mine().reduce((t, a) => t + accountStats(a.id).cur, 0);
+  const mineTotal = mine().reduce((t, a) => t + curOf(a), 0);
   if (visitInfo === undefined) {
     const prev = ui.lastVisit;
     visitInfo = null;

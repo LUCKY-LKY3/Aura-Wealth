@@ -288,6 +288,9 @@ not advice — keep that disclaimer.
   `mortgagesOf(p)`, `equityOf(p)`, `propTile`, `securedLine`. Property is left out of Accessible now, the planner, goals
   ('all'), balanceJump and Year by year; it counts as locked in "Where it is". Card `.stmt-net` shows Home/Property equity.
   FAQ `property`. Demo: `demo_home` (£285k bought 6 years ago) + `demo_mort` (4.5%, £1,150/month).
+- 2.0.24 joint accounts: `account.share` (1–99, your %) for groups in `JOINT_GROUPS`, only when owner is me (`#acct-joint`).
+  `shareOf(a)`, `curOf(a)`, `myStats(a)`; `timeline` and `periodTotals` scale by share, so every total, chart and Insight
+  counts your share; account pages and pickers show the whole balance. `ownerChip` adds "joint N%". FAQ `joint`.
 
 ## Status (latest)
 
