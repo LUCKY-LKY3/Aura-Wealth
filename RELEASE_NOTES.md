@@ -1,3 +1,7 @@
+- Property: add your home or another property with what it's worth now and its purchase price; value changes show as growth
+- Link a mortgage to its property ("Secured on") to see your equity and loan to value on both pages, and your home equity on the net worth card
+- Property counts in your net worth but not in "Accessible now", the retirement plan or goals
+- New Help question: how do I add my home or other property?
 - Debts: add a mortgage, loan, credit card or student loan as an account and what you owe is taken off your net worth, so your total is now everything you have minus everything you owe
 - Log repayments as money in: what you owe falls and your net worth rises, while the interest the lender adds shows as the cost of the debt
 - The net worth card shows your assets and debts, Overview has a Debts tile, and each debt's page shows what you owed at the start, what you've repaid, the interest charged and roughly what interest costs a month

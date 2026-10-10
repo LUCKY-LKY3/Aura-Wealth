@@ -283,6 +283,11 @@ not advice — keep that disclaimer.
   Allocation, "Where it is") use assets only. Debts are left out of `planIncluded`, goals (`goalAccounts` 'all', pickers),
   `payStats`, streaks and value-move notes. `chart()` axes reach below 0. Overview: `.stmt-net` Assets/Debts line, Debts KPI
   (`debtLine`). FAQ `debts`. Demo has `demo_car` (Loan, 7.9%).
+- 2.0.23 property: types Home / Property (group `property`, `isProperty`). Value updates are growth; Purchase price uses
+  `priorPaid`, Bought in uses `since`. A Mortgage may carry `secures: propertyId` (`#acct-secures`, cleaned in `normalize`);
+  `mortgagesOf(p)`, `equityOf(p)`, `propTile`, `securedLine`. Property is left out of Accessible now, the planner, goals
+  ('all'), balanceJump and Year by year; it counts as locked in "Where it is". Card `.stmt-net` shows Home/Property equity.
+  FAQ `property`. Demo: `demo_home` (£285k bought 6 years ago) + `demo_mort` (4.5%, £1,150/month).
 
 ## Status (latest)
 

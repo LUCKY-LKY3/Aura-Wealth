@@ -56,7 +56,9 @@ From the net worth audit. One version and one PR each, in this order:
 - 2.0.22 Debts: Mortgage, Loan, Credit card and Student loan account types (group "Debts"); what you owe is taken off
   net worth (assets − debts); repayments count as money in, interest as negative growth; Debts tile and Assets/Debts line
   on the net worth card; kept out of the planner, goals and savings rate; FAQ "How are debts counted?"
-- 2.0.23 Property and home equity: home / buy-to-let values, linked mortgage, equity in net worth, value updates as growth
+- 2.0.23 Property and home equity: Home / Other property types (value now, purchase price, bought in), a mortgage
+  "Secured on" a property, equity and loan to value on both pages and on the net worth card; value updates as growth;
+  left out of Accessible now, the planner and goals
 - 2.0.24 Joint accounts: an account owned jointly, with your share counted in your net worth (e.g. 50%)
 - 2.0.25 Partner income: an owner on each income source (me / partner / joint) so household pay and saving can be shown
 - 2.0.26 Cash drag warning: lots of cash in a low-interest account (uses the rate entered on the account), with what a
