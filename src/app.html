@@ -707,11 +707,12 @@ dialog.sheet.wide{width:min(620px,calc(100% - 32px))}
 .ms-chip{display:inline-flex;align-items:baseline;gap:8px;padding:6px 12px;border:1px solid color-mix(in srgb,var(--gold) 35%,var(--line));border-radius:999px;font-size:13px;color:var(--ink-3)}
 .ms-chip b{color:var(--gold);font-weight:600}
 .review details.fold2 .fold-body .review-grid{margin-top:14px}
-.month-strip{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin:14px -18px 0;padding:2px 18px 4px;scroll-snap-type:x proximity;mask-image:linear-gradient(90deg,transparent,#000 16px,#000 calc(100% - 16px),transparent)}
+.month-strip{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin:14px -18px 0;padding:2px 18px 4px;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;will-change:scroll-position;mask-image:linear-gradient(90deg,transparent,#000 16px,#000 calc(100% - 16px),transparent)}
 .month-strip::-webkit-scrollbar{display:none}
+/* 2.0.21: no scroll snap, so a flick keeps rolling with full momentum instead of stopping at each tile */
 @media (min-width:760px){.month-strip{margin-inline:-22px;padding-inline:22px}}
 .month-strip .ms-yr{flex:none;align-self:center;font-family:var(--mono);font-size:11px;color:var(--ink-3);writing-mode:vertical-rl;transform:rotate(180deg);letter-spacing:.06em}
-.month-strip button{flex:none;scroll-snap-align:center;width:52px;height:52px;border-radius:12px;border:1px solid var(--line);background:var(--surface-2);color:var(--ink-2);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;font:inherit;font-size:13px;font-weight:600;cursor:pointer}
+.month-strip button{flex:none;width:52px;height:52px;border-radius:12px;border:1px solid var(--line);background:var(--surface-2);color:var(--ink-2);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;font:inherit;font-size:13px;font-weight:600;cursor:pointer}
 .month-strip button i{width:18px;height:3px;border-radius:2px;background:var(--line-strong)}
 .month-strip button i.on{background:color-mix(in srgb,var(--gold) 75%,transparent)}.month-strip button i.up{background:color-mix(in srgb,var(--pos) 75%,transparent)}.month-strip button i.down{background:color-mix(in srgb,var(--neg) 75%,transparent)}
 .month-strip button[aria-pressed=true]{border-color:color-mix(in srgb,var(--gold) 55%,transparent);background:var(--gold-soft);color:var(--gold)}

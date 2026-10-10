@@ -273,6 +273,7 @@ not advice — keep that disclaimer.
 - 2.0.21 All accounts tidy: `everyAccount(order)` replaces `paidGrowthPanel` + the inline table (`table.every`): each row with a
   balance history gets a `tr.pg-row` underneath (money-vs-growth `.pg-bar`, scaled to the largest listed account, plus return on phones).
   `splitPanel` ("Where it is" donut + accessible/locked) is fold `all-where`, closed by default; its legend still filters via `ui.allType`.
+  `.month-strip` has no scroll snap (it stopped flings at each tile); keep it free-scrolling.
 
 ## Status (latest)
 

@@ -1,4 +1,5 @@
 - Tidier Accounts › All accounts: "Your money vs growth" and "Every account" are now one list, with each account's money-in vs growth bar and return under its row, and "Where it is" folds to one line (accessible vs locked) until you open it
+- Month and year strips (Insights month review, Income Savings and Payslip) scroll faster: a flick now keeps rolling smoothly instead of stopping at each month
 - Capital gains on the tax return helper: enter each investment account's profit or loss for the tax year (for example a CFD or share dealing account's closed positions, from your provider's yearly statement). Aurum checks it against the £3,000 tax-free amount, carries losses forward and adds any capital gains tax to the refund check. It's only used for tax, so your balances and net worth don't change
 - New Help question: how to record capital gains, for example from a CFD account
 - Clearer how-to: Help has a worked example for capital gains (Trading 212's Closed Positions export), and choosing General investment account explains how to log a share dealing, CFD or crypto account
