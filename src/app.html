@@ -2922,7 +2922,7 @@ function loanLine(a, st) {
   const owed = Math.max(0, -st.cur), left = monthsLeft(L.end), ln = loanFrom(a, st.s);
   const amt = ln ? ln.amount : 0, off = amt ? Math.min(1, Math.max(0, (amt - owed) / amt)) : null;
   const when = [L.start ? `Taken out ${dateLabel(toMs(L.start))}` : '', L.end ? `ends ${fmtMonth.format(new Date(toMs(L.end + '-01')))} ${L.end.slice(0, 4)}` : ''].filter(Boolean).join(' · ');
-  const time = left == null ? '' : owed < 0.5 ? '' : left > 0 ? `<b>${spanText(left)}</b> left` : left === 0 ? 'Last payment due this month' : 'Past its last payment date';
+  const time = left == null ? '' : owed < 0.5 ? '' : left > 0 ? `<b>${spanText(left)}</b> left` : left === 0 ? 'Loan ends this month' : 'Loan has ended';
   // With a rate, the schedule gives the monthly payment and the interest charged so far (an estimate, as lenders round).
   const lp = loanPlan(a), k = lp ? lp.paidBy(TODAY) : 0;
   const sched = lp && k ? `<p class="hint" style="margin:6px 0 0">Monthly payment about <b>${gbp(lp.pay)}</b> at ${lp.rate}%. About <b>${gbp(lp.interestTo(k))}</b> interest charged over the ${k} payment${k === 1 ? '' : 's'} so far, an estimate from the rate.</p>` : '';
