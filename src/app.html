@@ -1041,6 +1041,7 @@ details.fold:not([open])>summary h2::after{content:' ▸'}
       <label for="acct-type">Type</label>
       <div class="type-tiles" id="acct-tiles"></div>
       <select id="acct-type" class="input sr" tabindex="-1" aria-hidden="true"></select>
+      <p class="hint" id="acct-type-tip" hidden>Also for share dealing, CFD or crypto trading accounts. Log the balance you see in the app (for CFDs, your equity: cash plus or minus open profit or loss, not the size of your positions), with deposits as paid in. Profit or loss then shows as growth. Once a year, enter the tax year's realised gain in <b>Insights › Tax return</b>.</p>
     </div>
     <div class="field">
       <label for="acct-name">Name</label>
@@ -3877,7 +3878,7 @@ function gainsRow(r, row) {
     if (c.cf > 0.5) out += ` Losses to carry forward: ${gbp(c.cf)}.`;
   } else if (r.giaOut > 0) out = `You took ${gbp(r.giaOut)} out this year, which may have meant selling.`;
   const val = c.entered ? signed(c.net) : '<span class="faint">Not entered</span>';
-  return row(`<b>Capital gains</b> ${why('cgt', 'How capital gains work')}`, val, `Profit or loss on investments sold or positions closed this tax year, outside ISAs and pensions, from your provider's yearly statement. Enter a loss with a minus sign.`)
+  return row(`<b>Capital gains</b> ${why('cgt', 'How capital gains work')}`, val, `Profit or loss on investments sold or positions closed this tax year, outside ISAs and pensions, from your provider's yearly statement. Enter a loss with a minus sign.<br><b>Example:</b> on Trading 212, open History › Export, pick 6 April ${r.y} to 5 April ${r.y + 1}, tick Closed Positions and add up the Result column. If it comes to £1,250 profit, enter 1250; a £400 loss, enter -400.`)
     + `<tr class="gain-tr"><td colspan="2"><div class="gain-list">${inputs}</div>${out ? `<div class="hint">${out}</div>` : ''}</td></tr>`;
 }
 
@@ -5066,6 +5067,7 @@ srcSheet.addEventListener('close', () => { srcThenPay = false; });
 const acctSheet = document.getElementById('acct-sheet');
 let editingAcct = null;
 function updateAcctRelief() {
+  document.getElementById('acct-type-tip').hidden = document.getElementById('acct-type').value !== 'GIA';
   const lbl = topupLabel({ type: document.getElementById('acct-type').value });
   document.getElementById('acct-reg-relief-wrap').hidden = !lbl;
   document.getElementById('acct-reg-relief-label').textContent = lbl;
