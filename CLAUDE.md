@@ -267,6 +267,8 @@ not advice — keep that disclaimer.
   from the provider's yearly statement; tax only, never money in or growth. `capitalGains(y, band)` (in `taxReport` as `r.cg`): net,
   annual exempt (`taxRules(y).cgt`), earlier losses used down to the exempt amount, carry-forward, CGT 10/20% before 2024 else 18/24%;
   `est.cgtTax` joins the refund check. `gainsRow()` on the Tax return helper (`data-gain`/`data-year` inputs, saved on change). FAQ `cgt`.
+  `allowancesPanel()` adds a Capital gains block (this year vs exempt); bell note `cgt-<y>` (20 Apr to 31 Jan) when last year's gains are
+  missing for invest/other accounts held then; `#acct-type-tip` explains logging CFD/trading accounts when type GIA is picked.
 
 ## Status (latest)
 

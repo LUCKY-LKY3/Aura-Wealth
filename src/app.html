@@ -3728,6 +3728,9 @@ function allowancesPanel() {
   const parts = [];
   if (isas.length) parts.push(block('ISA allowance', isaUsed, ISA_ALLOWANCE, isaRows, lisa ? `Lifetime ISA ${gbp(lisa)} of ${gbp(LISA_ALLOWANCE)}` : ''));
   if (pens.length) parts.push(block('Pension annual allowance', penUsed, taxRules(y).aa, penRows, 'You, employer and tax relief'));
+  // 2.0.20 capital gains so far this tax year against the annual exempt amount (entered on the Tax return page).
+  const cg = capitalGains(y, state.profile.band), cgRows = cg.list.filter(a => a.gains && a.gains[y] != null).map(a => ({ a, v: a.gains[y] }));
+  if (cg.list.length) parts.push(block('Capital gains', Math.max(0, cg.net), cg.exempt, cgRows, `<button class="link-btn" data-action="tab" data-tab="insights" data-page="tax">${cg.entered ? 'Edit' : 'Enter'} on Tax return</button>`));
   for (const person of state.profile.people) {
     const j = state.accounts.filter(a => a.owner === person.id && a.type === 'JISA' && !a.archived);
     if (j.length) { const r = j.map(a => ({ a, v: yearPaid(a, y) })); parts.push(block(`${esc(person.name)}'s Junior ISA`, r.reduce((t, x) => t + x.v, 0), JISA_ALLOWANCE, r)); }
@@ -5738,6 +5741,11 @@ function computeNotes() {
     if (noteOn('tax')) {
       if (md >= '04-06' && md <= '04-30') out.push({ id: `ty-${cur}`, cat: 'tax', icon: 'calendar', date: `${cur}-04-06`, title: `New tax year ${tyLabel(cur)}`, body: 'Allowances have reset. Add your balances at 5 April to close off last year.', act: { action: 'open-bulk', label: 'Update all' } });
       if (md >= '06-01' && md <= '07-31' && !state.profile.p60[cur - 1]) out.push({ id: `p60-${cur - 1}`, cat: 'tax', icon: 'doc', date: `${cur}-06-01`, title: 'Your P60 should be ready', body: `Add your ${tyLabel(cur - 1)} P60 for a tax refund estimate.`, act: { action: 'note-go', id: 'insights', page: 'tax', fold: 'p60', label: 'Tax helper' } });
+      // 2.0.20: last tax year's realised gains not entered for any investment account held then.
+      if (md >= '04-20' || md <= '01-31') {
+        const y = cur - 1, held = gainAccts().filter(a => !a.archived && logsOf(a.id).some(l => l.date <= `${y + 1}-04-05`));
+        if (held.length && !held.some(a => a.gains && a.gains[y] != null)) out.push({ id: `cgt-${y}`, cat: 'tax', icon: 'doc', date: md >= '04-20' ? `${cur}-04-20` : `${cur + 1}-01-01`, title: `Capital gains for ${tyLabel(y)}`, body: `Enter the profit or loss you made on ${held.length === 1 ? esc(held[0].name) : 'your investment accounts'} from your provider's yearly statement. Enter 0 if you sold nothing.`, act: { action: 'note-go', id: 'insights', page: 'tax', label: 'Tax helper' } });
+      }
       if (md >= '10-01' || md <= '01-31') {
         const y = cur - 1, e = taxReport(y).est;
         const why = e && e.net >= 50 ? `Your figures show about ${gbp(e.net)} to claim back.` : e && e.net <= -50 ? `Your figures show about ${gbp(-e.net)} to pay.` : 'If you need to file, the deadline for paying and filing online is 31 January.';
