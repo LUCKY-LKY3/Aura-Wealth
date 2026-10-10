@@ -859,11 +859,16 @@ details.fold>summary{list-style:none;cursor:pointer}
 .legend-btn:hover,.legend-btn.on{background:var(--surface-2)}
 .split-bar{display:flex;gap:2px;height:10px;border-radius:99px;overflow:hidden;margin:8px 0}
 .split-bar i{display:block;height:100%}
-.pg-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:14px}
-.pg-list li{display:flex;flex-direction:column;gap:6px;cursor:pointer}
 .pg-bar{display:flex;gap:2px;height:10px}
 .pg-bar i{display:block;height:100%;min-width:2px}
 .pg-bar i:first-child{border-radius:99px 0 0 99px}.pg-bar i:last-child{border-radius:0 99px 99px 0}
+/* Every account (2.0.21): the money-vs-growth bar sits on a slim row under each account */
+table.every tr.has-bar td{border-bottom:0;padding-bottom:6px}
+table.every tr.pg-row td{padding-top:0;padding-bottom:12px}
+table.every .pg-line{display:flex;align-items:center;gap:10px}
+table.every .pg-bar{height:6px;flex:1;min-width:0}
+table.every .pg-line .pc{font-size:11.5px;flex:none}
+@media (min-width:760px){table.every .pg-line .pc{display:none}}
 .pg-bar i.loss{background:repeating-linear-gradient(135deg,var(--neg) 0 3px,transparent 3px 6px);border:1px solid var(--neg)}
 .heatmap{display:grid;grid-template-columns:22px repeat(12,minmax(0,1fr));gap:4px;align-items:center}
 .hm-h,.hm-y{font-family:var(--mono);font-size:12px;color:var(--ink-3);text-align:center}
@@ -2210,7 +2215,7 @@ const TITLE_ICONS = {
   reset: '<path d="M4 12a8 8 0 1 0 2.4-5.7"/><path d="M4 4v4h4"/>'
 };
 const FOLD_ICONS = { 'ws-more': 'pie', 'ov-alloc': 'pie', 'ov-monthly': 'bars', hist: 'clock', 'hist-all': 'clock', years: 'month', 'ins-years': 'month',
-  p60: 'doc', 'ins-acct': 'wallet', payhist: 'clock', 'month-review': 'month' };
+  p60: 'doc', 'ins-acct': 'wallet', 'all-where': 'pie', payhist: 'clock', 'month-review': 'month' };
 const ti = k => { const d = TITLE_ICONS[k] || SET_ICONS[k]; return d ? `<i class="t-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">${d}</svg></i>` : ''; };
 const foldOpen = (key, title, sub, extraCls) => `<details class="fold2${extraCls ? ' ' + extraCls : ''}" data-fold="${key}" ${ui.folds && ui.folds[key] ? 'open' : ''}><summary><span class="fold-titles"><h2 class="tt">${ti(FOLD_ICONS[key])}${title}</h2>${sub ? `<span class="fold-sub">${sub}</span>` : ''}</span><span class="fold-btn" aria-hidden="true">${CHEVRON}</span></summary><div class="fold-body">`;
 const foldClose = '</div></details>';
@@ -3143,20 +3148,7 @@ function renderAllAccounts(accts) {
         ${perfPanel(accts)}
       </section>
       ${splitPanel(accts, stats, all.cur)}
-      ${paidGrowthPanel(order)}
-      <section class="panel">
-        <div class="panel-head"><h2 class="tt">${ti('wallet')}Every account</h2><span class="aside">${ui.allType && GROUPS[ui.allType] ? `${esc(GROUPS[ui.allType])} · <button class="btn sm ghost" data-action="all-type" data-id="">Show all</button>` : 'All time'}</span></div>
-        <div class="table-wrap"><table>
-          <thead><tr><th>Account</th><th class="r">Value</th><th class="r hide-sm">Paid in</th><th class="r">Growth</th><th class="r hide-sm">Return</th></tr></thead>
-          <tbody>${order.filter(x => !ui.allType || groupOf(x.a) === ui.allType).map(x => `<tr class="clickable" data-action="pick-account" data-id="${esc(x.a.id)}" tabindex="0">
-            <td><div class="acct-cell">${badge(x.a)}<div style="min-width:0"><div class="n">${esc(x.a.name)}${ownerChip(x.a)}</div><div class="p hide-sm">${esc(typeOf(x.a).label)}</div></div></div></td>
-            <td class="r val">${gbp(x.st.cur)}</td>
-            <td class="r val hide-sm">${x.p ? gbp(x.p.paid) : '—'}</td>
-            <td class="r">${x.p && (x.st.s.length > 1 || x.a.priorPaid != null) ? deltaChip(x.p.growth, signed(x.p.growth)) : '<span class="faint">—</span>'}</td>
-            <td class="r hide-sm mono">${x.p && x.p.ret != null && (x.st.s.length > 1 || x.a.priorPaid != null) ? pct(x.p.ret) : '—'}</td>
-          </tr>`).join('')}</tbody>
-        </table></div>
-      </section>
+      ${everyAccount(order)}
       ${heatmapPanel(accts)}
       <section class="panel">
         ${foldOpen('hist-all', 'History', histSummary(accts.map(x => x.id)) + ' · all accounts')}
@@ -3188,8 +3180,10 @@ function splitPanel(accts, stats, total) {
   const locked = stats.filter(x => groupOf(x.a) === 'pension' && !x.a.archived).reduce((t, x) => t + x.st.cur, 0);
   const free = total - locked, dob = state.profile.dob, age = accessAge(dob);
   const unlock = dob ? `${+dob.slice(0, 4) + age}${dob.slice(4)}` : '';
+  const sub = `${groups.length} type${groups.length === 1 ? '' : 's'} · ${gbp(free)} accessible · ${gbp(locked)} locked`;
   return `<section class="panel">
-    <div class="panel-head"><h2 class="tt">${ti('pie')}Where it is</h2><span class="aside">Tap a type to filter</span></div>
+    ${foldOpen('all-where', 'Where it is', sub)}
+    <p class="hint" style="margin:12px 0 0">Tap a type to show only those accounts below.</p>
     <div class="donut-wrap">
       <div class="donut-box">${donut(groups.map(g => ({ value: g.value, color: g.color })), total)}
         <div class="donut-center"><b class="mono">${compact(total)}</b><span>${groups.length} type${groups.length === 1 ? '' : 's'}</span></div>
@@ -3201,24 +3195,33 @@ function splitPanel(accts, stats, total) {
       <div class="split-bar" role="img" aria-label="Accessible ${gbp(free)}, locked ${gbp(locked)}"><i style="flex:${Math.max(free, 0)};background:var(--c2)"></i><i style="flex:${locked};background:var(--c1)"></i></div>
       <div class="goal-meta"><span>${(free / total * 100).toFixed(0)}% ISAs, savings and investments</span><span>${locked ? `Pensions from age ${age}${unlock ? ` (${monthYear(toMs(unlock))})` : ''}` : ''}</span></div>
     </div>
+    ${foldClose}
   </section>`;
 }
-// Each account as one bar: your money (ivory) then growth (green), or the part lost (red), scaled to the largest.
-function paidGrowthPanel(order) {
-  const rows = order.filter(x => x.p && (x.st.s.length > 1 || x.a.priorPaid != null || Object.keys(x.a.yearly || {}).length));
-  if (!rows.length) return '';
-  const max = Math.max(1, ...rows.map(x => Math.max(x.p.paid, x.st.cur)));
+// Every account (2.0.21): one table that also carries the old "Your money vs growth" bars, one slim bar under each row:
+// your money (ivory) then growth (green), or the part lost (red), scaled to the largest account.
+function everyAccount(order) {
+  const list = order.filter(x => !ui.allType || groupOf(x.a) === ui.allType);
+  const hasBar = x => x.p && (x.st.s.length > 1 || x.a.priorPaid != null || Object.keys(x.a.yearly || {}).length);
+  const max = Math.max(1, ...list.filter(hasBar).map(x => Math.max(x.p.paid, x.st.cur)));
   const w = v => (Math.max(0, v) / max * 100).toFixed(2) + '%';
+  const bar = x => {
+    const paid = x.p.paid, g = x.st.cur - paid;
+    return `<tr class="pg-row clickable" data-action="pick-account" data-id="${esc(x.a.id)}"><td colspan="5"><div class="pg-line"><span class="pg-bar" role="img" aria-label="${esc(x.a.name)}: ${gbp(paid)} your money, ${g >= 0 ? `${gbp(g)} growth` : `${gbp(-g)} loss`}">${g >= 0 ? `<i style="width:${w(paid)};background:var(--c2)"></i><i style="width:${w(g)};background:var(--pos)"></i>` : `<i style="width:${w(x.st.cur)};background:var(--c2)"></i><i class="loss" style="width:${w(-g)}"></i>`}</span>${x.p.ret != null ? `<span class="pc mono ${cls(g)}">${pct(x.p.ret)}</span>` : ''}</div></td></tr>`;
+  };
   return `<section class="panel">
-    <div class="panel-head"><h2 class="tt">${ti('bars')}Your money vs growth</h2><span class="aside">All time</span></div>
-    <ul class="pg-list">${[...rows].sort((a, b) => b.st.cur - a.st.cur).map(x => {
-      const paid = x.p.paid, g = x.st.cur - paid;
-      return `<li data-action="pick-account" data-id="${esc(x.a.id)}" tabindex="0">
-        <div class="al-top"><span class="nm">${esc(x.a.name)}</span><b>${gbp(x.st.cur)}</b><span class="pc ${cls(g)}">${x.p.ret != null ? pct(x.p.ret) : ''}</span></div>
-        <span class="pg-bar">${g >= 0 ? `<i style="width:${w(paid)};background:var(--c2)"></i><i style="width:${w(g)};background:var(--pos)"></i>` : `<i style="width:${w(x.st.cur)};background:var(--c2)"></i><i class="loss" style="width:${w(-g)}"></i>`}</span>
-      </li>`;
-    }).join('')}</ul>
-    <div class="bar-legend"><span><i class="sw" style="background:var(--c2)"></i>Your money</span><span><i class="sw" style="background:var(--pos)"></i>Growth</span><span><i class="sw" style="background:var(--neg)"></i>Loss</span></div>
+    <div class="panel-head"><h2 class="tt">${ti('wallet')}Every account</h2><span class="aside">${ui.allType && GROUPS[ui.allType] ? `${esc(GROUPS[ui.allType])} · <button class="btn sm ghost" data-action="all-type" data-id="">Show all</button>` : 'All time'}</span></div>
+    <div class="table-wrap"><table class="every">
+      <thead><tr><th>Account</th><th class="r">Value</th><th class="r hide-sm">Paid in</th><th class="r">Growth</th><th class="r hide-sm">Return</th></tr></thead>
+      <tbody>${list.map(x => `<tr class="clickable${hasBar(x) ? ' has-bar' : ''}" data-action="pick-account" data-id="${esc(x.a.id)}" tabindex="0">
+        <td><div class="acct-cell">${badge(x.a)}<div style="min-width:0"><div class="n">${esc(x.a.name)}${ownerChip(x.a)}</div><div class="p hide-sm">${esc(typeOf(x.a).label)}</div></div></div></td>
+        <td class="r val">${gbp(x.st.cur)}</td>
+        <td class="r val hide-sm">${x.p ? gbp(x.p.paid) : '—'}</td>
+        <td class="r">${x.p && (x.st.s.length > 1 || x.a.priorPaid != null) ? deltaChip(x.p.growth, signed(x.p.growth)) : '<span class="faint">—</span>'}</td>
+        <td class="r hide-sm mono">${x.p && x.p.ret != null && (x.st.s.length > 1 || x.a.priorPaid != null) ? pct(x.p.ret) : '—'}</td>
+      </tr>${hasBar(x) ? bar(x) : ''}`).join('')}</tbody>
+    </table></div>
+    ${list.some(hasBar) ? '<div class="bar-legend"><span><i class="sw" style="background:var(--c2)"></i>Your money</span><span><i class="sw" style="background:var(--pos)"></i>Growth</span><span><i class="sw" style="background:var(--neg)"></i>Loss</span></div>' : ''}
   </section>`;
 }
 // Month-by-month growth as a heatmap: rows are years, cells are months, green for growth and red for a fall.
