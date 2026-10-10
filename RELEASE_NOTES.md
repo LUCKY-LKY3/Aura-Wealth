@@ -1,3 +1,4 @@
+- Wording tidy across the app: "Tax year" spelt out on the range buttons, and loan wording made clearer
 - Loans: the loan end date (last payment month) is labelled clearly on the add and edit forms
 - With a rate, a loan shows its monthly payment and the interest charged so far (an estimate from the rate)
 - Loans you've had a while: add the amount borrowed, when you took it out and the loan end date, the month of the last payment (Edit account). The loan's page then shows what you borrowed, how much is paid off, what's left and the time to go

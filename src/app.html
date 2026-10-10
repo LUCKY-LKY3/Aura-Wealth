@@ -2095,7 +2095,7 @@ function rangePoints(tl, startMs) {
 
 const RANGES = ['1W', '1M', '3M', '6M', 'YTD', 'TY', '1Y', '5Y', 'All', 'Custom'];
 const RANGE_NAMES = { '1W': 'the past week', '1M': 'the past month', '3M': 'the past 3 months', '6M': 'the past 6 months', 'YTD': 'this calendar year', 'TY': 'this tax year', '1Y': 'the past year', '5Y': 'the past 5 years', 'All': 'all time' };
-const RANGE_BTN = { TY: 'Tax yr' };
+const RANGE_BTN = { TY: 'Tax year' };
 const UNITS = { d: ['day', 'days'], w: ['week', 'weeks'], m: ['month', 'months'], y: ['year', 'years'] };
 function rangeStart(key) {
   const [y, m, d] = TODAY.split('-').map(Number);
